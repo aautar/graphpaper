@@ -1,0 +1,8 @@
+{
+  "name": "graphpaper",
+  "version": "1.0.0",
+  "main": "src/GraphPaper.js",
+  "repository": "https://github.com/aautar/graphpaper.git",
+  "author": "Avishkar Autar <aautar@digital-radiation.com>",
+  "license": "MIT"
+}
