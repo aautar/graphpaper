@@ -51,3 +51,5 @@ function Rectangle(_left, _top, _right, _bottom)  {
         return false;
     };
 };
+
+export { Rectangle }
