@@ -42,19 +42,19 @@ function Rectangle(_left, _top, _right, _bottom)  {
      * @returns {Boolean}
      */
     this.checkIntersect = function(_otherRectangle) {
-        if(_bottom < _otherRectangle.top) {
+        if(_bottom < _otherRectangle.getTop()) {
             return false;
         }
 
-        if(_top > _otherRectangle.bottom) {
+        if(_top > _otherRectangle.getBottom()) {
             return false;
         }
 
-        if(_right < _otherRectangle.left) {
+        if(_right < _otherRectangle.getLeft()) {
             return false;
         }
 
-        if(_left > _otherRectangle.right) {
+        if(_left > _otherRectangle.getRight()) {
             return false;
         }
 
@@ -67,10 +67,10 @@ function Rectangle(_left, _top, _right, _bottom)  {
      * @returns {Boolean}
      */
     this.checkIsWithin = function(_otherRectangle) {
-        if( _bottom <= _otherRectangle.bottom &&
-            _top >= _otherRectangle.top &&
-            _right <= _otherRectangle.right &&
-            _left >= _otherRectangle.left
+        if( _bottom <= _otherRectangle.getBottom() &&
+            _top >= _otherRectangle.getTop() &&
+            _right <= _otherRectangle.getRight() &&
+            _left >= _otherRectangle.getLeft()
         ) {
 
             return true;
