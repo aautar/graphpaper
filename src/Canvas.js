@@ -5,7 +5,7 @@ import  {Rectangle} from './Rectangle';
  * 
  * @param {Element} _canvasDomElement 
  */
-function Canvas(_canvasDomElement) {
+function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     var self = this;
     
@@ -30,12 +30,11 @@ function Canvas(_canvasDomElement) {
     this.objectDragStartX = 0.0;
     this.objectDragStartY = 0.0;
 
-    this.highlightMask = null;
-    this.highlightedObjects = [];
-    
-    this.onObjectTransform = _onObjectTransform;
-    this.reqDisableObjectSelection = _reqDisableObjectSelection;
-    this.reqEnableObjectSelection = _reqEnableObjectSelection;
+    var dblTapDetectVars = {
+        lastTouchX: null,
+        lastTouchY: null,
+        lastTouchTime: null
+    };
 
     /**
      * @param {Number} _p 
@@ -112,28 +111,6 @@ function Canvas(_canvasDomElement) {
 
         return new Rectangle(minLeft, minTop, maxRight, maxBottom);
     };
-
-    /**
-     * @returns {Dimensions} new dimensions of canvas
-     */
-    this.resize = function() {
-
-        var canvasElem = $(this.canvasElementSelector);
-
-        var canvasWidth = parseInt(canvasElem.width());
-        var canvasHeight = parseInt(canvasElem.height());
-        var bbox = self.calcBoundingBox();
-        if(bbox.getRight()+250 > canvasWidth) {
-            canvasElem.css('width', bbox.getRight() + 500);
-        }
-
-        if(bbox.getBottom()+250 > canvasHeight) {
-            canvasElem.css('height', bbox.getBottom() + 500);
-        }             
-        
-        return new Dimensions( parseInt(canvasElem.width()), parseInt(canvasElem.height()) );
-        
-    };    
   
     /**
      * @returns {Object[]}
@@ -159,44 +136,51 @@ function Canvas(_canvasDomElement) {
         return foundObject;
     };
 
-    this.addObject = function(_graphPaperObject) {
-        self.canvasObjects.push(_graphPaperObject);
-        return true;
+    /**
+     * @param {Object} _obj
+     */
+    this.addObject = function(_obj) {
+        self.canvasObjects.push(_obj);
     };
 
-    this.initInteractionHandlers = function(_dblTapSpeed, _dblTapRadius, _onDoubleClickOrDoubleTap, _onClickOrTap) {
-        var canvasElem = $(this.canvasElementSelector);
+    /**
+     * @param {Number} _posX 
+     * @param {Number} _posY 
+     */
+    var dblClickTapHandler = function(_posX, _posY) {
+        var objectsAroundPoint = self.getObjectsAroundPoint(_posX, _posY);
+        if (objectsAroundPoint.length === 0) {
+            _handleCanvasInteraction('dbl-click', new Point(_posX, _posY));
+        }
+    };
 
-        function dblClickTapHandler(posX, posY) {
-            var objectsAroundPoint = self.getObjectsAroundPoint(posX, posY);
-            if (objectsAroundPoint.length === 0) {
-                _onDoubleClickOrDoubleTap(posX, posY);
-            }
-        };
+    /**
+     * @param {Number} _dblTapSpeed
+     * @param {Number} _dblTapRadius
+     */
+    this.initInteractionHandlers = function(_dblTapSpeed, _dblTapRadius) {
 
-        canvasElem.on('dblclick', function (e) {
-            dblClickTapHandler(e.pageX, e.pageY);
+        // dblclick on empty area of canvas
+        _canvasDomElement.addEventListener('dblclick', function (e) {
+            self.dblClickTapHandler(e.pageX, e.pageY);
         });
 
-
-        canvasElem.on('click', function (e) {
-
-            if(e.target === canvasElem[0]) {
-                self.unhighlightObjects();
-                _onClickOrTap({'canvasObjectClicked': false});
+        // click anywhere on canvas
+        _canvasDomElement.addEventListener('click', function (e) {
+            if(e.target === _canvasDomElement) {
+                _handleCanvasInteraction('click', {'canvasObjectClicked': false});
             } else {
-                _onClickOrTap({'canvasObjectClicked': true});
+                _handleCanvasInteraction('click', {'canvasObjectClicked': true});
             }
         });
 
-        canvasElem.on('touchend', function(e) {
-
+        // touchend on canvas, logic to see if there was a double-tap
+        _canvasDomElement.addEventListener('touchend', function(e) {
             if(e.originalEvent.changedTouches.length <= 0) {
                 return false; // we have nothing to work with
             }
 
             var dblTapDetected = false;  // flag specifying if we detected a double-tap
-            var areaElem = $(this); // element in which this touchend event has occured
 
             // Position of the touch
             var x = e.originalEvent.changedTouches[0].pageX;
@@ -205,314 +189,149 @@ function Canvas(_canvasDomElement) {
             var now = new Date().getTime();
 
             // Check if we have stored data for a previous touch (indicating we should test for a double-tap)
-            if(areaElem.data('last-touch-time')) {
+            if(self.dblTapDetectVars.lastTouchTime !== null) {
 
-                var lastTouchTime = areaElem.data('last-touch-time');
+                var lastTouchTime = self.dblTapDetectVars.lastTouchTime;
 
                 // Compute time since the previous touch
                 var timeSinceLastTouch = now - lastTouchTime;
 
                 // Get the position of the last touch on the element
-                var lastX = areaElem.data('last-touch-x');
-                var lastY = areaElem.data('last-touch-y');
+                var lastX = self.dblTapDetectVars.lastTouchX;
+                var lastY = self.dblTapDetectVars.lastTouchY;
 
                 // Compute the distance from the last touch on the element
                 var distFromLastTouch = Math.sqrt( Math.pow(x-lastX,2) + Math.pow(y-lastY,2) );
 
                 if(timeSinceLastTouch <= _dblTapSpeed && distFromLastTouch <= _dblTapRadius) {
-
                     // Flag that we detected a double tap
                     dblTapDetected = true;
 
                     // Call handler
-                    dblClickTapHandler(x, y);
+                    self.dblClickTapHandler(x, y);
 
                     // Remove last touch info from element
-                    areaElem.data('last-touch-time', '');
-                    areaElem.data('last-touch-x', '');
-                    areaElem.data('last-touch-y', '');
+                    self.dblTapDetectVars.lastTouchTime = null;
+                    self.dblTapDetectVars.lastTouchX = null;
+                    self.dblTapDetectVars.lastTouchY = null;
                 }
-
             }
 
             if(!dblTapDetected) {
-                areaElem.data('last-touch-time', now);
-                areaElem.data('last-touch-x', x);
-                areaElem.data('last-touch-y', y);
+                self.dblTapDetectVars.lastTouchTime = now;
+                self.dblTapDetectVars.lastTouchX = x;
+                self.dblTapDetectVars.lastTouchY = y;
             }
-
         });
     };
 
+    /**
+     * 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     */
+    var handleMove = function(_x, _y) {
+        var obj = self.getObjectById(self.objectIdBeingDragged);
+        if(obj.touchInternalContactPt) {
+            // Move relative to point of contact
+            _x -= obj.touchInternalContactPt.getX();
+            _y -= obj.touchInternalContactPt.getY();
+        }
+
+        var mx = self.snap(_x);
+        var my = self.snap(_y - obj.height*0.5);
+        
+        self.objectDragX = mx;
+        self.objectDragY = my;		
+
+        obj.translate(mx, my);
+    };
+
+    /**
+     * 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     */
+    var handleMoveEnd = function(_x, _y) {
+        var obj = self.getObjectById(self.objectIdBeingDragged);
+        
+        var mx = self.snap(_x);
+        var my = self.snap(_y - obj.height*0.5);
+
+        var mxStart = self.objectDragStartX;
+        var myStart = self.objectDragStartY;
+
+        if(mxStart == mx && myStart == my) {
+            // we didn't drag it anywhere
+        } else {
+            obj.translate(mx, my);
+            _handleCanvasInteraction('object-translated', obj);
+        }
+    };     
+
     this.initTransformationHandlers = function() {
         
-        var graphPaper = this;
-        var canvasElem = $(this.canvasElementSelector);
-
-        function handleMove(_x, _y) {
-            var obj = graphPaper.getObjectById(graphPaper.objectIdBeingDragged);
-
-            if(obj.touchInternalContactPt) {
-                // Move relative to point of contact
-                _x -= obj.touchInternalContactPt.x;
-                _y -= obj.touchInternalContactPt.y;
-            }
-
-            var mx = graphPaper.snapToGrid(_x);
-            var my = graphPaper.snapToGrid(_y - obj.height*0.5);
-            
-            graphPaper.objectDragX = mx;
-            graphPaper.objectDragY = my;		
-
-            obj.translate(mx, my);
-        
-        };
-
-        canvasElem.on('touchmove', function (e) {
-            if (graphPaper.objectIdBeingDragged !== null) {
-                handleMove(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);
-
-                setTimeout(function() {
-                    graphPaper.resize();
-                }, 300);
-                
+        _canvasDomElement.addEventListener('touchmove', function (e) {
+            if (self.objectIdBeingDragged !== null) {
+                self.handleMove(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);       
                 e.preventDefault();
                 e.stopPropagation();
             }
         });
 
-        canvasElem.on('mousemove', function (e) {
+        _canvasDomElement.addEventListener('mousemove', function (e) {
 
-            if (graphPaper.objectIdBeingDragged !== null) {				
-
-                handleMove(e.pageX, e.pageY);
-
-                setTimeout(function() {
-                    graphPaper.resize();
-                }, 300);
-
+            if (self.objectIdBeingDragged !== null) {				
+                self.handleMove(e.pageX, e.pageY);
                 return false;
             }
 
-            if(graphPaper.objectIdBeingResized !== null) {
+            if(self.objectIdBeingResized !== null) {
 
-                var mx = graphPaper.snapToGrid(e.pageX);
-                var my = graphPaper.snapToGrid(e.pageY);
+                var mx = self.snap(e.pageX);
+                var my = self.snap(e.pageY);
 
-                var obj = graphPaper.getObjectById(graphPaper.objectIdBeingResized);
+                var obj = self.getObjectById(self.objectIdBeingResized);
 
-                var top = obj.y;
-                var left = obj.x;
+                var top = obj.getX();
+                var left = obj.getY();
                 var newWidth = ((mx - left)+1);
                 var newHeight = ((my - top)+1);
 
                 obj.resize(newWidth, newHeight);
-
-                setTimeout(function() {
-                    graphPaper.resize();
-                }, 300);
+                _handleCanvasInteraction('object-resized', obj);
 
                 return false;
-
             }
-
         });
 
-
-        function handleMoveEnd(_x, _y) {
-            var obj = graphPaper.getObjectById(graphPaper.objectIdBeingDragged);
-            
-            var mx = graphPaper.snapToGrid(_x);
-            var my = graphPaper.snapToGrid(_y - obj.height*0.5);
-
-            var mxStart = graphPaper.objectDragStartX;
-            var myStart = graphPaper.objectDragStartY;
-
-            if(mxStart == mx && myStart == my) {
-                // we didn't drag it anywhere
-            } else {
-                obj.translate(mx, my);
-                graphPaper.onObjectTransform(obj);
-            }
-
-            graphPaper.reqEnableObjectSelection();                    
-            //document.activeElement.blur();
-        };     
-
-
-
-        canvasElem.on('touchend', function (e) {
-            if(graphPaper.objectIdBeingDragged !== null) {
-
-                var obj = graphPaper.getObjectById(graphPaper.objectIdBeingDragged);
+        _canvasDomElement.addEventListener('touchend', function (e) {
+            if(self.objectIdBeingDragged !== null) {
+                var obj = self.getObjectById(self.objectIdBeingDragged);
 
                 obj.touchInternalContactPt = null;
-
-                graphPaper.objectIdBeingDragged = null;
-                graphPaper.objectIdBeingResized = null;
-
-                graphPaper.onObjectTransform(obj);
-                graphPaper.reqEnableObjectSelection();  
+                self.objectIdBeingDragged = null;
+                self.objectIdBeingResized = null;  
             }            
         });
 
-        canvasElem.on('mouseup', function (e) {
+        _canvasDomElement.addEventListener('mouseup', function (e) {
             if (e.which === 1) {
-
-                if(graphPaper.objectIdBeingDragged !== null) {
-                    handleMoveEnd(e.pageX, e.pageY);
+                if(self.objectIdBeingDragged !== null) {
+                    self.handleMoveEnd(e.pageX, e.pageY);
                 }            
 
-                if(graphPaper.objectIdBeingResized !== null) {
-                    var obj = graphPaper.getObjectById(graphPaper.objectIdBeingResized);
-                    graphPaper.reqEnableObjectSelection();                    
-                    graphPaper.onObjectTransform(obj);
+                if(self.objectIdBeingResized !== null) {
+                    //var obj = self.getObjectById(self.objectIdBeingResized);
+                    //self.reqEnableObjectSelection();                    
+                    //self.onObjectTransform(obj);
                 }
 
-                graphPaper.objectIdBeingDragged = null;
-                graphPaper.objectIdBeingResized = null;
+                self.objectIdBeingDragged = null;
+                self.objectIdBeingResized = null;
             }
-        });        
-        
-        
-        
+        });  
     };
-
-    this.bindSelectionChangeInteractionHandler = function() {
-
-        var handleSelectionChange = function() {
-            var selection = window.getSelection();
-
-            if(selection && selection.rangeCount > 0 && selection.isCollapsed === false) {
-
-                var range = selection.getRangeAt(0);
-                var boundingRect = range.getBoundingClientRect();
-
-                var selectionRect = new GraphPaper.Rectangle(
-                        boundingRect.left+$(window).scrollLeft(),
-                        boundingRect.top+$(window).scrollTop(),
-                        boundingRect.right+$(window).scrollLeft(),
-                        boundingRect.bottom+$(window).scrollTop());
-
-                var selectionIsLink = false;
-                var selectionLink = null;
-                if(selection.anchorNode.parentNode.nodeName === 'A') {
-                    selectionIsLink = true;
-                    selectionLink = selection.anchorNode.parentNode.href;
-                } else if(typeof selection.anchorNode.nextSibling !== 'undefined' && selection.anchorNode.nextSibling !== null && selection.anchorNode.nextSibling.nodeName === 'A') {
-                    // Firefox weirdness
-                    selectionIsLink = true;
-                    selectionLink = selection.anchorNode.nextSibling.href;
-                } else {
-                    //
-                }
-
-                var selectionIsUnorderedList = false;
-                var selectionIsTaskList = false;
-                if(document.queryCommandState("insertUnorderedList")) {
-                    if($(selection.anchorNode).closest('ul').hasClass('task-list')) {
-                        selectionIsTaskList = true;
-                    } else {
-                        selectionIsUnorderedList = true;
-                    }
-                }
-
-                var selectionStateDetails = {
-                    "selection": selection,
-                    "range": range,
-                    "selectionRect": selectionRect,
-                    "selectionIsBold": document.queryCommandState("bold"),
-                    "selectionIsItalic": document.queryCommandState("italic"),
-                    "selectionIsUnderline": document.queryCommandState("underline"),
-                    "selectionIsStrikeThrough": document.queryCommandState("strikeThrough"),
-                    "selectionIsAlignLeft": document.queryCommandState("justifyLeft"),
-                    "selectionIsAlignCenter": document.queryCommandState("justifyCenter"),
-                    "selectionIsAlignRight": document.queryCommandState("justifyRight"),
-                    "selectionIsUnorderedList": selectionIsUnorderedList,
-                    "selectionIsTaskList": selectionIsTaskList,
-                    "selectionIsLink": selectionIsLink,
-                    "selectionLink": selectionLink
-                };
-
-                self.canvasObjects.forEach(function(element, index, array) {
-                    element.handleSiblingObjectChange('text-selection', selectionStateDetails);
-                });
-
-            } else if (selection && selection.rangeCount > 0 && selection.isCollapsed === true) {
-                // collapsed and caret moved
-
-                var range = selection.getRangeAt(0);
-                var boundingRect = range.getBoundingClientRect();
-
-                var selectionRect = new GraphPaper.Rectangle(
-                        boundingRect.left+$(window).scrollLeft(),
-                        boundingRect.top+$(window).scrollTop(),
-                        boundingRect.right+$(window).scrollLeft(),
-                        boundingRect.bottom+$(window).scrollTop());
-
-                var selectionIsLink = false;
-                var selectionLink = null;
-                if(selection.anchorNode.parentNode.nodeName === 'A') {
-                    selectionIsLink = true;
-                    selectionLink = selection.anchorNode.parentNode.href;
-                }
-
-                var selectionIsUnorderedList = false;
-                var selectionIsTaskList = false;
-                if(document.queryCommandState("insertUnorderedList")) {
-                    if($(selection.anchorNode).closest('ul').hasClass('task-list')) {
-                        selectionIsTaskList = true;
-                    } else {
-                        selectionIsUnorderedList = true;
-                    }
-                }
-
-                var selectionStateDetails = {
-                    "selection": selection,
-                    "range": range,
-                    "selectionRect": selectionRect,
-                    "selectionIsBold": document.queryCommandState("bold"),
-                    "selectionIsItalic": document.queryCommandState("italic"),
-                    "selectionIsUnderline": document.queryCommandState("underline"),
-                    "selectionIsStrikeThrough": document.queryCommandState("strikeThrough"),
-                    "selectionIsAlignLeft": document.queryCommandState("justifyLeft"),
-                    "selectionIsAlignCenter": document.queryCommandState("justifyCenter"),
-                    "selectionIsAlignRight": document.queryCommandState("justifyRight"),                    
-                    "selectionIsUnorderedList": selectionIsUnorderedList,
-                    "selectionIsTaskList": selectionIsTaskList,
-                    "selectionIsLink": selectionIsLink,
-                    "selectionLink": selectionLink
-                };
-
-                self.canvasObjects.forEach(function(element, index, array) {
-                    element.handleSiblingObjectChange('text-selection-collapsed', selectionStateDetails);
-                });
-            }
-            else {
-
-                self.canvasObjects.forEach(function(element, index, array) {
-                    element.handleSiblingObjectChange('text-selection-collapsed', {});
-                });
-            }
-        };
-
-        if ("onselectionchange" in document) {
-
-            document.addEventListener("selectionchange", function(e) {
-                handleSelectionChange();
-            }, false);
-        } else {
-            // selectionchange event not supported
-
-            setInterval(function() {
-                handleSelectionChange(); // hmm, running all text selection logic again
-            }, 500);
-
-        }
-
-    };
-
-    this.bindSelectionChangeInteractionHandler();
 };
 
 export { Canvas };

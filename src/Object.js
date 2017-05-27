@@ -55,7 +55,16 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
      */
     this.setY = function(_y) {
         self.y = _y;
-    }
+    };
+
+    /**
+     * @param {Number} _x
+     * @param {Number} _y
+     */
+    this.translate = function(_x, _y) {
+        self.x = _x;
+        self.y = _y;
+    };
 
     /**
      * @returns {Number}
@@ -70,6 +79,15 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
     this.getHeight = function() {
         return self.height;
     };
+
+    /**
+     * @param {Number} _width
+     * @param {Number} _height
+     */
+    this.resize = function(_width, _height) {
+        self.width = _width;
+        self.height = _height;
+    }
 
     /**
      * @returns {Boolean}
