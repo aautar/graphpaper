@@ -37,11 +37,25 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
     };
 
     /**
+     * @param {Number} _x
+     */
+    this.setX = function(_x) {
+        self.x = _x;
+    }
+
+    /**
      * @returns {Number}
      */
     this.getY = function() {
         return self.y;
     };
+
+    /**
+     * @param {Number} _y
+     */
+    this.setY = function(_y) {
+        self.y = _y;
+    }
 
     /**
      * @returns {Number}
