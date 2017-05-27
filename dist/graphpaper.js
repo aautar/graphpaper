@@ -194,7 +194,7 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
      * @param {String} _eventName
      * @param {*} _eventData
      */
-    this.handleParentCanvasInteraction = function(_eventName, _eventData) { 
+    this.handleSiblingObjectChange = function(_eventName, _eventData) { 
 
     };
 
