@@ -1,5 +1,6 @@
 import  {Object} from './Object';
 import  {Rectangle} from './Rectangle';
+import  {Point} from './Point';
 
 /**
  * 
