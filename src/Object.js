@@ -60,7 +60,7 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
     /**
      * @returns {Boolean}
      */
-    this.isDeleted = function() {
+    this.getIsDeleted = function() {
         return self.isDeleted;
     };
 
