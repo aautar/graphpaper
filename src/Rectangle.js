@@ -9,6 +9,34 @@
 function Rectangle(_left, _top, _right, _bottom)  {
     
     /**
+     * @returns {Number}
+     */
+    this.getLeft = function() {
+        return _left;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.getTop = function() {
+        return _top;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.getRight = function() {
+        return _right;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.getBottom = function() {
+        return _bottom;
+    };
+
+    /**
      * 
      * @param {Rectangle} _otherRectangle
      * @returns {Boolean}
