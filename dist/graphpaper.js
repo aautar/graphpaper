@@ -308,7 +308,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
         var ptRect = new Rectangle(_x, _y, _x+1, _y+1);
 
-        self.canvasObjects.forEach(function(_obj) {
+        canvasObjects.forEach(function(_obj) {
             if(!_obj.getIsDeleted() && ptRect.checkIntersect(_obj.getBoundingRectange())) {
                 result.push(_obj);
             }
@@ -327,7 +327,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         var maxBottom = null;
         var maxRight = null;
 
-        self.canvasObjects.forEach(function(element, index, array) {
+        canvasObjects.forEach(function(element, index, array) {
 
             var left = parseInt(element.getX());
             var top = parseInt(element.getY());  
@@ -359,7 +359,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      * @returns {Object[]}
      */
     this.getAllObjects = function() {    
-        return self.canvasObjects;
+        return canvasObjects;
     };
 
     /**
@@ -370,7 +370,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         
         var foundObject = null;
         
-        self.canvasObjects.forEach(function(element, index, array) {
+        canvasObjects.forEach(function(element, index, array) {
             if(foundObject === null && element.id === _id) {
                 foundObject = element;
             }            
@@ -383,7 +383,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      * @param {Object} _obj
      */
     this.addObject = function(_obj) {
-        self.canvasObjects.push(_obj);
+        canvasObjects.push(_obj);
     };
 
     /**
@@ -405,7 +405,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
         // dblclick on empty area of canvas
         _canvasDomElement.addEventListener('dblclick', function (e) {
-            self.dblClickTapHandler(e.pageX, e.pageY);
+            dblClickTapHandler(e.pageX, e.pageY);
         });
 
         // click anywhere on canvas
@@ -432,16 +432,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
             var now = new Date().getTime();
 
             // Check if we have stored data for a previous touch (indicating we should test for a double-tap)
-            if(self.dblTapDetectVars.lastTouchTime !== null) {
+            if(dblTapDetectVars.lastTouchTime !== null) {
 
-                var lastTouchTime = self.dblTapDetectVars.lastTouchTime;
+                var lastTouchTime = dblTapDetectVars.lastTouchTime;
 
                 // Compute time since the previous touch
                 var timeSinceLastTouch = now - lastTouchTime;
 
                 // Get the position of the last touch on the element
-                var lastX = self.dblTapDetectVars.lastTouchX;
-                var lastY = self.dblTapDetectVars.lastTouchY;
+                var lastX = dblTapDetectVars.lastTouchX;
+                var lastY = dblTapDetectVars.lastTouchY;
 
                 // Compute the distance from the last touch on the element
                 var distFromLastTouch = Math.sqrt( Math.pow(x-lastX,2) + Math.pow(y-lastY,2) );
@@ -451,19 +451,19 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
                     dblTapDetected = true;
 
                     // Call handler
-                    self.dblClickTapHandler(x, y);
+                    dblClickTapHandler(x, y);
 
                     // Remove last touch info from element
-                    self.dblTapDetectVars.lastTouchTime = null;
-                    self.dblTapDetectVars.lastTouchX = null;
-                    self.dblTapDetectVars.lastTouchY = null;
+                    dblTapDetectVars.lastTouchTime = null;
+                    dblTapDetectVars.lastTouchX = null;
+                    dblTapDetectVars.lastTouchY = null;
                 }
             }
 
             if(!dblTapDetected) {
-                self.dblTapDetectVars.lastTouchTime = now;
-                self.dblTapDetectVars.lastTouchX = x;
-                self.dblTapDetectVars.lastTouchY = y;
+                dblTapDetectVars.lastTouchTime = now;
+                dblTapDetectVars.lastTouchX = x;
+                dblTapDetectVars.lastTouchY = y;
             }
         });
     };
@@ -516,7 +516,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (self.objectIdBeingDragged !== null) {
-                self.handleMove(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);       
+                handleMove(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);       
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -525,7 +525,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         _canvasDomElement.addEventListener('mousemove', function (e) {
 
             if (self.objectIdBeingDragged !== null) {				
-                self.handleMove(e.pageX, e.pageY);
+                handleMove(e.pageX, e.pageY);
                 return false;
             }
 
@@ -561,7 +561,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         _canvasDomElement.addEventListener('mouseup', function (e) {
             if (e.which === 1) {
                 if(self.objectIdBeingDragged !== null) {
-                    self.handleMoveEnd(e.pageX, e.pageY);
+                    handleMoveEnd(e.pageX, e.pageY);
                 }            
 
                 if(self.objectIdBeingResized !== null) {
