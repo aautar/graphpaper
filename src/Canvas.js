@@ -42,7 +42,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      * @returns {Number}
      */
     var snap = function(_p) {
-        var ret = Math.round(_pos/self.getGridSize()) * self.getGridSize();
+        var ret = Math.round(_p/self.getGridSize()) * self.getGridSize();
         return Math.max(0, ret - 1);
     }
 
