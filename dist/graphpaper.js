@@ -548,8 +548,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
                 var obj = self.getObjectById(self.objectIdBeingResized);
 
-                var top = obj.getX();
-                var left = obj.getY();
+                var top = obj.getY();
+                var left = obj.getX();
                 var newWidth = ((mx - left)+1);
                 var newHeight = ((my - top)+1);
 
