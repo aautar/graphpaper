@@ -292,8 +292,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      * @param {Object} _obj
      */
     this.snapObjectToGrid = function(_obj) {
-        var newX = self.snap(_obj.getX());
-        var newY = self.snap(_obj.getY());
+        var newX = snap(_obj.getX());
+        var newY = snap(_obj.getY());
         _obj.setX(newX);
         _obj.setY(newY);
     };
@@ -493,8 +493,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
             _y -= obj.touchInternalContactPt.getY();
         }
 
-        var mx = self.snap(_x);
-        var my = self.snap(_y - obj.height*0.5);
+        var mx = snap(_x);
+        var my = snap(_y - obj.height*0.5);
         
         self.objectDragX = mx;
         self.objectDragY = my;		
@@ -510,8 +510,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     var handleMoveEnd = function(_x, _y) {
         var obj = self.getObjectById(self.objectIdBeingDragged);
         
-        var mx = self.snap(_x);
-        var my = self.snap(_y - obj.height*0.5);
+        var mx = snap(_x);
+        var my = snap(_y - obj.height*0.5);
 
         var mxStart = self.objectDragStartX;
         var myStart = self.objectDragStartY;
@@ -543,8 +543,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
             if(self.objectIdBeingResized !== null) {
 
-                var mx = self.snap(e.pageX);
-                var my = self.snap(e.pageY);
+                var mx = snap(e.pageX);
+                var my = snap(e.pageY);
 
                 var obj = self.getObjectById(self.objectIdBeingResized);
 
