@@ -363,6 +363,18 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     /**
+     * Helper method to publish an object change to all objects
+     * 
+     * @param {String} _eventName
+     * @param {*} _eventData
+     */
+    this.publishSiblingObjectChange = function(_eventName, _eventData) {
+        canvasObjects.forEach(function(_obj) {
+            _obj.handleSiblingObjectChange(_eventName, _eventData);
+        });
+    };
+
+    /**
      * @param {String} _id
      * @returns {Object|null}
      */   
