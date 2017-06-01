@@ -153,6 +153,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      * @param {Object} _obj
      */
     this.addObject = function(_obj) {
+        _obj.setCanvas(self);
         canvasObjects.push(_obj);
     };
 
@@ -251,8 +252,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
             _y -= obj.touchInternalContactPt.getY();
         }
 
-        var mx = snap(_x);
-        var my = snap(_y - obj.height*0.5);
+        var mx = snap(_x + obj.getTranslateHandleOffsetX());
+        var my = snap(_y + obj.getTranslateHandleOffsetY());
         
         self.objectDragX = mx;
         self.objectDragY = my;		
@@ -268,8 +269,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     var handleMoveEnd = function(_x, _y) {
         var obj = self.getObjectById(self.objectIdBeingDragged);
         
-        var mx = snap(_x);
-        var my = snap(_y - obj.height*0.5);
+        var mx = snap(_x + obj.getTranslateHandleOffsetX());
+        var my = snap(_y + obj.getTranslateHandleOffsetY());
 
         var mxStart = self.objectDragStartX;
         var myStart = self.objectDragStartY;
@@ -286,7 +287,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (self.objectIdBeingDragged !== null) {
-                handleMove(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);       
+                handleMove(e.touches[0].pageX, e.touches[0].pageY);       
                 e.preventDefault();
                 e.stopPropagation();
             }

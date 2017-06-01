@@ -1,5 +1,6 @@
 import {Point} from './Point';
 import  {Rectangle} from './Rectangle';
+import  {Canvas} from './Canvas';
 
 /**
  * 
@@ -8,8 +9,10 @@ import  {Rectangle} from './Rectangle';
  * @param {Number} _y
  * @param {Number} _width
  * @param {Number} _height
+ * @param {Element} _domElement
+ * @param {Element} _translateHandleDomElement
  */
-function Object(_id, _x, _y, _width, _height, _domElement) {
+function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomElement) {
 
     var self = this;
 
@@ -21,6 +24,23 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
     this.domElement = _domElement;
     this.isDeleted = false;
     this.touchInternalContactPt = null;
+
+    this.getTranslateHandleOffsetX = function() {
+        return -(_translateHandleDomElement.offsetLeft + _translateHandleDomElement.offsetWidth * 0.5);
+    };
+
+    this.getTranslateHandleOffsetY = function() {
+        return -(_translateHandleDomElement.offsetTop  + _translateHandleDomElement.offsetHeight * 0.5);
+    };
+
+    var canvas = null;
+
+    /**
+     * @param {Canvas} _canvas
+     */
+    this.setCanvas = function(_canvas) {
+        canvas = _canvas;
+    };
 
     /**
      * @returns {Number}
@@ -64,6 +84,9 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
     this.translate = function(_x, _y) {
         self.x = _x;
         self.y = _y;
+
+        self.domElement.style.left = parseInt(self.x) + 'px';
+        self.domElement.style.top = parseInt(self.y) + 'px';
     };
 
     /**
@@ -87,6 +110,9 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
     this.resize = function(_width, _height) {
         self.width = _width;
         self.height = _height;
+
+        self.domElement.style.width = parseInt(self.width) + 'px';
+        self.domElement.style.height = parseInt(self.height) + 'px';
     }
 
     /**
@@ -131,6 +157,50 @@ function Object(_id, _x, _y, _width, _height, _domElement) {
 
         return new Rectangle(left, top, right, bottom);
     };
+
+    _translateHandleDomElement.addEventListener('touchstart', function(e) {
+
+        if(canvas === null) {
+            return;
+        }
+       
+        canvas.touchInternalContactPt = {
+            "x": e.touches[0].pageX-self.getX(),
+            "y": e.touches[0].pageY-self.getY()
+        };
+        
+        var mx = e.pageX;
+        var my = e.pageY;
+
+        canvas.objectIdBeingDragged = self.getId();
+        canvas.objectDragX = mx;
+        canvas.objectDragY = my;
+
+        canvas.objectDragStartX = mx;
+        canvas.objectDragStartY = my;
+
+        // Don't do this, we still want the note to get focus
+        //e.preventDefault();
+        //e.stopPropagation();
+    });
+
+    _translateHandleDomElement.addEventListener('mousedown', function (e) {
+
+        if(canvas === null) {
+            return;
+        }
+
+        var mx = e.pageX;
+        var my = e.pageY;
+
+        canvas.objectIdBeingDragged = self.getId();
+        canvas.objectDragX = mx;
+        canvas.objectDragY = my;
+
+        canvas.objectDragStartX = mx;
+        canvas.objectDragStartY = my;
+
+    });
 };
 
 export { Object };
