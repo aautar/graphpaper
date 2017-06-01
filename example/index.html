@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GraphPaper</title>
+    <script src="../dist/graphpaper.js" type="text/javascript"></script>
+
+    <style type="text/css">
+        * { margin:0; padding:0; font-family:LatoRegular; font-size:14px; font-weight:normal; }
+        html, body { width:100%; height:100%; }
+        body { background:#fff; }
+        ul, li { list-style:none; }
+
+        #paper { border:2px solid #f00; width:1000px; height:1000px; overflow:hidden; position:relative; background:url("grid-elem.svg") repeat; transform-origin:0 0; transition:transform 0.55s ease-in-out; /*transform:scale3d(1,1,1)*/ }
+        #obj1 { position:absolute; }
+        #obj1 #translateHandle { cursor:move; display:block; position:absolute; top:16px; left:0px; width:12px; height:12px; background:#fff; }
+    </style>
+
+</head>
+
+
+<body>
+    
+    <div id="paper">
+
+        <div id="obj1" style="width:44px; height:44px; background:#0094ff;">
+            <div id="translateHandle"></div>
+        </div>
+
+    </div>
+
+
+    <script type="text/javascript">
+	
+        var canvas = new GraphPaper.Canvas(document.getElementById('paper'), function() { });
+        canvas.initTransformationHandlers();
+
+        var obj1 = new GraphPaper.Object('obj1', 0, 0, 44, 44, document.getElementById('obj1'), document.getElementById('translateHandle'));
+
+        canvas.addObject(obj1);
+
+
+
+    </script>
+
+</body>
+
+</html>
