@@ -13,7 +13,8 @@
 
         #paper { border:2px solid #f00; width:1000px; height:1000px; overflow:hidden; position:relative; background:url("grid-elem.svg") repeat; transform-origin:0 0; transition:transform 0.55s ease-in-out; /*transform:scale3d(1,1,1)*/ }
         #obj1 { position:absolute; }
-        #obj1 #translateHandle { cursor:move; display:block; position:absolute; top:16px; left:0px; width:12px; height:12px; background:#fff; }
+        #obj1 #translateHandle { cursor:move; display:block; position:absolute; top:16px; left:0px; width:12px; height:12px; background:#f0f; }
+        #obj1 #resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:0px; right:0px; width:12px; height:12px; background:#0ff; }
     </style>
 
 </head>
@@ -25,6 +26,7 @@
 
         <div id="obj1" style="width:44px; height:44px; background:#0094ff;">
             <div id="translateHandle"></div>
+            <div id="resizeHandle"></div>
         </div>
 
     </div>
@@ -35,7 +37,17 @@
         var canvas = new GraphPaper.Canvas(document.getElementById('paper'), function() { });
         canvas.initTransformationHandlers();
 
-        var obj1 = new GraphPaper.Object('obj1', 0, 0, 44, 44, document.getElementById('obj1'), document.getElementById('translateHandle'));
+        var obj1 = new GraphPaper.Object(
+            'obj1', 
+            0, 
+            0, 
+            44, 
+            44, 
+            canvas,
+            document.getElementById('obj1'), 
+            document.getElementById('translateHandle'),
+            document.getElementById('resizeHandle')
+        );
 
         canvas.addObject(obj1);
 
