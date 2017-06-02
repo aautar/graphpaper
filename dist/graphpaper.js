@@ -263,7 +263,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      * @param {Object} _obj
      */
     this.addObject = function(_obj) {
-        _obj.setCanvas(self);
         canvasObjects.push(_obj);
     };
 
@@ -398,8 +397,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (self.objectIdBeingDragged !== null) {
                 handleMove(e.touches[0].pageX, e.touches[0].pageY);       
-                e.preventDefault();
-                e.stopPropagation();
             }
         });
 
@@ -407,7 +404,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
             if (self.objectIdBeingDragged !== null) {				
                 handleMove(e.pageX, e.pageY);
-                return false;
             }
 
             if(self.objectIdBeingResized !== null) {
@@ -424,8 +420,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
                 obj.resize(newWidth, newHeight);
                 _handleCanvasInteraction('object-resized', obj);
-
-                return false;
             }
         });
 
@@ -455,6 +449,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
                 self.objectIdBeingResized = null;
             }
         });  
+
+        _canvasDomElement.addEventListener('mousedown', function (e) {
+            if(self.objectIdBeingDragged !== null || self.objectIdBeingResized !== null) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
     };
 }
 
@@ -465,10 +466,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
  * @param {Number} _y
  * @param {Number} _width
  * @param {Number} _height
+ * @param {Canvas} _canvas
  * @param {Element} _domElement
  * @param {Element} _translateHandleDomElement
+ * @param {Element} _resizeHandleDomElement
  */
-function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomElement) {
+function Object(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
 
     var self = this;
 
@@ -487,15 +490,6 @@ function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomEl
 
     this.getTranslateHandleOffsetY = function() {
         return -(_translateHandleDomElement.offsetTop  + _translateHandleDomElement.offsetHeight * 0.5);
-    };
-
-    var canvas = null;
-
-    /**
-     * @param {Canvas} _canvas
-     */
-    this.setCanvas = function(_canvas) {
-        canvas = _canvas;
     };
 
     /**
@@ -614,49 +608,41 @@ function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomEl
         return new Rectangle(left, top, right, bottom);
     };
 
-    _translateHandleDomElement.addEventListener('touchstart', function(e) {
+    var translateStart = function(e) {
 
-        if(canvas === null) {
-            return;
+        if(e.touches) {
+            self.touchInternalContactPt = new Point(
+                e.touches[0].pageX-self.getX(),
+                e.touches[0].pageY-self.getY()
+            );
         }
-       
-        canvas.touchInternalContactPt = {
-            "x": e.touches[0].pageX-self.getX(),
-            "y": e.touches[0].pageY-self.getY()
-        };
         
         var mx = e.pageX;
         var my = e.pageY;
 
-        canvas.objectIdBeingDragged = self.getId();
-        canvas.objectDragX = mx;
-        canvas.objectDragY = my;
+        _canvas.objectIdBeingDragged = self.getId();
+        _canvas.objectDragX = mx;
+        _canvas.objectDragY = my;
 
-        canvas.objectDragStartX = mx;
-        canvas.objectDragStartY = my;
+        _canvas.objectDragStartX = mx;
+        _canvas.objectDragStartY = my;
+    };
 
-        // Don't do this, we still want the note to get focus
-        //e.preventDefault();
-        //e.stopPropagation();
+    _translateHandleDomElement.addEventListener('touchstart', function(e) {
+        translateStart(e);
     });
 
     _translateHandleDomElement.addEventListener('mousedown', function (e) {
+        translateStart(e);
+    });
 
-        if(canvas === null) {
+    _resizeHandleDomElement.addEventListener('mousedown', function (e) {
+        if (e.which !== 1) {
             return;
         }
 
-        var mx = e.pageX;
-        var my = e.pageY;
-
-        canvas.objectIdBeingDragged = self.getId();
-        canvas.objectDragX = mx;
-        canvas.objectDragY = my;
-
-        canvas.objectDragStartX = mx;
-        canvas.objectDragStartY = my;
-
-    });
+        _canvas.objectIdBeingResized = self.getId();
+    });    
 }
 
 exports.Dimensions = Dimensions;

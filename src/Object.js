@@ -9,11 +9,12 @@ import  {Canvas} from './Canvas';
  * @param {Number} _y
  * @param {Number} _width
  * @param {Number} _height
+ * @param {Canvas} _canvas
  * @param {Element} _domElement
  * @param {Element} _translateHandleDomElement
  * @param {Element} _resizeHandleDomElement
  */
-function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
+function Object(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
 
     var self = this;
 
@@ -32,15 +33,6 @@ function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomEl
 
     this.getTranslateHandleOffsetY = function() {
         return -(_translateHandleDomElement.offsetTop  + _translateHandleDomElement.offsetHeight * 0.5);
-    };
-
-    var canvas = null;
-
-    /**
-     * @param {Canvas} _canvas
-     */
-    this.setCanvas = function(_canvas) {
-        canvas = _canvas;
     };
 
     /**
@@ -161,10 +153,6 @@ function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomEl
 
     var translateStart = function(e) {
 
-        if(canvas === null) {
-            return;
-        }
-
         if(e.touches) {
             self.touchInternalContactPt = new Point(
                 e.touches[0].pageX-self.getX(),
@@ -175,12 +163,12 @@ function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomEl
         var mx = e.pageX;
         var my = e.pageY;
 
-        canvas.objectIdBeingDragged = self.getId();
-        canvas.objectDragX = mx;
-        canvas.objectDragY = my;
+        _canvas.objectIdBeingDragged = self.getId();
+        _canvas.objectDragX = mx;
+        _canvas.objectDragY = my;
 
-        canvas.objectDragStartX = mx;
-        canvas.objectDragStartY = my;
+        _canvas.objectDragStartX = mx;
+        _canvas.objectDragStartY = my;
     };
 
     _translateHandleDomElement.addEventListener('touchstart', function(e) {
@@ -190,6 +178,14 @@ function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomEl
     _translateHandleDomElement.addEventListener('mousedown', function (e) {
         translateStart(e);
     });
+
+    _resizeHandleDomElement.addEventListener('mousedown', function (e) {
+        if (e.which !== 1) {
+            return;
+        }
+
+        _canvas.objectIdBeingResized = self.getId();
+    });    
 };
 
 export { Object };

@@ -153,7 +153,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      * @param {Object} _obj
      */
     this.addObject = function(_obj) {
-        _obj.setCanvas(self);
         canvasObjects.push(_obj);
     };
 
@@ -288,8 +287,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (self.objectIdBeingDragged !== null) {
                 handleMove(e.touches[0].pageX, e.touches[0].pageY);       
-                e.preventDefault();
-                e.stopPropagation();
             }
         });
 
@@ -297,7 +294,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
             if (self.objectIdBeingDragged !== null) {				
                 handleMove(e.pageX, e.pageY);
-                return false;
             }
 
             if(self.objectIdBeingResized !== null) {
@@ -314,8 +310,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
                 obj.resize(newWidth, newHeight);
                 _handleCanvasInteraction('object-resized', obj);
-
-                return false;
             }
         });
 
@@ -345,6 +339,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
                 self.objectIdBeingResized = null;
             }
         });  
+
+        _canvasDomElement.addEventListener('mousedown', function (e) {
+            if(self.objectIdBeingDragged !== null || self.objectIdBeingResized !== null) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
     };
 };
 
