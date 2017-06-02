@@ -11,8 +11,9 @@ import  {Canvas} from './Canvas';
  * @param {Number} _height
  * @param {Element} _domElement
  * @param {Element} _translateHandleDomElement
+ * @param {Element} _resizeHandleDomElement
  */
-function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomElement) {
+function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
 
     var self = this;
 
@@ -158,16 +159,18 @@ function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomEl
         return new Rectangle(left, top, right, bottom);
     };
 
-    _translateHandleDomElement.addEventListener('touchstart', function(e) {
+    var translateStart = function(e) {
 
         if(canvas === null) {
             return;
         }
-       
-        canvas.touchInternalContactPt = {
-            "x": e.touches[0].pageX-self.getX(),
-            "y": e.touches[0].pageY-self.getY()
-        };
+
+        if(e.touches) {
+            self.touchInternalContactPt = new Point(
+                e.touches[0].pageX-self.getX(),
+                e.touches[0].pageY-self.getY()
+            );
+        }
         
         var mx = e.pageX;
         var my = e.pageY;
@@ -178,28 +181,14 @@ function Object(_id, _x, _y, _width, _height, _domElement, _translateHandleDomEl
 
         canvas.objectDragStartX = mx;
         canvas.objectDragStartY = my;
+    };
 
-        // Don't do this, we still want the note to get focus
-        //e.preventDefault();
-        //e.stopPropagation();
+    _translateHandleDomElement.addEventListener('touchstart', function(e) {
+        translateStart(e);
     });
 
     _translateHandleDomElement.addEventListener('mousedown', function (e) {
-
-        if(canvas === null) {
-            return;
-        }
-
-        var mx = e.pageX;
-        var my = e.pageY;
-
-        canvas.objectIdBeingDragged = self.getId();
-        canvas.objectDragX = mx;
-        canvas.objectDragY = my;
-
-        canvas.objectDragStartX = mx;
-        canvas.objectDragStartY = my;
-
+        translateStart(e);
     });
 };
 
