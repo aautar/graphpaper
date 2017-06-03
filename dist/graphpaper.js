@@ -151,19 +151,23 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      * @param {Number} _p 
      * @returns {Number}
      */
-    var snap = function(_p) {
+    this.snapToGrid = function(_p) {
         var ret = Math.round(_p/self.getGridSize()) * self.getGridSize();
         return Math.max(0, ret - 1);
     };
 
     /**
-     * @param {Object} _obj
+     * @returns {Number}
      */
-    this.snapObjectToGrid = function(_obj) {
-        var newX = snap(_obj.getX());
-        var newY = snap(_obj.getY());
-        _obj.setX(newX);
-        _obj.setY(newY);
+    this.getOffsetLeft = function() {
+        return _canvasDomElement.offsetLeft;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.getOffsetTop = function() {
+        return _canvasDomElement.offsetTop;
     };
 
     /**
@@ -361,8 +365,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
             _y -= obj.touchInternalContactPt.getY();
         }
 
-        var mx = snap(_x + obj.getTranslateHandleOffsetX());
-        var my = snap(_y + obj.getTranslateHandleOffsetY());
+        var mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
+        var my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
         
         self.objectDragX = mx;
         self.objectDragY = my;		
@@ -378,8 +382,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     var handleMoveEnd = function(_x, _y) {
         var obj = self.getObjectById(self.objectIdBeingDragged);
         
-        var mx = snap(_x + obj.getTranslateHandleOffsetX());
-        var my = snap(_y + obj.getTranslateHandleOffsetY());
+        var mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
+        var my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
 
         var mxStart = self.objectDragStartX;
         var myStart = self.objectDragStartY;
@@ -408,8 +412,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
             if(self.objectIdBeingResized !== null) {
 
-                var mx = snap(e.pageX);
-                var my = snap(e.pageY);
+                var mx = self.snapToGrid(e.pageX);
+                var my = self.snapToGrid(e.pageY);
 
                 var obj = self.getObjectById(self.objectIdBeingResized);
 
