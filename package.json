@@ -4,5 +4,8 @@
   "main": "src/GraphPaper.js",
   "repository": "https://github.com/aautar/graphpaper.git",
   "author": "Avishkar Autar <aautar@digital-radiation.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jasmine-es6": "^0.4.0"
+  }
 }

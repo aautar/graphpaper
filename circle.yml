@@ -1,0 +1,12 @@
+machine:
+  node:
+    version: stable
+
+dependencies:
+  override:
+    - npm install
+
+test:
+  override:
+    - .\node_modules\.bin\jasmine
+
