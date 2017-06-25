@@ -7,5 +7,8 @@
   "license": "MIT",
   "devDependencies": {
     "jasmine-es6": "^0.4.0"
-  }
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/jasmine"
+  }  
 }
