@@ -1,4 +1,4 @@
-import  {Object} from './Object';
+import  {GPObject} from './GPObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
 
@@ -63,7 +63,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     /**
      * @param {Number} _x
      * @param {Number} _y
-     * @returns {Object[]}
+     * @returns {GPObject[]}
      */
     this.getObjectsAroundPoint = function(_x, _y) {
         var result = [];
@@ -118,7 +118,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
   
     /**
-     * @returns {Object[]}
+     * @returns {GPObject[]}
      */
     this.getAllObjects = function() {    
         return canvasObjects;
@@ -138,7 +138,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     /**
      * @param {String} _id
-     * @returns {Object|null}
+     * @returns {GPObject|null}
      */   
     this.getObjectById = function(_id) {
         
@@ -154,7 +154,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     /**
-     * @param {Object} _obj
+     * @param {GPObject} _obj
      */
     this.addObject = function(_obj) {
         canvasObjects.push(_obj);
