@@ -1,6 +1,6 @@
 import {Point} from './Point';
-import  {Rectangle} from './Rectangle';
-import  {Canvas} from './Canvas';
+import {Rectangle} from './Rectangle';
+import {Canvas} from './Canvas';
 
 /**
  * 
@@ -14,7 +14,7 @@ import  {Canvas} from './Canvas';
  * @param {Element} _translateHandleDomElement
  * @param {Element} _resizeHandleDomElement
  */
-function Object(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
+function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
 
     var self = this;
 
@@ -188,4 +188,4 @@ function Object(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHa
     });    
 };
 
-export { Object };
+export { CanvasObject };

@@ -1,4 +1,4 @@
-import  {Object} from './Object';
+import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
 
@@ -19,7 +19,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         return gridSize;
     }
 
-    var scaleFactor = 1.0;
     var useTranslate3d = false; // better performance w/o it
     var canvasObjects = [];
 
@@ -35,6 +34,27 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         lastTouchX: null,
         lastTouchY: null,
         lastTouchTime: null
+    };
+
+    var scaleFactor = 1.0;
+    var invScaleFactor = 1.0;
+
+    /**
+     * @param {Number} _scaleFactor
+     * @returns {Number}
+     */
+    this.setScaleFactor = function(_scaleFactor) {
+        scaleFactor = _scaleFactor;
+        invScaleFactor = 1.0 / scaleFactor;
+        _canvasDomElement.style.transform = "scale3d(" + scaleFactor + "," + scaleFactor + "," + scaleFactor + ")";
+        return scaleFactor;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.getScaleFactor = function() {
+        return scaleFactor;
     };
 
     /**
@@ -63,7 +83,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     /**
      * @param {Number} _x
      * @param {Number} _y
-     * @returns {Object[]}
+     * @returns {CanvasObject[]}
      */
     this.getObjectsAroundPoint = function(_x, _y) {
         var result = [];
@@ -118,7 +138,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
   
     /**
-     * @returns {Object[]}
+     * @returns {CanvasObject[]}
      */
     this.getAllObjects = function() {    
         return canvasObjects;
@@ -138,15 +158,15 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     /**
      * @param {String} _id
-     * @returns {Object|null}
+     * @returns {CanvasObject|null}
      */   
     this.getObjectById = function(_id) {
         
         var foundObject = null;
         
-        canvasObjects.forEach(function(element, index, array) {
-            if(foundObject === null && element.id === _id) {
-                foundObject = element;
+        canvasObjects.forEach(function(obj, index, array) {
+            if(foundObject === null && obj.getId() === _id) {
+                foundObject = obj;
             }            
         });
         
@@ -154,7 +174,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     /**
-     * @param {Object} _obj
+     * @param {CanvasObject} _obj
      */
     this.addObject = function(_obj) {
         canvasObjects.push(_obj);
@@ -290,20 +310,20 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (self.objectIdBeingDragged !== null) {
-                handleMove(e.touches[0].pageX, e.touches[0].pageY);       
+                handleMove(e.touches[0].pageX * invScaleFactor, e.touches[0].pageY * invScaleFactor);       
             }
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
 
             if (self.objectIdBeingDragged !== null) {				
-                handleMove(e.pageX, e.pageY);
+                handleMove(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
             }
 
             if(self.objectIdBeingResized !== null) {
 
-                var mx = self.snapToGrid(e.pageX);
-                var my = self.snapToGrid(e.pageY);
+                var mx = self.snapToGrid(e.pageX * invScaleFactor);
+                var my = self.snapToGrid(e.pageY * invScaleFactor);
 
                 var obj = self.getObjectById(self.objectIdBeingResized);
 
@@ -330,7 +350,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         _canvasDomElement.addEventListener('mouseup', function (e) {
             if (e.which === 1) {
                 if(self.objectIdBeingDragged !== null) {
-                    handleMoveEnd(e.pageX, e.pageY);
+                    handleMoveEnd(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
                 }            
 
                 if(self.objectIdBeingResized !== null) {
