@@ -83,7 +83,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     /**
      * @param {Number} _x
      * @param {Number} _y
-     * @returns {GPObject[]}
+     * @returns {CanvasObject[]}
      */
     this.getObjectsAroundPoint = function(_x, _y) {
         var result = [];
@@ -138,7 +138,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
   
     /**
-     * @returns {GPObject[]}
+     * @returns {CanvasObject[]}
      */
     this.getAllObjects = function() {    
         return canvasObjects;
@@ -158,15 +158,15 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     /**
      * @param {String} _id
-     * @returns {GPObject|null}
+     * @returns {CanvasObject|null}
      */   
     this.getObjectById = function(_id) {
         
         var foundObject = null;
         
-        canvasObjects.forEach(function(element, index, array) {
-            if(foundObject === null && element.id === _id) {
-                foundObject = element;
+        canvasObjects.forEach(function(obj, index, array) {
+            if(foundObject === null && obj.getId() === _id) {
+                foundObject = obj;
             }            
         });
         
@@ -174,7 +174,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     /**
-     * @param {GPObject} _obj
+     * @param {CanvasObject} _obj
      */
     this.addObject = function(_obj) {
         canvasObjects.push(_obj);
