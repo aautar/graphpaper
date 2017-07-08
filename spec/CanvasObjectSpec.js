@@ -1,5 +1,5 @@
 import {Rectangle} from '../src/Rectangle.js';
-import {GPObject} from '../src/GPObject.js';
+import {CanvasObject} from '../src/CanvasObject.js';
 
 describe("GPObject", function() {
  
@@ -9,7 +9,7 @@ describe("GPObject", function() {
       addEventListener: function() { }
     };
 
-    var o = new GPObject(
+    var o = new CanvasObject(
         "obj-123",
         100, 
         200, 

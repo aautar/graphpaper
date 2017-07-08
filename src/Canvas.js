@@ -1,4 +1,4 @@
-import  {GPObject} from './GPObject';
+import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
 

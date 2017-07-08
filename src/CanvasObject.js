@@ -14,7 +14,7 @@ import {Canvas} from './Canvas';
  * @param {Element} _translateHandleDomElement
  * @param {Element} _resizeHandleDomElement
  */
-function GPObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
+function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
 
     var self = this;
 
@@ -188,4 +188,4 @@ function GPObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translate
     });    
 };
 
-export { GPObject };
+export { CanvasObject };
