@@ -193,7 +193,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     /**
      * @param {Number} _x
      * @param {Number} _y
-     * @returns {GPObject[]}
+     * @returns {CanvasObject[]}
      */
     this.getObjectsAroundPoint = function(_x, _y) {
         var result = [];
@@ -248,7 +248,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
   
     /**
-     * @returns {GPObject[]}
+     * @returns {CanvasObject[]}
      */
     this.getAllObjects = function() {    
         return canvasObjects;
@@ -268,15 +268,15 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     /**
      * @param {String} _id
-     * @returns {GPObject|null}
+     * @returns {CanvasObject|null}
      */   
     this.getObjectById = function(_id) {
         
         var foundObject = null;
         
-        canvasObjects.forEach(function(element, index, array) {
-            if(foundObject === null && element.id === _id) {
-                foundObject = element;
+        canvasObjects.forEach(function(obj, index, array) {
+            if(foundObject === null && obj.getId() === _id) {
+                foundObject = obj;
             }            
         });
         
@@ -284,7 +284,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     /**
-     * @param {GPObject} _obj
+     * @param {CanvasObject} _obj
      */
     this.addObject = function(_obj) {
         canvasObjects.push(_obj);
@@ -495,7 +495,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
  * @param {Element} _translateHandleDomElement
  * @param {Element} _resizeHandleDomElement
  */
-function GPObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
+function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
 
     var self = this;
 
@@ -672,7 +672,7 @@ function GPObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translate
 exports.Dimensions = Dimensions;
 exports.Rectangle = Rectangle;
 exports.Point = Point;
-exports.GPObject = GPObject;
+exports.CanvasObject = CanvasObject;
 exports.Canvas = Canvas;
 
 }((this.GraphPaper = this.GraphPaper || {})));
