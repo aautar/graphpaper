@@ -1,7 +1,7 @@
 import {Rectangle} from '../src/Rectangle.js';
 import {CanvasObject} from '../src/CanvasObject.js';
 
-describe("GPObject", function() {
+describe("CanvasObject", function() {
  
   it("getBoundingRectange returns correct bounding rectangle", function() {
 
@@ -28,4 +28,56 @@ describe("GPObject", function() {
 
   });
   
+  it("getTranslateHandleOffsetX return handle x-offset", function() {
+  
+    var mockDomElem = {
+      addEventListener: function() { },
+      offsetLeft: 10,
+      offsetWidth: 100,
+      offsetTop: 20,
+      offsetHeight: 150      
+    };
+
+    var o = new CanvasObject(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        {}, 
+        mockDomElem, 
+        mockDomElem, 
+        mockDomElem
+    );
+
+    expect(o.getTranslateHandleOffsetX()).toBe(-60);
+  });      
+
+
+  it("getTranslateHandleOffsetX return handle x-offset", function() {
+  
+    var mockDomElem = {
+      addEventListener: function() { },
+      offsetLeft: 10,
+      offsetWidth: 100,
+      offsetTop: 20,
+      offsetHeight: 150
+    };
+
+    var o = new CanvasObject(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        {}, 
+        mockDomElem, 
+        mockDomElem, 
+        mockDomElem
+    );
+
+    expect(o.getTranslateHandleOffsetY()).toBe(-95);
+  });      
+
+
 });
