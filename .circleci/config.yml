@@ -1,6 +1,7 @@
 version: 2
 jobs:
   build:
+    working_directory: ~/graphpaper
     docker:
       - image: circleci/node:4.8
     steps:
