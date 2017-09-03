@@ -6,7 +6,7 @@
   "author": "Avishkar Autar <aautar@digital-radiation.com>",
   "license": "MIT",
   "devDependencies": {
-    "jasmine-es6": "^0.4.0",
+    "jasmine-es6": "0.4.0",
     "process-nextick-args": "^1.0.7"
   },
   "scripts": {
