@@ -4,15 +4,15 @@ jobs:
     working_directory: ~/graphpaper
     docker:
       - image: circleci/node:7.10.0
-        environment:
-          NODE_ENV: development      
+    environment:
+      - NODE_ENV: development      
     steps:
       - checkout
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: Install modules
-          command: yarn install
+          command: yarn install --verbose
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
@@ -20,4 +20,3 @@ jobs:
       - run:
           name: Run tests
           command: yarn test
-          working_directory: ~/graphpaper
