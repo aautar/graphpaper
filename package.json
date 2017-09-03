@@ -10,6 +10,6 @@
     "process-nextick-args": "^1.0.7"
   },
   "scripts": {
-    "test": "./node_modules/.bin/jasmine"
+    "test": "node_modules/.bin/jasmine"
   }
 }
