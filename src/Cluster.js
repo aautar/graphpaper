@@ -4,12 +4,12 @@
  */
 function Cluster(_id) {
 
-    var self = this;
+    const self = this;
 
     /**
      * @type {CanvasObjects[]}
      */
-    var canvasObjects = [];
+    const canvasObjects = [];
 
     /**
      * @returns {String}
@@ -22,7 +22,7 @@ function Cluster(_id) {
      * @returns {String|null}
      */
     this.getObjectIndex = function(_id) {
-        for(var i=0; i<canvasObjects.length; i++) {
+        for(let i=0; i<canvasObjects.length; i++) {
             if(canvasObjects[i].getId() === _id) {
                 return i;
             }
@@ -56,7 +56,7 @@ function Cluster(_id) {
      * @returns {String[]}
      */
     this.getObjectIds = function() {
-        var ids = [];
+        const ids = [];
         canvasObjects.forEach(function(_o) {
             ids.push(_o.getId());
         });
@@ -69,7 +69,7 @@ function Cluster(_id) {
      * @returns {Boolean}
      */
     this.removeObject = function(_id) {
-        var idx = self.getObjectIndex(_id);
+        const idx = self.getObjectIndex(_id);
         if(idx === null) {
             return false;
         }
