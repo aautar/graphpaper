@@ -10,13 +10,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     var self = this;
     
-    var gridSize = 12.0;
+    const GRID_SIZE = 12.0;
 
     /**
      * @returns {Number}
      */
     this.getGridSize = function() {
-        return gridSize;
+        return GRID_SIZE;
     }
 
     var useTranslate3d = false; // better performance w/o it
