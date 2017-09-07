@@ -27,10 +27,16 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.isDeleted = false;
     this.touchInternalContactPt = null;
 
+    /**
+     * @returns {Number}
+     */    
     this.getTranslateHandleOffsetX = function() {
         return -(_translateHandleDomElement.offsetLeft + _translateHandleDomElement.offsetWidth * 0.5);
     };
 
+    /**
+     * @returns {Number}
+     */    
     this.getTranslateHandleOffsetY = function() {
         return -(_translateHandleDomElement.offsetTop  + _translateHandleDomElement.offsetHeight * 0.5);
     };

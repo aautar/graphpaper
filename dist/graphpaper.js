@@ -7,10 +7,17 @@
  * @param {Number} _height
  */
 function Dimensions(_width, _height) {
+
+    /**
+     * @returns {Number}
+     */       
     this.getWidth = function() {
         return _width;
     };
 
+    /**
+     * @returns {Number}
+     */       
     this.getHeight = function() {
         return _height;
     };
@@ -103,10 +110,17 @@ function Rectangle(_left, _top, _right, _bottom)  {
  * @param {Number} _y
  */
 function Point(_x, _y) {
+
+    /**
+     * @returns {Number}
+     */       
     this.getX = function() {
         return _x;
     };
 
+    /**
+     * @returns {Number}
+     */       
     this.getY = function() {
         return _y;
     };
@@ -120,13 +134,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     var self = this;
     
-    var gridSize = 12.0;
+    const GRID_SIZE = 12.0;
 
     /**
      * @returns {Number}
      */
     this.getGridSize = function() {
-        return gridSize;
+        return GRID_SIZE;
     };
 
     var useTranslate3d = false; // better performance w/o it
@@ -508,10 +522,16 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.isDeleted = false;
     this.touchInternalContactPt = null;
 
+    /**
+     * @returns {Number}
+     */    
     this.getTranslateHandleOffsetX = function() {
         return -(_translateHandleDomElement.offsetLeft + _translateHandleDomElement.offsetWidth * 0.5);
     };
 
+    /**
+     * @returns {Number}
+     */    
     this.getTranslateHandleOffsetY = function() {
         return -(_translateHandleDomElement.offsetTop  + _translateHandleDomElement.offsetHeight * 0.5);
     };
@@ -675,12 +695,12 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
  */
 function Cluster(_id) {
 
-    var self = this;
+    const self = this;
 
     /**
      * @type {CanvasObjects[]}
      */
-    var canvasObjects = [];
+    const canvasObjects = [];
 
     /**
      * @returns {String}
@@ -693,7 +713,7 @@ function Cluster(_id) {
      * @returns {String|null}
      */
     this.getObjectIndex = function(_id) {
-        for(var i=0; i<canvasObjects.length; i++) {
+        for(let i=0; i<canvasObjects.length; i++) {
             if(canvasObjects[i].getId() === _id) {
                 return i;
             }
@@ -727,7 +747,7 @@ function Cluster(_id) {
      * @returns {String[]}
      */
     this.getObjectIds = function() {
-        var ids = [];
+        const ids = [];
         canvasObjects.forEach(function(_o) {
             ids.push(_o.getId());
         });
@@ -740,7 +760,7 @@ function Cluster(_id) {
      * @returns {Boolean}
      */
     this.removeObject = function(_id) {
-        var idx = self.getObjectIndex(_id);
+        const idx = self.getObjectIndex(_id);
         if(idx === null) {
             return false;
         }
