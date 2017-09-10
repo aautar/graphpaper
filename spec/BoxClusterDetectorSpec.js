@@ -138,54 +138,64 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
 
 describe("BoxClusterDetector::getClusterObjectsFromSeed", function() {
   
-    it("produces result set with 3 objects aligned in row", function() {
-      const mockDomElem = {
-        addEventListener: function() { }
-      };
-  
-      const o1 = new CanvasObject(
-          "obj-123",
-          100, 
-          200, 
-          10, 
-          20, 
-          {}, 
-          mockDomElem, 
-          mockDomElem, 
-          mockDomElem
-      );
-  
-      const o2 = new CanvasObject(
-        "obj-456",
-        134, 
-        222, 
+  it("produces result set with 3 objects aligned in row", function() {
+    const mockDomElem = {
+      addEventListener: function() { }
+    };
+
+    const o1 = new CanvasObject(
+        "obj-123",
+        100, 
+        200, 
         10, 
         20, 
         {}, 
         mockDomElem, 
         mockDomElem, 
         mockDomElem
-      );        
+    );
 
-      const o3 = new CanvasObject(
-        "obj-789",
-        168, 
-        222, 
-        10, 
-        20, 
-        {}, 
-        mockDomElem, 
-        mockDomElem, 
-        mockDomElem
-      );        
+    const o2 = new CanvasObject(
+      "obj-456",
+      134, 
+      222, 
+      10, 
+      20, 
+      {}, 
+      mockDomElem, 
+      mockDomElem, 
+      mockDomElem
+    );        
+
+    const o3 = new CanvasObject(
+      "obj-789",
+      168, 
+      222, 
+      10, 
+      20, 
+      {}, 
+      mockDomElem, 
+      mockDomElem, 
+      mockDomElem
+    );        
+
+    const resultSet = [o1];
+
+    const detector = new BoxClusterDetector(12.0);
+    detector.getClusterObjectsFromSeed(o1, [o1, o2, o3], resultSet);
+
+    expect(resultSet).toEqual([o1, o2, o3]);
+  });  
+
+});
+
+describe("BoxClusterDetector::computeClusters", function() {
   
-      const resultSet = [o1];
-
-      const detector = new BoxClusterDetector(12.0);
-      detector.getClusterObjectsFromSeed(o1, [o1, o2, o3], resultSet);
-
-      expect(resultSet).toEqual([o1, o2, o3]);
-    });  
+  it("return empty array of clusters for no objects", function() {  
+    const detector = new BoxClusterDetector(12.0);
+    const clusters = detector.computeClusters([], []);
+    expect(clusters).toEqual([]);
+  });  
   
-  });
+});
   
