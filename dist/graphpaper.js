@@ -537,7 +537,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     };
 
     /**
-     * @returns {Number}
+     * @returns {String}
      */
     this.getId = function() {
         return self.id;
@@ -959,6 +959,12 @@ function BoxClusterDetector(_boxExtentOffset) {
                     clusters.push(clusterToAddTo);
                 } else {
                     clusterToAddTo = getClusterWithMostObjectsFromClusterMap(intersectingClusterToNumObjectsIntersecting);
+
+                    // Remove object from any cluster it's currently in, we'll be adding it to clusterToAddTo
+                    objsForCluster.forEach(function(_clusterObject) {
+                        self.removeObjectFromClusters(_clusterObject, clusters);                    
+                    });
+
                 }
 
                 // Add objects to cluster and remove from objectsUnderConsideration
