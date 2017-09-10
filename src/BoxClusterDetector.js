@@ -178,7 +178,7 @@ function BoxClusterDetector(_boxExtentOffset) {
             const obj = objectsUnderConsideration.pop();
 
             const objsForCluster = [obj];
-            getClusterObjectsFromSeed(obj, objectsUnderConsideration, objsForCluster);
+            self.getClusterObjectsFromSeed(obj, objectsUnderConsideration, objsForCluster);
 
             if(objsForCluster.length > 1) {
 

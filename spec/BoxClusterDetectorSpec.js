@@ -196,6 +196,29 @@ describe("BoxClusterDetector::computeClusters", function() {
     const clusters = detector.computeClusters([], []);
     expect(clusters).toEqual([]);
   });  
+
+  it("return empty array of clusters for single object", function() {  
+
+    const mockDomElem = {
+      addEventListener: function() { }
+    };
+
+    const o1 = new CanvasObject(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        {}, 
+        mockDomElem, 
+        mockDomElem, 
+        mockDomElem
+    );
+
+    const detector = new BoxClusterDetector(12.0);
+    const clusters = detector.computeClusters([o1], []);
+    expect(clusters).toEqual([]);
+  });
   
 });
   
