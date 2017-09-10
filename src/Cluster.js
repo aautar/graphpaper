@@ -68,7 +68,7 @@ function Cluster(_id) {
      * @param {String} _id
      * @returns {Boolean}
      */
-    this.removeObject = function(_id) {
+    this.removeObjectById = function(_id) {
         const idx = self.getObjectIndex(_id);
         if(idx === null) {
             return false;
