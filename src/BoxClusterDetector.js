@@ -14,7 +14,7 @@ function BoxClusterDetector(_boxExtentOffset) {
      */
     const getObjectIndexFromArray = function(_obj, _canvasObjectsArray) {
         for(let i=0; i<_canvasObjectsArray.length; i++) {
-            if(_canvasObjectsArray.getId() === _obj.getId()) {
+            if(_canvasObjectsArray[i].getId() === _obj.getId()) {
                 return i;
             }
         }
@@ -30,7 +30,7 @@ function BoxClusterDetector(_boxExtentOffset) {
      */
     const removeObjectsFromArray = function(_objects, _canvasObjectsArray) {
         for(let i=0; i<_objects.length; i++) {
-            const idx = getObjectIndexFromArray(_objects[i].getId(), _canvasObjectsArray);
+            const idx = getObjectIndexFromArray(_objects[i], _canvasObjectsArray);
             _canvasObjectsArray.splice(idx, 1);
         }
 
@@ -108,14 +108,14 @@ function BoxClusterDetector(_boxExtentOffset) {
      */
     this.getClusterObjectsFromSeed = function(_seedObj, _objectsUnderConsideration, _resultSet) {
         const closeByObjects = self.getAllObjectsCloseTo(_seedObj, _objectsUnderConsideration);
-        if(closeByObjects.length <= 0) {
+        if(closeByObjects.length === 0) {
             return [];
         } else {
-            removeObjectsFromArray(closeByObjects, _objectsUnderConsideration);
+            removeObjectsFromArray(closeByObjects.concat([_seedObj]), _objectsUnderConsideration);
 
-            closeByObjects.forEach(function(_note) {
-                _resultSet.push(_note);
-                self.getClusterObjectsFromSeed(_note, _objectsUnderConsideration, _resultSet);
+            closeByObjects.forEach(function(_o) {
+                _resultSet.push(_o);
+                self.getClusterObjectsFromSeed(_o, _objectsUnderConsideration, _resultSet);
             });
         }
     };
