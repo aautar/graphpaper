@@ -165,7 +165,7 @@ function BoxClusterDetector(_boxExtentOffset) {
         });
     };    
 
-    this.computeClusters = function(_objects, _knownClusters) {
+    this.computeClusters = function(_objects, _knownClusters, _getNewIdFunc) {
         const clusters = _knownClusters.map(function(_c) {
             return _c;
         });
@@ -182,15 +182,23 @@ function BoxClusterDetector(_boxExtentOffset) {
 
             if(objsForCluster.length > 1) {
 
-                var clusterToAddTo = null;
-                const intersectingClusterToNumObjectsIntersecting = self.findIntersectingClustersForObjects(objsForCluster);
+                let clusterToAddTo = null;
+                const intersectingClusterToNumObjectsIntersecting = self.findIntersectingClustersForObjects(objsForCluster, clusters);
 
                 if(intersectingClusterToNumObjectsIntersecting.size === 0) {
-                    clusterToAddTo = new Cluster();
+                    const newClusterId = _getNewIdFunc();
+                    clusterToAddTo = new Cluster(newClusterId);
+                    clusters.push(clusterToAddTo);
                 } else {
                     clusterToAddTo = getClusterWithMostObjectsFromClusterMap(intersectingClusterToNumObjectsIntersecting);
                 }
 
+                // Add objects to cluster and remove from objectsUnderConsideration
+                objsForCluster.forEach(function(_clusterObject) {
+                    clusterToAddTo.addObject(_clusterObject);
+                });                
+
+                removeObjectsFromArray(objsForCluster, objectsUnderConsideration);
 
             } else {
                 self.removeObjectFromClusters(obj, clusters);

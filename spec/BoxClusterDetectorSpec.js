@@ -1,5 +1,6 @@
 import {BoxClusterDetector} from '../src/BoxClusterDetector.js';
 import {CanvasObject} from '../src/CanvasObject.js';
+import {Cluster} from '../src/Cluster.js';
 
 describe("BoxClusterDetector::areObjectsClose", function() {
     
@@ -220,5 +221,25 @@ describe("BoxClusterDetector::computeClusters", function() {
     expect(clusters).toEqual([]);
   });
   
+  it("return single Cluster for 2 objects close to each other", function() {  
+    const mockDomElem = {
+      addEventListener: function() { }
+    };
+
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+
+    const idGenerator = function() {
+      return "new-cluster-id";
+    };
+
+    const detector = new BoxClusterDetector(12.0);
+    const clusters = detector.computeClusters([o1, o2], [], idGenerator);
+
+    expect(clusters.length).toEqual(1);
+    expect(clusters[0].getId()).toEqual('new-cluster-id');
+    expect(clusters[0].getObjects().indexOf(o1) >= 0).toEqual(true);
+    expect(clusters[0].getObjects().indexOf(o2) >= 0).toEqual(true);
+  });
+
 });
-  
