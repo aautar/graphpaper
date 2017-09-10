@@ -204,17 +204,7 @@ describe("BoxClusterDetector::computeClusters", function() {
       addEventListener: function() { }
     };
 
-    const o1 = new CanvasObject(
-        "obj-123",
-        100, 
-        200, 
-        10, 
-        20, 
-        {}, 
-        mockDomElem, 
-        mockDomElem, 
-        mockDomElem
-    );
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
 
     const detector = new BoxClusterDetector(12.0);
     const clusters = detector.computeClusters([o1], []);
@@ -241,5 +231,55 @@ describe("BoxClusterDetector::computeClusters", function() {
     expect(clusters[0].getObjects().indexOf(o1) >= 0).toEqual(true);
     expect(clusters[0].getObjects().indexOf(o2) >= 0).toEqual(true);
   });
+
+  it("adds object to exiting Cluster and returns that Cluster", function() {  
+    const mockDomElem = {
+      addEventListener: function() { }
+    };
+
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+    const newObj = new CanvasObject("obj-789", 112, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+
+    const existingCluster = new Cluster("existing-cluster-id");
+    existingCluster.addObject(o1);
+    existingCluster.addObject(o2);
+
+    const idGenerator = function() {
+      return "new-cluster-id";
+    };
+
+    const detector = new BoxClusterDetector(12.0);
+    const clusters = detector.computeClusters([o1,o2,newObj], [existingCluster], idGenerator);
+
+    expect(clusters.length).toEqual(1);
+    expect(clusters[0].getId()).toEqual('existing-cluster-id');
+    expect(clusters[0].getObjects().indexOf(o1) >= 0).toEqual(true);
+    expect(clusters[0].getObjects().indexOf(o2) >= 0).toEqual(true);
+    expect(clusters[0].getObjects().indexOf(newObj) >= 0).toEqual(true);
+  });  
+
+  it("return single Cluster for 3 objects close to each other", function() {  
+    const mockDomElem = {
+      addEventListener: function() { }
+    };
+
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+    const o3 = new CanvasObject("obj-789", 112, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+
+    const idGenerator = function() {
+      return "new-cluster-id";
+    };
+
+    const detector = new BoxClusterDetector(12.0);
+    const clusters = detector.computeClusters([o1,o2,o3], [], idGenerator);
+
+    expect(clusters.length).toEqual(1);
+    expect(clusters[0].getId()).toEqual('new-cluster-id');
+    expect(clusters[0].getObjects().indexOf(o1) >= 0).toEqual(true);
+    expect(clusters[0].getObjects().indexOf(o2) >= 0).toEqual(true);
+    expect(clusters[0].getObjects().indexOf(o3) >= 0).toEqual(true);
+  });    
 
 });
