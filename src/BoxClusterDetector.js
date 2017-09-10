@@ -186,7 +186,7 @@ function BoxClusterDetector(_boxExtentOffset) {
                 const intersectingClusterToNumObjectsIntersecting = self.findIntersectingClustersForObjects(objsForCluster);
 
                 if(intersectingClusterToNumObjectsIntersecting.size === 0) {
-                    //clusterToAddTo = new Cluster()
+                    clusterToAddTo = new Cluster();
                 } else {
                     clusterToAddTo = getClusterWithMostObjectsFromClusterMap(intersectingClusterToNumObjectsIntersecting);
                 }

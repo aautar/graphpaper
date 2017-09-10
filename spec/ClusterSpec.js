@@ -49,7 +49,7 @@ describe("Cluster", function() {
         c.addObject(makeCanvasObject("obj-id-1"));
         c.addObject(makeCanvasObject("obj-id-2"));
 
-        expect(c.removeObject("obj-id-1")).toEqual(true);
+        expect(c.removeObjectById("obj-id-1")).toEqual(true);
         expect(c.getObjectIds()).toEqual(["obj-id-2"]);
     });    
 
