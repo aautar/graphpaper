@@ -28,13 +28,23 @@ describe("Cluster", function() {
         expect(c.getId()).toBe("cluster-id");
     });
 
-    it("returns object index when getObjectIndex is called", function() {
+    it("returns object index when getObjectIndexById is called", function() {
         var c = new Cluster("cluster-id");
         c.addObject(makeCanvasObject("obj-id-1"));
         c.addObject(makeCanvasObject("obj-id-2"));
 
-        expect(c.getObjectIndex("obj-id-2")).toBe(1);
+        expect(c.getObjectIndexById("obj-id-2")).toBe(1);
     });
+
+    it("returns object index when getObjectIndex is called", function() {
+        var c = new Cluster("cluster-id");
+        c.addObject(makeCanvasObject("obj-id-1"));
+
+        var targetObj = makeCanvasObject("obj-id-2");
+        c.addObject(targetObj);
+
+        expect(c.getObjectIndex(targetObj)).toBe(1);
+    });    
 
     it("returns object IDs when getObjectIds is called", function() {
         var c = new Cluster("cluster-id");
