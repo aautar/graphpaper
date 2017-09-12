@@ -86,6 +86,10 @@ function Cluster(_id) {
         canvasObjects.splice(idx, 1);
         return true;
     };
+
+    this.removeAllObjects = function() {
+        canvasObjects.length = 0;
+    };
 };
 
 export { Cluster };

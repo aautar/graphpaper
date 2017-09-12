@@ -182,27 +182,28 @@ function BoxClusterDetector(_boxExtentOffset) {
 
             if(objsForCluster.length > 1) {
 
-                let clusterToAddTo = null;
                 const intersectingClusterToNumObjectsIntersecting = self.findIntersectingClustersForObjects(objsForCluster, clusters);
 
                 if(intersectingClusterToNumObjectsIntersecting.size === 0) {
-                    const newClusterId = _getNewIdFunc();
-                    clusterToAddTo = new Cluster(newClusterId);
-                    clusters.push(clusterToAddTo);
-                } else {
-                    clusterToAddTo = getClusterWithMostObjectsFromClusterMap(intersectingClusterToNumObjectsIntersecting);
+                    const newCluster = new Cluster(_getNewIdFunc());
+                    objsForCluster.forEach(function(_clusterObject) {
+                        newCluster.addObject(_clusterObject);
+                    });    
 
-                    // Remove object from any cluster it's currently in, we'll be adding it to clusterToAddTo
+                    clusters.push(newCluster);
+                } else {
+                    const clusterToModify = getClusterWithMostObjectsFromClusterMap(intersectingClusterToNumObjectsIntersecting);
+
+                    // Clear out objects in cluster
+                    clusterToModify.removeAllObjects();
+
+                    // Remove object from any cluster it's currently in, add it to clusterToModify
                     objsForCluster.forEach(function(_clusterObject) {
                         self.removeObjectFromClusters(_clusterObject, clusters);                    
+                        clusterToModify.addObject(_clusterObject);
                     });
 
                 }
-
-                // Add objects to cluster and remove from objectsUnderConsideration
-                objsForCluster.forEach(function(_clusterObject) {
-                    clusterToAddTo.addObject(_clusterObject);
-                });                
 
                 removeObjectsFromArray(objsForCluster, objectsUnderConsideration);
 
