@@ -282,4 +282,36 @@ describe("BoxClusterDetector::computeClusters", function() {
     expect(clusters[0].getObjects().indexOf(o3) >= 0).toEqual(true);
   });    
 
+
+  it("removes object from an existing cluster", function() {  
+    const mockDomElem = {
+      addEventListener: function() { }
+    };
+
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+    const o3 = new CanvasObject("obj-789", 114, 200, 10, 20, {}, mockDomElem, mockDomElem, mockDomElem);
+
+    const idGenerator = function() {
+      return "new-cluster-id";
+    };
+
+    const existingCluster = new Cluster("existing-cluster-id");
+    existingCluster.addObject(o1);
+    existingCluster.addObject(o2);    
+    existingCluster.addObject(o3);    
+
+    o3.setX(1000);
+    o3.setY(1000);
+
+    const detector = new BoxClusterDetector(12.0);
+    const clusters = detector.computeClusters([o1,o2,o3], [existingCluster], idGenerator);
+
+    expect(clusters.length).toEqual(1);
+    expect(clusters[0].getId()).toEqual('existing-cluster-id');
+    expect(clusters[0].getObjects().indexOf(o1) >= 0).toEqual(true);
+    expect(clusters[0].getObjects().indexOf(o2) >= 0).toEqual(true);
+    expect(clusters[0].getObjects().indexOf(o3) >= 0).toEqual(false);
+  });      
+
 });
