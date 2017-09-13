@@ -89,7 +89,7 @@ function BoxClusterDetector(_boxExtentOffset) {
     this.getAllObjectsCloseTo = function(_obj, _objectsUnderConsideration) {
         const resultSet = [];
         for(let i=0; i<_objectsUnderConsideration.length; i++) {
-            if(_obj.getId() === _objectsUnderConsideration[i].id) {
+            if(_obj.getId() === _objectsUnderConsideration[i].getId()) {
                 continue;
             }
 
