@@ -344,9 +344,7 @@ describe("BoxClusterDetector::computeClusters", function() {
     const detector = new BoxClusterDetector(12.0);
     const clusters = detector.computeClusters([o1,o2,o3], [existingCluster], idGenerator);
 
-    expect(clusters.length).toEqual(1);
-    expect(clusters[0].getId()).toEqual('existing-cluster-id');
-    expect(clusters[0].getObjects().length).toEqual(0);
+    expect(clusters.length).toEqual(0);
 
   });      
 

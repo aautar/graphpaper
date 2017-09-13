@@ -213,7 +213,16 @@ function BoxClusterDetector(_boxExtentOffset) {
 
         }
 
-        return clusters;
+        // Filter out clusters w/o any objects
+        const nonEmptyClusters = clusters.filter(function(_c) {
+            if(_c.getObjects().length > 0) {
+                return true;
+            }
+
+            return false;
+        });
+
+        return nonEmptyClusters;
     };
     
 };
