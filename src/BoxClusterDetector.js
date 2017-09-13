@@ -215,7 +215,7 @@ function BoxClusterDetector(_boxExtentOffset) {
 
         // Filter out clusters w/o any objects
         const nonEmptyClusters = clusters.filter(function(_c) {
-            if(_c.getObjects().length > 0) {
+            if(_c.getObjects().length >= 2) {
                 return true;
             }
 
