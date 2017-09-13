@@ -777,6 +777,10 @@ function Cluster(_id) {
         canvasObjects.splice(idx, 1);
         return true;
     };
+
+    this.removeAllObjects = function() {
+        canvasObjects.length = 0;
+    };
 }
 
 function BoxClusterDetector(_boxExtentOffset) {
@@ -959,27 +963,28 @@ function BoxClusterDetector(_boxExtentOffset) {
 
             if(objsForCluster.length > 1) {
 
-                let clusterToAddTo = null;
                 const intersectingClusterToNumObjectsIntersecting = self.findIntersectingClustersForObjects(objsForCluster, clusters);
 
                 if(intersectingClusterToNumObjectsIntersecting.size === 0) {
-                    const newClusterId = _getNewIdFunc();
-                    clusterToAddTo = new Cluster(newClusterId);
-                    clusters.push(clusterToAddTo);
-                } else {
-                    clusterToAddTo = getClusterWithMostObjectsFromClusterMap(intersectingClusterToNumObjectsIntersecting);
+                    const newCluster = new Cluster(_getNewIdFunc());
+                    objsForCluster.forEach(function(_clusterObject) {
+                        newCluster.addObject(_clusterObject);
+                    });    
 
-                    // Remove object from any cluster it's currently in, we'll be adding it to clusterToAddTo
+                    clusters.push(newCluster);
+                } else {
+                    const clusterToModify = getClusterWithMostObjectsFromClusterMap(intersectingClusterToNumObjectsIntersecting);
+
+                    // Clear out objects in cluster
+                    clusterToModify.removeAllObjects();
+
+                    // Remove object from any cluster it's currently in, add it to clusterToModify
                     objsForCluster.forEach(function(_clusterObject) {
                         self.removeObjectFromClusters(_clusterObject, clusters);                    
+                        clusterToModify.addObject(_clusterObject);
                     });
 
                 }
-
-                // Add objects to cluster and remove from objectsUnderConsideration
-                objsForCluster.forEach(function(_clusterObject) {
-                    clusterToAddTo.addObject(_clusterObject);
-                });                
 
                 removeObjectsFromArray(objsForCluster, objectsUnderConsideration);
 
@@ -989,7 +994,16 @@ function BoxClusterDetector(_boxExtentOffset) {
 
         }
 
-        return clusters;
+        // Filter out clusters w/o any objects
+        const nonEmptyClusters = clusters.filter(function(_c) {
+            if(_c.getObjects().length > 0) {
+                return true;
+            }
+
+            return false;
+        });
+
+        return nonEmptyClusters;
     };
     
 }
