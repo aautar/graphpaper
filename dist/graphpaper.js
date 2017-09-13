@@ -870,7 +870,7 @@ function BoxClusterDetector(_boxExtentOffset) {
     this.getAllObjectsCloseTo = function(_obj, _objectsUnderConsideration) {
         const resultSet = [];
         for(let i=0; i<_objectsUnderConsideration.length; i++) {
-            if(_obj.getId() === _objectsUnderConsideration[i].id) {
+            if(_obj.getId() === _objectsUnderConsideration[i].getId()) {
                 continue;
             }
 
@@ -996,7 +996,7 @@ function BoxClusterDetector(_boxExtentOffset) {
 
         // Filter out clusters w/o any objects
         const nonEmptyClusters = clusters.filter(function(_c) {
-            if(_c.getObjects().length > 0) {
+            if(_c.getObjects().length >= 2) {
                 return true;
             }
 
