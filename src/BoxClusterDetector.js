@@ -31,7 +31,9 @@ function BoxClusterDetector(_boxExtentOffset) {
     const removeObjectsFromArray = function(_objects, _canvasObjectsArray) {
         for(let i=0; i<_objects.length; i++) {
             const idx = getObjectIndexFromArray(_objects[i], _canvasObjectsArray);
-            _canvasObjectsArray.splice(idx, 1);
+            if(idx !== -1) {
+                _canvasObjectsArray.splice(idx, 1);
+            }
         }
 
         return _canvasObjectsArray;
