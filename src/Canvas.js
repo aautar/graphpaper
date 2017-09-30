@@ -1,6 +1,7 @@
 import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
+import  {Connector} from './Connector';
 
 /**
  * 
@@ -20,7 +21,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     }
 
     var useTranslate3d = false; // better performance w/o it
-    var canvasObjects = [];
+    const canvasObjects = [];
+    const objectConnectors = [];
 
     this.objectIdBeingDragged = null;
     this.objectIdBeingResized = null;
@@ -178,6 +180,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      */
     this.addObject = function(_obj) {
         canvasObjects.push(_obj);
+    };
+
+    /**
+     * @param {CanvasObject} _objStart
+     * @param {CanvasObject} _objEnd
+     */
+    this.connectObjects = function(_objStart, _objEnd) {
+        objectConnectors.push(
+            new Connector(_objStart, _objEnd)
+        );
     };
 
     /**
