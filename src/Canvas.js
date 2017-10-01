@@ -26,6 +26,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     this.objectIdBeingDragged = null;
     this.objectIdBeingResized = null;
+    const connectorAnchorsSelected = [];
     
     this.objectDragX = 0.0;
     this.objectDragY = 0.0;
@@ -190,6 +191,19 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         objectConnectors.push(
             new Connector(_objStart, _objEnd)
         );
+    };
+
+    /**
+     * @param {ConnectorAnchor} _anchor
+     */
+    this.addConnectionAnchorToSelectionStack = function(_anchor) {
+        connectorAnchorsSelected.push(_anchor);
+
+        console.log('push anchor');
+        if(connectorAnchorsSelected.length >= 2) {
+            console.log('create connector');
+        }
+
     };
 
     /**

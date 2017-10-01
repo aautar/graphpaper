@@ -128,6 +128,22 @@ function Point(_x, _y) {
 
 /**
  * 
+ * @param {CanvasObject} _objectStart 
+ * @param {CanvasObject} _objectEnd
+ */
+function Connector(_objectStart, _objectEnd) {
+    
+    this.getSVG = function() {
+        const startCoordString = _objectStart.getX() + "," + _objectStart.getY();
+        const endCoordString = _objectEnd.getX() + "," + _objectEnd.getY();
+
+        return '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><path fill="#F7931E" stroke="#000" d="M' + startCoordString + ' L' + endCoordString + '"></path></svg>';
+    };
+
+}
+
+/**
+ * 
  * @param {Element} _canvasDomElement 
  */
 function Canvas(_canvasDomElement, _handleCanvasInteraction) {
@@ -144,10 +160,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     var useTranslate3d = false; // better performance w/o it
-    var canvasObjects = [];
+    const canvasObjects = [];
+    const objectConnectors = [];
 
     this.objectIdBeingDragged = null;
     this.objectIdBeingResized = null;
+    const connectorAnchorsSelected = [];
     
     this.objectDragX = 0.0;
     this.objectDragY = 0.0;
@@ -302,6 +320,28 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
      */
     this.addObject = function(_obj) {
         canvasObjects.push(_obj);
+    };
+
+    /**
+     * @param {CanvasObject} _objStart
+     * @param {CanvasObject} _objEnd
+     */
+    this.connectObjects = function(_objStart, _objEnd) {
+        objectConnectors.push(
+            new Connector(_objStart, _objEnd)
+        );
+    };
+
+    /**
+     * @param {ConnectorAnchor} _anchor
+     */
+    this.addConnectionAnchorToSelectionStack = function(_anchor) {
+        connectorAnchorsSelected.push(_anchor);
+
+        if(connectorAnchorsSelected.length >= 2) {
+            console.log('create connector');
+        }
+
     };
 
     /**
@@ -499,6 +539,44 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
 /**
  * 
+ * @param {String} _objectId 
+ * @param {Number} _x
+ * @param {Number} _y
+ * @param {Element} _domElement
+ */
+function ConnectorAnchor(_objectId, _x, _y, _domElement) {
+    
+    /**
+     * @returns {String}
+     */
+    this.getObjectId = function() {
+        return _objectId;
+    };
+
+    /**
+     * @returns {Number}
+     */    
+    this.getX = function() {
+        return x;
+    };
+
+    /**
+     * @returns {Number}
+     */        
+    this.getY = function() {
+        return y;
+    };
+
+    /**
+     * @returns {Element}
+     */
+    this.getDomElement = function() {
+        return _domElement;
+    };
+}
+
+/**
+ * 
  * @param {String} _id
  * @param {Number} _x
  * @param {Number} _y
@@ -511,7 +589,9 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
  */
 function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
 
-    var self = this;
+    const self = this;
+
+    const connectorAnchors = [];
 
     this.id = _id;
     this.x = _x;
@@ -521,6 +601,20 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.domElement = _domElement;
     this.isDeleted = false;
     this.touchInternalContactPt = null;
+
+    /**
+     * @param {Element} _connectorAnchorDomElement
+     */
+    this.addConnectorAnchor = function(_connectorAnchorDomElement) {
+
+        const anchor = new ConnectorAnchor(_id, _x, _y, _connectorAnchorDomElement);
+
+        _connectorAnchorDomElement.addEventListener('click', function(e) {
+            _canvas.addConnectionAnchorToSelectionStack(anchor);
+        });
+
+        connectorAnchors.push(anchor);
+    };
 
     /**
      * @returns {Number}

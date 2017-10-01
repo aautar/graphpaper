@@ -58,7 +58,7 @@
             document.getElementById('resizeHandle1')
         );
 
-        obj1.addConnectorAnchorDomElement(document.getElementById('translateHandle1'));
+        obj1.addConnectorAnchor(document.getElementById('connectorAnchor1'));
         obj1.translate(100,100);
 
         const obj2 = new GraphPaper.CanvasObject(
@@ -73,7 +73,7 @@
             document.getElementById('resizeHandle2')
         );
 
-        obj2.addConnectorAnchorDomElement(document.getElementById('translateHandle2'));
+        obj2.addConnectorAnchor(document.getElementById('connectorAnchor2'));
 
         canvas.addObject(obj1);
         canvas.addObject(obj2);
