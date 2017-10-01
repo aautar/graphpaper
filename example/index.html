@@ -12,9 +12,11 @@
         ul, li { list-style:none; }
 
         #paper { border:2px solid #f00; width:1000px; height:1000px; overflow:hidden; position:relative; background:url("grid-elem.svg") repeat; transform-origin:0 0; transition:transform 0.55s ease-in-out; /*transform:scale3d(1,1,1)*/ }
-        #obj1 { position:absolute; }
-        #obj1 #translateHandle { cursor:move; display:block; position:absolute; top:16px; left:0px; width:12px; height:12px; background:#f0f; }
-        #obj1 #resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:0px; right:0px; width:12px; height:12px; background:#0ff; }
+        
+        .obj { position:absolute; width:44px; height:44px; background:#0094ff; }
+        .translateHandle { cursor:move; display:block; position:absolute; top:16px; left:0px; width:12px; height:12px; background:#f0f; }
+        .resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:0px; right:0px; width:12px; height:12px; background:#0ff; } 
+        .connectorAnchor { cursor:pointer; display:block; position:absolute; top:0px; right:0px; width:12px; height:12px; background:#FF0000; }
     </style>
 
 </head>
@@ -24,20 +26,27 @@
     
     <div id="paper">
 
-        <div id="obj1" style="width:44px; height:44px; background:#0094ff;">
-            <div id="translateHandle"></div>
-            <div id="resizeHandle"></div>
+        <div id="obj1" class="obj">
+            <div id="translateHandle1" class="translateHandle"></div>
+            <div id="resizeHandle1"  class="resizeHandle"></div>
+            <div id="connectorAnchor1" class="connectorAnchor"></div>
         </div>
+
+        <div id="obj2" class="obj">
+            <div id="translateHandle2" class="translateHandle"></div>
+            <div id="resizeHandle2" class="resizeHandle"></div>
+            <div id="connectorAnchor2" class="connectorAnchor"></div>
+        </div>        
 
     </div>
 
 
     <script type="text/javascript">
 	
-        var canvas = new GraphPaper.Canvas(document.getElementById('paper'), function() { });
+        const canvas = new GraphPaper.Canvas(document.getElementById('paper'), function() { });
         canvas.initTransformationHandlers();
 
-        var obj1 = new GraphPaper.CanvasObject(
+        const obj1 = new GraphPaper.CanvasObject(
             'obj1', 
             0, 
             0, 
@@ -45,15 +54,29 @@
             44, 
             canvas,
             document.getElementById('obj1'), 
-            document.getElementById('translateHandle'),
-            document.getElementById('resizeHandle')
+            document.getElementById('translateHandle1'),
+            document.getElementById('resizeHandle1')
         );
 
+        obj1.addConnectorAnchorDomElement(document.getElementById('translateHandle1'));
+        obj1.translate(100,100);
+
+        const obj2 = new GraphPaper.CanvasObject(
+            'obj2', 
+            0, 
+            0, 
+            44, 
+            44, 
+            canvas,
+            document.getElementById('obj2'), 
+            document.getElementById('translateHandle2'),
+            document.getElementById('resizeHandle2')
+        );
+
+        obj2.addConnectorAnchorDomElement(document.getElementById('translateHandle2'));
+
         canvas.addObject(obj1);
-
-
-        //canvas.setScaleFactor(0.5);
-
+        canvas.addObject(obj2);
 
     </script>
 
