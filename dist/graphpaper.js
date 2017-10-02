@@ -128,14 +128,52 @@ function Point(_x, _y) {
 
 /**
  * 
- * @param {CanvasObject} _objectStart 
- * @param {CanvasObject} _objectEnd
+ * @param {String} _objectId 
+ * @param {Number} _x
+ * @param {Number} _y
+ * @param {Element} _domElement
  */
-function Connector(_objectStart, _objectEnd) {
+function ConnectorAnchor(_objectId, _x, _y, _domElement) {
+    
+    /**
+     * @returns {String}
+     */
+    this.getObjectId = function() {
+        return _objectId;
+    };
+
+    /**
+     * @returns {Number}
+     */    
+    this.getX = function() {
+        return x;
+    };
+
+    /**
+     * @returns {Number}
+     */        
+    this.getY = function() {
+        return y;
+    };
+
+    /**
+     * @returns {Element}
+     */
+    this.getDomElement = function() {
+        return _domElement;
+    };
+}
+
+/**
+ * 
+ * @param {ConnectorAnchor} _anchorStart 
+ * @param {ConnectorAnchor} _anchorEnd
+ */
+function Connector(_anchorStart, _anchorEnd) {
     
     this.getSVG = function() {
-        const startCoordString = _objectStart.getX() + "," + _objectStart.getY();
-        const endCoordString = _objectEnd.getX() + "," + _objectEnd.getY();
+        const startCoordString = _anchorStart.getX() + "," + _anchorStart.getY();
+        const endCoordString = _anchorEnd.getX() + "," + _anchorEnd.getY();
 
         return '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><path fill="#F7931E" stroke="#000" d="M' + startCoordString + ' L' + endCoordString + '"></path></svg>';
     };
@@ -148,9 +186,12 @@ function Connector(_objectStart, _objectEnd) {
  */
 function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
-    var self = this;
-    
+    const self = this;
     const GRID_SIZE = 12.0;
+
+    const connectorsContainerDomElement = _canvasDomElement.appendChild(document.createElement("div"));
+
+    connectorsContainerDomElement.append(document.createElement("p"));
 
     /**
      * @returns {Number}
@@ -338,8 +379,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     this.addConnectionAnchorToSelectionStack = function(_anchor) {
         connectorAnchorsSelected.push(_anchor);
 
-        if(connectorAnchorsSelected.length >= 2) {
+        if(connectorAnchorsSelected.length === 2) {
+
             console.log('create connector');
+
+
+            connectorAnchorsSelected.length = 0;
         }
 
     };
@@ -534,44 +579,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
                 e.stopPropagation();
             }
         });
-    };
-}
-
-/**
- * 
- * @param {String} _objectId 
- * @param {Number} _x
- * @param {Number} _y
- * @param {Element} _domElement
- */
-function ConnectorAnchor(_objectId, _x, _y, _domElement) {
-    
-    /**
-     * @returns {String}
-     */
-    this.getObjectId = function() {
-        return _objectId;
-    };
-
-    /**
-     * @returns {Number}
-     */    
-    this.getX = function() {
-        return x;
-    };
-
-    /**
-     * @returns {Number}
-     */        
-    this.getY = function() {
-        return y;
-    };
-
-    /**
-     * @returns {Element}
-     */
-    this.getDomElement = function() {
-        return _domElement;
     };
 }
 

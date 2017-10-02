@@ -9,9 +9,10 @@ import  {Connector} from './Connector';
  */
 function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
-    var self = this;
-    
+    const self = this;
     const GRID_SIZE = 12.0;
+
+    const connectorsContainerDomElement = _canvasDomElement.appendChild(document.createElement("div"));
 
     /**
      * @returns {Number}
@@ -199,9 +200,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     this.addConnectionAnchorToSelectionStack = function(_anchor) {
         connectorAnchorsSelected.push(_anchor);
 
-        console.log('push anchor');
-        if(connectorAnchorsSelected.length >= 2) {
+        if(connectorAnchorsSelected.length === 2) {
+
             console.log('create connector');
+
+
+            connectorAnchorsSelected.length = 0;
         }
 
     };
