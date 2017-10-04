@@ -1,31 +1,37 @@
 /**
  * 
  * @param {String} _objectId 
- * @param {Number} _x
- * @param {Number} _y
  * @param {Element} _domElement
+ * @param {CanvasObject} _parentObject
  */
-function ConnectorAnchor(_objectId, _x, _y, _domElement) {
+function ConnectorAnchor(_domElement, _parentObject) {
     
+    /**
+     * @returns {CanvasObject}
+     */
+    this.getParentObject = function() {
+        return _parentObject;
+    };
+
     /**
      * @returns {String}
      */
     this.getObjectId = function() {
-        return _objectId;
+        return _parentObject.getId();
     };
 
     /**
      * @returns {Number}
-     */    
+     */     
     this.getX = function() {
-        return x;
+        return _parentObject.getX() + _domElement.offsetLeft;
     };
 
     /**
      * @returns {Number}
-     */        
+     */     
     this.getY = function() {
-        return y;
+        return _parentObject.getY() + _domElement.offsetTop;
     };
 
     /**

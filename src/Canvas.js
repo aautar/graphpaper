@@ -12,7 +12,10 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     const self = this;
     const GRID_SIZE = 12.0;
 
-    const connectorsContainerDomElement = _canvasDomElement.appendChild(document.createElement("div"));
+    const svgElem = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgElem.style.width = "100%";
+    svgElem.style.height = "100%";
+    const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
 
     /**
      * @returns {Number}
@@ -185,29 +188,15 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     /**
-     * @param {CanvasObject} _objStart
-     * @param {CanvasObject} _objEnd
-     */
-    this.connectObjects = function(_objStart, _objEnd) {
-        objectConnectors.push(
-            new Connector(_objStart, _objEnd)
-        );
-    };
-
-    /**
      * @param {ConnectorAnchor} _anchor
      */
     this.addConnectionAnchorToSelectionStack = function(_anchor) {
         connectorAnchorsSelected.push(_anchor);
 
         if(connectorAnchorsSelected.length === 2) {
-
-            console.log('create connector');
-
-
+            objectConnectors.push(new Connector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement));
             connectorAnchorsSelected.length = 0;
         }
-
     };
 
     /**
@@ -312,6 +301,11 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         self.objectDragY = my;		
 
         obj.translate(mx, my);
+
+        // refresh connectors
+        objectConnectors.forEach(function(_c) {
+            _c.refresh();
+        });
     };
 
     /**
@@ -363,6 +357,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
                 var newHeight = ((my - top)+1);
 
                 obj.resize(newWidth, newHeight);
+
+                // refresh connectors
+                objectConnectors.forEach(function(_c) {
+                    _c.refresh();
+                });
+
                 _handleCanvasInteraction('object-resized', obj);
             }
         });

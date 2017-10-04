@@ -129,31 +129,37 @@ function Point(_x, _y) {
 /**
  * 
  * @param {String} _objectId 
- * @param {Number} _x
- * @param {Number} _y
  * @param {Element} _domElement
+ * @param {CanvasObject} _parentObject
  */
-function ConnectorAnchor(_objectId, _x, _y, _domElement) {
+function ConnectorAnchor(_domElement, _parentObject) {
     
+    /**
+     * @returns {CanvasObject}
+     */
+    this.getParentObject = function() {
+        return _parentObject;
+    };
+
     /**
      * @returns {String}
      */
     this.getObjectId = function() {
-        return _objectId;
+        return _parentObject.getId();
     };
 
     /**
      * @returns {Number}
-     */    
+     */     
     this.getX = function() {
-        return x;
+        return _parentObject.getX() + _domElement.offsetLeft;
     };
 
     /**
      * @returns {Number}
-     */        
+     */     
     this.getY = function() {
-        return y;
+        return _parentObject.getY() + _domElement.offsetTop;
     };
 
     /**
@@ -168,16 +174,26 @@ function ConnectorAnchor(_objectId, _x, _y, _domElement) {
  * 
  * @param {ConnectorAnchor} _anchorStart 
  * @param {ConnectorAnchor} _anchorEnd
+ * @param {Element} _containerDomElement
  */
-function Connector(_anchorStart, _anchorEnd) {
+function Connector(_anchorStart, _anchorEnd, _containerDomElement) {
     
-    this.getSVG = function() {
+    const self = this;
+
+    const pathElem = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    pathElem.setAttribute("d", 'M0,0 L0,0');
+    pathElem.style.stroke = "#000"; 
+    pathElem.style.strokeWidth = "2px";         
+
+    const svgDomElem = _containerDomElement.appendChild(pathElem);
+
+    this.refresh = function() {
         const startCoordString = _anchorStart.getX() + "," + _anchorStart.getY();
         const endCoordString = _anchorEnd.getX() + "," + _anchorEnd.getY();
-
-        return '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><path fill="#F7931E" stroke="#000" d="M' + startCoordString + ' L' + endCoordString + '"></path></svg>';
+        pathElem.setAttribute("d", 'M' + startCoordString + ' L' + endCoordString);
     };
 
+    self.refresh();
 }
 
 /**
@@ -189,9 +205,10 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     const self = this;
     const GRID_SIZE = 12.0;
 
-    const connectorsContainerDomElement = _canvasDomElement.appendChild(document.createElement("div"));
-
-    connectorsContainerDomElement.append(document.createElement("p"));
+    const svgElem = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgElem.style.width = "100%";
+    svgElem.style.height = "100%";
+    const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
 
     /**
      * @returns {Number}
@@ -364,29 +381,15 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     /**
-     * @param {CanvasObject} _objStart
-     * @param {CanvasObject} _objEnd
-     */
-    this.connectObjects = function(_objStart, _objEnd) {
-        objectConnectors.push(
-            new Connector(_objStart, _objEnd)
-        );
-    };
-
-    /**
      * @param {ConnectorAnchor} _anchor
      */
     this.addConnectionAnchorToSelectionStack = function(_anchor) {
         connectorAnchorsSelected.push(_anchor);
 
         if(connectorAnchorsSelected.length === 2) {
-
-            console.log('create connector');
-
-
+            objectConnectors.push(new Connector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement));
             connectorAnchorsSelected.length = 0;
         }
-
     };
 
     /**
@@ -491,6 +494,11 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         self.objectDragY = my;		
 
         obj.translate(mx, my);
+
+        // refresh connectors
+        objectConnectors.forEach(function(_c) {
+            _c.refresh();
+        });
     };
 
     /**
@@ -542,6 +550,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
                 var newHeight = ((my - top)+1);
 
                 obj.resize(newWidth, newHeight);
+
+                // refresh connectors
+                objectConnectors.forEach(function(_c) {
+                    _c.refresh();
+                });
+
                 _handleCanvasInteraction('object-resized', obj);
             }
         });
@@ -614,7 +628,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     this.addConnectorAnchor = function(_connectorAnchorDomElement) {
 
-        const anchor = new ConnectorAnchor(_id, _x, _y, _connectorAnchorDomElement);
+        const anchor = new ConnectorAnchor(_connectorAnchorDomElement, self);
 
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _canvas.addConnectionAnchorToSelectionStack(anchor);

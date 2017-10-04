@@ -35,7 +35,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     this.addConnectorAnchor = function(_connectorAnchorDomElement) {
 
-        const anchor = new ConnectorAnchor(_id, _x, _y, _connectorAnchorDomElement);
+        const anchor = new ConnectorAnchor(_connectorAnchorDomElement, self);
 
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _canvas.addConnectionAnchorToSelectionStack(anchor);
