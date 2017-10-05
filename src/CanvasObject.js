@@ -30,6 +30,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.isDeleted = false;
     this.touchInternalContactPt = null;
 
+
     /**
      * @param {Element} _connectorAnchorDomElement
      */

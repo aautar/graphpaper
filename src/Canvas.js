@@ -30,7 +30,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     this.objectIdBeingDragged = null;
     this.objectIdBeingResized = null;
-    const connectorAnchorsSelected = [];
     
     this.objectDragX = 0.0;
     this.objectDragY = 0.0;
@@ -45,6 +44,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     var scaleFactor = 1.0;
     var invScaleFactor = 1.0;
+
+    const connectorAnchorsSelected = [];
+    const refreshAllConnectors = function() {
+        objectConnectors.forEach(function(_c) {
+            _c.refresh();
+        });
+    };
 
     /**
      * @param {Number} _scaleFactor
@@ -303,9 +309,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         obj.translate(mx, my);
 
         // refresh connectors
-        objectConnectors.forEach(function(_c) {
-            _c.refresh();
-        });
+        refreshAllConnectors();
     };
 
     /**
@@ -359,9 +363,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
                 obj.resize(newWidth, newHeight);
 
                 // refresh connectors
-                objectConnectors.forEach(function(_c) {
-                    _c.refresh();
-                });
+                refreshAllConnectors();
 
                 _handleCanvasInteraction('object-resized', obj);
             }
