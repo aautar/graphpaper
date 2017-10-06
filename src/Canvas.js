@@ -194,6 +194,20 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     };
 
     /**
+     * @param {String} _id
+     * @returns {Connector|null}
+     */    
+    this.getConnector = function(_id) {
+        for(let c=0; c<objectConnectors.length; c++) {
+            if(objectConnectors[c].getId() === _id) {
+                return objectConnectors[c];
+            }
+        }
+
+        return null;
+    };
+
+    /**
      * @param {ConnectorAnchor} _anchor
      */
     this.addConnectionAnchorToSelectionStack = function(_anchor) {
@@ -201,15 +215,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
         if(connectorAnchorsSelected.length === 2) {
             const newConnector = new Connector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement);
+            const foundConnector = self.getConnector(newConnector.getId());
 
-            for(let c=0; c<objectConnectors.length; c++) {
-                if(objectConnectors[c].getId() === newConnector.getId()) {
-                    connectorAnchorsSelected.length = 0;
-                    return;
-                }
+            connectorAnchorsSelected.length = 0;
+            if(foundConnector === null) {
+                objectConnectors.push(newConnector);
+                newConnector.appendPathToContainerDomElement();
             }
-
-            objectConnectors.push(newConnector);
         }
     };
 

@@ -15,7 +15,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement) {
     pathElem.style.stroke = "#000"; 
     pathElem.style.strokeWidth = "2px";         
 
-    const svgDomElem = _containerDomElement.appendChild(pathElem);
+    var svgDomElem = null;
+    this.appendPathToContainerDomElement = function() {
+        svgDomElem = _containerDomElement.appendChild(pathElem);
+    };
 
     this.refresh = function() {
         const startCoordString = _anchorStart.getX() + "," + _anchorStart.getY();
