@@ -23,6 +23,11 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement) {
         pathElem.setAttribute("d", 'M' + startCoordString + ' L' + endCoordString);
     };
 
+    this.getId = function() {
+        const objIds = [_anchorStart.getObjectId(), _anchorEnd.getObjectId()].sort();
+        return  objIds.join(':');
+    };
+
     self.refresh();
 };
 

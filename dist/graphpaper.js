@@ -193,6 +193,11 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement) {
         pathElem.setAttribute("d", 'M' + startCoordString + ' L' + endCoordString);
     };
 
+    this.getId = function() {
+        const objIds = [_anchorStart.getObjectId(), _anchorEnd.getObjectId()].sort();
+        return  objIds.join(':');
+    };
+
     self.refresh();
 }
 
@@ -200,12 +205,12 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement) {
  * 
  * @param {Element} _canvasDomElement 
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction) {
+function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
     const self = this;
     const GRID_SIZE = 12.0;
 
-    const svgElem = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const svgElem = _window.document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgElem.style.width = "100%";
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
@@ -393,8 +398,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         connectorAnchorsSelected.push(_anchor);
 
         if(connectorAnchorsSelected.length === 2) {
-            objectConnectors.push(new Connector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement));
-            connectorAnchorsSelected.length = 0;
+            const newConnector = new Connector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement);
+
+            for(let c=0; c<objectConnectors.length; c++) {
+                if(objectConnectors[c].getId() === newConnector.getId()) {
+                    connectorAnchorsSelected.length = 0;
+                    return;
+                }
+            }
+
+            objectConnectors.push(newConnector);
         }
     };
 
