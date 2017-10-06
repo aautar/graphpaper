@@ -7,12 +7,12 @@ import  {Connector} from './Connector';
  * 
  * @param {Element} _canvasDomElement 
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction) {
+function Canvas(_canvasDomElement, _handleCanvasInteraction, _document) {
 
     const self = this;
     const GRID_SIZE = 12.0;
 
-    const svgElem = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const svgElem = _document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgElem.style.width = "100%";
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
