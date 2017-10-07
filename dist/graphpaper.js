@@ -258,7 +258,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         });
     };
 
-    var connectorFactory = function(_anchorStart, _anchorEnd, _containerDomElement) {
+    var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {
         return new Connector(_anchorStart, _anchorEnd, _containerDomElement);
     };
 
@@ -273,7 +273,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {ConnectorFactory} _connectorFactory
      */
     this.setConnectorFactory = function(_newConnectorFactory) {
-        connectorFactory = _newConnectorFactory;
+        makeNewConnector = _newConnectorFactory;
     };    
 
     /**
@@ -438,7 +438,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         connectorAnchorsSelected.push(_anchor);
 
         if(connectorAnchorsSelected.length === 2) {
-            const newConnector = connectorFactory(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement);
+            const newConnector = makeNewConnector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement);
             const foundConnector = self.getConnector(newConnector.getId());
 
             connectorAnchorsSelected.length = 0;
