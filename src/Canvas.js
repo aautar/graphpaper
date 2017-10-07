@@ -1,16 +1,26 @@
 import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
+import  {Connector} from './Connector';
 
 /**
+ * @callback HandleCanvasInteractionCallback
+ * @param {String} interactionType
+ * @param {Object} interactionData
  * 
  * @param {Element} _canvasDomElement 
+ * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
+ * @param {Window} _window
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction) {
+function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
-    var self = this;
-    
+    const self = this;
     const GRID_SIZE = 12.0;
+
+    const svgElem = _window.document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgElem.style.width = "100%";
+    svgElem.style.height = "100%";
+    const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
 
     /**
      * @returns {Number}
@@ -20,7 +30,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     }
 
     var useTranslate3d = false; // better performance w/o it
-    var canvasObjects = [];
+    const canvasObjects = [];
+    const objectConnectors = [];
 
     this.objectIdBeingDragged = null;
     this.objectIdBeingResized = null;
@@ -38,6 +49,31 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
 
     var scaleFactor = 1.0;
     var invScaleFactor = 1.0;
+
+    const connectorAnchorsSelected = [];
+    const refreshAllConnectors = function() {
+        objectConnectors.forEach(function(_c) {
+            _c.refresh();
+        });
+    };
+
+    var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {
+        return new Connector(_anchorStart, _anchorEnd, _containerDomElement);
+    };
+
+    /**
+     * @callback ConnectorFactory
+     * @param {ConnectorAnchor} _anchorStart
+     * @param {ConnectorAnchor} _anchorEnd
+     * @param {Element} _containerDomElement
+     */
+
+    /**
+     * @param {ConnectorFactory} _connectorFactory
+     */
+    this.setConnectorFactory = function(_newConnectorFactory) {
+        makeNewConnector = _newConnectorFactory;
+    };    
 
     /**
      * @param {Number} _scaleFactor
@@ -181,6 +217,38 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
     };
 
     /**
+     * @param {String} _id
+     * @returns {Connector|null}
+     */    
+    this.getConnector = function(_id) {
+        for(let c=0; c<objectConnectors.length; c++) {
+            if(objectConnectors[c].getId() === _id) {
+                return objectConnectors[c];
+            }
+        }
+
+        return null;
+    };
+
+    /**
+     * @param {ConnectorAnchor} _anchor
+     */
+    this.addConnectionAnchorToSelectionStack = function(_anchor) {
+        connectorAnchorsSelected.push(_anchor);
+
+        if(connectorAnchorsSelected.length === 2) {
+            const newConnector = makeNewConnector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement);
+            const foundConnector = self.getConnector(newConnector.getId());
+
+            connectorAnchorsSelected.length = 0;
+            if(foundConnector === null) {
+                objectConnectors.push(newConnector);
+                newConnector.appendPathToContainerDomElement();
+            }
+        }
+    };
+
+    /**
      * @param {Number} _posX 
      * @param {Number} _posY 
      */
@@ -282,6 +350,9 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
         self.objectDragY = my;		
 
         obj.translate(mx, my);
+
+        // refresh connectors
+        refreshAllConnectors();
     };
 
     /**
@@ -333,6 +404,10 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction) {
                 var newHeight = ((my - top)+1);
 
                 obj.resize(newWidth, newHeight);
+
+                // refresh connectors
+                refreshAllConnectors();
+
                 _handleCanvasInteraction('object-resized', obj);
             }
         });

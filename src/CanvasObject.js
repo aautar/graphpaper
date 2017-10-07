@@ -1,6 +1,7 @@
 import {Point} from './Point';
 import {Rectangle} from './Rectangle';
 import {Canvas} from './Canvas';
+import {ConnectorAnchor} from './ConnectorAnchor';
 
 /**
  * 
@@ -16,7 +17,9 @@ import {Canvas} from './Canvas';
  */
 function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
 
-    var self = this;
+    const self = this;
+
+    const connectorAnchors = [];
 
     this.id = _id;
     this.x = _x;
@@ -26,6 +29,21 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.domElement = _domElement;
     this.isDeleted = false;
     this.touchInternalContactPt = null;
+
+
+    /**
+     * @param {Element} _connectorAnchorDomElement
+     */
+    this.addConnectorAnchor = function(_connectorAnchorDomElement) {
+
+        const anchor = new ConnectorAnchor(_connectorAnchorDomElement, self);
+
+        _connectorAnchorDomElement.addEventListener('click', function(e) {
+            _canvas.addConnectionAnchorToSelectionStack(anchor);
+        });
+
+        connectorAnchors.push(anchor);
+    };
 
     /**
      * @returns {Number}

@@ -23,14 +23,33 @@ describe("Canvas", function() {
         return o;
     };
 
+  const canvasDomElement = {
+    appendChild: () => {}
+  };
+
+  const document = {
+    createElementNS: () => { 
+      return { 
+        "style": {
+          "width": null,
+          "height": null
+        }
+      };
+    }
+  };
+
+  const window = {
+    document: document
+  };
+
   it("snapToGrid snaps coordinate to grid", function() {
-    const canvas = new Canvas({}, {});
+    const canvas = new Canvas(canvasDomElement, {}, window);
     const snappedValue = canvas.snapToGrid(13);
     expect(snappedValue).toBe(canvas.getGridSize() - 1);
   });
 
   it("getObjectById returns added object", function() {
-    const canvas = new Canvas({}, {});
+    const canvas = new Canvas(canvasDomElement, {}, window);
     var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
     canvas.addObject(o);
 
@@ -39,7 +58,7 @@ describe("Canvas", function() {
   });
 
   it("getObjectById returns null for missing object", function() {
-    const canvas = new Canvas({}, {});
+    const canvas = new Canvas(canvasDomElement, {}, window);
 
     var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
     canvas.addObject(o);
@@ -49,7 +68,7 @@ describe("Canvas", function() {
   });  
 
   it("getObjectsAroundPoint returns nearby object within box-radius of 1px", function() {
-    const canvas = new Canvas({}, {});
+    const canvas = new Canvas(canvasDomElement, {}, window);
 
     var mockDomElem = {
       addEventListener: function() { }
@@ -66,7 +85,8 @@ describe("Canvas", function() {
 
 
   it("getObjectsAroundPoint does not return objects outside box-radius of 1px", function() {
-    const canvas = new Canvas({}, {});
+    
+    const canvas = new Canvas(canvasDomElement, {}, window);
 
     var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
     canvas.addObject(o);
