@@ -205,8 +205,13 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement) {
 }
 
 /**
+ * @callback HandleCanvasInteractionCallback
+ * @param {String} interactionType
+ * @param {Object} interactionData
  * 
  * @param {Element} _canvasDomElement 
+ * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
+ * @param {Window} _window
  */
 function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
@@ -252,6 +257,24 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             _c.refresh();
         });
     };
+
+    var connectorFactory = function(_anchorStart, _anchorEnd, _containerDomElement) {
+        return new Connector(_anchorStart, _anchorEnd, _containerDomElement);
+    };
+
+    /**
+     * @callback ConnectorFactory
+     * @param {ConnectorAnchor} _anchorStart
+     * @param {ConnectorAnchor} _anchorEnd
+     * @param {Element} _containerDomElement
+     */
+
+    /**
+     * @param {ConnectorFactory} _connectorFactory
+     */
+    this.setConnectorFactory = function(_newConnectorFactory) {
+        connectorFactory = _newConnectorFactory;
+    };    
 
     /**
      * @param {Number} _scaleFactor
@@ -415,7 +438,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         connectorAnchorsSelected.push(_anchor);
 
         if(connectorAnchorsSelected.length === 2) {
-            const newConnector = new Connector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement);
+            const newConnector = connectorFactory(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement);
             const foundConnector = self.getConnector(newConnector.getId());
 
             connectorAnchorsSelected.length = 0;
