@@ -5,3 +5,5 @@ export * from './CanvasObject';
 export * from './Canvas';
 export * from './Cluster';
 export * from './BoxClusterDetector';
+export * from './Connector';
+export * from './ConnectorAnchor';

@@ -1194,5 +1194,7 @@ exports.CanvasObject = CanvasObject;
 exports.Canvas = Canvas;
 exports.Cluster = Cluster;
 exports.BoxClusterDetector = BoxClusterDetector;
+exports.Connector = Connector;
+exports.ConnectorAnchor = ConnectorAnchor;
 
 }((this.GraphPaper = this.GraphPaper || {})));
