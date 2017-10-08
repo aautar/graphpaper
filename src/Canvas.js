@@ -2,12 +2,15 @@ import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
 import  {Connector} from './Connector';
+import  {GRID_STYLE, Grid} from './Grid';
 
 /**
  * @callback HandleCanvasInteractionCallback
  * @param {String} interactionType
  * @param {Object} interactionData
- * 
+ */ 
+
+ /**
  * @param {Element} _canvasDomElement 
  * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
@@ -15,19 +18,39 @@ import  {Connector} from './Connector';
 function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
     const self = this;
-    const GRID_SIZE = 12.0;
 
+    // Create container for SVG connectors
     const svgElem = _window.document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgElem.style.width = "100%";
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
 
     /**
+     * @type {Grid}
+     */
+    var grid = null;
+
+    /**
+     * @param {Grid} _grid
+     */
+    this.setGrid = function(_grid) {
+        grid = _grid;
+        _canvasDomElement.style.background = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "') repeat";
+    }(new Grid(12.0, '#424242', GRID_STYLE.DOT));
+
+    /**
+     * @returns {Grid}
+     */
+    this.getGrid = function() {
+        return grid;
+    };
+
+    /**
      * @returns {Number}
      */
     this.getGridSize = function() {
-        return GRID_SIZE;
-    }
+        return grid.getSize();
+    };
 
     var useTranslate3d = false; // better performance w/o it
     const canvasObjects = [];

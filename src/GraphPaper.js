@@ -7,3 +7,4 @@ export * from './Cluster';
 export * from './BoxClusterDetector';
 export * from './Connector';
 export * from './ConnectorAnchor';
+export * from './Grid';

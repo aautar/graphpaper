@@ -212,11 +212,45 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     self.refresh();
 }
 
+const GRID_STYLE = {
+    LINE: 'line',
+    DOT: 'dot'
+};
+
+/**
+ * 
+ * @param {Number} _size
+ * @param {String} _color
+ * @param {String} _style
+ */
+function Grid(_size, _color, _style) {
+
+    this.getSize = function() {
+        return _size;
+    };
+
+    this.getStyle = function() {
+        return _style;
+    };
+
+    this.getSvgImageTile = function() {
+
+        if(_style === GRID_STYLE.LINE) {
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="' + _size + '" height="' + _size + '"><rect width="12" height="1" x="0" y="11" style="fill:' + _color + '" /><rect width="1" height="12" x="11" y="0" style="fill:' + _color + '" /></svg>';
+        } else {
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="' + _size + '" height="' + _size + '"><rect width="1" height="1" x="11" y="11" style="fill:' + _color + '" /></svg>';
+        }
+    };
+
+}
+
 /**
  * @callback HandleCanvasInteractionCallback
  * @param {String} interactionType
  * @param {Object} interactionData
- * 
+ */ 
+
+ /**
  * @param {Element} _canvasDomElement 
  * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
@@ -224,18 +258,38 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
     const self = this;
-    const GRID_SIZE = 12.0;
 
+    // Create container for SVG connectors
     const svgElem = _window.document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgElem.style.width = "100%";
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
 
     /**
+     * @type {Grid}
+     */
+    var grid = null;
+
+    /**
+     * @param {Grid} _grid
+     */
+    this.setGrid = function(_grid) {
+        grid = _grid;
+        _canvasDomElement.style.background = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "') repeat";
+    }(new Grid(12.0, '#424242', GRID_STYLE.DOT));
+
+    /**
+     * @returns {Grid}
+     */
+    this.getGrid = function() {
+        return grid;
+    };
+
+    /**
      * @returns {Number}
      */
     this.getGridSize = function() {
-        return GRID_SIZE;
+        return grid.getSize();
     };
 
     var useTranslate3d = false; // better performance w/o it
@@ -1196,5 +1250,7 @@ exports.Cluster = Cluster;
 exports.BoxClusterDetector = BoxClusterDetector;
 exports.Connector = Connector;
 exports.ConnectorAnchor = ConnectorAnchor;
+exports.GRID_STYLE = GRID_STYLE;
+exports.Grid = Grid;
 
 }((this.GraphPaper = this.GraphPaper || {})));
