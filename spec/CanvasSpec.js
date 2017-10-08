@@ -24,7 +24,10 @@ describe("Canvas", function() {
     };
 
   const canvasDomElement = {
-    appendChild: () => {}
+    appendChild: () => {},
+    style: {
+      background: ""
+    }    
   };
 
   const document = {
@@ -39,7 +42,8 @@ describe("Canvas", function() {
   };
 
   const window = {
-    document: document
+    document: document,
+    btoa: function() { },
   };
 
   it("snapToGrid snaps coordinate to grid", function() {
