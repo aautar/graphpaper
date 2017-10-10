@@ -234,7 +234,6 @@ function Grid(_size, _color, _style) {
     };
 
     this.getSvgImageTile = function() {
-
         if(_style === GRID_STYLE.LINE) {
             return '<svg xmlns="http://www.w3.org/2000/svg" width="' + _size + '" height="' + _size + '"><rect width="12" height="1" x="0" y="11" style="fill:' + _color + '" /><rect width="1" height="12" x="11" y="0" style="fill:' + _color + '" /></svg>';
         } else {
@@ -276,7 +275,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     this.setGrid = function(_grid) {
         grid = _grid;
         _canvasDomElement.style.background = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "') repeat";
-    }(new Grid(12.0, '#424242', GRID_STYLE.DOT));
+    };
+    self.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
 
     /**
      * @returns {Grid}

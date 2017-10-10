@@ -36,7 +36,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     this.setGrid = function(_grid) {
         grid = _grid;
         _canvasDomElement.style.background = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "') repeat";
-    }(new Grid(12.0, '#424242', GRID_STYLE.DOT));
+    };
+    self.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
 
     /**
      * @returns {Grid}

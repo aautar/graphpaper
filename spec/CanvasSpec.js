@@ -1,5 +1,6 @@
 import {Canvas} from '../src/Canvas.js';
 import {CanvasObject} from '../src/CanvasObject.js';
+import {GRID_STYLE,Grid} from '../src/Grid.js';
 
 describe("Canvas", function() {
 
@@ -43,7 +44,9 @@ describe("Canvas", function() {
 
   const window = {
     document: document,
-    btoa: function() { },
+    btoa: function() { 
+      return "a";
+    },
   };
 
   it("snapToGrid snaps coordinate to grid", function() {
@@ -99,4 +102,13 @@ describe("Canvas", function() {
     expect(retunedCanvasObjects.length).toBe(0);
   });      
 
+  it("setGrid sets the repeating tile, grid, background on the Canvas DOM element", function() {
+    
+    const canvas = new Canvas(canvasDomElement, {}, window);
+    canvas.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
+
+    expect(canvasDomElement.style.background).toBe("url('data:image/svg+xml;base64,a') repeat");
+  });
+
 });
+

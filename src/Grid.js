@@ -20,7 +20,6 @@ function Grid(_size, _color, _style) {
     };
 
     this.getSvgImageTile = function() {
-
         if(_style === GRID_STYLE.LINE) {
             return '<svg xmlns="http://www.w3.org/2000/svg" width="' + _size + '" height="' + _size + '"><rect width="12" height="1" x="0" y="11" style="fill:' + _color + '" /><rect width="1" height="12" x="11" y="0" style="fill:' + _color + '" /></svg>';
         } else {
