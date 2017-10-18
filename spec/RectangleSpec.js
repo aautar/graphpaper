@@ -39,3 +39,29 @@ describe("Rectangle", function() {
   });   
 
 });
+
+describe("Rectangle.getProjectedPoints", function() {
+  it("returns 4 projected points", function() {
+    const r = new Rectangle(25, 25, 50, 50);
+    const rPoints = r.getProjectedPoints(2.0);
+
+    expect(rPoints.length).toBe(4);
+  });
+
+  it("returns projected points in clockwise order, from top-left", function() {
+    const r = new Rectangle(25, 25, 50, 50);
+    const rPoints = r.getProjectedPoints(2.0);
+
+    expect(rPoints[0].getX()).toBe(23.0);
+    expect(rPoints[0].getY()).toBe(23.0);
+
+    expect(rPoints[1].getX()).toBe(52.0);
+    expect(rPoints[1].getY()).toBe(23.0);    
+
+    expect(rPoints[2].getX()).toBe(52.0);
+    expect(rPoints[2].getY()).toBe(52.0);        
+
+    expect(rPoints[3].getX()).toBe(23.0);
+    expect(rPoints[3].getY()).toBe(52.0);            
+  });  
+});

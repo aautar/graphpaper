@@ -1,3 +1,4 @@
+import {Point} from './Point';
 
 /**
  * 
@@ -35,6 +36,57 @@ function Rectangle(_left, _top, _right, _bottom)  {
     this.getBottom = function() {
         return _bottom;
     };
+
+    /**
+     * @returns {Point[]}
+     */
+    this.getPoints = function() {
+        return [
+            new Point(_left, _top),
+            new Point(_right, _top),
+            new Point(_right, _bottom),
+            new Point(_left, _bottom)
+        ];
+    };
+
+    /**
+     * @param {Number} _gridSize
+     * @returns {Point[]}
+     */
+    this.getProjectedPoints = function(_gridSize) {
+
+        const centroid = new Point(
+            _left + ((_right-_left)*0.5),
+            _top + ((_bottom-_top)*0.5)
+        );
+
+        const scaleDx = ((_right - centroid.getX()) + _gridSize) / (_right - centroid.getX());
+        const scaleDy = ((_bottom - centroid.getY()) + _gridSize) / (_bottom - centroid.getY());        
+       
+        const pointsRelativeToCentroid = [
+            new Point(
+                ((_left - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((_top - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((_right - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((_top - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((_right - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((_bottom - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((_left - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((_bottom - centroid.getY())*scaleDy) + centroid.getY()
+            )
+        ];
+
+        return pointsRelativeToCentroid;
+    };    
 
     /**
      * 
