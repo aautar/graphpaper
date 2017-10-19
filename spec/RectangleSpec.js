@@ -68,17 +68,17 @@ describe("Rectangle.getPoints", function() {
 });
 
 
-describe("Rectangle.getProjectedPoints", function() {
+describe("Rectangle.getPointsScaledToGrid", function() {
   it("returns 4 projected points", function() {
     const r = new Rectangle(25, 25, 50, 50);
-    const rPoints = r.getProjectedPoints(2.0);
+    const rPoints = r.getPointsScaledToGrid(2.0);
 
     expect(rPoints.length).toBe(4);
   });
 
   it("returns projected points in clockwise order, from top-left", function() {
     const r = new Rectangle(25, 25, 50, 50);
-    const rPoints = r.getProjectedPoints(2.0);
+    const rPoints = r.getPointsScaledToGrid(2.0);
 
     expect(rPoints[0].getX()).toBe(23.0);
     expect(rPoints[0].getY()).toBe(23.0);

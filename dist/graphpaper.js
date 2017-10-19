@@ -108,7 +108,7 @@ function Rectangle(_left, _top, _right, _bottom)  {
      * @param {Number} _gridSize
      * @returns {Point[]}
      */
-    this.getProjectedPoints = function(_gridSize) {
+    this.getPointsScaledToGrid = function(_gridSize) {
 
         const centroid = new Point(
             _left + ((_right-_left)*0.5),
