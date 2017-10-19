@@ -25,6 +25,38 @@ function Dimensions(_width, _height) {
 
 /**
  * 
+ * @param {Number} _x
+ * @param {Number} _y
+ */
+function Point(_x, _y) {
+
+    /**
+     * @returns {Number}
+     */       
+    this.getX = function() {
+        return _x;
+    };
+
+    /**
+     * @returns {Number}
+     */       
+    this.getY = function() {
+        return _y;
+    };
+
+    /**
+     * @returns {Point}
+     */
+    this.getCartesianPoint = function(_canvasWidth, _canvasHeight) {
+        return new Point(
+            _x - (_canvasWidth * 0.5),
+            -_y + (_canvasHeight * 0.5)
+        );
+    };
+}
+
+/**
+ * 
  * @param {Number} _left
  * @param {Number} _top
  * @param {Number} _right
@@ -59,6 +91,57 @@ function Rectangle(_left, _top, _right, _bottom)  {
     this.getBottom = function() {
         return _bottom;
     };
+
+    /**
+     * @returns {Point[]}
+     */
+    this.getPoints = function() {
+        return [
+            new Point(_left, _top),
+            new Point(_right, _top),
+            new Point(_right, _bottom),
+            new Point(_left, _bottom)
+        ];
+    };
+
+    /**
+     * @param {Number} _gridSize
+     * @returns {Point[]}
+     */
+    this.getPointsScaledToGrid = function(_gridSize) {
+
+        const centroid = new Point(
+            _left + ((_right-_left)*0.5),
+            _top + ((_bottom-_top)*0.5)
+        );
+
+        const scaleDx = ((_right - centroid.getX()) + _gridSize) / (_right - centroid.getX());
+        const scaleDy = ((_bottom - centroid.getY()) + _gridSize) / (_bottom - centroid.getY());        
+       
+        const pointsRelativeToCentroid = [
+            new Point(
+                ((_left - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((_top - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((_right - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((_top - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((_right - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((_bottom - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((_left - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((_bottom - centroid.getY())*scaleDy) + centroid.getY()
+            )
+        ];
+
+        return pointsRelativeToCentroid;
+    };    
 
     /**
      * 
@@ -101,28 +184,6 @@ function Rectangle(_left, _top, _right, _bottom)  {
         }
 
         return false;
-    };
-}
-
-/**
- * 
- * @param {Number} _x
- * @param {Number} _y
- */
-function Point(_x, _y) {
-
-    /**
-     * @returns {Number}
-     */       
-    this.getX = function() {
-        return _x;
-    };
-
-    /**
-     * @returns {Number}
-     */       
-    this.getY = function() {
-        return _y;
     };
 }
 
@@ -730,10 +791,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     const connectorAnchors = [];
 
     this.id = _id;
-    this.x = _x;
-    this.y = _y;
-    this.width = _width;
-    this.height = _height;
+    this.x = parseInt(_x);
+    this.y = parseInt(_y);
+    this.width = parseInt(_width);
+    this.height = parseInt(_height);
     this.domElement = _domElement;
     this.isDeleted = false;
     this.touchInternalContactPt = null;
@@ -881,6 +942,23 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         var bottom = top + parseInt(self.height);
 
         return new Rectangle(left, top, right, bottom);
+    };
+
+    /**
+     * @returns {Point[]}
+     */
+    this.getBoundingPoints = function() {
+        const topLeft = new Point(self.getX(), self.getY());
+        const topRight = new Point(self.getX() + self.getWidth(), self.getY());
+        const bottomLeft = new Point(self.getX(), self.getY() + self.getWidth());
+        const bottomRight = new Point(self.getX() + self.getWidth(), self.getY() + self.getWidth());
+
+        return [
+            topLeft,
+            topRight,
+            bottomLeft,
+            bottomRight
+        ];
     };
 
     var translateStart = function(e) {

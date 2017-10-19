@@ -22,10 +22,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     const connectorAnchors = [];
 
     this.id = _id;
-    this.x = _x;
-    this.y = _y;
-    this.width = _width;
-    this.height = _height;
+    this.x = parseInt(_x);
+    this.y = parseInt(_y);
+    this.width = parseInt(_width);
+    this.height = parseInt(_height);
     this.domElement = _domElement;
     this.isDeleted = false;
     this.touchInternalContactPt = null;
@@ -173,6 +173,23 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         var bottom = top + parseInt(self.height);
 
         return new Rectangle(left, top, right, bottom);
+    };
+
+    /**
+     * @returns {Point[]}
+     */
+    this.getBoundingPoints = function() {
+        const topLeft = new Point(self.getX(), self.getY());
+        const topRight = new Point(self.getX() + self.getWidth(), self.getY());
+        const bottomLeft = new Point(self.getX(), self.getY() + self.getWidth());
+        const bottomRight = new Point(self.getX() + self.getWidth(), self.getY() + self.getWidth());
+
+        return [
+            topLeft,
+            topRight,
+            bottomLeft,
+            bottomRight
+        ];
     };
 
     var translateStart = function(e) {
