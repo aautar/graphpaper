@@ -273,6 +273,21 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     };
 
     /**
+     * @returns {Array}
+     */
+    this.getConnectorRoutingPoints = function() {
+        const points = [];
+
+        canvasObjects.forEach(function(_obj) {
+            points.push(
+                ..._obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize())
+            );
+        });
+
+        return points;
+    };
+
+    /**
      * @param {Number} _posX 
      * @param {Number} _posY 
      */
