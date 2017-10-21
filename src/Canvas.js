@@ -279,9 +279,21 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         const points = [];
 
         canvasObjects.forEach(function(_obj) {
-            points.push(
-                ..._obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize())
-            );
+
+            const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
+
+            scaledPoints.forEach(function(_sp) {
+                var alreadyInPointsArray = false;
+                points.forEach(function(_p) {
+                    if(_sp.getX() === _p.getX() && _sp.getY() === _p.getY()) {
+                        alreadyInPointsArray = true;
+                    }
+                });
+
+                if(!alreadyInPointsArray) {
+                    points.push(_sp);
+                }
+            });
         });
 
         return points;
