@@ -1,6 +1,7 @@
 import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
+import  {PointSet} from './PointSet';
 import  {Connector} from './Connector';
 import  {GRID_STYLE, Grid} from './Grid';
 
@@ -276,27 +277,18 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @returns {Array}
      */
     this.getConnectorRoutingPoints = function() {
-        const points = [];
+        const pointSet = new PointSet();
 
         canvasObjects.forEach(function(_obj) {
 
             const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
 
-            scaledPoints.forEach(function(_sp) {
-                var alreadyInPointsArray = false;
-                points.forEach(function(_p) {
-                    if(_sp.getX() === _p.getX() && _sp.getY() === _p.getY()) {
-                        alreadyInPointsArray = true;
-                    }
-                });
-
-                if(!alreadyInPointsArray) {
-                    points.push(_sp);
-                }
+            scaledPoints.forEach((_sp) => {
+                pointSet.push(_sp);
             });
         });
 
-        return points;
+        return pointSet.toArray();
     };
 
     /**
