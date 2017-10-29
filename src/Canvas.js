@@ -280,7 +280,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         const pointSet = new PointSet();
 
         canvasObjects.forEach(function(_obj) {
-
             const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
 
             scaledPoints.forEach((_sp) => {
