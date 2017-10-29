@@ -24,7 +24,7 @@ function LineIntersection(_type, _intersectionPoint) {
     /**
      * @returns {Point|null}
      */
-    this.getIntersectionPoint() = function {
+    this.getIntersectionPoint = function() {
         return _intersectionPoint;
     };
 };
