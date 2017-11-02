@@ -93,3 +93,32 @@ describe("Rectangle.getPointsScaledToGrid", function() {
     expect(rPoints[3].getY()).toBe(52.0);            
   });  
 });
+
+describe("Rectangle.getLines", function() {
+  it("returns Line objects", function() {
+    const r = new Rectangle(25, 25, 50, 50);
+    const lines = r.getLines();
+
+    expect(lines[0].getStartPoint().getX()).toBe(25);
+    expect(lines[0].getStartPoint().getY()).toBe(25);
+    expect(lines[0].getEndPoint().getX()).toBe(50);
+    expect(lines[0].getEndPoint().getY()).toBe(25);    
+
+    expect(lines[1].getStartPoint().getX()).toBe(50);
+    expect(lines[1].getStartPoint().getY()).toBe(25);
+    expect(lines[1].getEndPoint().getX()).toBe(50);
+    expect(lines[1].getEndPoint().getY()).toBe(50);        
+
+    expect(lines[2].getStartPoint().getX()).toBe(50);
+    expect(lines[2].getStartPoint().getY()).toBe(50);
+    expect(lines[2].getEndPoint().getX()).toBe(25);
+    expect(lines[2].getEndPoint().getY()).toBe(50);        
+
+    expect(lines[3].getStartPoint().getX()).toBe(25);
+    expect(lines[3].getStartPoint().getY()).toBe(50);
+    expect(lines[3].getEndPoint().getX()).toBe(25);
+    expect(lines[3].getEndPoint().getY()).toBe(25);
+
+    expect(lines.length).toBe(4);
+  });
+});
