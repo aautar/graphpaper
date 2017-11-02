@@ -1,4 +1,5 @@
 import {Point} from './Point';
+import {Line} from './Line';
 
 /**
  * 
@@ -46,6 +47,18 @@ function Rectangle(_left, _top, _right, _bottom)  {
             new Point(_right, _top),
             new Point(_right, _bottom),
             new Point(_left, _bottom)
+        ];
+    };
+
+    /**
+     * @returns {Line[]}
+     */
+    this.getLines = function() {
+        return [
+            new Line(new Point(_left, _top), new Point(_right, _top)),
+            new Line(new Point(_right, _top), new Point(_right, _bottom)),
+            new Line(new Point(_right, _bottom), new Point(_left, _bottom)),
+            new Line(new Point(_left, _bottom), new Point(_left, _top))
         ];
     };
 
