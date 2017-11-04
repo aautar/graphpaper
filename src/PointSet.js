@@ -16,7 +16,7 @@ function PointSet() {
     this.push = function(_newPoint) {
         var alreadyInPointsArray = false;
         points.forEach(function(_existingPoint) {
-            if(_newPoint.getX() === _existingPoint.getX() && _newPoint.getY() === _existingPoint.getY()) {
+            if(_newPoint.isEqual(_existingPoint)) {
                 alreadyInPointsArray = true;
             }
         });        
