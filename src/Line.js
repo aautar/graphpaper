@@ -22,6 +22,15 @@ function Line(_startPoint, _endPoint) {
     };
 
     /**
+     * @returns {Number}
+     */
+    this.getLength = function() {
+        return Math.sqrt(
+            Math.pow(_endPoint.getX() - _startPoint.getX(), 2) + Math.pow(_endPoint.getY() - _startPoint.getY(), 2)
+        );
+    };
+
+    /**
      * @param {Line} _otherLine
      * @returns {LINE_INTERSECTION_RESULT}
      */

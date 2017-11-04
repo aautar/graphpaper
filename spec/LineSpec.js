@@ -2,6 +2,13 @@ import {Point} from '../src/Point'
 import {Line} from '../src/Line'
 import {LINE_INTERSECTION_TYPE, LineIntersection} from '../src/LineIntersection'
 
+describe("Line.getLength", function() {
+  it("returns distance of the line segment", function() {
+    const line = new Line(new Point(0,0), new Point(0,100));
+    expect(line.getLength()).toBe(100.0);
+  });
+});
+
 describe("Line.computeIntersection", function() {
  
   it("returns LINE_INTERSECTION_TYPE.LINESEG intersection type for intersection on line", function() {
