@@ -19,3 +19,18 @@ describe("PointSet.push", function() {
   });
 
 });
+
+describe("Point constructor", function() {  
+  it("takes array of Point objects", function() {
+    const ps = new PointSet([
+      new Point(-100, 200),
+      new Point(-100, 200)
+    ]);
+
+    const pointSetArray = ps.toArray();
+
+    expect(pointSetArray.length).toBe(1);
+    expect(pointSetArray[0].getX()).toBe(-100);
+    expect(pointSetArray[0].getY()).toBe(200);
+  });  
+});
