@@ -40,6 +40,13 @@ function Point(_x, _y) {
             -_y + (_canvasHeight * 0.5)
         );
     };
+
+    /**
+     * @returns {String}
+     */
+    this.toString = function() {
+        return _x + "," + _y;
+    };
 };
 
 export { Point };

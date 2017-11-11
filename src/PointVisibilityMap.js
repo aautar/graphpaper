@@ -10,6 +10,8 @@ import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
  */
 function PointVisibilityMap(_freePoints, _boundaryLines) {
 
+    const self = this;
+
     /**
      * @type Map<Point,Point[]>
      */
@@ -40,6 +42,9 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         }
 
         for(let i=0; i<freePointsArray.length; i++) {
+            
+            pointToVisiblePointSet.set(freePointsArray[i], []);
+
             for(let j=0; j<freePointsArray.length; j++) {
                 if(i===j) {
                     continue;
@@ -49,20 +54,81 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
                 const ijLine = new Line(freePointsArray[i], freePointsArray[j]);
 
                 if(!doesLineIntersectAnyBoundaryLines(ijLine)) {
-                    if(pointToVisiblePointSet.has(freePointsArray[i])) {
-                        pointToVisiblePointSet.set(
-                            freePointsArray[i], 
-                            pointToVisiblePointSet.get(freePointsArray[i]).append(freePointsArray[j])
-                        );
-                    } else {
-                        pointToVisiblePointSet.set(freePointsArray[i], [freePointsArray[j]]);
-                    }
-                    
+                    const visiblePoints = pointToVisiblePointSet.get(freePointsArray[i]);
+                    visiblePoints.push(freePointsArray[j]);
+
+                    pointToVisiblePointSet.set(
+                        freePointsArray[i], 
+                        visiblePoints
+                    );
                 }
             }
         }
     };
 
+    /**
+     * 
+     * @param {Map<Point,Number>} _visiblePointToCost 
+     */
+    const getMinimumCostPointFromMap = function(_visiblePointToCost) {
+        var minCost = Number.MAX_SAFE_INTEGER;
+        var pointWithMinCost = null;
+        for (var [_vp, _cost] of _visiblePointToCost.entries()) {
+            if(_cost < minCost) {
+                pointWithMinCost = _vp;
+            }
+        }
+
+        if (pointWithMinCost === null) {
+            return null;
+        }
+
+        return {
+            "cost": minCost,
+            "point": pointWithMinCost
+        };
+    };
+
+    /**
+     * 
+     * @param {Number} _currentRouteLength 
+     * @param {Point[]} _pointsInRoute 
+     * @param {Point} _currentPoint 
+     * @param {Point} _endPoint 
+     */
+    const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPoint, _endPoint) {
+
+        const visiblePointToCost = new Map();
+        var visiblePoints = pointToVisiblePointSet.get(_currentPoint);
+
+        // filter out _pointsInRoute
+        visiblePoints = visiblePoints.filter(function(_vp) {
+            for(let i=0; i<_pointsInRoute.length; i++) {
+                if(_vp.isEqual(_pointsInRoute[i])) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        
+
+        visiblePoints.forEach(function(_vp) {
+            // g(n) = length/cost of _startPoint to _vp + _currentRouteLength
+            const gn = (new Line(_currentPoint, _vp)).getLength() + _currentRouteLength;
+
+            // h(n) = length/cost of _vp to _endPoint
+            const hn = (new Line(_vp, _endPoint)).getLength();
+
+            visiblePointToCost.set(_vp, gn + hn);
+        });
+
+        const nextPoint = getMinimumCostPointFromMap(visiblePointToCost);
+        if(nextPoint === null) {
+            return null;
+        }
+
+        return nextPoint;
+    };
 
     /**
      * @param {Point} _point
@@ -94,21 +160,32 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      */
     this.computeRoute = function(_startPoint, _endPoint) {
 
-        const resultSet = new PointSet();
-
-        // if _startPoint has line-of-sight to _endPoint, return PointSet of [_startPoint, _endPoint]
-        if(!doesLineIntersectAnyBoundaryLines(new Line(_startPoint, _endPoint))) {
-            resultSet.push(_startPoint);
-            resultSet.push(_endPoint);
-            return resultSet;
+        // find closest visible point in pointToVisiblePointSet
+        const firstRoutingPoint = self.findVisiblePointClosestTo(_startPoint);
+        if(firstRoutingPoint === null) {
+            return new PointSet();
         }
 
-        // else find closest visible point in pointToVisiblePointSet
+        var currentRouteLen = 0;
+        const pointsInRoute = [firstRoutingPoint];
+        var currentPoint = firstRoutingPoint;
+        while(true) {
+            const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPoint, _endPoint);
+            if(routeSegment === null) {
+                break;
+            }
+
+            currentRouteLen += (new Line(currentPoint, routeSegment.point)).getLength();
+            pointsInRoute.push(routeSegment.point);
+            currentPoint = routeSegment.point;
+        }
+
+
+        return new PointSet(pointsInRoute);
+
     };
 
-
     computePointsVisibility();
-
 };
     
 export { PointVisibilityMap };

@@ -278,10 +278,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      */
     this.getConnectorRoutingPoints = function() {
         const pointSet = new PointSet();
-
         canvasObjects.forEach(function(_obj) {
             const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
-
             scaledPoints.forEach((_sp) => {
                 pointSet.push(_sp);
             });
