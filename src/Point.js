@@ -20,6 +20,18 @@ function Point(_x, _y) {
     };
 
     /**
+     * @param {Point} _otherPoint
+     * @returns {Boolean}
+     */
+    this.isEqual = function(_otherPoint) {
+        if(_x === _otherPoint.getX() && _y === _otherPoint.getY()) {
+            return true;
+        }
+
+        return false;
+    };
+
+    /**
      * @returns {Point}
      */
     this.getCartesianPoint = function(_canvasWidth, _canvasHeight) {
@@ -27,6 +39,13 @@ function Point(_x, _y) {
             _x - (_canvasWidth * 0.5),
             -_y + (_canvasHeight * 0.5)
         );
+    };
+
+    /**
+     * @returns {String}
+     */
+    this.toString = function() {
+        return _x + "," + _y;
     };
 };
 

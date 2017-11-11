@@ -1,6 +1,7 @@
 import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
+import  {PointSet} from './PointSet';
 import  {Connector} from './Connector';
 import  {GRID_STYLE, Grid} from './Grid';
 
@@ -270,6 +271,21 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
                 newConnector.appendPathToContainerDomElement();
             }
         }
+    };
+
+    /**
+     * @returns {Array}
+     */
+    this.getConnectorRoutingPoints = function() {
+        const pointSet = new PointSet();
+        canvasObjects.forEach(function(_obj) {
+            const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
+            scaledPoints.forEach((_sp) => {
+                pointSet.push(_sp);
+            });
+        });
+
+        return pointSet.toArray();
     };
 
     /**

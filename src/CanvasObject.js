@@ -167,10 +167,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Rectangle}
      */
     this.getBoundingRectange = function() {
-        var left = parseInt(self.x);
-        var top = parseInt(self.y);
-        var right = left + parseInt(self.width);
-        var bottom = top + parseInt(self.height);
+        const left = parseInt(self.x);
+        const top = parseInt(self.y);
+        const right = left + parseInt(self.width);
+        const bottom = top + parseInt(self.height);
 
         return new Rectangle(left, top, right, bottom);
     };

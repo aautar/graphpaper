@@ -1,4 +1,5 @@
 import {Point} from './Point';
+import {Line} from './Line';
 
 /**
  * 
@@ -50,6 +51,18 @@ function Rectangle(_left, _top, _right, _bottom)  {
     };
 
     /**
+     * @returns {Line[]}
+     */
+    this.getLines = function() {
+        return [
+            new Line(new Point(_left, _top), new Point(_right, _top)),
+            new Line(new Point(_right, _top), new Point(_right, _bottom)),
+            new Line(new Point(_right, _bottom), new Point(_left, _bottom)),
+            new Line(new Point(_left, _bottom), new Point(_left, _top))
+        ];
+    };
+
+    /**
      * @param {Number} _gridSize
      * @returns {Point[]}
      */
@@ -63,7 +76,7 @@ function Rectangle(_left, _top, _right, _bottom)  {
         const scaleDx = ((_right - centroid.getX()) + _gridSize) / (_right - centroid.getX());
         const scaleDy = ((_bottom - centroid.getY()) + _gridSize) / (_bottom - centroid.getY());        
        
-        const pointsRelativeToCentroid = [
+        const scaledPoints = [
             new Point(
                 ((_left - centroid.getX())*scaleDx) + centroid.getX(), 
                 ((_top - centroid.getY())*scaleDy) + centroid.getY()
@@ -85,7 +98,7 @@ function Rectangle(_left, _top, _right, _bottom)  {
             )
         ];
 
-        return pointsRelativeToCentroid;
+        return scaledPoints;
     };    
 
     /**
