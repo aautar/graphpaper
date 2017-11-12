@@ -1,3 +1,5 @@
+import  {Point} from './Point';
+
 /**
  * 
  * @param {String} _objectId 
@@ -6,6 +8,8 @@
  */
 function ConnectorAnchor(_domElement, _parentObject) {
     
+    const self = this;
+
     /**
      * @returns {CanvasObject}
      */
@@ -32,6 +36,13 @@ function ConnectorAnchor(_domElement, _parentObject) {
      */     
     this.getY = function() {
         return _parentObject.getY() + _domElement.offsetTop + (_domElement.clientHeight * 0.5);
+    };
+
+    /**
+     * @returns {Point}
+     */
+    this.getPoint = function() {
+        return new Point(self.getX(), self.getY());
     };
 
     /**
