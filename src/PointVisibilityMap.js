@@ -198,6 +198,10 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
             currentRouteLen += (new Line(currentPoint, routeSegment.point)).getLength();
             pointsInRoute.push(routeSegment.point);
             currentPoint = routeSegment.point;
+
+            if((new Line(currentPoint, _endPoint).getLength()) < 1.0) {
+                break;
+            }
         }
 
 
