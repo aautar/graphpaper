@@ -76,6 +76,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         for (var [_vp, _cost] of _visiblePointToCost.entries()) {
             if(_cost < minCost) {
                 pointWithMinCost = _vp;
+                minCost = _cost;
             }
         }
 
@@ -128,6 +129,25 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         }
 
         return nextPoint;
+    };
+
+    /**
+     * @param {Point} _point
+     * @returns {Point|null}
+     */
+    this.findPointClosestTo = function(_point) {
+        var resultPoint = null;
+        var currentMaxLength = Number.MAX_SAFE_INTEGER;
+
+        pointToVisiblePointSet.forEach(function(_visiblePoints, _ptKey) {
+            const lineOfSight = new Line(_point, _ptKey);
+            if(lineOfSight.getLength() < currentMaxLength) {
+                resultPoint = _ptKey;
+                currentMaxLength = lineOfSight.getLength();
+            }
+        });
+        
+        return resultPoint;
     };
 
     /**
