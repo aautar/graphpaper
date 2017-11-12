@@ -1,8 +1,10 @@
 import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
+import  {Line} from './Line';
 import  {PointSet} from './PointSet';
 import  {Connector} from './Connector';
+import  {PointVisibilityMap} from './PointVisibilityMap';
 import  {GRID_STYLE, Grid} from './Grid';
 
 /**
@@ -25,7 +27,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     svgElem.style.width = "100%";
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
-
+   
     /**
      * @type {Grid}
      */
@@ -54,6 +56,15 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         return grid.getSize();
     };
 
+    var currentPointVisiblityMap = null;
+
+    /**
+     * @returns {PointVisibilityMap}
+     */
+    this.getCurrentPointVisibilityMap = function() {
+        return currentPointVisiblityMap;
+    };
+
     var useTranslate3d = false; // better performance w/o it
     const canvasObjects = [];
     const objectConnectors = [];
@@ -76,9 +87,46 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     var invScaleFactor = 1.0;
 
     const connectorAnchorsSelected = [];
+
+
+    /**
+     * @returns {PointSet}
+     */
+    const getConnectorRoutingPoints = function() {
+        const pointSet = new PointSet();
+        canvasObjects.forEach(function(_obj) {
+            const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
+            scaledPoints.forEach((_sp) => {
+                pointSet.push(_sp);
+            });
+        });
+
+        return pointSet;
+    };
+
+    /**
+     * @returns {Line[]}
+     */    
+    const getConnectorBoundaryLines = function() {
+        const boundaryLines = [];
+        canvasObjects.forEach(function(_obj) {
+            const lines = _obj.getBoundingRectange().getLines();
+            lines.forEach((_l) => {
+                boundaryLines.push(_l);
+            });
+        });
+
+        return boundaryLines;
+    };    
+
     const refreshAllConnectors = function() {
+        currentPointVisiblityMap = new PointVisibilityMap(
+            getConnectorRoutingPoints(),
+            getConnectorBoundaryLines()
+        );
+
         objectConnectors.forEach(function(_c) {
-            _c.refresh();
+            _c.refresh(currentPointVisiblityMap);
         });
     };
 
@@ -222,9 +270,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @returns {CanvasObject|null}
      */   
     this.getObjectById = function(_id) {
-        
         var foundObject = null;
-        
         canvasObjects.forEach(function(obj, index, array) {
             if(foundObject === null && obj.getId() === _id) {
                 foundObject = obj;
@@ -239,6 +285,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      */
     this.addObject = function(_obj) {
         canvasObjects.push(_obj);
+        refreshAllConnectors();       
     };
 
     /**
@@ -269,23 +316,9 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             if(foundConnector === null) {
                 objectConnectors.push(newConnector);
                 newConnector.appendPathToContainerDomElement();
+                refreshAllConnectors();
             }
         }
-    };
-
-    /**
-     * @returns {Array}
-     */
-    this.getConnectorRoutingPoints = function() {
-        const pointSet = new PointSet();
-        canvasObjects.forEach(function(_obj) {
-            const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
-            scaledPoints.forEach((_sp) => {
-                pointSet.push(_sp);
-            });
-        });
-
-        return pointSet.toArray();
     };
 
     /**

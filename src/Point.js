@@ -45,7 +45,7 @@ function Point(_x, _y) {
      * @returns {String}
      */
     this.toString = function() {
-        return _x + "," + _y;
+        return _x + " " + _y;
     };
 };
 

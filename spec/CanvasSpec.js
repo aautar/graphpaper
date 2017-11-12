@@ -102,58 +102,6 @@ describe("Canvas", function() {
     expect(retunedCanvasObjects.length).toBe(0);
   });
 
-  it("getConnectorRoutingPoints returns routing points", function() {
-    
-    const canvas = new Canvas(canvasDomElement, {}, window);
-    const o = makeCanvasObject("obj-123", 100, 200, 10, 20);
-    canvas.addObject(o);
-
-    const points = canvas.getConnectorRoutingPoints();
-    expect(points.length).toBe(4);
-
-    expect(points[0].getX()).toBe(88);
-    expect(points[0].getY()).toBe(188);
-
-    expect(points[1].getX()).toBe(122);
-    expect(points[1].getY()).toBe(188);    
-
-    expect(points[2].getX()).toBe(122);
-    expect(points[2].getY()).toBe(232);        
-
-    expect(points[3].getX()).toBe(88);
-    expect(points[3].getY()).toBe(232);        
-  });    
-  
-  it("getConnectorRoutingPoints returns array of unique points", function() {
-    
-    const canvas = new Canvas(canvasDomElement, {}, window);
-    const o1 = makeCanvasObject("obj-123", 100, 200, 10, 20);
-    const o2 = makeCanvasObject("obj-456", 100, 200, 10, 10);
-    canvas.addObject(o1);
-    canvas.addObject(o2);
-
-    const points = canvas.getConnectorRoutingPoints();
-    expect(points.length).toBe(6);
-    
-    expect(points[0].getX()).toBe(88);
-    expect(points[0].getY()).toBe(188);
-
-    expect(points[1].getX()).toBe(122);
-    expect(points[1].getY()).toBe(188);    
-
-    expect(points[2].getX()).toBe(122);
-    expect(points[2].getY()).toBe(232);        
-
-    expect(points[3].getX()).toBe(88);
-    expect(points[3].getY()).toBe(232);        
-
-    expect(points[4].getX()).toBe(122);
-    expect(points[4].getY()).toBe(222);          
-
-    expect(points[5].getX()).toBe(88);
-    expect(points[5].getY()).toBe(222);              
-  });     
-
   it("setGrid sets the repeating tile, grid, background on the Canvas DOM element", function() {
     
     const canvas = new Canvas(canvasDomElement, {}, window);

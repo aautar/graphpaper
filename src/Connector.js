@@ -4,10 +4,9 @@ import  {ConnectorAnchor} from './ConnectorAnchor';
  * 
  * @param {ConnectorAnchor} _anchorStart 
  * @param {ConnectorAnchor} _anchorEnd
- * @param {PointSet} _routingPoints
  * @param {Element} _containerDomElement
  */
-function Connector(_anchorStart, _anchorEnd, _routingPoints, _containerDomElement, _strokeColor, _strokeWidth) {
+function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth) {
     
     const self = this;
 
@@ -38,10 +37,19 @@ function Connector(_anchorStart, _anchorEnd, _routingPoints, _containerDomElemen
         svgDomElem = _containerDomElement.appendChild(pathElem);
     };
 
-    this.refresh = function() {
+    /**
+     * 
+     * @param {PointVisibilityMap} _pointVisibilityMap
+     */
+    this.refresh = function(_pointVisibilityMap) {
+
+        const adjustedStart = _pointVisibilityMap.findPointClosestTo(_anchorStart.getPoint());
+        const adjustedEnd = _pointVisibilityMap.findPointClosestTo(_anchorEnd.getPoint());        
+        const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
+        const routingPointsArray = routingPoints.toArray();
+
         const startCoordString = _anchorStart.getX() + " " + _anchorStart.getY();
 
-        const routingPointsArray = _routingPoints.toArray();
         const lineToString = [];
         routingPointsArray.forEach(function(_rp) {
             lineToString.push(pointToSvgLineTo(_rp));
@@ -56,8 +64,6 @@ function Connector(_anchorStart, _anchorEnd, _routingPoints, _containerDomElemen
         const objIds = [_anchorStart.getObjectId(), _anchorEnd.getObjectId()].sort();
         return  objIds.join(':');
     };
-
-    self.refresh();
 };
 
 export { Connector };
