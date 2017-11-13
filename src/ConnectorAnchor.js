@@ -39,6 +39,20 @@ function ConnectorAnchor(_domElement, _parentObject) {
     };
 
     /**
+     * @returns {Number}
+     */
+    this.getWidth = function() {
+        return _domElement.clientWidth;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.getHeight = function() {
+        return _domElement.clientHeight;
+    };
+
+    /**
      * @returns {Point}
      */
     this.getPoint = function() {
