@@ -101,6 +101,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             });
         });
 
+        canvasObjects.forEach(function(_obj) {
+            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
+            objAnchorRoutingPoints.forEach(function(_rp) {
+                pointSet.push(_rp);
+            });
+        });
+
         return pointSet;
     };
 

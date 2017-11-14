@@ -418,6 +418,19 @@ function ConnectorAnchor(_domElement, _parentObject) {
         return new Point(self.getX(), self.getY());
     };
 
+    this.getRoutingPoints = function(_gridSize) {
+
+        const halfWidth = _domElement.clientWidth * 0.5;
+        const halfHeight = _domElement.clientHeight * 0.5;
+
+        return [
+            new Point(self.getX() + halfWidth + _gridSize, self.getY()),
+            new Point(self.getX() - halfWidth - _gridSize, self.getY()),
+            new Point(self.getX(), self.getY() + halfHeight + _gridSize),
+            new Point(self.getX(), self.getY() - halfHeight - _gridSize),
+        ];
+    };
+
     /**
      * @returns {Element}
      */
@@ -832,6 +845,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
             scaledPoints.forEach((_sp) => {
                 pointSet.push(_sp);
+            });
+        });
+
+        canvasObjects.forEach(function(_obj) {
+            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
+            objAnchorRoutingPoints.forEach(function(_rp) {
+                pointSet.push(_rp);
             });
         });
 
@@ -1271,6 +1291,9 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     const self = this;
 
+    /**
+     * @type {ConnectorAnchor[]}
+     */
     const connectorAnchors = [];
 
     this.id = _id;
@@ -1287,14 +1310,29 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Element} _connectorAnchorDomElement
      */
     this.addConnectorAnchor = function(_connectorAnchorDomElement) {
-
         const anchor = new ConnectorAnchor(_connectorAnchorDomElement, self);
-
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _canvas.addConnectionAnchorToSelectionStack(anchor);
         });
 
         connectorAnchors.push(anchor);
+    };
+
+    /**
+     * 
+     * @param {Number} _gridSize 
+     * @returns {Point[]}
+     */
+    this.getConnectorAnchorRoutingPoints = function(_gridSize) {
+        const allRoutingPoints = [];
+        connectorAnchors.forEach(function(_anchor) {
+            const anchorPoints = _anchor.getRoutingPoints();
+            anchorPoints.forEach(function(_pt) {
+                allRoutingPoints.push(_pt);
+            });
+        });
+
+        return allRoutingPoints;
     };
 
     /**

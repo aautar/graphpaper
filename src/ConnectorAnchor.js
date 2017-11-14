@@ -59,6 +59,19 @@ function ConnectorAnchor(_domElement, _parentObject) {
         return new Point(self.getX(), self.getY());
     };
 
+    this.getRoutingPoints = function(_gridSize) {
+
+        const halfWidth = _domElement.clientWidth * 0.5;
+        const halfHeight = _domElement.clientHeight * 0.5;
+
+        return [
+            new Point(self.getX() + halfWidth + _gridSize, self.getY()),
+            new Point(self.getX() - halfWidth - _gridSize, self.getY()),
+            new Point(self.getX(), self.getY() + halfHeight + _gridSize),
+            new Point(self.getX(), self.getY() - halfHeight - _gridSize),
+        ];
+    };
+
     /**
      * @returns {Element}
      */
