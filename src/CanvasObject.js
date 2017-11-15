@@ -54,7 +54,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.getConnectorAnchorRoutingPoints = function(_gridSize) {
         const allRoutingPoints = [];
         connectorAnchors.forEach(function(_anchor) {
-            const anchorPoints = _anchor.getRoutingPoints();
+            const anchorPoints = _anchor.getRoutingPoints(_gridSize);
             anchorPoints.forEach(function(_pt) {
                 allRoutingPoints.push(_pt);
             });
