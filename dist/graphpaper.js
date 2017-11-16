@@ -340,6 +340,57 @@ function PointSet(_points) {
     };
 
     /**
+     * 
+     * @param {Point} _point 
+     * @returns {Point}
+     */
+    this.findPointClosestTo = function(_point) {
+        var resultPoint = null;
+        var currentMinLength = Number.MAX_SAFE_INTEGER;
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() < currentMinLength) {
+                resultPoint = _pt;
+                currentMinLength = lineToPt.getLength();
+            }
+        });
+        
+        return resultPoint;        
+    };
+
+    this.findDistanceToPointClosestTo = function(_point) {
+        var currentMinLength = Number.MAX_SAFE_INTEGER;
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() < currentMinLength) {
+                currentMinLength = lineToPt.getLength();
+            }
+        });
+        
+        return currentMinLength;        
+    };    
+
+    /**
+     * 
+     * @param {Point} _point 
+     * @returns {PointSet}
+     */
+    this.findPointsCloseTo = function(_point, _radius) {
+        const resultSet = new PointSet();
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() <= _radius) {
+                resultSet.push(_pt);
+            }
+        });
+        
+        return resultSet;        
+    };    
+
+    /**
      * @returns {Point[]}
      */
     this.toArray = function() {
@@ -425,8 +476,8 @@ function ConnectorAnchor(_domElement, _parentObject) {
 
         return [
             new Point(self.getX() + halfWidth + _gridSize, self.getY()),
-            new Point(self.getX() - halfWidth - _gridSize, self.getY()),
-            new Point(self.getX(), self.getY() + halfHeight + _gridSize),
+            //new Point(self.getX() - halfWidth - _gridSize, self.getY()),
+            //new Point(self.getX(), self.getY() + halfHeight + _gridSize),
             new Point(self.getX(), self.getY() - halfHeight - _gridSize),
         ];
     };
@@ -477,13 +528,22 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
-     * 
+     * @param {PointSet} _anchorPoints
      * @param {PointVisibilityMap} _pointVisibilityMap
+     * @param {Number} _gridSize
      */
-    this.refresh = function(_pointVisibilityMap) {
+    this.refresh = function(_anchorPoints, _pointVisibilityMap, _gridSize) {
 
-        const adjustedStart = _pointVisibilityMap.findPointClosestTo(_anchorStart.getPoint());
-        const adjustedEnd = _pointVisibilityMap.findPointClosestTo(_anchorEnd.getPoint());        
+        const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(_anchorStart.getPoint());
+
+        const adjustedStart = _anchorPoints
+            .findPointsCloseTo(_anchorStart.getPoint(), anchorPointMinDist)
+            .findPointClosestTo(_anchorEnd.getPoint());
+
+        const adjustedEnd = _anchorPoints
+            .findPointsCloseTo(_anchorEnd.getPoint(), anchorPointMinDist)
+            .findPointClosestTo(_anchorStart.getPoint());
+
         const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
         const routingPointsArray = routingPoints.toArray();
 
@@ -858,6 +918,19 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         return pointSet;
     };
 
+    const getConnectorAnchorPoints = function() {
+        const pointSet = new PointSet();
+        
+        canvasObjects.forEach(function(_obj) {
+            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
+            objAnchorRoutingPoints.forEach(function(_rp) {
+                pointSet.push(_rp);
+            });
+        });
+
+        return pointSet;
+    };
+
     /**
      * @returns {Line[]}
      */    
@@ -874,13 +947,14 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     };    
 
     const refreshAllConnectors = function() {
-        currentPointVisiblityMap = new PointVisibilityMap(
+        const anchorPoints = getConnectorAnchorPoints();
+        const currentPointVisiblityMap = new PointVisibilityMap(
             getConnectorRoutingPoints(),
             getConnectorBoundaryLines()
         );
 
         objectConnectors.forEach(function(_c) {
-            _c.refresh(currentPointVisiblityMap);
+            _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
         });
     };
 
@@ -1326,7 +1400,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.getConnectorAnchorRoutingPoints = function(_gridSize) {
         const allRoutingPoints = [];
         connectorAnchors.forEach(function(_anchor) {
-            const anchorPoints = _anchor.getRoutingPoints();
+            const anchorPoints = _anchor.getRoutingPoints(_gridSize);
             anchorPoints.forEach(function(_pt) {
                 allRoutingPoints.push(_pt);
             });

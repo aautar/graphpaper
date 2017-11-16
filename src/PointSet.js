@@ -1,4 +1,5 @@
 import  {Point} from './Point';
+import  {Line} from './Line';
 
 /**
  * Unique collection of Point objects
@@ -35,7 +36,8 @@ function PointSet(_points) {
 
     /**
      * 
-     * @param {PointSet} _point 
+     * @param {Point} _point 
+     * @returns {Point}
      */
     this.findPointClosestTo = function(_point) {
         var resultPoint = null;
@@ -51,6 +53,37 @@ function PointSet(_points) {
         
         return resultPoint;        
     };
+
+    this.findDistanceToPointClosestTo = function(_point) {
+        var currentMinLength = Number.MAX_SAFE_INTEGER;
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() < currentMinLength) {
+                currentMinLength = lineToPt.getLength();
+            }
+        });
+        
+        return currentMinLength;        
+    };    
+
+    /**
+     * 
+     * @param {Point} _point 
+     * @returns {PointSet}
+     */
+    this.findPointsCloseTo = function(_point, _radius) {
+        const resultSet = new PointSet();
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() <= _radius) {
+                resultSet.push(_pt);
+            }
+        });
+        
+        return resultSet;        
+    };    
 
     /**
      * @returns {Point[]}
