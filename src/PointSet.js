@@ -34,6 +34,25 @@ function PointSet(_points) {
     };
 
     /**
+     * 
+     * @param {PointSet} _point 
+     */
+    this.findPointClosestTo = function(_point) {
+        var resultPoint = null;
+        var currentMinLength = Number.MAX_SAFE_INTEGER;
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() < currentMinLength) {
+                resultPoint = _pt;
+                currentMinLength = lineToPt.getLength();
+            }
+        });
+        
+        return resultPoint;        
+    };
+
+    /**
      * @returns {Point[]}
      */
     this.toArray = function() {
