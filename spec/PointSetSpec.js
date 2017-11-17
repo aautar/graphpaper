@@ -20,7 +20,7 @@ describe("PointSet.push", function() {
 
 });
 
-describe("Point constructor", function() {  
+describe("PointSet constructor", function() {  
   it("takes array of Point objects", function() {
     const ps = new PointSet([
       new Point(-100, 200),
@@ -32,5 +32,19 @@ describe("Point constructor", function() {
     expect(pointSetArray.length).toBe(1);
     expect(pointSetArray[0].getX()).toBe(-100);
     expect(pointSetArray[0].getY()).toBe(200);
+  });  
+});
+
+describe("PointSet.findPointClosestTo", function() {  
+  it("finds closest point", function() {
+    const ps = new PointSet([
+      new Point(10, 10),
+      new Point(20, 20)
+    ]);
+
+    const closestPt = ps.findPointClosestTo(new Point(2,2));
+
+    expect(closestPt.getX()).toBe(10);
+    expect(closestPt.getY()).toBe(10);
   });  
 });
