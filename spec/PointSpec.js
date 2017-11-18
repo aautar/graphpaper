@@ -25,3 +25,15 @@ describe("Point.getCartesianPoint", function() {
   });  
 
 });
+
+describe("Point.isEqual", function() {  
+  it("returns true is x and y coordinates match", function() {
+    const p = new Point(-100, 200);
+    expect(p.isEqual(new Point(-100, 200))).toBe(true);
+  });  
+
+  it("returns false is x and y coordinates don't match", function() {
+    const p = new Point(-100, 200);
+    expect(p.isEqual(new Point(0, 0))).toBe(false);
+  });  
+});
