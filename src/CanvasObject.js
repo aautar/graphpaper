@@ -69,6 +69,13 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     };
 
     /**
+     * @returns {ConnectorAnchor[]}
+     */
+    this.getConnectorAnchors = function() {
+        return connectorAnchors;
+    };
+
+    /**
      * @returns {Number}
      */    
     this.getTranslateHandleOffsetX = function() {

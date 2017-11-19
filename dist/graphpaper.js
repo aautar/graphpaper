@@ -504,6 +504,23 @@ function ConnectorAnchor(_domElement, _parentObject, _canvas) {
     };
 
     /**
+     * 
+     * @returns {Rectangle}
+     */
+    this.getBoundingRectange = function() {
+        const centroid = self.getCentroid();
+        const halfWidth = _domElement.clientWidth * 0.5;
+        const halfHeight = _domElement.clientHeight * 0.5;
+
+        return new Rectangle(
+            centroid.getX() - halfWidth, 
+            centroid.getY() - halfHeight, 
+            centroid.getX() + halfWidth, 
+            centroid.getY() + halfHeight
+        );
+    };
+
+    /**
      * @returns {Element}
      */
     this.getDomElement = function() {
@@ -962,6 +979,14 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             const lines = _obj.getBoundingRectange().getLines();
             lines.forEach((_l) => {
                 boundaryLines.push(_l);
+            });
+
+            const anchors = _obj.getConnectorAnchors();
+            anchors.forEach(function(_anchor) {
+                const lines = _anchor.getBoundingRectange().getLines();
+                lines.forEach((_l) => {
+                    boundaryLines.push(_l);
+                });                
             });
         });
 
@@ -1441,6 +1466,13 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         });
 
         return allRoutingPoints;
+    };
+
+    /**
+     * @returns {ConnectorAnchor[]}
+     */
+    this.getConnectorAnchors = function() {
+        return connectorAnchors;
     };
 
     /**

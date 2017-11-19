@@ -134,6 +134,14 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             lines.forEach((_l) => {
                 boundaryLines.push(_l);
             });
+
+            const anchors = _obj.getConnectorAnchors();
+            anchors.forEach(function(_anchor) {
+                const lines = _anchor.getBoundingRectange().getLines();
+                lines.forEach((_l) => {
+                    boundaryLines.push(_l);
+                });                
+            });
         });
 
         return boundaryLines;

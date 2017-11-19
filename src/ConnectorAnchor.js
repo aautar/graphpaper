@@ -1,4 +1,5 @@
 import  {Point} from './Point';
+import  {Rectangle} from './Rectangle';
 
 /**
  * 
@@ -76,6 +77,23 @@ function ConnectorAnchor(_domElement, _parentObject, _canvas) {
             new Point(centroid.getX(), centroid.getY() + halfHeight + _gridSize),
             new Point(centroid.getX(), centroid.getY() - halfHeight - _gridSize),
         ];
+    };
+
+    /**
+     * 
+     * @returns {Rectangle}
+     */
+    this.getBoundingRectange = function() {
+        const centroid = self.getCentroid();
+        const halfWidth = _domElement.clientWidth * 0.5;
+        const halfHeight = _domElement.clientHeight * 0.5;
+
+        return new Rectangle(
+            centroid.getX() - halfWidth, 
+            centroid.getY() - halfHeight, 
+            centroid.getX() + halfWidth, 
+            centroid.getY() + halfHeight
+        );
     };
 
     /**
