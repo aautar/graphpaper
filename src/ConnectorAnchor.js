@@ -2,11 +2,11 @@ import  {Point} from './Point';
 
 /**
  * 
- * @param {String} _objectId 
  * @param {Element} _domElement
  * @param {CanvasObject} _parentObject
+ * @param {Canvas} _canvas
  */
-function ConnectorAnchor(_domElement, _parentObject) {
+function ConnectorAnchor(_domElement, _parentObject, _canvas) {
     
     const self = this;
 
@@ -28,14 +28,14 @@ function ConnectorAnchor(_domElement, _parentObject) {
      * @returns {Number}
      */     
     this.getX = function() {
-        return _parentObject.getX() + _domElement.offsetLeft + (_domElement.clientWidth * 0.5);
+        return self.getCentroid().getX();
     };
 
     /**
      * @returns {Number}
      */     
     this.getY = function() {
-        return _parentObject.getY() + _domElement.offsetTop + (_domElement.clientHeight * 0.5);
+        return self.getCentroid().getY();
     };
 
     /**
@@ -55,20 +55,26 @@ function ConnectorAnchor(_domElement, _parentObject) {
     /**
      * @returns {Point}
      */
-    this.getPoint = function() {
-        return new Point(self.getX(), self.getY());
+    this.getCentroid = function() {
+        const viewportRect = _domElement.getBoundingClientRect();
+        const pageOffset = _canvas.getPageOffset();        
+        return new Point(
+            viewportRect.left + pageOffset.getX() + (_domElement.clientWidth * 0.5), 
+            viewportRect.top + pageOffset.getY() + (_domElement.clientHeight * 0.5)
+        );
     };
 
     this.getRoutingPoints = function(_gridSize) {
 
+        const centroid = self.getCentroid();
         const halfWidth = _domElement.clientWidth * 0.5;
         const halfHeight = _domElement.clientHeight * 0.5;
 
         return [
-            new Point(self.getX() + halfWidth + _gridSize, self.getY()),
-            new Point(self.getX() - halfWidth - _gridSize, self.getY()),
-            new Point(self.getX(), self.getY() + halfHeight + _gridSize),
-            new Point(self.getX(), self.getY() - halfHeight - _gridSize),
+            new Point(centroid.getX() + halfWidth + _gridSize, centroid.getY()),
+            new Point(centroid.getX() - halfWidth - _gridSize, centroid.getY()),
+            new Point(centroid.getX(), centroid.getY() + halfHeight + _gridSize),
+            new Point(centroid.getX(), centroid.getY() - halfHeight - _gridSize),
         ];
     };
 

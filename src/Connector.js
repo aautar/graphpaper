@@ -44,27 +44,28 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      */
     this.refresh = function(_anchorPoints, _pointVisibilityMap, _gridSize) {
 
-        const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(_anchorStart.getPoint());
+        const anchorStartCentroid = _anchorStart.getCentroid();
+        const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(anchorStartCentroid);
 
         const adjustedStart = _anchorPoints
-            .findPointsCloseTo(_anchorStart.getPoint(), anchorPointMinDist)
-            .findPointClosestTo(_anchorEnd.getPoint());
+            .findPointsCloseTo(anchorStartCentroid, anchorPointMinDist)
+            .findPointClosestTo(_anchorEnd.getCentroid());
 
         const adjustedEnd = _anchorPoints
-            .findPointsCloseTo(_anchorEnd.getPoint(), anchorPointMinDist)
-            .findPointClosestTo(_anchorStart.getPoint());
+            .findPointsCloseTo(_anchorEnd.getCentroid(), anchorPointMinDist)
+            .findPointClosestTo(anchorStartCentroid);
 
         const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
         const routingPointsArray = routingPoints.toArray();
 
-        const startCoordString = _anchorStart.getX() + " " + _anchorStart.getY();
+        const startCoordString = anchorStartCentroid.getX() + " " + anchorStartCentroid.getY();
 
         const lineToString = [];
         routingPointsArray.forEach(function(_rp) {
             lineToString.push(pointToSvgLineTo(_rp));
         });
 
-        lineToString.push(pointToSvgLineTo(_anchorEnd.getPoint()));
+        lineToString.push(pointToSvgLineTo(_anchorEnd.getCentroid()));
 
         pathElem.setAttribute("d", 'M' + startCoordString + lineToString.join(" "));
     };

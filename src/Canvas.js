@@ -188,6 +188,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     };
 
     /**
+     * @returns {Point}
+     */
+    this.getPageOffset = function() {
+        return new Point(window.pageXOffset, window.pageYOffset);
+    };
+
+    /**
      * @param {Number} _p 
      * @returns {Number}
      */
