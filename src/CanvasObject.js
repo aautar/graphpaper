@@ -52,11 +52,16 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Point[]}
      */
     this.getConnectorAnchorRoutingPoints = function(_gridSize) {
+
+        const objBoundingRectange = self.getBoundingRectange();
+
         const allRoutingPoints = [];
         connectorAnchors.forEach(function(_anchor) {
             const anchorPoints = _anchor.getRoutingPoints(_gridSize);
             anchorPoints.forEach(function(_pt) {
-                allRoutingPoints.push(_pt);
+                if(!objBoundingRectange.checkIsPointWithin(_pt)) {
+                    allRoutingPoints.push(_pt);
+                }
             });
         });
 
@@ -96,7 +101,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     this.setX = function(_x) {
         self.x = _x;
-    }
+    };
 
     /**
      * @returns {Number}

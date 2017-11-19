@@ -66,8 +66,8 @@ function ConnectorAnchor(_domElement, _parentObject) {
 
         return [
             new Point(self.getX() + halfWidth + _gridSize, self.getY()),
-            //new Point(self.getX() - halfWidth - _gridSize, self.getY()),
-            //new Point(self.getX(), self.getY() + halfHeight + _gridSize),
+            new Point(self.getX() - halfWidth - _gridSize, self.getY()),
+            new Point(self.getX(), self.getY() + halfHeight + _gridSize),
             new Point(self.getX(), self.getY() - halfHeight - _gridSize),
         ];
     };

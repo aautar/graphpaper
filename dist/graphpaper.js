@@ -171,6 +171,8 @@ function Line(_startPoint, _endPoint) {
  */
 function Rectangle(_left, _top, _right, _bottom)  {
     
+    const self=this;
+
     /**
      * @returns {Number}
      */
@@ -285,6 +287,19 @@ function Rectangle(_left, _top, _right, _bottom)  {
         }
 
         return true;
+    };
+
+
+    /**
+     * 
+     * @param {Point} _point 
+     */
+    this.checkIsPointWithin = function(_point) {
+        if(_point.getX() >= _left && _point.getX() <= _right && _point.getY() >= _top && _point.getY() <= _bottom) {
+            return true;
+        }
+
+        return false;
     };
 
     /**
@@ -476,8 +491,8 @@ function ConnectorAnchor(_domElement, _parentObject) {
 
         return [
             new Point(self.getX() + halfWidth + _gridSize, self.getY()),
-            //new Point(self.getX() - halfWidth - _gridSize, self.getY()),
-            //new Point(self.getX(), self.getY() + halfHeight + _gridSize),
+            new Point(self.getX() - halfWidth - _gridSize, self.getY()),
+            new Point(self.getX(), self.getY() + halfHeight + _gridSize),
             new Point(self.getX(), self.getY() - halfHeight - _gridSize),
         ];
     };
@@ -1398,11 +1413,16 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Point[]}
      */
     this.getConnectorAnchorRoutingPoints = function(_gridSize) {
+
+        const objBoundingRectange = self.getBoundingRectange();
+
         const allRoutingPoints = [];
         connectorAnchors.forEach(function(_anchor) {
             const anchorPoints = _anchor.getRoutingPoints(_gridSize);
             anchorPoints.forEach(function(_pt) {
-                allRoutingPoints.push(_pt);
+                if(!objBoundingRectange.checkIsPointWithin(_pt)) {
+                    allRoutingPoints.push(_pt);
+                }
             });
         });
 
