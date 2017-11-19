@@ -14,10 +14,10 @@
 
         #paper { border:2px solid #f00; width:1000px; height:1000px; overflow:hidden; position:relative; transform-origin:0 0; transition:transform 0.55s ease-in-out; /*transform:scale3d(1,1,1)*/ }
         
-        .obj { position:absolute; width:44px; height:44px; background:#0094ff; }
-        .translateHandle { cursor:move; display:block; position:absolute; top:16px; left:0px; width:12px; height:12px; background:#f0f; }
-        .resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:0px; right:0px; width:12px; height:12px; background:#0ff; } 
-        .connectorAnchor { cursor:pointer; display:block; position:absolute; top:0px; right:0px; width:12px; height:12px; background:#FF0000; }
+        .obj { display:flex; align-items:center; justify-content:center; position:absolute; width:44px; height:44px; background:#fff; border:1px solid #0094ff; border-radius:4px; }
+        .translateHandle { cursor:move; display:block; width:12px; height:12px; background:#0094ff; border-radius:12px; }
+        .resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:3px; right:3px; width:12px; height:12px; background:url(resize-handle.svg) 0 0 no-repeat; } 
+        .connectorAnchor { cursor:pointer; display:block; position:absolute; top:0px; right:-18px; width:12px; height:12px; background:#fff; border:2px solid rgb(0, 109, 201); border-radius:12px; }
     </style>
 
 </head>
