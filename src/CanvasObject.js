@@ -19,6 +19,9 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     const self = this;
 
+    /**
+     * @type {ConnectorAnchor[]}
+     */
     const connectorAnchors = [];
 
     this.id = _id;
@@ -35,14 +38,34 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Element} _connectorAnchorDomElement
      */
     this.addConnectorAnchor = function(_connectorAnchorDomElement) {
-
         const anchor = new ConnectorAnchor(_connectorAnchorDomElement, self);
-
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _canvas.addConnectionAnchorToSelectionStack(anchor);
         });
 
         connectorAnchors.push(anchor);
+    };
+
+    /**
+     * 
+     * @param {Number} _gridSize 
+     * @returns {Point[]}
+     */
+    this.getConnectorAnchorRoutingPoints = function(_gridSize) {
+
+        const objBoundingRectange = self.getBoundingRectange();
+
+        const allRoutingPoints = [];
+        connectorAnchors.forEach(function(_anchor) {
+            const anchorPoints = _anchor.getRoutingPoints(_gridSize);
+            anchorPoints.forEach(function(_pt) {
+                if(!objBoundingRectange.checkIsPointWithin(_pt)) {
+                    allRoutingPoints.push(_pt);
+                }
+            });
+        });
+
+        return allRoutingPoints;
     };
 
     /**
@@ -78,7 +101,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     this.setX = function(_x) {
         self.x = _x;
-    }
+    };
 
     /**
      * @returns {Number}

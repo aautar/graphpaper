@@ -101,6 +101,26 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             });
         });
 
+        canvasObjects.forEach(function(_obj) {
+            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
+            objAnchorRoutingPoints.forEach(function(_rp) {
+                pointSet.push(_rp);
+            });
+        });
+
+        return pointSet;
+    };
+
+    const getConnectorAnchorPoints = function() {
+        const pointSet = new PointSet();
+        
+        canvasObjects.forEach(function(_obj) {
+            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
+            objAnchorRoutingPoints.forEach(function(_rp) {
+                pointSet.push(_rp);
+            });
+        });
+
         return pointSet;
     };
 
@@ -120,13 +140,14 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     };    
 
     const refreshAllConnectors = function() {
-        currentPointVisiblityMap = new PointVisibilityMap(
+        const anchorPoints = getConnectorAnchorPoints();
+        const currentPointVisiblityMap = new PointVisibilityMap(
             getConnectorRoutingPoints(),
             getConnectorBoundaryLines()
         );
 
         objectConnectors.forEach(function(_c) {
-            _c.refresh(currentPointVisiblityMap);
+            _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
         });
     };
 

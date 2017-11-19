@@ -1,6 +1,7 @@
 import {Rectangle} from '../src/Rectangle'
+import {Point} from '../src/Point'
 
-describe("Rectangle", function() {
+describe("Rectangle.checkIntersect", function() {
  
   it("checkIntersect returns true is otherRectangle is fully containing with the rectangle", function() {
     var r = new Rectangle(0, 0, 100, 100);
@@ -121,4 +122,20 @@ describe("Rectangle.getLines", function() {
 
     expect(lines.length).toBe(4);
   });
+});
+
+describe("Rectangle.checkIsPointWithin", function() {
+
+  it("returns true if point is within rectangle", function() {
+    const r = new Rectangle(0, 0, 200, 200);
+    const isWithin = r.checkIsPointWithin(new Point(100, 100));
+    expect(isWithin).toBe(true);
+  });
+
+  it("returns false if point is outside rectangle", function() {
+    const r = new Rectangle(0, 0, 100, 100);
+    const isWithin = r.checkIsPointWithin(new Point(50, 150));
+    expect(isWithin).toBe(false);
+  });  
+
 });

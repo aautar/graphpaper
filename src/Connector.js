@@ -38,13 +38,22 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
-     * 
+     * @param {PointSet} _anchorPoints
      * @param {PointVisibilityMap} _pointVisibilityMap
+     * @param {Number} _gridSize
      */
-    this.refresh = function(_pointVisibilityMap) {
+    this.refresh = function(_anchorPoints, _pointVisibilityMap, _gridSize) {
 
-        const adjustedStart = _pointVisibilityMap.findPointClosestTo(_anchorStart.getPoint());
-        const adjustedEnd = _pointVisibilityMap.findPointClosestTo(_anchorEnd.getPoint());        
+        const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(_anchorStart.getPoint());
+
+        const adjustedStart = _anchorPoints
+            .findPointsCloseTo(_anchorStart.getPoint(), anchorPointMinDist)
+            .findPointClosestTo(_anchorEnd.getPoint());
+
+        const adjustedEnd = _anchorPoints
+            .findPointsCloseTo(_anchorEnd.getPoint(), anchorPointMinDist)
+            .findPointClosestTo(_anchorStart.getPoint());
+
         const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
         const routingPointsArray = routingPoints.toArray();
 

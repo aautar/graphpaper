@@ -171,6 +171,8 @@ function Line(_startPoint, _endPoint) {
  */
 function Rectangle(_left, _top, _right, _bottom)  {
     
+    const self=this;
+
     /**
      * @returns {Number}
      */
@@ -287,6 +289,19 @@ function Rectangle(_left, _top, _right, _bottom)  {
         return true;
     };
 
+
+    /**
+     * 
+     * @param {Point} _point 
+     */
+    this.checkIsPointWithin = function(_point) {
+        if(_point.getX() >= _left && _point.getX() <= _right && _point.getY() >= _top && _point.getY() <= _bottom) {
+            return true;
+        }
+
+        return false;
+    };
+
     /**
      * 
      * @param {Rectangle} _otherRectangle
@@ -338,6 +353,57 @@ function PointSet(_points) {
         points.push(_newPoint);
         return true;
     };
+
+    /**
+     * 
+     * @param {Point} _point 
+     * @returns {Point}
+     */
+    this.findPointClosestTo = function(_point) {
+        var resultPoint = null;
+        var currentMinLength = Number.MAX_SAFE_INTEGER;
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() < currentMinLength) {
+                resultPoint = _pt;
+                currentMinLength = lineToPt.getLength();
+            }
+        });
+        
+        return resultPoint;        
+    };
+
+    this.findDistanceToPointClosestTo = function(_point) {
+        var currentMinLength = Number.MAX_SAFE_INTEGER;
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() < currentMinLength) {
+                currentMinLength = lineToPt.getLength();
+            }
+        });
+        
+        return currentMinLength;        
+    };    
+
+    /**
+     * 
+     * @param {Point} _point 
+     * @returns {PointSet}
+     */
+    this.findPointsCloseTo = function(_point, _radius) {
+        const resultSet = new PointSet();
+
+        points.forEach(function(_pt) {
+            const lineToPt = new Line(_point, _pt);
+            if(lineToPt.getLength() <= _radius) {
+                resultSet.push(_pt);
+            }
+        });
+        
+        return resultSet;        
+    };    
 
     /**
      * @returns {Point[]}
@@ -418,6 +484,19 @@ function ConnectorAnchor(_domElement, _parentObject) {
         return new Point(self.getX(), self.getY());
     };
 
+    this.getRoutingPoints = function(_gridSize) {
+
+        const halfWidth = _domElement.clientWidth * 0.5;
+        const halfHeight = _domElement.clientHeight * 0.5;
+
+        return [
+            new Point(self.getX() + halfWidth + _gridSize, self.getY()),
+            new Point(self.getX() - halfWidth - _gridSize, self.getY()),
+            new Point(self.getX(), self.getY() + halfHeight + _gridSize),
+            new Point(self.getX(), self.getY() - halfHeight - _gridSize),
+        ];
+    };
+
     /**
      * @returns {Element}
      */
@@ -464,13 +543,22 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
-     * 
+     * @param {PointSet} _anchorPoints
      * @param {PointVisibilityMap} _pointVisibilityMap
+     * @param {Number} _gridSize
      */
-    this.refresh = function(_pointVisibilityMap) {
+    this.refresh = function(_anchorPoints, _pointVisibilityMap, _gridSize) {
 
-        const adjustedStart = _pointVisibilityMap.findPointClosestTo(_anchorStart.getPoint());
-        const adjustedEnd = _pointVisibilityMap.findPointClosestTo(_anchorEnd.getPoint());        
+        const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(_anchorStart.getPoint());
+
+        const adjustedStart = _anchorPoints
+            .findPointsCloseTo(_anchorStart.getPoint(), anchorPointMinDist)
+            .findPointClosestTo(_anchorEnd.getPoint());
+
+        const adjustedEnd = _anchorPoints
+            .findPointsCloseTo(_anchorEnd.getPoint(), anchorPointMinDist)
+            .findPointClosestTo(_anchorStart.getPoint());
+
         const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
         const routingPointsArray = routingPoints.toArray();
 
@@ -835,6 +923,26 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             });
         });
 
+        canvasObjects.forEach(function(_obj) {
+            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
+            objAnchorRoutingPoints.forEach(function(_rp) {
+                pointSet.push(_rp);
+            });
+        });
+
+        return pointSet;
+    };
+
+    const getConnectorAnchorPoints = function() {
+        const pointSet = new PointSet();
+        
+        canvasObjects.forEach(function(_obj) {
+            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
+            objAnchorRoutingPoints.forEach(function(_rp) {
+                pointSet.push(_rp);
+            });
+        });
+
         return pointSet;
     };
 
@@ -854,13 +962,14 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     };    
 
     const refreshAllConnectors = function() {
-        currentPointVisiblityMap = new PointVisibilityMap(
+        const anchorPoints = getConnectorAnchorPoints();
+        const currentPointVisiblityMap = new PointVisibilityMap(
             getConnectorRoutingPoints(),
             getConnectorBoundaryLines()
         );
 
         objectConnectors.forEach(function(_c) {
-            _c.refresh(currentPointVisiblityMap);
+            _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
         });
     };
 
@@ -1271,6 +1380,9 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     const self = this;
 
+    /**
+     * @type {ConnectorAnchor[]}
+     */
     const connectorAnchors = [];
 
     this.id = _id;
@@ -1287,14 +1399,34 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Element} _connectorAnchorDomElement
      */
     this.addConnectorAnchor = function(_connectorAnchorDomElement) {
-
         const anchor = new ConnectorAnchor(_connectorAnchorDomElement, self);
-
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _canvas.addConnectionAnchorToSelectionStack(anchor);
         });
 
         connectorAnchors.push(anchor);
+    };
+
+    /**
+     * 
+     * @param {Number} _gridSize 
+     * @returns {Point[]}
+     */
+    this.getConnectorAnchorRoutingPoints = function(_gridSize) {
+
+        const objBoundingRectange = self.getBoundingRectange();
+
+        const allRoutingPoints = [];
+        connectorAnchors.forEach(function(_anchor) {
+            const anchorPoints = _anchor.getRoutingPoints(_gridSize);
+            anchorPoints.forEach(function(_pt) {
+                if(!objBoundingRectange.checkIsPointWithin(_pt)) {
+                    allRoutingPoints.push(_pt);
+                }
+            });
+        });
+
+        return allRoutingPoints;
     };
 
     /**
