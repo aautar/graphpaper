@@ -1,5 +1,6 @@
 import {Point} from './Point';
 import {Line} from './Line';
+import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
 
 /**
  * 
@@ -10,6 +11,8 @@ import {Line} from './Line';
  */
 function Rectangle(_left, _top, _right, _bottom)  {
     
+    const self=this;
+
     /**
      * @returns {Number}
      */
@@ -124,6 +127,19 @@ function Rectangle(_left, _top, _right, _bottom)  {
         }
 
         return true;
+    };
+
+
+    /**
+     * 
+     * @param {Point} _point 
+     */
+    this.checkIsPointWithin = function(_point) {
+        if(_point.getX() >= _left && _point.getX() <= _right && _point.getY() >= _top && _point.getY() <= _bottom) {
+            return true;
+        }
+
+        return false;
     };
 
     /**
