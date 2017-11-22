@@ -1,6 +1,6 @@
 # GraphPaper
 
-GraphPaper helps with creating 2D, interactive, workspaces for web applications. It isn't an "out of the box" solution; GraphPaper handles transformations and interactions of objects, markup and styling of those objects are left to the caller.
+GraphPaper helps with creating 2D, interactive, workspaces for web applications. It isn't an "out of the box" solution; GraphPaper takes over handling transformations and interactions of objects, but markup and styling of those objects are left to the caller.
 
 ![graphpaper-connector](https://user-images.githubusercontent.com/12861733/33002147-358957a8-cd80-11e7-89ae-1b211c0eb2db.png)
 
@@ -21,9 +21,9 @@ Some basic DOM elements we'll use:
 
 ```javascript
 const canvas = new GraphPaper.Canvas(
-    document.getElementById('paper'), 
-    function() { },
-    window
+    document.getElementById('paper'),   // div to use
+    function() { },                     // callback on interaction
+    window                              // parent window 
 );
 
 canvas.initTransformationHandlers();
@@ -33,15 +33,15 @@ canvas.initTransformationHandlers();
 
 ```javascript
 const obj1 = new GraphPaper.CanvasObject(
-    'obj1', 
-    0, 
-    0, 
-    44, 
-    44, 
-    canvas,
-    document.getElementById('obj1'), 
-    document.getElementById('translateHandle1'),
-    document.getElementById('resizeHandle1')
+    'obj1',                                             // id
+    0,                                                  // x        
+    0,                                                  // y
+    44,                                                 // width
+    44,                                                 // height
+    canvas,                                             // parent GraphPaper.Canvas
+    document.getElementById('obj1'),                    // object DOM element
+    document.getElementById('translateHandle1'),        // DOM element for the object's translation handle
+    document.getElementById('resizeHandle1')            // DOM element for the object's resize handle
 );
 ```
 
