@@ -1,6 +1,10 @@
 # GraphPaper
 
-GraphPaper helps with creating 2D, interactive, workspaces for web applications. It isn't an "out of the box" solution; GraphPaper takes over handling transformations and interactions of objects, but markup and styling of those objects are left to the caller.
+GraphPaper helps with creating 2D, interactive, workspaces for web applications. It isn't an "out of the box" solution; GraphPaper takes over handling user interactions and transformations of objects, but markup and styling of those objects are left to the caller.
+
+Very much a work-in-progress.
+
+Used as the basis for sheets in [ScratchGraph](https://scratchgraph.com)
 
 ![graphpaper-connector](https://user-images.githubusercontent.com/12861733/33002147-358957a8-cd80-11e7-89ae-1b211c0eb2db.png)
 
