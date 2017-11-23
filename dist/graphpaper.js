@@ -642,31 +642,24 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
 
         const freePointsArray = _freePoints.toArray();
 
-        if(freePointsArray.length === 1) {
-            pointToVisiblePointSet.set(freePointsArray[0], []);
-            return;
+        for(let i=0; i<freePointsArray.length; i++) {
+            pointToVisiblePointSet.set(freePointsArray[i], []);        
         }
 
-        for(let i=0; i<freePointsArray.length; i++) {
-            
-            pointToVisiblePointSet.set(freePointsArray[i], []);
-
-            for(let j=0; j<freePointsArray.length; j++) {
-                if(i===j) {
-                    continue;
-                }
+        for(let i=0; i<freePointsArray.length; i++) {            
+            for(let j=i+1; j<freePointsArray.length; j++) {
 
                 // line representing line-of-sight between the 2 points
                 const ijLine = new Line(freePointsArray[i], freePointsArray[j]);
 
                 if(!doesLineIntersectAnyBoundaryLines(ijLine)) {
-                    const visiblePoints = pointToVisiblePointSet.get(freePointsArray[i]);
-                    visiblePoints.push(freePointsArray[j]);
+                    const visiblePointsI = pointToVisiblePointSet.get(freePointsArray[i]);
+                    visiblePointsI.push(freePointsArray[j]);
+                    pointToVisiblePointSet.set(freePointsArray[i], visiblePointsI);
 
-                    pointToVisiblePointSet.set(
-                        freePointsArray[i], 
-                        visiblePoints
-                    );
+                    const visiblePointsJ = pointToVisiblePointSet.get(freePointsArray[j]);
+                    visiblePointsJ.push(freePointsArray[i]);
+                    pointToVisiblePointSet.set(freePointsArray[j], visiblePointsJ);                    
                 }
             }
         }
