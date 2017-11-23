@@ -12,7 +12,23 @@ Used as the basis for sheets in [ScratchGraph](https://scratchgraph.com)
 
 ## The Basics
 
-Some basic DOM elements we'll use:
+Some basic CSS styling + DOM elements we'll use:
+
+```css
+* { margin:0; padding:0; font-family:LatoRegular; font-size:14px; font-weight:normal; }
+html, body { width:100%; height:100%; }
+body { background:#fff; }
+ul, li { list-style:none; }
+path { fill: none; }
+
+#paper { border:2px solid #f00; width:1000px; height:1000px; overflow:hidden; position:relative; transform-origin:0 0; transition:transform 0.55s ease-in-out; }
+
+.obj { display:flex; align-items:center; justify-content:center; position:absolute; width:44px; height:44px; background:#fff; border:1px solid #0094ff; border-radius:4px; }
+.translateHandle { cursor:move; display:block; width:12px; height:12px; background:#0094ff; border-radius:12px; }
+.resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:3px; right:3px; width:12px; height:12px; background:url(resize-handle.svg) 0 0 no-repeat; } 
+.connectorAnchor { cursor:pointer; display:block; position:absolute; top:0px; right:-18px; width:12px; height:12px; background:#fff; border:2px solid rgb(0, 109, 201); border-radius:4px; }
+```
+
 ```html
 <div id="paper">
     <div id="obj1" class="obj">
@@ -35,6 +51,8 @@ const canvas = new GraphPaper.Canvas(
 canvas.initTransformationHandlers();
 ```
 
+The default, 12x12, dotted grid will be applied to the canvas.
+
 ###  Create an object
 
 ```javascript
@@ -56,3 +74,5 @@ const obj1 = new GraphPaper.CanvasObject(
 ```javascript
 canvas.addObject(obj1);
 ```
+
+ The object (`obj1`) will be added to the canvas and can now be translated by dragging the translation handle (`#translateHandle1`) or resized with the resize handle (`#resizeHandle1`). GraphPaper will take care of both mouse and touch interactions on the handle elements.
