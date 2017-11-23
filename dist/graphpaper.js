@@ -489,6 +489,11 @@ function ConnectorAnchor(_domElement, _parentObject, _canvas) {
         );
     };
 
+    /**
+     * 
+     * @param {Number} _gridSize 
+     * @returns {Point[]}
+     */
     this.getRoutingPoints = function(_gridSize) {
 
         const centroid = self.getCentroid();
