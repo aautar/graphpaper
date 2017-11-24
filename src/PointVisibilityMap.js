@@ -23,8 +23,8 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      */
     const doesLineIntersectAnyBoundaryLines = function(_theLine) {
         for(let b=0; b<_boundaryLines.length; b++) {
-            const intersection = _boundaryLines[b].computeIntersection(_theLine);
-            if(intersection.getType() === LINE_INTERSECTION_TYPE.LINESEG) {
+            const intersectionType = _boundaryLines[b].computeIntersectionType(_theLine);
+            if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
                 return true;
             }
         };
