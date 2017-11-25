@@ -147,16 +147,30 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         return boundaryLines;
     };    
 
-    const refreshAllConnectors = function() {
-        const anchorPoints = getConnectorAnchorPoints();
-        const currentPointVisiblityMap = new PointVisibilityMap(
-            getConnectorRoutingPoints(),
-            getConnectorBoundaryLines()
-        );
+    /**
+     * @type {Number}
+     */
+    var refreshAllConnectorsTimeout = null;
 
-        objectConnectors.forEach(function(_c) {
-            _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
-        });
+    const refreshAllConnectors = function() {
+
+        if(refreshAllConnectorsTimeout !== null) {
+            clearTimeout(refreshAllConnectorsTimeout);
+        }
+
+        refreshAllConnectorsTimeout = setTimeout(function() {
+            const anchorPoints = getConnectorAnchorPoints();
+            const currentPointVisiblityMap = new PointVisibilityMap(
+                getConnectorRoutingPoints(),
+                getConnectorBoundaryLines()
+            );
+
+            objectConnectors.forEach(function(_c) {
+                _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
+            });
+
+            refreshAllConnectorsTimeout = null;
+        }, 66);
     };
 
     var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {
