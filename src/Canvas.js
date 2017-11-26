@@ -446,10 +446,11 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      */
     const handleMove = function(_x, _y) {
         const obj = self.getObjectById(self.objectIdBeingDragged);
-        if(obj.touchInternalContactPt) {
+        const objTouchInternalContactPt = obj.getTouchInternalContactPt();
+        if(objTouchInternalContactPt) {
             // Move relative to point of contact
-            _x -= obj.touchInternalContactPt.getX();
-            _y -= obj.touchInternalContactPt.getY();
+            _x -= objTouchInternalContactPt.getX();
+            _y -= objTouchInternalContactPt.getY();
         }
 
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
@@ -463,6 +464,28 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         // refresh connectors
         refreshAllConnectors();
     };
+
+    /**
+     * 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     */
+    const handleMoveEnd = function(_x, _y) {
+        const obj = self.getObjectById(self.objectIdBeingDragged);
+        
+        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
+        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
+
+        const mxStart = self.objectDragStartX;
+        const myStart = self.objectDragStartY;
+
+        if(mxStart == mx && myStart == my) {
+            // we didn't drag it anywhere
+        } else {
+            obj.translate(mx, my);
+            _handleCanvasInteraction('object-translated', obj);
+        }
+    };         
 
     /**
      * 
@@ -487,28 +510,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
         _handleCanvasInteraction('object-resized', obj);
     };
-
-    /**
-     * 
-     * @param {Number} _x 
-     * @param {Number} _y 
-     */
-    const handleMoveEnd = function(_x, _y) {
-        const obj = self.getObjectById(self.objectIdBeingDragged);
-        
-        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
-        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
-
-        const mxStart = self.objectDragStartX;
-        const myStart = self.objectDragStartY;
-
-        if(mxStart == mx && myStart == my) {
-            // we didn't drag it anywhere
-        } else {
-            obj.translate(mx, my);
-            _handleCanvasInteraction('object-translated', obj);
-        }
-    };     
 
     this.initTransformationHandlers = function() {
         
