@@ -1333,16 +1333,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {Number} _x 
      * @param {Number} _y 
      */
-    var handleMove = function(_x, _y) {
-        var obj = self.getObjectById(self.objectIdBeingDragged);
+    const handleMove = function(_x, _y) {
+        const obj = self.getObjectById(self.objectIdBeingDragged);
         if(obj.touchInternalContactPt) {
             // Move relative to point of contact
             _x -= obj.touchInternalContactPt.getX();
             _y -= obj.touchInternalContactPt.getY();
         }
 
-        var mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
-        var my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
+        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
+        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
         
         self.objectDragX = mx;
         self.objectDragY = my;		
@@ -1351,6 +1351,30 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
         // refresh connectors
         refreshAllConnectors();
+    };
+
+    /**
+     * 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     */    
+    const handleResize = function(_x, _y) {
+        const obj = self.getObjectById(self.objectIdBeingResized);
+
+        const mx = self.snapToGrid(_x);
+        const my = self.snapToGrid(_y);
+
+        const top = obj.getY();
+        const left = obj.getX();
+        const newWidth = ((mx - left)+1);
+        const newHeight = ((my - top)+1);
+
+        obj.resize(newWidth, newHeight);
+
+        // refresh connectors
+        refreshAllConnectors();
+
+        _handleCanvasInteraction('object-resized', obj);
     };
 
     /**
@@ -1384,29 +1408,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
-
             if (self.objectIdBeingDragged !== null) {				
                 handleMove(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
             }
 
             if(self.objectIdBeingResized !== null) {
-
-                var mx = self.snapToGrid(e.pageX * invScaleFactor);
-                var my = self.snapToGrid(e.pageY * invScaleFactor);
-
-                var obj = self.getObjectById(self.objectIdBeingResized);
-
-                var top = obj.getY();
-                var left = obj.getX();
-                var newWidth = ((mx - left)+1);
-                var newHeight = ((my - top)+1);
-
-                obj.resize(newWidth, newHeight);
-
-                // refresh connectors
-                refreshAllConnectors();
-
-                _handleCanvasInteraction('object-resized', obj);
+                handleResize(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
             }
         });
 
