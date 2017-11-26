@@ -493,14 +493,14 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {Number} _x 
      * @param {Number} _y 
      */
-    var handleMoveEnd = function(_x, _y) {
-        var obj = self.getObjectById(self.objectIdBeingDragged);
+    const handleMoveEnd = function(_x, _y) {
+        const obj = self.getObjectById(self.objectIdBeingDragged);
         
-        var mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
-        var my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
+        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
+        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
 
-        var mxStart = self.objectDragStartX;
-        var myStart = self.objectDragStartY;
+        const mxStart = self.objectDragStartX;
+        const myStart = self.objectDragStartY;
 
         if(mxStart == mx && myStart == my) {
             // we didn't drag it anywhere
