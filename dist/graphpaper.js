@@ -605,12 +605,19 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         return "L" + _pt.getX() + " " + _pt.getY();
     };
 
+    /**
+     * @type {Element}
+     */
     const pathElem = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
     pathElem.style.stroke = _strokeColor; 
     pathElem.style.strokeWidth = _strokeWidth;         
 
+    /**
+     * @type {Element}
+     */
     var svgDomElem = null;
+    
     this.appendPathToContainerDomElement = function() {
         svgDomElem = _containerDomElement.appendChild(pathElem);
     };
@@ -648,6 +655,9 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         pathElem.setAttribute("d", 'M' + startCoordString + lineToString.join(" "));
     };
 
+    /**
+     * @returns {String}
+     */
     this.getId = function() {
         const objIds = [_anchorStart.getObjectId(), _anchorEnd.getObjectId()].sort();
         return  objIds.join(':');
@@ -1673,7 +1683,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         ];
     };
 
-    var translateStart = function(e) {
+    const translateStart = function(e) {
 
         if(e.touches) {
             touchInternalContactPt = new Point(
@@ -1682,8 +1692,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
             );
         }
         
-        var mx = e.pageX;
-        var my = e.pageY;
+        const mx = e.pageX;
+        const my = e.pageY;
 
         _canvas.objectIdBeingDragged = self.getId();
         _canvas.objectDragX = mx;

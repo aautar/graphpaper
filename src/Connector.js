@@ -27,12 +27,19 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         return "L" + _pt.getX() + " " + _pt.getY();
     };
 
+    /**
+     * @type {Element}
+     */
     const pathElem = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
     pathElem.style.stroke = _strokeColor; 
     pathElem.style.strokeWidth = _strokeWidth;         
 
+    /**
+     * @type {Element}
+     */
     var svgDomElem = null;
+    
     this.appendPathToContainerDomElement = function() {
         svgDomElem = _containerDomElement.appendChild(pathElem);
     };
@@ -70,6 +77,9 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         pathElem.setAttribute("d", 'M' + startCoordString + lineToString.join(" "));
     };
 
+    /**
+     * @returns {String}
+     */
     this.getId = function() {
         const objIds = [_anchorStart.getObjectId(), _anchorEnd.getObjectId()].sort();
         return  objIds.join(':');
