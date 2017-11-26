@@ -31,7 +31,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.height = parseInt(_height);
     this.domElement = _domElement;
     this.isDeleted = false;
-    this.touchInternalContactPt = null;
+    var touchInternalContactPt = null;
 
 
     /**
@@ -180,7 +180,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Point}
      */
     this.getTouchInternalContactPt = function() {
-        return self.touchInternalContactPt;
+        return touchInternalContactPt;
     };
 
     /**
@@ -222,17 +222,17 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         ];
     };
 
-    var translateStart = function(e) {
+    const translateStart = function(e) {
 
         if(e.touches) {
-            self.touchInternalContactPt = new Point(
+            touchInternalContactPt = new Point(
                 e.touches[0].pageX-self.getX(),
                 e.touches[0].pageY-self.getY()
             );
         }
         
-        var mx = e.pageX;
-        var my = e.pageY;
+        const mx = e.pageX;
+        const my = e.pageY;
 
         _canvas.objectIdBeingDragged = self.getId();
         _canvas.objectDragX = mx;

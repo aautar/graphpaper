@@ -1335,10 +1335,11 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      */
     const handleMove = function(_x, _y) {
         const obj = self.getObjectById(self.objectIdBeingDragged);
-        if(obj.touchInternalContactPt) {
+        const objTouchInternalContactPt = obj.getTouchInternalContactPt();
+        if(objTouchInternalContactPt) {
             // Move relative to point of contact
-            _x -= obj.touchInternalContactPt.getX();
-            _y -= obj.touchInternalContactPt.getY();
+            _x -= objTouchInternalContactPt.getX();
+            _y -= objTouchInternalContactPt.getY();
         }
 
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
@@ -1352,6 +1353,28 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         // refresh connectors
         refreshAllConnectors();
     };
+
+    /**
+     * 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     */
+    const handleMoveEnd = function(_x, _y) {
+        const obj = self.getObjectById(self.objectIdBeingDragged);
+        
+        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
+        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
+
+        const mxStart = self.objectDragStartX;
+        const myStart = self.objectDragStartY;
+
+        if(mxStart == mx && myStart == my) {
+            // we didn't drag it anywhere
+        } else {
+            obj.translate(mx, my);
+            _handleCanvasInteraction('object-translated', obj);
+        }
+    };         
 
     /**
      * 
@@ -1376,28 +1399,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
         _handleCanvasInteraction('object-resized', obj);
     };
-
-    /**
-     * 
-     * @param {Number} _x 
-     * @param {Number} _y 
-     */
-    var handleMoveEnd = function(_x, _y) {
-        var obj = self.getObjectById(self.objectIdBeingDragged);
-        
-        var mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
-        var my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
-
-        var mxStart = self.objectDragStartX;
-        var myStart = self.objectDragStartY;
-
-        if(mxStart == mx && myStart == my) {
-            // we didn't drag it anywhere
-        } else {
-            obj.translate(mx, my);
-            _handleCanvasInteraction('object-translated', obj);
-        }
-    };     
 
     this.initTransformationHandlers = function() {
         
@@ -1481,7 +1482,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.height = parseInt(_height);
     this.domElement = _domElement;
     this.isDeleted = false;
-    this.touchInternalContactPt = null;
+    var touchInternalContactPt = null;
 
 
     /**
@@ -1630,7 +1631,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Point}
      */
     this.getTouchInternalContactPt = function() {
-        return self.touchInternalContactPt;
+        return touchInternalContactPt;
     };
 
     /**
@@ -1675,7 +1676,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     var translateStart = function(e) {
 
         if(e.touches) {
-            self.touchInternalContactPt = new Point(
+            touchInternalContactPt = new Point(
                 e.touches[0].pageX-self.getX(),
                 e.touches[0].pageY-self.getY()
             );
