@@ -69,7 +69,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     const canvasObjects = [];
     const objectConnectors = [];
 
-    this.objectIdBeingDragged = null;
+    var objectIdBeingDragged = null;
     this.objectIdBeingResized = null;
     
     var objectDragX = 0.0;
@@ -448,7 +448,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {Boolean} _isTouchMove
      */
     const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {       
-        self.objectIdBeingDragged = _obj.getId();
+        objectIdBeingDragged = _obj.getId();
         objectDragX = _x;
         objectDragY = _y;
         objectDragStartX = _x;
@@ -461,7 +461,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {Number} _y 
      */
     const handleMove = function(_x, _y) {
-        const obj = self.getObjectById(self.objectIdBeingDragged);
+        const obj = self.getObjectById(objectIdBeingDragged);
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
         const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
         
@@ -480,7 +480,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {Number} _y 
      */
     const handleMoveEnd = function(_x, _y) {
-        const obj = self.getObjectById(self.objectIdBeingDragged);
+        const obj = self.getObjectById(objectIdBeingDragged);
         
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
         const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
@@ -523,13 +523,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     this.initTransformationHandlers = function() {
         
         _canvasDomElement.addEventListener('touchmove', function (e) {
-            if (self.objectIdBeingDragged !== null) {
+            if (objectIdBeingDragged !== null) {
                 handleMove(e.touches[0].pageX * invScaleFactor, e.touches[0].pageY * invScaleFactor);       
             }
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
-            if (self.objectIdBeingDragged !== null) {				
+            if (objectIdBeingDragged !== null) {				
                 handleMove(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
             }
 
@@ -539,16 +539,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         });
 
         _canvasDomElement.addEventListener('touchend', function (e) {
-            if(self.objectIdBeingDragged !== null) {
-                const obj = self.getObjectById(self.objectIdBeingDragged);
-                self.objectIdBeingDragged = null;
+            if(objectIdBeingDragged !== null) {
+                const obj = self.getObjectById(objectIdBeingDragged);
+                objectIdBeingDragged = null;
                 self.objectIdBeingResized = null;  
             }            
         });
 
         _canvasDomElement.addEventListener('mouseup', function (e) {
             if (e.which === 1) {
-                if(self.objectIdBeingDragged !== null) {
+                if(objectIdBeingDragged !== null) {
                     handleMoveEnd(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
                 }            
 
@@ -558,13 +558,13 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
                     //self.onObjectTransform(obj);
                 }
 
-                self.objectIdBeingDragged = null;
+                objectIdBeingDragged = null;
                 self.objectIdBeingResized = null;
             }
         });  
 
         _canvasDomElement.addEventListener('mousedown', function (e) {
-            if(self.objectIdBeingDragged !== null || self.objectIdBeingResized !== null) {
+            if(objectIdBeingDragged !== null || self.objectIdBeingResized !== null) {
                 e.preventDefault();
                 e.stopPropagation();
             }
