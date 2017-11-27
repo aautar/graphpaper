@@ -31,8 +31,6 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.height = parseInt(_height);
     this.domElement = _domElement;
     this.isDeleted = false;
-    var touchInternalContactPt = null;
-
 
     /**
      * @param {Element} _connectorAnchorDomElement
@@ -177,17 +175,6 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     };
 
     /**
-     * @returns {Point}
-     */
-    this.getTouchInternalContactPt = function() {
-        return touchInternalContactPt;
-    };
-
-    this.resetTouchInternalContactPt = function() {
-        touchInternalContactPt = null;
-    };
-
-    /**
      * 
      * @param {String} _eventName
      * @param {*} _eventData
@@ -226,32 +213,32 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         ];
     };
 
-    const translateStart = function(e) {
 
-        if(e.touches) {
-            touchInternalContactPt = new Point(
-                e.touches[0].pageX-self.getX(),
-                e.touches[0].pageY-self.getY()
-            );
-        }
-        
-        const mx = e.pageX;
-        const my = e.pageY;
+    /**
+     * 
+     * @param {CanvasObject} _obj 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     * @param {Boolean} _isTouchMove 
+     */
+    var moveStart = function(_obj, _x, _y, _isTouchMove) {
 
-        _canvas.objectIdBeingDragged = self.getId();
-        _canvas.objectDragX = mx;
-        _canvas.objectDragY = my;
-
-        _canvas.objectDragStartX = mx;
-        _canvas.objectDragStartY = my;
     };
 
+    /**
+     * 
+     * @param {*} _moveStartFunc 
+     */
+    this.setMoveStartCallback = function(_moveStartFunc) {
+        moveStart = _moveStartFunc;
+    }; 
+
     _translateHandleDomElement.addEventListener('touchstart', function(e) {
-        translateStart(e);
+        moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
     });
 
     _translateHandleDomElement.addEventListener('mousedown', function (e) {
-        translateStart(e);
+        moveStart(self, e.pageX, e.pageY, false);
     });
 
     _resizeHandleDomElement.addEventListener('mousedown', function (e) {

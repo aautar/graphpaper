@@ -1219,6 +1219,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {CanvasObject} _obj
      */
     this.addObject = function(_obj) {
+        _obj.setMoveStartCallback(handleMoveStart);
         canvasObjects.push(_obj);
         refreshAllConnectors();       
     };
@@ -1340,18 +1341,26 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
     /**
      * 
+     * @param {CanvasObject} _obj
+     * @param {Number} _x 
+     * @param {Number} _y 
+     * @param {Boolean} _isTouchMove
+     */
+    const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {       
+        self.objectIdBeingDragged = _obj.getId();
+        self.objectDragX = _x;
+        self.objectDragY = _y;
+        self.objectDragStartX = _x;
+        self.objectDragStartY = _y;        
+    };    
+
+    /**
+     * 
      * @param {Number} _x 
      * @param {Number} _y 
      */
     const handleMove = function(_x, _y) {
         const obj = self.getObjectById(self.objectIdBeingDragged);
-        const objTouchInternalContactPt = obj.getTouchInternalContactPt();
-        if(objTouchInternalContactPt) {
-            // Move relative to point of contact
-            _x -= objTouchInternalContactPt.getX();
-            _y -= objTouchInternalContactPt.getY();
-        }
-
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
         const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
         
@@ -1431,8 +1440,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         _canvasDomElement.addEventListener('touchend', function (e) {
             if(self.objectIdBeingDragged !== null) {
                 const obj = self.getObjectById(self.objectIdBeingDragged);
-                obj.resetTouchInternalContactPt();
-
                 self.objectIdBeingDragged = null;
                 self.objectIdBeingResized = null;  
             }            
@@ -1492,8 +1499,6 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.height = parseInt(_height);
     this.domElement = _domElement;
     this.isDeleted = false;
-    var touchInternalContactPt = null;
-
 
     /**
      * @param {Element} _connectorAnchorDomElement
@@ -1638,17 +1643,6 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     };
 
     /**
-     * @returns {Point}
-     */
-    this.getTouchInternalContactPt = function() {
-        return touchInternalContactPt;
-    };
-
-    this.resetTouchInternalContactPt = function() {
-        touchInternalContactPt = null;
-    };
-
-    /**
      * 
      * @param {String} _eventName
      * @param {*} _eventData
@@ -1687,32 +1681,21 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         ];
     };
 
-    const translateStart = function(e) {
 
-        if(e.touches) {
-            touchInternalContactPt = new Point(
-                e.touches[0].pageX-self.getX(),
-                e.touches[0].pageY-self.getY()
-            );
-        }
-        
-        const mx = e.pageX;
-        const my = e.pageY;
+    var moveStart = function(_obj, _x, _y, _isTouchMove) {
 
-        _canvas.objectIdBeingDragged = self.getId();
-        _canvas.objectDragX = mx;
-        _canvas.objectDragY = my;
-
-        _canvas.objectDragStartX = mx;
-        _canvas.objectDragStartY = my;
     };
 
+    this.setMoveStartCallback = function(_moveStartFunc) {
+        moveStart = _moveStartFunc;
+    }; 
+
     _translateHandleDomElement.addEventListener('touchstart', function(e) {
-        translateStart(e);
+        moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
     });
 
     _translateHandleDomElement.addEventListener('mousedown', function (e) {
-        translateStart(e);
+        moveStart(self, e.pageX, e.pageY, false);
     });
 
     _resizeHandleDomElement.addEventListener('mousedown', function (e) {
