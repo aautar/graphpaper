@@ -70,7 +70,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     const objectConnectors = [];
 
     var objectIdBeingDragged = null;
-    this.objectIdBeingResized = null;
+    var objectIdBeingResized = null;
     
     var objectDragX = 0.0;
     var objectDragY = 0.0;
@@ -320,6 +320,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {CanvasObject} _obj
      */
     this.addObject = function(_obj) {
+        _obj.setResizeStartCallback(handleResizeStart);
         _obj.setMoveStartCallback(handleMoveStart);
         canvasObjects.push(_obj);
         refreshAllConnectors();       
@@ -445,6 +446,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {CanvasObject} _obj
      * @param {Number} _x 
      * @param {Number} _y 
+     */
+    const handleResizeStart = function(_obj, _x, _y) {       
+        objectIdBeingResized = _obj.getId();
+    };    
+
+    /**
+     * 
+     * @param {CanvasObject} _obj
+     * @param {Number} _x 
+     * @param {Number} _y 
      * @param {Boolean} _isTouchMove
      */
     const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {       
@@ -502,7 +513,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      * @param {Number} _y 
      */    
     const handleResize = function(_x, _y) {
-        const obj = self.getObjectById(self.objectIdBeingResized);
+        const obj = self.getObjectById(objectIdBeingResized);
 
         const mx = self.snapToGrid(_x);
         const my = self.snapToGrid(_y);
@@ -533,7 +544,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
                 handleMove(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
             }
 
-            if(self.objectIdBeingResized !== null) {
+            if(objectIdBeingResized !== null) {
                 handleResize(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
             }
         });
@@ -542,7 +553,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             if(objectIdBeingDragged !== null) {
                 const obj = self.getObjectById(objectIdBeingDragged);
                 objectIdBeingDragged = null;
-                self.objectIdBeingResized = null;  
+                objectIdBeingResized = null;  
             }            
         });
 
@@ -552,19 +563,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
                     handleMoveEnd(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
                 }            
 
-                if(self.objectIdBeingResized !== null) {
-                    //var obj = self.getObjectById(self.objectIdBeingResized);
-                    //self.reqEnableObjectSelection();                    
-                    //self.onObjectTransform(obj);
+                if(objectIdBeingResized !== null) {
                 }
 
                 objectIdBeingDragged = null;
-                self.objectIdBeingResized = null;
+                objectIdBeingResized = null;
             }
         });  
 
         _canvasDomElement.addEventListener('mousedown', function (e) {
-            if(objectIdBeingDragged !== null || self.objectIdBeingResized !== null) {
+            if(objectIdBeingDragged !== null || objectIdBeingResized !== null) {
                 e.preventDefault();
                 e.stopPropagation();
             }

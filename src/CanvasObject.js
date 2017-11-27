@@ -227,11 +227,30 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     /**
      * 
+     * @param {CanvasObject} _obj 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     */
+    var resizeStart = function(_obj, _x, _y) {
+
+    };
+
+    /**
+     * 
      * @param {*} _moveStartFunc 
      */
     this.setMoveStartCallback = function(_moveStartFunc) {
         moveStart = _moveStartFunc;
     }; 
+
+    /**
+     * 
+     * @param {*} _moveStartFunc 
+     */
+    this.setResizeStartCallback = function(_resizeStartFunc) {
+        resizeStart = _resizeStartFunc;
+    }; 
+    
 
     _translateHandleDomElement.addEventListener('touchstart', function(e) {
         moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
@@ -246,7 +265,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
             return;
         }
 
-        _canvas.objectIdBeingResized = self.getId();
+        resizeStart(self, e.pageX, e.pageY);
     });    
 };
 
