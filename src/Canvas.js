@@ -72,10 +72,10 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     this.objectIdBeingDragged = null;
     this.objectIdBeingResized = null;
     
-    this.objectDragX = 0.0;
-    this.objectDragY = 0.0;
-    this.objectDragStartX = 0.0;
-    this.objectDragStartY = 0.0;
+    var objectDragX = 0.0;
+    var objectDragY = 0.0;
+    var objectDragStartX = 0.0;
+    var objectDragStartY = 0.0;
 
     var dblTapDetectVars = {
         lastTouchX: null,
@@ -449,10 +449,10 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      */
     const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {       
         self.objectIdBeingDragged = _obj.getId();
-        self.objectDragX = _x;
-        self.objectDragY = _y;
-        self.objectDragStartX = _x;
-        self.objectDragStartY = _y;        
+        objectDragX = _x;
+        objectDragY = _y;
+        objectDragStartX = _x;
+        objectDragStartY = _y;        
     };    
 
     /**
@@ -465,8 +465,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
         const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
         
-        self.objectDragX = mx;
-        self.objectDragY = my;		
+        objectDragX = mx;
+        objectDragY = my;		
 
         obj.translate(mx, my);
 
@@ -485,8 +485,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
         const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
 
-        const mxStart = self.objectDragStartX;
-        const myStart = self.objectDragStartY;
+        const mxStart = objectDragStartX;
+        const myStart = objectDragStartY;
 
         if(mxStart == mx && myStart == my) {
             // we didn't drag it anywhere
