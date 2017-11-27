@@ -183,6 +183,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         return touchInternalContactPt;
     };
 
+    this.resetTouchInternalContactPt = function() {
+        touchInternalContactPt = null;
+    };
+
     /**
      * 
      * @param {String} _eventName

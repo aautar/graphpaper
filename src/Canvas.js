@@ -531,9 +531,9 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
         _canvasDomElement.addEventListener('touchend', function (e) {
             if(self.objectIdBeingDragged !== null) {
-                var obj = self.getObjectById(self.objectIdBeingDragged);
+                const obj = self.getObjectById(self.objectIdBeingDragged);
+                obj.resetTouchInternalContactPt();
 
-                obj.touchInternalContactPt = null;
                 self.objectIdBeingDragged = null;
                 self.objectIdBeingResized = null;  
             }            
