@@ -29,7 +29,6 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.y = parseInt(_y);
     this.width = parseInt(_width);
     this.height = parseInt(_height);
-    this.domElement = _domElement;
     this.isDeleted = false;
 
     /**
@@ -130,8 +129,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         self.x = _x;
         self.y = _y;
 
-        self.domElement.style.left = parseInt(self.x) + 'px';
-        self.domElement.style.top = parseInt(self.y) + 'px';
+        _domElement.style.left = parseInt(self.x) + 'px';
+        _domElement.style.top = parseInt(self.y) + 'px';
     };
 
     /**
@@ -156,8 +155,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         self.width = _width;
         self.height = _height;
 
-        self.domElement.style.width = parseInt(self.width) + 'px';
-        self.domElement.style.height = parseInt(self.height) + 'px';
+        _domElement.style.width = parseInt(self.width) + 'px';
+        _domElement.style.height = parseInt(self.height) + 'px';
     }
 
     /**
@@ -171,7 +170,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Element}
      */
     this.getDomElement = function() {
-        return self.domElement;
+        return _domElement;
     };
 
     /**
