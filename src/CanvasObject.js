@@ -24,7 +24,6 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     const connectorAnchors = [];
 
-    this.id = _id;
     this.x = parseInt(_x);
     this.y = parseInt(_y);
     this.width = parseInt(_width);
@@ -90,7 +89,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {String}
      */
     this.getId = function() {
-        return self.id;
+        return _id;
     };
 
     /**
