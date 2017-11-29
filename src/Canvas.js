@@ -17,8 +17,9 @@ import  {GRID_STYLE, Grid} from './Grid';
  * @param {Element} _canvasDomElement 
  * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
+ * @param {Worker} _pvMapWorker
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
+function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWorker) {
 
     const self = this;
 
@@ -87,7 +88,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     var invScaleFactor = 1.0;
 
     const connectorAnchorsSelected = [];
-
 
     /**
      * @returns {PointSet}

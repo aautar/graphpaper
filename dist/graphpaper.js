@@ -1,4 +1,4 @@
-(function (exports) {
+var GraphPaper = (function (exports) {
 'use strict';
 
 /**
@@ -216,11 +216,6 @@ function Line(_startPoint, _endPoint) {
  */
 function Rectangle(_left, _top, _right, _bottom)  {
     
-    const self=this;
-
-    /**
-     * @returns {Number}
-     */
     this.getLeft = function() {
         return _left;
     };
@@ -586,8 +581,6 @@ function ConnectorAnchor(_domElement, _parentObject, _canvas) {
  */
 function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth) {
     
-    const self = this;
-
     if(typeof _strokeColor === 'undefined') {
         _strokeColor = '#000';
     }
@@ -917,7 +910,7 @@ function Grid(_size, _color, _style) {
  * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
+function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWorker) {
 
     const self = this;
 
@@ -964,15 +957,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         return currentPointVisiblityMap;
     };
 
-    var useTranslate3d = false; // better performance w/o it
     const canvasObjects = [];
     const objectConnectors = [];
 
     var objectIdBeingDragged = null;
     var objectIdBeingResized = null;
     
-    var objectDragX = 0.0;
-    var objectDragY = 0.0;
     var objectDragStartX = 0.0;
     var objectDragStartY = 0.0;
 
@@ -987,6 +977,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
 
     const connectorAnchorsSelected = [];
 
+    _pvMapWorker.postMessage({});
+    _pvMapWorker.postMessage({});
 
     /**
      * @returns {PointSet}
@@ -1359,8 +1351,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      */
     const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {       
         objectIdBeingDragged = _obj.getId();
-        objectDragX = _x;
-        objectDragY = _y;
         objectDragStartX = _x;
         objectDragStartY = _y;        
     };    
@@ -1375,9 +1365,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
         const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
         
-        objectDragX = mx;
-        objectDragY = my;		
-
         obj.translate(mx, my);
 
         // refresh connectors
@@ -1461,9 +1448,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
                 if(objectIdBeingDragged !== null) {
                     handleMoveEnd(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
                 }            
-
-                if(objectIdBeingResized !== null) {
-                }
 
                 objectIdBeingDragged = null;
                 objectIdBeingResized = null;
@@ -1898,20 +1882,6 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Map<Cluster, Number>} _clusterToObjectCountMap 
      * @returns {Cluster[]}
      */
-    const getClusterArrayFromClusterMap = function(_clusterToObjectCountMap) {
-        const resultSet = [];
-        _clusterToObjectCountMap.keys().forEach(function(_cluster) {
-            resultSet.push(_cluster);
-        });
-
-        return resultSet;
-    };
-
-    /**
-     * @param {CanvasObject} _objA
-     * @param {CanvasObject} _objB
-     * @returns {Boolean}
-     */
     this.areObjectsClose = function(_objA, _objB) {
         const nA = new Rectangle(_objA.x-_boxExtentOffset, _objA.y-_boxExtentOffset, _objA.x + _objA.width + _boxExtentOffset, _objA.y + _objA.height + _boxExtentOffset);
         const nB = new Rectangle(_objB.x-_boxExtentOffset, _objB.y-_boxExtentOffset, _objB.x + _objB.width + _boxExtentOffset, _objB.y + _objB.height + _boxExtentOffset);
@@ -2080,4 +2050,6 @@ exports.PointVisibilityMap = PointVisibilityMap;
 exports.GRID_STYLE = GRID_STYLE;
 exports.Grid = Grid;
 
-}((this.GraphPaper = this.GraphPaper || {})));
+return exports;
+
+}({}));
