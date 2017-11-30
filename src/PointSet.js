@@ -93,6 +93,21 @@ function PointSet(_points) {
     };
 
     /**
+     * @returns {Float64Array}
+     */
+    this.toFloat64Array = function() {
+
+        const result = new Float64Array(points.length * 2);
+        for(let i=0; i<points.length; i++) {
+            result[0 + (i*2)] = points[i].getX();
+            result[1 + (i*2)] = points[i].getY();
+        }
+
+        return result;
+    };
+    
+
+    /**
      * @returns {Number}
      */
     this.count = function() {

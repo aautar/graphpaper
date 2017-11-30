@@ -48,3 +48,22 @@ describe("PointSet.findPointClosestTo", function() {
     expect(closestPt.getY()).toBe(10);
   });  
 });
+
+
+describe("PointSet.toFloat64Array", function() {  
+  it("returns array with x,y points", function() {
+    const ps = new PointSet([
+      new Point(1, 2),
+      new Point(3, 4)
+    ]);
+
+    const typedArray = ps.toFloat64Array();
+
+    expect(typedArray.length).toBe(4);
+    expect(typedArray[0]).toBe(1);
+    expect(typedArray[1]).toBe(2);
+    expect(typedArray[2]).toBe(3);
+    expect(typedArray[3]).toBe(4);
+    
+  });  
+});
