@@ -453,6 +453,32 @@ function PointSet(_points) {
     };
 
     /**
+     * @returns {Float64Array}
+     */
+    this.toFloat64Array = function() {
+
+        const result = new Float64Array(points.length * 2);
+        for(let i=0; i<points.length; i++) {
+            result[0 + (i*2)] = points[i].getX();
+            result[1 + (i*2)] = points[i].getY();
+        }
+
+        return result;
+    };
+    
+    /**
+     * @param {Float64Array} _float64Array
+     */
+    this.fromFloat64Array = function(_float64Array) {
+        points.length = 0;
+        for(let i=0; i<_float64Array.length; i+=2) {
+            points.push(
+                new Point(_float64Array[i], _float64Array[i+1])
+            );
+        }
+    };    
+
+    /**
      * @returns {Number}
      */
     this.count = function() {
@@ -909,6 +935,7 @@ function Grid(_size, _color, _style) {
  * @param {Element} _canvasDomElement 
  * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
+ * @param {Worker} _pvMapWorker
  */
 function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWorker) {
 
@@ -977,9 +1004,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
 
     const connectorAnchorsSelected = [];
 
-    _pvMapWorker.postMessage({});
-    _pvMapWorker.postMessage({});
-
     /**
      * @returns {PointSet}
      */
@@ -1043,6 +1067,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
         const currentPointVisiblityMap = new PointVisibilityMap(
             getConnectorRoutingPoints(),
             getConnectorBoundaryLines()
+        );
+
+        const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
+        _pvMapWorker.postMessage(
+            {
+                "routingPoints": routingPointsFloat64Array.buffer
+            },
+            [
+                routingPointsFloat64Array.buffer
+            ]
         );
 
         objectConnectors.forEach(function(_c) {

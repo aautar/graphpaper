@@ -154,6 +154,16 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
             getConnectorBoundaryLines()
         );
 
+        const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
+        _pvMapWorker.postMessage(
+            {
+                "routingPoints": routingPointsFloat64Array.buffer
+            },
+            [
+                routingPointsFloat64Array.buffer
+            ]
+        );
+
         objectConnectors.forEach(function(_c) {
             _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
         });

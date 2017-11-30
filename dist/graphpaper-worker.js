@@ -277,6 +277,32 @@ function PointSet(_points) {
     };
 
     /**
+     * @returns {Float64Array}
+     */
+    this.toFloat64Array = function() {
+
+        const result = new Float64Array(points.length * 2);
+        for(let i=0; i<points.length; i++) {
+            result[0 + (i*2)] = points[i].getX();
+            result[1 + (i*2)] = points[i].getY();
+        }
+
+        return result;
+    };
+    
+    /**
+     * @param {Float64Array} _float64Array
+     */
+    this.fromFloat64Array = function(_float64Array) {
+        points.length = 0;
+        for(let i=0; i<_float64Array.length; i+=2) {
+            points.push(
+                new Point(_float64Array[i], _float64Array[i+1])
+            );
+        }
+    };    
+
+    /**
      * @returns {Number}
      */
     this.count = function() {
@@ -491,8 +517,15 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
     computePointsVisibility();
 }
 
-onmessage = function() {
-    console.log('yyyy');
+onmessage = function(_msg) {
+    const routingPointsArrayBuffer = _msg.data.routingPoints;
+    const routingPointsFloat64Array = new Float64Array(routingPointsArrayBuffer);
+
+    const routingPointsSet = new PointSet();
+    routingPointsSet.fromFloat64Array(routingPointsFloat64Array);
+
+
+    console.log(routingPointsSet.count());
 };
 
 exports.PointVisibilityMap = PointVisibilityMap;
