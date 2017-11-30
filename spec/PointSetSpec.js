@@ -67,3 +67,19 @@ describe("PointSet.toFloat64Array", function() {
     
   });  
 });
+
+describe("PointSet.fromFloat64Array", function() {  
+  it("creates PointSet from Float64Array coordinates", function() {
+
+    const typedArray = Float64Array.from([1,2,3,4]);
+
+    const ps = new PointSet();    
+    ps.fromFloat64Array(typedArray);
+    const pointSetArray = ps.toArray();
+
+    expect(ps.count()).toBe(2);
+    expect(pointSetArray[0].isEqual(new Point(1,2))).toBe(true);
+    expect(pointSetArray[1].isEqual(new Point(3,4))).toBe(true);
+    
+  });  
+});

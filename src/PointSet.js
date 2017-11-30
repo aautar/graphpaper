@@ -106,6 +106,17 @@ function PointSet(_points) {
         return result;
     };
     
+    /**
+     * @param {Float64Array} _float64Array
+     */
+    this.fromFloat64Array = function(_float64Array) {
+        points.length = 0;
+        for(let i=0; i<_float64Array.length; i+=2) {
+            points.push(
+                new Point(_float64Array[i], _float64Array[i+1])
+            );
+        }
+    };    
 
     /**
      * @returns {Number}
