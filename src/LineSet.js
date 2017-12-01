@@ -1,3 +1,4 @@
+import  {Point} from './Point';
 import  {Line} from './Line';
 
 /**
@@ -6,7 +7,7 @@ import  {Line} from './Line';
  * @param {Line[]|undefined} _lines
  */
 function LineSet(_lines) {
-    
+
     const self = this;
     
     /**
@@ -44,10 +45,42 @@ function LineSet(_lines) {
      * @returns {Number}
      */
     this.count = function() {
-        return points.length;
+        return lines.length;
+    };
+
+    /**
+     * @returns {Float64Array}
+     */
+    this.toFloat64Array = function() {
+        const result = new Float64Array(lines.length * 4);
+        for(let i=0; i<lines.length; i++) {
+            result[0 + (i*4)] = lines[i].getStartPoint().getX();
+            result[1 + (i*4)] = lines[i].getStartPoint().getY();
+            result[2 + (i*4)] = lines[i].getEndPoint().getX();
+            result[3 + (i*4)] = lines[i].getEndPoint().getY();
+        }
+
+        return result;
+    };
+
+    /**
+     * @param {Float64Array} _float64Array
+     */
+    this.fromFloat64Array = function(_float64Array) {
+        lines.length = 0;
+        for(let i=0; i<_float64Array.length; i+=4) {
+            lines.push(
+                new Line(
+                    new Point(_float64Array[i], _float64Array[i+1]),
+                    new Point(_float64Array[i+2], _float64Array[i+3])
+                )
+            );
+        }
     };
 
     if(_lines && Array.isArray(_lines)) {
         _lines.forEach(self.push);
     }  
 };
+
+export { LineSet };
