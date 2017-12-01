@@ -7,6 +7,9 @@ import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
  * @param {Point} _endPoint
  */
 function Line(_startPoint, _endPoint) {   
+
+    const self = this;
+
     /**
      * @returns {Point}
      */       
@@ -19,6 +22,18 @@ function Line(_startPoint, _endPoint) {
      */       
     this.getEndPoint = function() {
         return _endPoint;
+    };
+
+    /**
+     * @param {Line} _otherLine
+     * @returns {Boolean}
+     */
+    this.isEqual = function(_otherLine) {
+        if(self.getStartPoint().isEqual(_otherLine.getStartPoint()) && self.getEndPoint().isEqual(_otherLine.getEndPoint())) {
+            return true;
+        }
+
+        return false;
     };
 
     /**
