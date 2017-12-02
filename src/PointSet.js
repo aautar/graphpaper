@@ -4,9 +4,9 @@ import  {Line} from './Line';
 /**
  * Unique collection of Point objects
  * 
- * @param {Point[]|undefined} _points
+ * @param {Point[]|Float64Array|undefined} _pointsInput
  */
-function PointSet(_points) {
+function PointSet(_pointsInput) {
 
     const self = this;
 
@@ -109,7 +109,7 @@ function PointSet(_points) {
     /**
      * @param {Float64Array} _float64Array
      */
-    this.fromFloat64Array = function(_float64Array) {
+    const fromFloat64Array = function(_float64Array) {
         points.length = 0;
         for(let i=0; i<_float64Array.length; i+=2) {
             points.push(
@@ -125,9 +125,11 @@ function PointSet(_points) {
         return points.length;
     };
 
-    if(_points && Array.isArray(_points)) {
-        _points.forEach(self.push);
-    }
+    if(_pointsInput && Array.isArray(_pointsInput)) {
+        _pointsInput.forEach(self.push);
+    } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
+        fromFloat64Array(_pointsInput);
+    } else { }    
 
 };
 

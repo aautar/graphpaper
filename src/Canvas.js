@@ -149,25 +149,28 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
     };    
 
     const refreshAllConnectors = function() {
-        const anchorPoints = getConnectorAnchorPoints();
-        const currentPointVisiblityMap = new PointVisibilityMap(
+        /*const currentPointVisiblityMap = new PointVisibilityMap(
             getConnectorRoutingPoints(),
             getConnectorBoundaryLines()
-        );
+        );*/
 
         const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
+        const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
         _pvMapWorker.postMessage(
             {
-                "routingPoints": routingPointsFloat64Array.buffer
+                "routingPoints": routingPointsFloat64Array.buffer,
+                "boundaryLines": boundaryLinesFloat64Array.buffer
             },
             [
-                routingPointsFloat64Array.buffer
+                routingPointsFloat64Array.buffer,
+                boundaryLinesFloat64Array.buffer
             ]
         );
 
+        /*const anchorPoints = getConnectorAnchorPoints();
         objectConnectors.forEach(function(_c) {
             _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
-        });
+        });*/
     };
 
     var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {

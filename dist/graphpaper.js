@@ -379,9 +379,9 @@ function Rectangle(_left, _top, _right, _bottom)  {
 /**
  * Unique collection of Point objects
  * 
- * @param {Point[]|undefined} _points
+ * @param {Point[]|Float64Array|undefined} _pointsInput
  */
-function PointSet(_points) {
+function PointSet(_pointsInput) {
 
     const self = this;
 
@@ -500,10 +500,94 @@ function PointSet(_points) {
         return points.length;
     };
 
-    if(_points && Array.isArray(_points)) {
-        _points.forEach(self.push);
-    }
+    if(_pointsInput && Array.isArray(_pointsInput)) {
+        _pointsInput.forEach(self.push);
+    } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
+        self.fromFloat64Array(_pointsInput);
+    } else { }    
 
+}
+
+/**
+ * Unique collection of Line objects
+ * 
+ * @param {Line[]|undefined} _lines
+ */
+function LineSet(_lines) {
+
+    const self = this;
+    
+    /**
+     * @type {Line[]}
+     */
+    const lines = [];    
+
+    /**
+     * @param {Line} _newLine
+     */
+    this.push = function(_newLine) {
+        var alreadyInLinesArray = false;
+        lines.forEach(function(_existingLine) {
+            if(_newLine.isEqual(_existingLine)) {
+                alreadyInLinesArray = true;
+            }
+        });        
+
+        if(alreadyInLinesArray) {
+            return false;
+        }
+
+        lines.push(_newLine);
+        return true;
+    };
+  
+    /**
+     * @returns {Line[]}
+     */
+    this.toArray = function() {
+        return lines;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.count = function() {
+        return lines.length;
+    };
+
+    /**
+     * @returns {Float64Array}
+     */
+    this.toFloat64Array = function() {
+        const result = new Float64Array(lines.length * 4);
+        for(let i=0; i<lines.length; i++) {
+            result[0 + (i*4)] = lines[i].getStartPoint().getX();
+            result[1 + (i*4)] = lines[i].getStartPoint().getY();
+            result[2 + (i*4)] = lines[i].getEndPoint().getX();
+            result[3 + (i*4)] = lines[i].getEndPoint().getY();
+        }
+
+        return result;
+    };
+
+    /**
+     * @param {Float64Array} _float64Array
+     */
+    this.fromFloat64Array = function(_float64Array) {
+        lines.length = 0;
+        for(let i=0; i<_float64Array.length; i+=4) {
+            lines.push(
+                new Line(
+                    new Point(_float64Array[i], _float64Array[i+1]),
+                    new Point(_float64Array[i+2], _float64Array[i+3])
+                )
+            );
+        }
+    };
+
+    if(_lines && Array.isArray(_lines)) {
+        _lines.forEach(self.push);
+    }  
 }
 
 /**
@@ -701,7 +785,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 /**
  * 
  * @param {PointSet} _freePoints
- * @param {Line[]} _boundaryLines
+ * @param {LineSet} _boundaryLines
  */
 function PointVisibilityMap(_freePoints, _boundaryLines) {
 
@@ -717,8 +801,11 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      * @returns {Boolean}
      */
     const doesLineIntersectAnyBoundaryLines = function(_theLine) {
-        for(let b=0; b<_boundaryLines.length; b++) {
-            const intersectionType = _boundaryLines[b].computeIntersectionType(_theLine);
+
+        const lines = _boundaryLines.toArray();
+
+        for(let b=0; b<lines.length; b++) {
+            const intersectionType = lines[b].computeIntersectionType(_theLine);
             if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
                 return true;
             }
@@ -1041,22 +1128,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
         return pointSet;
     };
 
-    const getConnectorAnchorPoints = function() {
-        const pointSet = new PointSet();
-        
-        canvasObjects.forEach(function(_obj) {
-            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
-            objAnchorRoutingPoints.forEach(function(_rp) {
-                pointSet.push(_rp);
-            });
-        });
-
-        return pointSet;
-    };
-
-    /**
-     * @returns {Line[]}
-     */    
     const getConnectorBoundaryLines = function() {
         const boundaryLines = [];
         canvasObjects.forEach(function(_obj) {
@@ -1074,29 +1145,32 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
             });
         });
 
-        return boundaryLines;
+        return new LineSet(boundaryLines);
     };    
 
     const refreshAllConnectors = function() {
-        const anchorPoints = getConnectorAnchorPoints();
-        const currentPointVisiblityMap = new PointVisibilityMap(
+        /*const currentPointVisiblityMap = new PointVisibilityMap(
             getConnectorRoutingPoints(),
             getConnectorBoundaryLines()
-        );
+        );*/
 
         const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
+        const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
         _pvMapWorker.postMessage(
             {
-                "routingPoints": routingPointsFloat64Array.buffer
+                "routingPoints": routingPointsFloat64Array.buffer,
+                "boundaryLines": boundaryLinesFloat64Array.buffer
             },
             [
-                routingPointsFloat64Array.buffer
+                routingPointsFloat64Array.buffer,
+                boundaryLinesFloat64Array.buffer
             ]
         );
 
+        /*const anchorPoints = getConnectorAnchorPoints();
         objectConnectors.forEach(function(_c) {
             _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
-        });
+        });*/
     };
 
     var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {

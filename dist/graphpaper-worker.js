@@ -203,9 +203,9 @@ function Line(_startPoint, _endPoint) {
 /**
  * Unique collection of Point objects
  * 
- * @param {Point[]|undefined} _points
+ * @param {Point[]|Float64Array|undefined} _pointsInput
  */
-function PointSet(_points) {
+function PointSet(_pointsInput) {
 
     const self = this;
 
@@ -324,16 +324,18 @@ function PointSet(_points) {
         return points.length;
     };
 
-    if(_points && Array.isArray(_points)) {
-        _points.forEach(self.push);
-    }
+    if(_pointsInput && Array.isArray(_pointsInput)) {
+        _pointsInput.forEach(self.push);
+    } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
+        self.fromFloat64Array(_pointsInput);
+    } else { }    
 
 }
 
 /**
  * 
  * @param {PointSet} _freePoints
- * @param {Line[]} _boundaryLines
+ * @param {LineSet} _boundaryLines
  */
 function PointVisibilityMap(_freePoints, _boundaryLines) {
 
@@ -349,8 +351,11 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      * @returns {Boolean}
      */
     const doesLineIntersectAnyBoundaryLines = function(_theLine) {
-        for(let b=0; b<_boundaryLines.length; b++) {
-            const intersectionType = _boundaryLines[b].computeIntersectionType(_theLine);
+
+        const lines = _boundaryLines.toArray();
+
+        for(let b=0; b<lines.length; b++) {
+            const intersectionType = lines[b].computeIntersectionType(_theLine);
             if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
                 return true;
             }
@@ -535,9 +540,9 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
 onmessage = function(_msg) {
     const routingPointsArrayBuffer = _msg.data.routingPoints;
     const routingPointsFloat64Array = new Float64Array(routingPointsArrayBuffer);
+    const routingPointsSet = new PointSet(routingPointsFloat64Array);
 
-    const routingPointsSet = new PointSet();
-    routingPointsSet.fromFloat64Array(routingPointsFloat64Array);
+    
 
 };
 
