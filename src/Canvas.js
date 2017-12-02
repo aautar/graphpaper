@@ -3,6 +3,7 @@ import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
 import  {Line} from './Line';
 import  {PointSet} from './PointSet';
+import  {LineSet} from './LineSet';
 import  {Connector} from './Connector';
 import  {PointVisibilityMap} from './PointVisibilityMap';
 import  {GRID_STYLE, Grid} from './Grid';
@@ -144,7 +145,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
             });
         });
 
-        return boundaryLines;
+        return new LineSet(boundaryLines);
     };    
 
     const refreshAllConnectors = function() {

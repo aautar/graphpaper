@@ -1,12 +1,13 @@
 import {Point} from './Point';
 import {Line} from './Line';
 import {PointSet} from './PointSet';
+import {LineSet} from './LineSet';
 import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
 
 /**
  * 
  * @param {PointSet} _freePoints
- * @param {Line[]} _boundaryLines
+ * @param {LineSet} _boundaryLines
  */
 function PointVisibilityMap(_freePoints, _boundaryLines) {
 
@@ -22,8 +23,11 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      * @returns {Boolean}
      */
     const doesLineIntersectAnyBoundaryLines = function(_theLine) {
-        for(let b=0; b<_boundaryLines.length; b++) {
-            const intersectionType = _boundaryLines[b].computeIntersectionType(_theLine);
+
+        const lines = _boundaryLines.toArray();
+
+        for(let b=0; b<lines.length; b++) {
+            const intersectionType = lines[b].computeIntersectionType(_theLine);
             if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
                 return true;
             }
