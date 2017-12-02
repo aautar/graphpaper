@@ -23,19 +23,14 @@ describe("LineSet.toFloat64Array", function() {
     });
   });
   
-  describe("LineSet.fromFloat64Array", function() {  
+describe("LineSet constructor", function() {  
     it("creates LineSet from Float64Array coordinates", function() {
-  
-      const typedArray = Float64Array.from([1,2,3,4,5,6,7,8]);
-  
-      const ls = new LineSet();    
-      ls.fromFloat64Array(typedArray);
-      const lineSetArray = ls.toArray();
-  
-      expect(ls.count()).toBe(2);
-      expect(lineSetArray[0].isEqual(new Line(new Point(1, 2), new Point(3, 4)))).toBe(true);
-      expect(lineSetArray[1].isEqual(new Line(new Point(5, 6), new Point(7, 8)))).toBe(true);
-      
+        const typedArray = Float64Array.from([1,2,3,4,5,6,7,8]);
+        const ls = new LineSet(typedArray);
+
+        const lineSetArray = ls.toArray();
+        expect(ls.count()).toBe(2);
+        expect(lineSetArray[0].isEqual(new Line(new Point(1, 2), new Point(3, 4)))).toBe(true);
+        expect(lineSetArray[1].isEqual(new Line(new Point(5, 6), new Point(7, 8)))).toBe(true);
     });  
-  });
-  
+});

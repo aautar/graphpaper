@@ -308,7 +308,7 @@ function PointSet(_pointsInput) {
     /**
      * @param {Float64Array} _float64Array
      */
-    this.fromFloat64Array = function(_float64Array) {
+    const fromFloat64Array = function(_float64Array) {
         points.length = 0;
         for(let i=0; i<_float64Array.length; i+=2) {
             points.push(
@@ -327,7 +327,7 @@ function PointSet(_pointsInput) {
     if(_pointsInput && Array.isArray(_pointsInput)) {
         _pointsInput.forEach(self.push);
     } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
-        self.fromFloat64Array(_pointsInput);
+        fromFloat64Array(_pointsInput);
     } else { }    
 
 }

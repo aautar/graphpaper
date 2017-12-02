@@ -484,7 +484,7 @@ function PointSet(_pointsInput) {
     /**
      * @param {Float64Array} _float64Array
      */
-    this.fromFloat64Array = function(_float64Array) {
+    const fromFloat64Array = function(_float64Array) {
         points.length = 0;
         for(let i=0; i<_float64Array.length; i+=2) {
             points.push(
@@ -503,7 +503,7 @@ function PointSet(_pointsInput) {
     if(_pointsInput && Array.isArray(_pointsInput)) {
         _pointsInput.forEach(self.push);
     } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
-        self.fromFloat64Array(_pointsInput);
+        fromFloat64Array(_pointsInput);
     } else { }    
 
 }
@@ -511,9 +511,9 @@ function PointSet(_pointsInput) {
 /**
  * Unique collection of Line objects
  * 
- * @param {Line[]|undefined} _lines
+ * @param {Line[]|Float64Array|undefined} _linesInput
  */
-function LineSet(_lines) {
+function LineSet(_linesInput) {
 
     const self = this;
     
@@ -573,7 +573,7 @@ function LineSet(_lines) {
     /**
      * @param {Float64Array} _float64Array
      */
-    this.fromFloat64Array = function(_float64Array) {
+    const fromFloat64Array = function(_float64Array) {
         lines.length = 0;
         for(let i=0; i<_float64Array.length; i+=4) {
             lines.push(
@@ -585,9 +585,11 @@ function LineSet(_lines) {
         }
     };
 
-    if(_lines && Array.isArray(_lines)) {
-        _lines.forEach(self.push);
-    }  
+    if(_linesInput && Array.isArray(_linesInput)) {
+        _linesInput.forEach(self.push);
+    } else if(_linesInput && Object.prototype.toString.call(_linesInput) === '[object Float64Array]') {
+        fromFloat64Array(_linesInput);
+    } else { }    
 }
 
 /**
