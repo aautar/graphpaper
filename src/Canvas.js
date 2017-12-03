@@ -149,28 +149,48 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
     };    
 
     const refreshAllConnectors = function() {
-        /*const currentPointVisiblityMap = new PointVisibilityMap(
-            getConnectorRoutingPoints(),
-            getConnectorBoundaryLines()
-        );*/
+        const connectorDescriptors = [];
+        objectConnectors.forEach(function(_c) {
+            connectorDescriptors.push(_c.getDescriptor());
+        });
 
+        const anchorPointsFloat64Array = (getConnectorAnchorPoints()).toFloat64Array();
         const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
         const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
         _pvMapWorker.postMessage(
             {
+                "gridSize": self.getGridSize(),
+                "connectorDescriptors": connectorDescriptors,
                 "routingPoints": routingPointsFloat64Array.buffer,
-                "boundaryLines": boundaryLinesFloat64Array.buffer
+                "boundaryLines": boundaryLinesFloat64Array.buffer,
+                "anchorPoints": anchorPointsFloat64Array.buffer
             },
             [
                 routingPointsFloat64Array.buffer,
-                boundaryLinesFloat64Array.buffer
+                boundaryLinesFloat64Array.buffer,
+                anchorPointsFloat64Array.buffer
             ]
         );
+    };
 
-        /*const anchorPoints = getConnectorAnchorPoints();
+    _pvMapWorker.onmessage = function(_msg) {
+        const connectorDescriptors = _msg.data.connectorDescriptors;
+        const getConnectorDescriptorById = function(_id) {
+            for(let i=0; i<connectorDescriptors.length; i++) {
+                if(connectorDescriptors[i].id === _id) {
+                    return connectorDescriptors[i];
+                }
+            }
+
+            return null;
+        };
+
         objectConnectors.forEach(function(_c) {
-            _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
-        });*/
+            const descriptor = getConnectorDescriptorById(_c.getId());
+            if(descriptor) {
+                _c.refresh(descriptor.svgPath);
+            }
+        });
     };
 
     var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {

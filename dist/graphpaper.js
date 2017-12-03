@@ -708,6 +708,8 @@ function ConnectorAnchor(_domElement, _parentObject, _canvas) {
  */
 function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth) {
     
+    const self = this;
+
     if(typeof _strokeColor === 'undefined') {
         _strokeColor = '#000';
     }
@@ -721,13 +723,6 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      * @param {Point} _pt 
      * @returns {String}
      */
-    const pointToSvgLineTo = function(_pt) {
-        return "L" + _pt.getX() + " " + _pt.getY();
-    };
-
-    /**
-     * @type {Element}
-     */
     const pathElem = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
     pathElem.style.stroke = _strokeColor; 
@@ -737,42 +732,16 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      * @type {Element}
      */
     var svgDomElem = null;
-    
+
     this.appendPathToContainerDomElement = function() {
         svgDomElem = _containerDomElement.appendChild(pathElem);
     };
 
     /**
-     * @param {PointSet} _anchorPoints
-     * @param {PointVisibilityMap} _pointVisibilityMap
-     * @param {Number} _gridSize
+     * @param {String} _svgPath
      */
-    this.refresh = function(_anchorPoints, _pointVisibilityMap, _gridSize) {
-
-        const anchorStartCentroid = _anchorStart.getCentroid();
-        const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(anchorStartCentroid);
-
-        const adjustedStart = _anchorPoints
-            .findPointsCloseTo(anchorStartCentroid, anchorPointMinDist)
-            .findPointClosestTo(_anchorEnd.getCentroid());
-
-        const adjustedEnd = _anchorPoints
-            .findPointsCloseTo(_anchorEnd.getCentroid(), anchorPointMinDist)
-            .findPointClosestTo(anchorStartCentroid);
-
-        const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
-        const routingPointsArray = routingPoints.toArray();
-
-        const startCoordString = anchorStartCentroid.getX() + " " + anchorStartCentroid.getY();
-
-        const lineToString = [];
-        routingPointsArray.forEach(function(_rp) {
-            lineToString.push(pointToSvgLineTo(_rp));
-        });
-
-        lineToString.push(pointToSvgLineTo(_anchorEnd.getCentroid()));
-
-        pathElem.setAttribute("d", 'M' + startCoordString + lineToString.join(" "));
+    this.refresh = function(_svgPath) {
+        pathElem.setAttribute("d", _svgPath);
     };
 
     /**
@@ -781,6 +750,17 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     this.getId = function() {
         const objIds = [_anchorStart.getObjectId(), _anchorEnd.getObjectId()].sort();
         return  objIds.join(':');
+    };
+
+    /**
+     * @returns {Object}
+     */
+    this.getDescriptor = function() {
+        return {
+            "id": self.getId(),
+            "anchor_start_centroid": _anchorStart.getCentroid().toString(),
+            "anchor_end_centroid": _anchorEnd.getCentroid().toString(),
+        };
     };
 }
 
@@ -1130,6 +1110,22 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
         return pointSet;
     };
 
+    const getConnectorAnchorPoints = function() {
+        const pointSet = new PointSet();
+        
+        canvasObjects.forEach(function(_obj) {
+            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
+            objAnchorRoutingPoints.forEach(function(_rp) {
+                pointSet.push(_rp);
+            });
+        });
+
+        return pointSet;
+    };
+
+    /**
+     * @returns {Line[]}
+     */    
     const getConnectorBoundaryLines = function() {
         const boundaryLines = [];
         canvasObjects.forEach(function(_obj) {
@@ -1151,21 +1147,27 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
     };    
 
     const refreshAllConnectors = function() {
-        /*const currentPointVisiblityMap = new PointVisibilityMap(
-            getConnectorRoutingPoints(),
-            getConnectorBoundaryLines()
-        );*/
+        const connectorDescriptors = [];
+        objectConnectors.forEach(function(_c) {
+            connectorDescriptors.push(_c.getDescriptor());
+        });
 
+
+        const anchorPointsFloat64Array = (getConnectorAnchorPoints()).toFloat64Array();
         const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
         const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
         _pvMapWorker.postMessage(
             {
+                "gridSize": self.getGridSize(),
+                "connectorDescriptors": connectorDescriptors,
                 "routingPoints": routingPointsFloat64Array.buffer,
-                "boundaryLines": boundaryLinesFloat64Array.buffer
+                "boundaryLines": boundaryLinesFloat64Array.buffer,
+                "anchorPoints": anchorPointsFloat64Array.buffer
             },
             [
                 routingPointsFloat64Array.buffer,
-                boundaryLinesFloat64Array.buffer
+                boundaryLinesFloat64Array.buffer,
+                anchorPointsFloat64Array.buffer
             ]
         );
 
@@ -1173,6 +1175,26 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
         objectConnectors.forEach(function(_c) {
             _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
         });*/
+    };
+
+    _pvMapWorker.onmessage = function(_msg) {
+        const connectorDescriptors = _msg.data.connectorDescriptors;
+        const getConnectorDescriptorById = function(_id) {
+            for(let i=0; i<connectorDescriptors.length; i++) {
+                if(connectorDescriptors[i].id === _id) {
+                    return connectorDescriptors[i];
+                }
+            }
+
+            return null;
+        };
+
+        objectConnectors.forEach(function(_c) {
+            const descriptor = getConnectorDescriptorById(_c.getId());
+            if(descriptor) {
+                _c.refresh(descriptor.svgPath);
+            }
+        });
     };
 
     var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {
