@@ -1019,9 +1019,9 @@ function Grid(_size, _color, _style) {
  * @param {Element} _canvasDomElement 
  * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
- * @param {Worker} _pvMapWorker
+ * @param {Worker} _connectorRoutingWorker
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWorker) {
+function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connectorRoutingWorker) {
 
     const self = this;
 
@@ -1152,11 +1152,10 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
             connectorDescriptors.push(_c.getDescriptor());
         });
 
-
         const anchorPointsFloat64Array = (getConnectorAnchorPoints()).toFloat64Array();
         const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
         const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
-        _pvMapWorker.postMessage(
+        _connectorRoutingWorker.postMessage(
             {
                 "gridSize": self.getGridSize(),
                 "connectorDescriptors": connectorDescriptors,
@@ -1170,14 +1169,9 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _pvMapWork
                 anchorPointsFloat64Array.buffer
             ]
         );
-
-        /*const anchorPoints = getConnectorAnchorPoints();
-        objectConnectors.forEach(function(_c) {
-            _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
-        });*/
     };
 
-    _pvMapWorker.onmessage = function(_msg) {
+    _connectorRoutingWorker.onmessage = function(_msg) {
         const connectorDescriptors = _msg.data.connectorDescriptors;
         const getConnectorDescriptorById = function(_id) {
             for(let i=0; i<connectorDescriptors.length; i++) {

@@ -9,11 +9,11 @@ export default [
     }
   },
   {
-    input: 'src/GraphPaperWorker.js',
+    input: 'src/ConnectorRoutingWorker.js',
     output: {
       format: 'iife',
-      file: 'dist/graphpaper-worker.js',
-      name: 'GraphPaperWorker'
+      file: 'dist/connector-routing-worker.js',
+      name: 'ConnectorRoutingWorker'
     }
   }  
 ];
