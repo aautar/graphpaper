@@ -1,12 +1,13 @@
 import {Point} from '../src/Point'
 import {PointSet} from '../src/PointSet'
 import {Line} from '../src/Line'
+import {LineSet} from '../src/LineSet'
 import {PointVisibilityMap} from '../src/PointVisibilityMap'
 
 describe("PointVisibilityMap.findVisiblePointClosestTo", function() {
 
     it("returns null when there are no points in PointVisibilityMap", function() {
-        const pointVisibilityMap = new PointVisibilityMap(new PointSet(), []);
+        const pointVisibilityMap = new PointVisibilityMap(new PointSet(), new LineSet());
         expect(pointVisibilityMap.findVisiblePointClosestTo(new Point(-100, 200))).toBe(null);
     });
 
@@ -17,9 +18,11 @@ describe("PointVisibilityMap.findVisiblePointClosestTo", function() {
 
         const pointVisibilityMap = new PointVisibilityMap(
             freePoints, 
-            [
-                new Line(new Point(50,0), new Point(50,100))
-            ]
+            new LineSet(
+                [
+                    new Line(new Point(50,0), new Point(50,100))
+                ]
+            )
         );
 
         expect(pointVisibilityMap.findVisiblePointClosestTo(new Point(60, 60))).toBe(null);
@@ -32,9 +35,11 @@ describe("PointVisibilityMap.findVisiblePointClosestTo", function() {
 
         const pointVisibilityMap = new PointVisibilityMap(
             freePoints, 
-            [
-                new Line(new Point(50,0), new Point(50,100))
-            ]
+            new LineSet(
+                [
+                    new Line(new Point(50,0), new Point(50,100))
+                ]
+            )
         );
 
         const closestVisiblePoint = pointVisibilityMap.findVisiblePointClosestTo(new Point(10, 10));
@@ -50,9 +55,11 @@ describe("PointVisibilityMap.findVisiblePointClosestTo", function() {
 
         const pointVisibilityMap = new PointVisibilityMap(
             freePoints, 
-            [
-                new Line(new Point(50,0), new Point(50,100))
-            ]
+            new LineSet(
+                [
+                    new Line(new Point(50,0), new Point(50,100))
+                ]
+            )
         );
 
         const closestVisiblePoint = pointVisibilityMap.findVisiblePointClosestTo(new Point(14, 14));
@@ -68,7 +75,7 @@ describe("PointVisibilityMap.computeRoute", function() {
         freePoints.push(new Point(15, 15));
         freePoints.push(new Point(25, 25));
 
-        const pointVisibilityMap = new PointVisibilityMap(freePoints, []);        
+        const pointVisibilityMap = new PointVisibilityMap(freePoints, new LineSet());        
 
         const pointsInRoute = pointVisibilityMap.computeRoute(
             new Point(14,14),
@@ -94,9 +101,11 @@ describe("PointVisibilityMap.computeRoute", function() {
 
         const pointVisibilityMap = new PointVisibilityMap(
             freePoints, 
-            [
-                new Line(new Point(50,0), new Point(50,100))
-            ]
+            new LineSet(
+                [
+                    new Line(new Point(50,0), new Point(50,100))
+                ]
+            )
         );
 
         const pointsInRoute = pointVisibilityMap.computeRoute(
@@ -120,9 +129,11 @@ describe("PointVisibilityMap.computeRoute", function() {
 
         const pointVisibilityMap = new PointVisibilityMap(
             freePoints, 
-            [
-                new Line(new Point(50,0), new Point(50,100))
-            ]
+            new LineSet(
+                [
+                    new Line(new Point(50,0), new Point(50,100))
+                ]
+            )
         );
 
         const pointsInRoute = pointVisibilityMap.computeRoute(

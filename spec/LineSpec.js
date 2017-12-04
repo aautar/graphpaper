@@ -9,6 +9,15 @@ describe("Line.getLength", function() {
   });
 });
 
+describe("Line.isEqual", function() {
+  it("returns true if start and end points of line are the same", function() {
+    const lineA = new Line(new Point(100,200), new Point(300,400));
+    const lineB = new Line(new Point(100,200), new Point(300,400));
+
+    expect(lineA.isEqual(lineB)).toBe(true);
+  });
+});
+
 describe("Line.computeIntersection", function() {
  
   it("returns LINE_INTERSECTION_TYPE.LINESEG intersection type for intersection on line", function() {

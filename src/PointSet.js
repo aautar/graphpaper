@@ -4,9 +4,9 @@ import  {Line} from './Line';
 /**
  * Unique collection of Point objects
  * 
- * @param {Point[]|undefined} _points
+ * @param {Point[]|Float64Array|undefined} _pointsInput
  */
-function PointSet(_points) {
+function PointSet(_pointsInput) {
 
     const self = this;
 
@@ -93,15 +93,43 @@ function PointSet(_points) {
     };
 
     /**
+     * @returns {Float64Array}
+     */
+    this.toFloat64Array = function() {
+
+        const result = new Float64Array(points.length * 2);
+        for(let i=0; i<points.length; i++) {
+            result[0 + (i*2)] = points[i].getX();
+            result[1 + (i*2)] = points[i].getY();
+        }
+
+        return result;
+    };
+    
+    /**
+     * @param {Float64Array} _float64Array
+     */
+    const fromFloat64Array = function(_float64Array) {
+        points.length = 0;
+        for(let i=0; i<_float64Array.length; i+=2) {
+            points.push(
+                new Point(_float64Array[i], _float64Array[i+1])
+            );
+        }
+    };    
+
+    /**
      * @returns {Number}
      */
     this.count = function() {
         return points.length;
     };
 
-    if(_points && Array.isArray(_points)) {
-        _points.forEach(self.push);
-    }
+    if(_pointsInput && Array.isArray(_pointsInput)) {
+        _pointsInput.forEach(self.push);
+    } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
+        fromFloat64Array(_pointsInput);
+    } else { }    
 
 };
 

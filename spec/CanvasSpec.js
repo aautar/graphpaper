@@ -4,25 +4,25 @@ import {GRID_STYLE,Grid} from '../src/Grid.js';
 
 describe("Canvas", function() {
 
-    function makeCanvasObject(_id, _x, _y, _width, _height) {
-        const mockDomElem = {
-            addEventListener: function() { }
-        };
+  function makeCanvasObject(_id, _x, _y, _width, _height) {
+      const mockDomElem = {
+          addEventListener: function() { }
+      };
 
-        const o = new CanvasObject(
-            _id,
-            _x, 
-            _y, 
-            _width, 
-            _height, 
-            {}, 
-            mockDomElem, 
-            mockDomElem, 
-            mockDomElem
-        );
+      const o = new CanvasObject(
+          _id,
+          _x, 
+          _y, 
+          _width, 
+          _height, 
+          {}, 
+          mockDomElem, 
+          mockDomElem, 
+          mockDomElem
+      );
 
-        return o;
-    };
+      return o;
+  };
 
   const canvasDomElement = {
     appendChild: () => {},
@@ -49,14 +49,18 @@ describe("Canvas", function() {
     },
   };
 
+  const pvWorkerMock = {
+    postMessage: function() { }
+  };
+
   it("snapToGrid snaps coordinate to grid", function() {
-    const canvas = new Canvas(canvasDomElement, {}, window);
+    const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
     const snappedValue = canvas.snapToGrid(13);
     expect(snappedValue).toBe(canvas.getGridSize() - 1);
   });
 
   it("getObjectById returns added object", function() {
-    const canvas = new Canvas(canvasDomElement, {}, window);
+    const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
     var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
     canvas.addObject(o);
 
@@ -65,7 +69,7 @@ describe("Canvas", function() {
   });
 
   it("getObjectById returns null for missing object", function() {
-    const canvas = new Canvas(canvasDomElement, {}, window);
+    const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
 
     var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
     canvas.addObject(o);
@@ -75,7 +79,7 @@ describe("Canvas", function() {
   });  
 
   it("getObjectsAroundPoint returns nearby object within box-radius of 1px", function() {
-    const canvas = new Canvas(canvasDomElement, {}, window);
+    const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
 
     var mockDomElem = {
       addEventListener: function() { }
@@ -93,7 +97,7 @@ describe("Canvas", function() {
 
   it("getObjectsAroundPoint does not return objects outside box-radius of 1px", function() {
     
-    const canvas = new Canvas(canvasDomElement, {}, window);
+    const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
 
     var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
     canvas.addObject(o);
@@ -104,7 +108,7 @@ describe("Canvas", function() {
 
   it("setGrid sets the repeating tile, grid, background on the Canvas DOM element", function() {
     
-    const canvas = new Canvas(canvasDomElement, {}, window);
+    const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
     canvas.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
 
     expect(canvasDomElement.style.background).toBe("url('data:image/svg+xml;base64,a') repeat");

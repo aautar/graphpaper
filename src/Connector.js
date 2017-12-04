@@ -39,42 +39,16 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      * @type {Element}
      */
     var svgDomElem = null;
-    
+
     this.appendPathToContainerDomElement = function() {
         svgDomElem = _containerDomElement.appendChild(pathElem);
     };
 
     /**
-     * @param {PointSet} _anchorPoints
-     * @param {PointVisibilityMap} _pointVisibilityMap
-     * @param {Number} _gridSize
+     * @param {String} _svgPath
      */
-    this.refresh = function(_anchorPoints, _pointVisibilityMap, _gridSize) {
-
-        const anchorStartCentroid = _anchorStart.getCentroid();
-        const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(anchorStartCentroid);
-
-        const adjustedStart = _anchorPoints
-            .findPointsCloseTo(anchorStartCentroid, anchorPointMinDist)
-            .findPointClosestTo(_anchorEnd.getCentroid());
-
-        const adjustedEnd = _anchorPoints
-            .findPointsCloseTo(_anchorEnd.getCentroid(), anchorPointMinDist)
-            .findPointClosestTo(anchorStartCentroid);
-
-        const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
-        const routingPointsArray = routingPoints.toArray();
-
-        const startCoordString = anchorStartCentroid.getX() + " " + anchorStartCentroid.getY();
-
-        const lineToString = [];
-        routingPointsArray.forEach(function(_rp) {
-            lineToString.push(pointToSvgLineTo(_rp));
-        });
-
-        lineToString.push(pointToSvgLineTo(_anchorEnd.getCentroid()));
-
-        pathElem.setAttribute("d", 'M' + startCoordString + lineToString.join(" "));
+    this.refresh = function(_svgPath) {
+        pathElem.setAttribute("d", _svgPath);
     };
 
     /**
@@ -83,6 +57,17 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     this.getId = function() {
         const objIds = [_anchorStart.getObjectId(), _anchorEnd.getObjectId()].sort();
         return  objIds.join(':');
+    };
+
+    /**
+     * @returns {Object}
+     */
+    this.getDescriptor = function() {
+        return {
+            "id": self.getId(),
+            "anchor_start_centroid": _anchorStart.getCentroid().toString(),
+            "anchor_end_centroid": _anchorEnd.getCentroid().toString(),
+        };
     };
 };
 

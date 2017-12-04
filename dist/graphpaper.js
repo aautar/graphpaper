@@ -1,4 +1,4 @@
-(function (exports) {
+var GraphPaper = (function (exports) {
 'use strict';
 
 /**
@@ -109,6 +109,9 @@ function LineIntersection(_type, _intersectionPoint) {
  * @param {Point} _endPoint
  */
 function Line(_startPoint, _endPoint) {   
+
+    const self = this;
+
     /**
      * @returns {Point}
      */       
@@ -121,6 +124,18 @@ function Line(_startPoint, _endPoint) {
      */       
     this.getEndPoint = function() {
         return _endPoint;
+    };
+
+    /**
+     * @param {Line} _otherLine
+     * @returns {Boolean}
+     */
+    this.isEqual = function(_otherLine) {
+        if(self.getStartPoint().isEqual(_otherLine.getStartPoint()) && self.getEndPoint().isEqual(_otherLine.getEndPoint())) {
+            return true;
+        }
+
+        return false;
     };
 
     /**
@@ -216,11 +231,6 @@ function Line(_startPoint, _endPoint) {
  */
 function Rectangle(_left, _top, _right, _bottom)  {
     
-    const self=this;
-
-    /**
-     * @returns {Number}
-     */
     this.getLeft = function() {
         return _left;
     };
@@ -369,9 +379,9 @@ function Rectangle(_left, _top, _right, _bottom)  {
 /**
  * Unique collection of Point objects
  * 
- * @param {Point[]|undefined} _points
+ * @param {Point[]|Float64Array|undefined} _pointsInput
  */
-function PointSet(_points) {
+function PointSet(_pointsInput) {
 
     const self = this;
 
@@ -458,16 +468,128 @@ function PointSet(_points) {
     };
 
     /**
+     * @returns {Float64Array}
+     */
+    this.toFloat64Array = function() {
+
+        const result = new Float64Array(points.length * 2);
+        for(let i=0; i<points.length; i++) {
+            result[0 + (i*2)] = points[i].getX();
+            result[1 + (i*2)] = points[i].getY();
+        }
+
+        return result;
+    };
+    
+    /**
+     * @param {Float64Array} _float64Array
+     */
+    const fromFloat64Array = function(_float64Array) {
+        points.length = 0;
+        for(let i=0; i<_float64Array.length; i+=2) {
+            points.push(
+                new Point(_float64Array[i], _float64Array[i+1])
+            );
+        }
+    };    
+
+    /**
      * @returns {Number}
      */
     this.count = function() {
         return points.length;
     };
 
-    if(_points && Array.isArray(_points)) {
-        _points.forEach(self.push);
-    }
+    if(_pointsInput && Array.isArray(_pointsInput)) {
+        _pointsInput.forEach(self.push);
+    } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
+        fromFloat64Array(_pointsInput);
+    } else { }    
 
+}
+
+/**
+ * Unique collection of Line objects
+ * 
+ * @param {Line[]|Float64Array|undefined} _linesInput
+ */
+function LineSet(_linesInput) {
+
+    const self = this;
+    
+    /**
+     * @type {Line[]}
+     */
+    const lines = [];    
+
+    /**
+     * @param {Line} _newLine
+     */
+    this.push = function(_newLine) {
+        var alreadyInLinesArray = false;
+        lines.forEach(function(_existingLine) {
+            if(_newLine.isEqual(_existingLine)) {
+                alreadyInLinesArray = true;
+            }
+        });        
+
+        if(alreadyInLinesArray) {
+            return false;
+        }
+
+        lines.push(_newLine);
+        return true;
+    };
+  
+    /**
+     * @returns {Line[]}
+     */
+    this.toArray = function() {
+        return lines;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.count = function() {
+        return lines.length;
+    };
+
+    /**
+     * @returns {Float64Array}
+     */
+    this.toFloat64Array = function() {
+        const result = new Float64Array(lines.length * 4);
+        for(let i=0; i<lines.length; i++) {
+            result[0 + (i*4)] = lines[i].getStartPoint().getX();
+            result[1 + (i*4)] = lines[i].getStartPoint().getY();
+            result[2 + (i*4)] = lines[i].getEndPoint().getX();
+            result[3 + (i*4)] = lines[i].getEndPoint().getY();
+        }
+
+        return result;
+    };
+
+    /**
+     * @param {Float64Array} _float64Array
+     */
+    const fromFloat64Array = function(_float64Array) {
+        lines.length = 0;
+        for(let i=0; i<_float64Array.length; i+=4) {
+            lines.push(
+                new Line(
+                    new Point(_float64Array[i], _float64Array[i+1]),
+                    new Point(_float64Array[i+2], _float64Array[i+3])
+                )
+            );
+        }
+    };
+
+    if(_linesInput && Array.isArray(_linesInput)) {
+        _linesInput.forEach(self.push);
+    } else if(_linesInput && Object.prototype.toString.call(_linesInput) === '[object Float64Array]') {
+        fromFloat64Array(_linesInput);
+    } else { }    
 }
 
 /**
@@ -601,13 +723,6 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      * @param {Point} _pt 
      * @returns {String}
      */
-    const pointToSvgLineTo = function(_pt) {
-        return "L" + _pt.getX() + " " + _pt.getY();
-    };
-
-    /**
-     * @type {Element}
-     */
     const pathElem = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
     pathElem.style.stroke = _strokeColor; 
@@ -617,42 +732,16 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      * @type {Element}
      */
     var svgDomElem = null;
-    
+
     this.appendPathToContainerDomElement = function() {
         svgDomElem = _containerDomElement.appendChild(pathElem);
     };
 
     /**
-     * @param {PointSet} _anchorPoints
-     * @param {PointVisibilityMap} _pointVisibilityMap
-     * @param {Number} _gridSize
+     * @param {String} _svgPath
      */
-    this.refresh = function(_anchorPoints, _pointVisibilityMap, _gridSize) {
-
-        const anchorStartCentroid = _anchorStart.getCentroid();
-        const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(anchorStartCentroid);
-
-        const adjustedStart = _anchorPoints
-            .findPointsCloseTo(anchorStartCentroid, anchorPointMinDist)
-            .findPointClosestTo(_anchorEnd.getCentroid());
-
-        const adjustedEnd = _anchorPoints
-            .findPointsCloseTo(_anchorEnd.getCentroid(), anchorPointMinDist)
-            .findPointClosestTo(anchorStartCentroid);
-
-        const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
-        const routingPointsArray = routingPoints.toArray();
-
-        const startCoordString = anchorStartCentroid.getX() + " " + anchorStartCentroid.getY();
-
-        const lineToString = [];
-        routingPointsArray.forEach(function(_rp) {
-            lineToString.push(pointToSvgLineTo(_rp));
-        });
-
-        lineToString.push(pointToSvgLineTo(_anchorEnd.getCentroid()));
-
-        pathElem.setAttribute("d", 'M' + startCoordString + lineToString.join(" "));
+    this.refresh = function(_svgPath) {
+        pathElem.setAttribute("d", _svgPath);
     };
 
     /**
@@ -662,12 +751,23 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         const objIds = [_anchorStart.getObjectId(), _anchorEnd.getObjectId()].sort();
         return  objIds.join(':');
     };
+
+    /**
+     * @returns {Object}
+     */
+    this.getDescriptor = function() {
+        return {
+            "id": self.getId(),
+            "anchor_start_centroid": _anchorStart.getCentroid().toString(),
+            "anchor_end_centroid": _anchorEnd.getCentroid().toString(),
+        };
+    };
 }
 
 /**
  * 
  * @param {PointSet} _freePoints
- * @param {Line[]} _boundaryLines
+ * @param {LineSet} _boundaryLines
  */
 function PointVisibilityMap(_freePoints, _boundaryLines) {
 
@@ -683,8 +783,11 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      * @returns {Boolean}
      */
     const doesLineIntersectAnyBoundaryLines = function(_theLine) {
-        for(let b=0; b<_boundaryLines.length; b++) {
-            const intersectionType = _boundaryLines[b].computeIntersectionType(_theLine);
+
+        const lines = _boundaryLines.toArray();
+
+        for(let b=0; b<lines.length; b++) {
+            const intersectionType = lines[b].computeIntersectionType(_theLine);
             if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
                 return true;
             }
@@ -916,8 +1019,9 @@ function Grid(_size, _color, _style) {
  * @param {Element} _canvasDomElement 
  * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
+ * @param {Worker} _connectorRoutingWorker
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
+function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connectorRoutingWorker) {
 
     const self = this;
 
@@ -964,15 +1068,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         return currentPointVisiblityMap;
     };
 
-    var useTranslate3d = false; // better performance w/o it
     const canvasObjects = [];
     const objectConnectors = [];
 
     var objectIdBeingDragged = null;
     var objectIdBeingResized = null;
     
-    var objectDragX = 0.0;
-    var objectDragY = 0.0;
     var objectDragStartX = 0.0;
     var objectDragStartY = 0.0;
 
@@ -986,7 +1087,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
     var invScaleFactor = 1.0;
 
     const connectorAnchorsSelected = [];
-
 
     /**
      * @returns {PointSet}
@@ -1043,18 +1143,51 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
             });
         });
 
-        return boundaryLines;
+        return new LineSet(boundaryLines);
     };    
 
     const refreshAllConnectors = function() {
-        const anchorPoints = getConnectorAnchorPoints();
-        const currentPointVisiblityMap = new PointVisibilityMap(
-            getConnectorRoutingPoints(),
-            getConnectorBoundaryLines()
+        const connectorDescriptors = [];
+        objectConnectors.forEach(function(_c) {
+            connectorDescriptors.push(_c.getDescriptor());
+        });
+
+        const anchorPointsFloat64Array = (getConnectorAnchorPoints()).toFloat64Array();
+        const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
+        const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
+        _connectorRoutingWorker.postMessage(
+            {
+                "gridSize": self.getGridSize(),
+                "connectorDescriptors": connectorDescriptors,
+                "routingPoints": routingPointsFloat64Array.buffer,
+                "boundaryLines": boundaryLinesFloat64Array.buffer,
+                "anchorPoints": anchorPointsFloat64Array.buffer
+            },
+            [
+                routingPointsFloat64Array.buffer,
+                boundaryLinesFloat64Array.buffer,
+                anchorPointsFloat64Array.buffer
+            ]
         );
+    };
+
+    _connectorRoutingWorker.onmessage = function(_msg) {
+        const connectorDescriptors = _msg.data.connectorDescriptors;
+        const getConnectorDescriptorById = function(_id) {
+            for(let i=0; i<connectorDescriptors.length; i++) {
+                if(connectorDescriptors[i].id === _id) {
+                    return connectorDescriptors[i];
+                }
+            }
+
+            return null;
+        };
 
         objectConnectors.forEach(function(_c) {
-            _c.refresh(anchorPoints, currentPointVisiblityMap, self.getGridSize());
+            const descriptor = getConnectorDescriptorById(_c.getId());
+            if(descriptor) {
+                _c.refresh(descriptor.svgPath);
+            }
         });
     };
 
@@ -1359,8 +1492,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
      */
     const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {       
         objectIdBeingDragged = _obj.getId();
-        objectDragX = _x;
-        objectDragY = _y;
         objectDragStartX = _x;
         objectDragStartY = _y;        
     };    
@@ -1375,9 +1506,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
         const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
         const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
         
-        objectDragX = mx;
-        objectDragY = my;		
-
         obj.translate(mx, my);
 
         // refresh connectors
@@ -1461,9 +1589,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window) {
                 if(objectIdBeingDragged !== null) {
                     handleMoveEnd(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
                 }            
-
-                if(objectIdBeingResized !== null) {
-                }
 
                 objectIdBeingDragged = null;
                 objectIdBeingResized = null;
@@ -1898,20 +2023,6 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Map<Cluster, Number>} _clusterToObjectCountMap 
      * @returns {Cluster[]}
      */
-    const getClusterArrayFromClusterMap = function(_clusterToObjectCountMap) {
-        const resultSet = [];
-        _clusterToObjectCountMap.keys().forEach(function(_cluster) {
-            resultSet.push(_cluster);
-        });
-
-        return resultSet;
-    };
-
-    /**
-     * @param {CanvasObject} _objA
-     * @param {CanvasObject} _objB
-     * @returns {Boolean}
-     */
     this.areObjectsClose = function(_objA, _objB) {
         const nA = new Rectangle(_objA.x-_boxExtentOffset, _objA.y-_boxExtentOffset, _objA.x + _objA.width + _boxExtentOffset, _objA.y + _objA.height + _boxExtentOffset);
         const nB = new Rectangle(_objB.x-_boxExtentOffset, _objB.y-_boxExtentOffset, _objB.x + _objB.width + _boxExtentOffset, _objB.y + _objB.height + _boxExtentOffset);
@@ -2080,4 +2191,6 @@ exports.PointVisibilityMap = PointVisibilityMap;
 exports.GRID_STYLE = GRID_STYLE;
 exports.Grid = Grid;
 
-}((this.GraphPaper = this.GraphPaper || {})));
+return exports;
+
+}({}));
