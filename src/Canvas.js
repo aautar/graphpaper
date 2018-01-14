@@ -426,15 +426,15 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
 
         // touchend on canvas, logic to see if there was a double-tap
         _canvasDomElement.addEventListener('touchend', function(e) {
-            if(e.originalEvent.changedTouches.length <= 0) {
+            if(e.changedTouches.length <= 0) {
                 return false; // we have nothing to work with
             }
 
             var dblTapDetected = false;  // flag specifying if we detected a double-tap
 
             // Position of the touch
-            var x = e.originalEvent.changedTouches[0].pageX;
-            var y = e.originalEvent.changedTouches[0].pageY;
+            var x = e.changedTouches[0].pageX;
+            var y = e.changedTouches[0].pageY;
 
             var now = new Date().getTime();
 
