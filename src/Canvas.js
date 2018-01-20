@@ -570,6 +570,9 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (objectIdBeingDragged !== null) {
                 handleMove(e.touches[0].pageX * invScaleFactor, e.touches[0].pageY * invScaleFactor);       
+
+                // if we're transforming an object, make sure we don't scroll the canvas
+                e.preventDefault();
             }
         });
 

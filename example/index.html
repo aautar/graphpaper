@@ -58,6 +58,7 @@
             new Worker('../dist/connector-routing-worker.js')
         );
 
+        canvas.initInteractionHandlers();
         canvas.initTransformationHandlers();
 
         canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
