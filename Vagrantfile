@@ -40,6 +40,8 @@ server
 }
 EOF
 
+sudo sed -i 's/sendfile on;/sendfile off;/' /etc/nginx/nginx.conf
+
 sudo service nginx restart
 
 SCRIPT
