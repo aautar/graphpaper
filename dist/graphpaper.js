@@ -1258,6 +1258,20 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
     };
 
     /**
+     * @returns {Number}
+     */
+    this.getWidth = function() {
+        return _canvasDomElement.offsetWidth;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.getHeight = function() {
+        return _canvasDomElement.offsetHeight;
+    };    
+
+    /**
      * @param {Number} _x
      * @param {Number} _y
      * @returns {CanvasObject[]}
