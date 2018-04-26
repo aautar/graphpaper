@@ -213,13 +213,24 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
 
     /**
      * @param {Number} _scaleFactor
+     * @param {Boolean} _adjustFactorToPreserveIntegerGrid=false
      * @returns {Number}
      */
-    this.setScaleFactor = function(_scaleFactor) {
+    this.setScaleFactor = function(_scaleFactor, _adjustFactorToPreserveIntegerGrid) {
+        
+        _adjustFactorToPreserveIntegerGrid = _adjustFactorToPreserveIntegerGrid || false;
+
+        if(_adjustFactorToPreserveIntegerGrid) {
+            const newGridSize = self.getGridSize() * _scaleFactor;
+            const roundedGridSize = Math.round(newGridSize);
+            _scaleFactor = roundedGridSize / self.getGridSize();
+        }
+
+        _canvasDomElement.style.transform = "scale3d(" + _scaleFactor + "," + _scaleFactor + "," + _scaleFactor + ")";
         scaleFactor = _scaleFactor;
         invScaleFactor = 1.0 / scaleFactor;
-        _canvasDomElement.style.transform = "scale3d(" + scaleFactor + "," + scaleFactor + "," + scaleFactor + ")";
-        return scaleFactor;
+
+        return _scaleFactor;
     };
 
     /**
