@@ -1036,37 +1036,17 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
      */
     var grid = null;
 
-    /**
-     * @param {Grid} _grid
-     */
-    this.setGrid = function(_grid) {
-        grid = _grid;
-        _canvasDomElement.style.background = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "') repeat";
-    };
-    self.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
+    var transitionCss = "transform 0.55s ease-in-out, transform-origin 0.55s ease-in-out";
 
-    /**
-     * @returns {Grid}
-     */
-    this.getGrid = function() {
-        return grid;
-    };
+    var transformOriginX = 0;
+    var transformOriginY = 0;
 
-    /**
-     * @returns {Number}
-     */
-    this.getGridSize = function() {
-        return grid.getSize();
-    };
+    var translateX = 0;
+    var translateY = 0;
+    var scaleFactor = 1.0;
+    var invScaleFactor = 1.0;    
 
     var currentPointVisiblityMap = null;
-
-    /**
-     * @returns {PointVisibilityMap}
-     */
-    this.getCurrentPointVisibilityMap = function() {
-        return currentPointVisiblityMap;
-    };
 
     const canvasObjects = [];
     const objectConnectors = [];
@@ -1083,10 +1063,36 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
         lastTouchTime: null
     };
 
-    var scaleFactor = 1.0;
-    var invScaleFactor = 1.0;
-
     const connectorAnchorsSelected = [];
+
+    /**
+     * @returns {PointVisibilityMap}
+     */
+    this.getCurrentPointVisibilityMap = function() {
+        return currentPointVisiblityMap;
+    };
+
+    /**
+     * @param {Grid} _grid
+     */
+    this.setGrid = function(_grid) {
+        grid = _grid;
+        _canvasDomElement.style.background = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "') repeat";
+    };
+
+    /**
+     * @returns {Grid}
+     */
+    this.getGrid = function() {
+        return grid;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    this.getGridSize = function() {
+        return grid.getSize();
+    };
 
     /**
      * @returns {PointSet}
@@ -1209,7 +1215,59 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
         makeNewConnector = _newConnectorFactory;
     };    
 
+
     /**
+     * @returns {String}
+     */
+    this.getTransitionCss = function() {
+        return transitionCss;
+    };
+
+    /**
+     * 
+     * @param {String} _css 
+     */
+    this.setTransitionCss = function(_css) {
+        transitionCss = _css;
+        _canvasDomElement.style.transition = transitionCss;
+    };
+
+    this.getTransformOriginX = function() {
+        return transformOriginX;
+    };
+
+    this.getTransformOriginY = function() {
+        return transformOriginY;
+    };    
+
+    /**
+     * @returns {Number}
+     */
+    this.getScaleFactor = function() {
+        return scaleFactor;
+    };
+
+    this.getTranslateX = function() {
+        return translateX;
+    };
+
+    this.getTranslateY = function() {
+        return translateY;
+    };    
+
+    /**
+     * 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     */
+    this.setTransformOrigin = function(_x, _y) {
+        transformOriginX = _x;
+        transformOriginY = _y;
+        _canvasDomElement.style.transformOrigin = `${transformOriginX}px ${transformOriginY}px`;
+    };
+
+    /**
+     * @deprecated Use transform
      * @param {Number} _scaleFactor
      * @param {Boolean} _adjustFactorToPreserveIntegerGrid=false
      * @returns {Number}
@@ -1231,11 +1289,37 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
         return _scaleFactor;
     };
 
+
     /**
-     * @returns {Number}
+     * 
+     * @param {Number} _scaleFactor 
+     * @param {Boolean} _adjustFactorToPreserveIntegerGrid 
+     * @param {Number} _translateX 
+     * @param {Number} _translateY 
      */
-    this.getScaleFactor = function() {
-        return scaleFactor;
+    this.transform = function(_scaleFactor, _adjustFactorToPreserveIntegerGrid, _translateX, _translateY) {
+        _adjustFactorToPreserveIntegerGrid = _adjustFactorToPreserveIntegerGrid || false;
+        translateX = _translateX || translateX;
+        translateY = _translateY || translateY;
+
+        if(_adjustFactorToPreserveIntegerGrid) {
+            const newGridSize = self.getGridSize() * _scaleFactor;
+            const roundedGridSize = Math.round(newGridSize);
+            _scaleFactor = roundedGridSize / self.getGridSize();
+        }
+
+        scaleFactor = _scaleFactor;
+        invScaleFactor = 1.0 / scaleFactor;        
+
+        _canvasDomElement.style.transform = `scale3d(${scaleFactor},${scaleFactor},${scaleFactor}) translate3d(${translateX}px,${translateY}px,0)`;
+    };
+
+    this.resetTransform = function() {
+        scaleFactor = 1.0;
+        invScaleFactor = 1.0;
+        translateX = 0.0;
+        translateY = 0.0;
+        _canvasDomElement.style.transform = "none";
     };
 
     /**
@@ -1630,6 +1714,11 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
             }
         });
     };
+
+    self.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
+    self.resetTransform();
+    self.setTransformOrigin(0, 0);
+    self.setTransitionCss(transitionCss);
 }
 
 /**
