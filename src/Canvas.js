@@ -45,6 +45,8 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
     var scaleFactor = 1.0;
     var invScaleFactor = 1.0;    
 
+    var pendingTransforms = [];
+
     var currentPointVisiblityMap = null;
 
     var useTranslate3d = false; // better performance w/o it
@@ -269,40 +271,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
     };
 
     /**
-     * @deprecated Use transform
-     * @param {Number} _scaleFactor
-     * @param {Boolean} _adjustFactorToPreserveIntegerGrid=false
-     * @returns {Number}
-     */
-    this.setScaleFactor = function(_scaleFactor, _adjustFactorToPreserveIntegerGrid) {
-        
-        _adjustFactorToPreserveIntegerGrid = _adjustFactorToPreserveIntegerGrid || false;
-
-        if(_adjustFactorToPreserveIntegerGrid) {
-            const newGridSize = self.getGridSize() * _scaleFactor;
-            const roundedGridSize = Math.round(newGridSize);
-            _scaleFactor = roundedGridSize / self.getGridSize();
-        }
-
-        _canvasDomElement.style.transform = "scale3d(" + _scaleFactor + "," + _scaleFactor + "," + _scaleFactor + ")";
-        scaleFactor = _scaleFactor;
-        invScaleFactor = 1.0 / scaleFactor;
-
-        return _scaleFactor;
-    };
-
-
-    /**
      * 
      * @param {Number} _scaleFactor 
      * @param {Boolean} _adjustFactorToPreserveIntegerGrid 
-     * @param {Number} _translateX 
-     * @param {Number} _translateY 
      */
-    this.transform = function(_scaleFactor, _adjustFactorToPreserveIntegerGrid, _translateX, _translateY) {
+    this.scale = function(_scaleFactor, _adjustFactorToPreserveIntegerGrid) {
         _adjustFactorToPreserveIntegerGrid = _adjustFactorToPreserveIntegerGrid || false;
-        translateX = _translateX || translateX;
-        translateY = _translateY || translateY;
 
         if(_adjustFactorToPreserveIntegerGrid) {
             const newGridSize = self.getGridSize() * _scaleFactor;
@@ -313,7 +287,25 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
         scaleFactor = _scaleFactor;
         invScaleFactor = 1.0 / scaleFactor;        
 
-        _canvasDomElement.style.transform = `scale3d(${scaleFactor},${scaleFactor},${scaleFactor}) translate3d(${translateX}px,${translateY}px,0)`;
+        pendingTransforms.push(`scale3d(${scaleFactor},${scaleFactor},${scaleFactor})`);
+        return self;
+    };
+
+    /**
+     * 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     */
+    this.translate = function(_x, _y) {
+        translateX = _x;
+        translateY = _y;
+        pendingTransforms.push(`translate3d(${translateX}px,${translateY}px,0)`);
+        return self;
+    };
+
+    this.applyTransform = function() {
+        _canvasDomElement.style.transform = pendingTransforms.join(" ");
+        pendingTransforms.length = 0;
     };
 
     this.resetTransform = function() {
