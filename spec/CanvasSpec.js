@@ -111,6 +111,25 @@ describe("Canvas", function() {
         
     });
 
+    it("emits click event", function() {
+
+        const clickCallback = jasmine.createSpy("click-callback");
+        
+        const canvas = new Canvas(canvasDomElement, () => { }, window, pvWorkerMock);
+        canvas.initInteractionHandlers();
+        canvas.on('click', clickCallback);
+
+        const event = new window.MouseEvent('click', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+        canvasDomElement.dispatchEvent(event);
+
+        expect(clickCallback).toHaveBeenCalled()
+        
+    });    
+
     it("off removes handler", function() {
 
         const dblclickCallback = jasmine.createSpy("dblclick-callback");

@@ -531,11 +531,17 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
 
         // click anywhere on canvas
         _canvasDomElement.addEventListener('click', function (e) {
-            if(e.target === _canvasDomElement) {
-                _handleCanvasInteraction('click', {'canvasObjectClicked': false});
-            } else {
-                _handleCanvasInteraction('click', {'canvasObjectClicked': true});
+            let canvasObjectClicked = false;
+            if(e.target !== _canvasDomElement) {
+                canvasObjectClicked = true;
             }
+
+            const eventData = {
+                'targetPoint': new Point(e.pageX, e.pageY),
+                'canvasObjectClicked': canvasObjectClicked
+            };
+    
+            emitEvent('click', eventData);
         });
 
         // touchend on canvas, logic to see if there was a double-tap
