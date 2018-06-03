@@ -34,13 +34,13 @@ describe("Canvas", function() {
     };
 
     it("snapToGrid snaps coordinate to grid", function() {
-        const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         const snappedValue = canvas.snapToGrid(13);
         expect(snappedValue).toBe(canvas.getGridSize() - 1);
     });
 
     it("getObjectById returns added object", function() {
-        const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
 
@@ -49,7 +49,7 @@ describe("Canvas", function() {
     });
 
     it("getObjectById returns null for missing object", function() {
-        const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
 
         var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
@@ -59,7 +59,7 @@ describe("Canvas", function() {
     });  
 
     it("getObjectsAroundPoint returns nearby object within box-radius of 1px", function() {
-        const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
 
         var mockDomElem = {
             addEventListener: function() { }
@@ -76,7 +76,7 @@ describe("Canvas", function() {
 
 
     it("getObjectsAroundPoint does not return objects outside box-radius of 1px", function() {
-        const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
 
         var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
@@ -86,7 +86,7 @@ describe("Canvas", function() {
     });
 
     it("setGrid sets the repeating tile, grid, background on the Canvas DOM element", function() {
-        const canvas = new Canvas(canvasDomElement, {}, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         canvas.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
 
         expect(canvasDomElement.style.background).toBe("url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiI+PHJlY3Qgd2lkdGg9IjEiIGhlaWdodD0iMSIgeD0iMTEiIHk9IjExIiBzdHlsZT0iZmlsbDojNDI0MjQyIiAvPjwvc3ZnPg==) repeat");
@@ -96,7 +96,7 @@ describe("Canvas", function() {
 
         const dblclickCallback = jasmine.createSpy("dblclick-callback");
         
-        const canvas = new Canvas(canvasDomElement, () => { }, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
         canvas.on('dblclick', dblclickCallback);
 
@@ -115,7 +115,7 @@ describe("Canvas", function() {
 
         const clickCallback = jasmine.createSpy("click-callback");
         
-        const canvas = new Canvas(canvasDomElement, () => { }, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
         canvas.on('click', clickCallback);
 
@@ -134,7 +134,7 @@ describe("Canvas", function() {
 
         const dblclickCallback = jasmine.createSpy("dblclick-callback");
         
-        const canvas = new Canvas(canvasDomElement, () => { }, window, pvWorkerMock);
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
         canvas.on('dblclick', dblclickCallback);
         canvas.off('dblclick', dblclickCallback);

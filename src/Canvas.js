@@ -16,11 +16,10 @@ import  {GRID_STYLE, Grid} from './Grid';
 
  /**
  * @param {Element} _canvasDomElement 
- * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
  * @param {Worker} _connectorRoutingWorker
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connectorRoutingWorker) {
+function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     const self = this;
 
