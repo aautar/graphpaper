@@ -9,11 +9,8 @@ const window = dom.window;
 
 describe("Canvas", function() {
 
-    function makeCanvasObject(_id, _x, _y, _width, _height) {
-        const mockDomElem = {
-            addEventListener: function() { }
-        };
-
+    const makeCanvasObject = function(_id, _x, _y, _width, _height) {
+        const domElem = window.document.createElement('div');
         const o = new CanvasObject(
             _id,
             _x, 
@@ -21,9 +18,9 @@ describe("Canvas", function() {
             _width, 
             _height, 
             {}, 
-            mockDomElem, 
-            mockDomElem, 
-            mockDomElem
+            domElem, 
+            domElem, 
+            domElem
         );
 
         return o;
@@ -113,6 +110,26 @@ describe("Canvas", function() {
         expect(dblclickCallback).toHaveBeenCalled()
         
     });
+
+    it("off removes handler", function() {
+
+        const dblclickCallback = jasmine.createSpy("dblclick-callback");
+        
+        const canvas = new Canvas(canvasDomElement, () => { }, window, pvWorkerMock);
+        canvas.initInteractionHandlers();
+        canvas.on('dblclick', dblclickCallback);
+        canvas.off('dblclick', dblclickCallback);
+
+        const event = new window.MouseEvent('dblclick', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+        canvasDomElement.dispatchEvent(event);
+
+        expect(dblclickCallback).not.toHaveBeenCalled()
+        
+    });    
 
 });
 
