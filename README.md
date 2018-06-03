@@ -43,9 +43,9 @@ path { fill: none; }
 
 ```javascript
 const canvas = new GraphPaper.Canvas(
-    document.getElementById('paper'),   // div to use
-    function() { },                     // callback on interaction
-    window                              // parent window 
+    document.getElementById('paper'),                    // div to use
+    window,                                              // parent window 
+    new Worker('../dist/connector-routing-worker.js')    // required worker for connector routing
 );
 
 canvas.initTransformationHandlers();
