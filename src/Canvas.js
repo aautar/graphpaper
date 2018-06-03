@@ -506,9 +506,6 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
      */
     const dblClickTapHandler = function(_posX, _posY) {
         const objectsAroundPoint = self.getObjectsAroundPoint(_posX, _posY);
-        if (objectsAroundPoint.length === 0) {
-            _handleCanvasInteraction('dbl-click', new Point(_posX, _posY));
-        }
 
         const eventData = {
             'targetPoint': new Point(_posX, _posY),
@@ -657,7 +654,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
             // we didn't drag it anywhere
         } else {
             obj.translate(mx, my);
-            _handleCanvasInteraction('object-translated', obj);
+            emitEvent('object-translated', { 'object': obj });            
         }
     };         
 
@@ -682,7 +679,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
         // refresh connectors
         refreshAllConnectors();
 
-        _handleCanvasInteraction('object-resized', obj);
+        emitEvent('object-resized', { 'object': obj });
     };
 
     this.initTransformationHandlers = function() {
