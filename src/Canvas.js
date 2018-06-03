@@ -70,6 +70,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
     const connectorAnchorsSelected = [];
 
     /**
+     * Event name -> Callback map
+     */
+    const eventHandlers = new Map();
+
+
+    /**
      * @returns {PointVisibilityMap}
      */
     this.getCurrentPointVisibilityMap = function() {
@@ -715,6 +721,34 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
                 e.stopPropagation();
             }
         });
+    };
+
+    const emitEvent = function(_eventName, _eventData) {
+        const allCallbacks = eventHandlers.get(_eventName) || [];
+
+        for(let i=0; i<allCallbacks.length; i++) {
+            const cbFunc = allCallbacks[i];
+            cbFunc(_eventData);
+        }
+    };
+
+    this.off = function(_eventName, _callback) {
+        const allCallbacks = eventHandlers.get(_eventName) || [];
+
+        for(let i=0; i<allCallbacks.length; i++) {
+            if(allCallbacks[i] === _callback) {
+                allCallbacks.splice(i, 1);
+                break;
+            }
+        }
+
+        eventHandlers.set(_eventName, allCallbacks);
+    };
+
+    this.on = function(_eventName, _callback) {
+        const allCallbacks = eventHandlers.get(_eventName) || [];
+        allCallbacks.push(_callback);
+        eventHandlers.set(_eventName, allCallbacks);
     };
 
     self.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
