@@ -7,6 +7,7 @@
   "license": "MIT",
   "devDependencies": {
     "jasmine-es6": "0.4.0",
+    "jsdom": "^11.11.0",
     "process-nextick-args": "^1.0.7"
   },
   "scripts": {

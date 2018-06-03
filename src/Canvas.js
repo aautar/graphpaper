@@ -504,11 +504,18 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
      * @param {Number} _posX 
      * @param {Number} _posY 
      */
-    var dblClickTapHandler = function(_posX, _posY) {
-        var objectsAroundPoint = self.getObjectsAroundPoint(_posX, _posY);
+    const dblClickTapHandler = function(_posX, _posY) {
+        const objectsAroundPoint = self.getObjectsAroundPoint(_posX, _posY);
         if (objectsAroundPoint.length === 0) {
             _handleCanvasInteraction('dbl-click', new Point(_posX, _posY));
         }
+
+        const eventData = {
+            'targetPoint': new Point(_posX, _posY),
+            'objectsAroundPoint': objectsAroundPoint
+        };
+
+        emitEvent('dblclick', eventData);
     };
 
     /**
