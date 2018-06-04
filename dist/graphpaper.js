@@ -1017,11 +1017,10 @@ function Grid(_size, _color, _style) {
 
  /**
  * @param {Element} _canvasDomElement 
- * @param {HandleCanvasInteractionCallback} _handleCanvasInteraction 
  * @param {Window} _window
  * @param {Worker} _connectorRoutingWorker
  */
-function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connectorRoutingWorker) {
+function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     const self = this;
 
@@ -1066,6 +1065,12 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
     };
 
     const connectorAnchorsSelected = [];
+
+    /**
+     * Event name -> Callback map
+     */
+    const eventHandlers = new Map();
+
 
     /**
      * @returns {PointVisibilityMap}
@@ -1496,11 +1501,15 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
      * @param {Number} _posX 
      * @param {Number} _posY 
      */
-    var dblClickTapHandler = function(_posX, _posY) {
-        var objectsAroundPoint = self.getObjectsAroundPoint(_posX, _posY);
-        if (objectsAroundPoint.length === 0) {
-            _handleCanvasInteraction('dbl-click', new Point(_posX, _posY));
-        }
+    const dblClickTapHandler = function(_posX, _posY) {
+        const objectsAroundPoint = self.getObjectsAroundPoint(_posX, _posY);
+
+        const eventData = {
+            'targetPoint': new Point(_posX, _posY),
+            'objectsAroundPoint': objectsAroundPoint
+        };
+
+        emitEvent('dblclick', eventData);
     };
 
     /**
@@ -1516,11 +1525,17 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
 
         // click anywhere on canvas
         _canvasDomElement.addEventListener('click', function (e) {
-            if(e.target === _canvasDomElement) {
-                _handleCanvasInteraction('click', {'canvasObjectClicked': false});
-            } else {
-                _handleCanvasInteraction('click', {'canvasObjectClicked': true});
+            let canvasObjectClicked = false;
+            if(e.target !== _canvasDomElement) {
+                canvasObjectClicked = true;
             }
+
+            const eventData = {
+                'targetPoint': new Point(e.pageX, e.pageY),
+                'canvasObjectClicked': canvasObjectClicked
+            };
+    
+            emitEvent('click', eventData);
         });
 
         // touchend on canvas, logic to see if there was a double-tap
@@ -1631,7 +1646,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
             // we didn't drag it anywhere
         } else {
             obj.translate(mx, my);
-            _handleCanvasInteraction('object-translated', obj);
+            emitEvent('object-translated', { 'object': obj });            
         }
     };         
 
@@ -1656,7 +1671,7 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
         // refresh connectors
         refreshAllConnectors();
 
-        _handleCanvasInteraction('object-resized', obj);
+        emitEvent('object-resized', { 'object': obj });
     };
 
     this.initTransformationHandlers = function() {
@@ -1705,6 +1720,34 @@ function Canvas(_canvasDomElement, _handleCanvasInteraction, _window, _connector
                 e.stopPropagation();
             }
         });
+    };
+
+    const emitEvent = function(_eventName, _eventData) {
+        const allCallbacks = eventHandlers.get(_eventName) || [];
+
+        for(let i=0; i<allCallbacks.length; i++) {
+            const cbFunc = allCallbacks[i];
+            cbFunc(_eventData);
+        }
+    };
+
+    this.off = function(_eventName, _callback) {
+        const allCallbacks = eventHandlers.get(_eventName) || [];
+
+        for(let i=0; i<allCallbacks.length; i++) {
+            if(allCallbacks[i] === _callback) {
+                allCallbacks.splice(i, 1);
+                break;
+            }
+        }
+
+        eventHandlers.set(_eventName, allCallbacks);
+    };
+
+    this.on = function(_eventName, _callback) {
+        const allCallbacks = eventHandlers.get(_eventName) || [];
+        allCallbacks.push(_callback);
+        eventHandlers.set(_eventName, allCallbacks);
     };
 
     self.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));

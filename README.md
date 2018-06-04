@@ -43,9 +43,9 @@ path { fill: none; }
 
 ```javascript
 const canvas = new GraphPaper.Canvas(
-    document.getElementById('paper'),   // div to use
-    function() { },                     // callback on interaction
-    window                              // parent window 
+    document.getElementById('paper'),                    // div to use
+    window,                                              // parent window 
+    new Worker('../dist/connector-routing-worker.js')    // required worker for connector routing
 );
 
 canvas.initTransformationHandlers();
@@ -76,3 +76,32 @@ canvas.addObject(obj1);
 ```
 
  The object (`obj1`) will be added to the canvas and can now be translated by dragging the translation handle (`#translateHandle1`) or resized with the resize handle (`#resizeHandle1`). GraphPaper will take care of both mouse and touch interactions on the handle elements.
+
+## Events
+
+### Add event handler
+
+Use the `Canvas.on()` method to add an event handler
+
+```javascript
+canvas.on('click', (eventData) => {
+    // a click on the Canvas
+});
+```
+
+Events emitted:
+
+- click
+- dblclick
+- object-translated
+- object-resized
+
+
+### Remove event handler
+
+Use the `Canvas.off()` method to remove an event handler
+
+```javascript
+canvas.off('click', registeredCallbackFunction);
+```
+
