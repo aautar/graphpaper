@@ -32,9 +32,18 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     /**
      * @param {Element} _connectorAnchorDomElement
-     */
-    this.addConnectorAnchor = function(_connectorAnchorDomElement) {
+     */    
+    this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement) {
+        connectorAnchors.push(new ConnectorAnchor(_connectorAnchorDomElement, self, _canvas));
+    };
+
+    /**
+     * @param {Element} _connectorAnchorDomElement
+     */    
+    this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement) {     
+        
         const anchor = new ConnectorAnchor(_connectorAnchorDomElement, self, _canvas);
+
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _canvas.addConnectionAnchorToSelectionStack(anchor);
         });
