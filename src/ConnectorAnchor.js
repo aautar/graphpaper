@@ -95,13 +95,6 @@ function ConnectorAnchor(_domElement, _parentObject, _canvas) {
             centroid.getY() + halfHeight
         );
     };
-
-    /**
-     * @returns {Element}
-     */
-    this.getDomElement = function() {
-        return _domElement;
-    };
 };
 
 export { ConnectorAnchor };
