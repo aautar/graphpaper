@@ -12,13 +12,6 @@ function ConnectorAnchor(_domElement, _parentObject, _canvas) {
     const self = this;
 
     /**
-     * @returns {CanvasObject}
-     */
-    this.getParentObject = function() {
-        return _parentObject;
-    };
-
-    /**
      * @returns {String}
      */
     this.getObjectId = function() {
