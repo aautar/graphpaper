@@ -1012,6 +1012,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     const self = this;
 
+    const Event = {
+        OBJECT_TRANSLATED: "object-translated"
+    };
+
     // Create container for SVG connectors
     const svgElem = _window.document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgElem.style.width = "100%";
@@ -1611,6 +1615,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
         
         obj.translate(mx, my);
+        emitEvent(Event.OBJECT_TRANSLATED, { 'object': obj });      
 
         // refresh connectors
         refreshAllConnectors();
@@ -1634,7 +1639,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             // we didn't drag it anywhere
         } else {
             obj.translate(mx, my);
-            emitEvent('object-translated', { 'object': obj });            
+            emitEvent(Event.OBJECT_TRANSLATED, { 'object': obj });            
         }
     };         
 
