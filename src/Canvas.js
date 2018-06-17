@@ -24,6 +24,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     const self = this;
 
     const Event = {
+        DBLCLICK: "dblclick",
+        CLICK: "click",
+        OBJECT_RESIZED: "object-resized",
         OBJECT_TRANSLATED: "object-translated"
     };
 
@@ -515,7 +518,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             'objectsAroundPoint': objectsAroundPoint
         };
 
-        emitEvent('dblclick', eventData);
+        emitEvent(Event.DBLCLICK, eventData);
     };
 
     /**
@@ -541,7 +544,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 'canvasObjectClicked': canvasObjectClicked
             };
     
-            emitEvent('click', eventData);
+            emitEvent(Event.CLICK, eventData);
         });
 
         // touchend on canvas, logic to see if there was a double-tap
@@ -683,7 +686,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         // refresh connectors
         refreshAllConnectors();
 
-        emitEvent('object-resized', { 'object': obj });
+        emitEvent(Event.OBJECT_RESIZED, { 'object': obj });
     };
 
     this.initTransformationHandlers = function() {
