@@ -19,6 +19,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     const self = this;
 
+    const MOUSE_MIDDLE_BUTTON = 1;
+
     /**
      * @type {ConnectorAnchor[]}
      */
@@ -268,7 +270,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     });
 
     _resizeHandleDomElement.addEventListener('mousedown', function (e) {
-        if (e.which !== 1) {
+        if (e.which !== MOUSE_MIDDLE_BUTTON) {
             return;
         }
 
