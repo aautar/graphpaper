@@ -130,6 +130,52 @@ describe("Canvas", function() {
         
     });    
 
+    it("emits object-translated event", function() {
+
+        const translateCallback = jasmine.createSpy("translate-callback");
+        
+        const canvasElem = window.document.createElement('div');
+        const canvas = new Canvas(canvasElem, window, pvWorkerMock);
+        canvas.initTransformationHandlers();
+        canvas.on('object-translated', translateCallback);
+
+        const objElement = window.document.createElement('div');
+        const objTranslateHandleElem = window.document.createElement('div');
+        const objResizeHandleElem = window.document.createElement('div');
+        const o = new CanvasObject(
+            "obj1",
+            "100", 
+            "100", 
+            "200", 
+            "200", 
+            canvas, 
+            objElement, 
+            objTranslateHandleElem,
+            objResizeHandleElem
+        );
+        
+        canvas.addObject(o);
+
+        const mouseDownEvent = new window.MouseEvent('mousedown', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+        objTranslateHandleElem.dispatchEvent(mouseDownEvent);
+
+        const mouseMoveEvent = new window.MouseEvent('mousemove', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true,
+            'movementX': 111,
+            'movementY': 111
+        });
+        canvasElem.dispatchEvent(mouseMoveEvent);
+
+        expect(translateCallback).toHaveBeenCalled()
+        
+    });    
+
     it("off removes handler", function() {
 
         const dblclickCallback = jasmine.createSpy("dblclick-callback");

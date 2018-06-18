@@ -615,7 +615,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      * @param {Number} _y 
      * @param {Boolean} _isTouchMove
      */
-    const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {       
+    const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {     
         objectIdBeingDragged = _obj.getId();
         objectDragX = _x;
         objectDragY = _y;
