@@ -397,15 +397,10 @@ var GraphPaper = (function (exports) {
          * @param {Point} _newPoint
          */
         this.push = function(_newPoint) {
-            var alreadyInPointsArray = false;
-            points.forEach(function(_existingPoint) {
-                if(_newPoint.isEqual(_existingPoint)) {
-                    alreadyInPointsArray = true;
+            for(let i=0; i<points.length; i++) {
+                if(_newPoint.isEqual(points[i])) {
+                    return false;
                 }
-            });        
-
-            if(alreadyInPointsArray) {
-                return false;
             }
 
             points.push(_newPoint);
