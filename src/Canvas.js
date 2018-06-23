@@ -26,6 +26,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     const Event = {
         DBLCLICK: "dblclick",
         CLICK: "click",
+        OBJECT_ADDED: "object-added",
         OBJECT_RESIZED: "object-resized",
         OBJECT_TRANSLATED: "object-translated"
     };
@@ -471,6 +472,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         _obj.setMoveStartCallback(handleMoveStart);
         canvasObjects.push(_obj);
         refreshAllConnectors();       
+
+        emitEvent(Event.OBJECT_ADDED, { "object":_obj });
     };
 
     /**

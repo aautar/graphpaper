@@ -92,6 +92,36 @@ describe("Canvas", function() {
         expect(canvasDomElement.style.background).toBe("url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiI+PHJlY3Qgd2lkdGg9IjEiIGhlaWdodD0iMSIgeD0iMTEiIHk9IjExIiBzdHlsZT0iZmlsbDojNDI0MjQyIiAvPjwvc3ZnPg==) repeat");
     });
 
+
+    it("emits object-added event", function() {
+
+        const objAddedCallback = jasmine.createSpy("object-added");
+        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initInteractionHandlers();
+        canvas.on('object-added', objAddedCallback);
+
+        const objElement = window.document.createElement('div');
+        const objTranslateHandleElem = window.document.createElement('div');
+        const objResizeHandleElem = window.document.createElement('div');
+        const o = new CanvasObject(
+            "obj1",
+            "100", 
+            "100", 
+            "200", 
+            "200", 
+            canvas, 
+            objElement, 
+            objTranslateHandleElem,
+            objResizeHandleElem
+        );
+        
+        canvas.addObject(o);
+
+        expect(objAddedCallback).toHaveBeenCalled();        
+    });
+
+
     it("emits dblclick event", function() {
 
         const dblclickCallback = jasmine.createSpy("dblclick-callback");
