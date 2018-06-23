@@ -93,6 +93,7 @@ Events emitted:
 
 - click
 - dblclick
+- object-added
 - object-translated
 - object-resized
 
