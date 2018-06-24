@@ -66,6 +66,8 @@ function Rectangle(_left, _top, _right, _bottom)  {
     };
 
     /**
+     * Scale the bounding box by _gridSize, and return the points comprising the box
+     * 
      * @param {Number} _gridSize
      * @returns {Point[]}
      */
