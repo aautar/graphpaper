@@ -55,6 +55,10 @@ const computeConnectorSvg = function(_connectorDescriptor, _anchorPoints, _point
 
 onmessage = function(_msg) {
 
+    const metrics = {};
+    metrics.overallTime = null;
+    const overallTimeT1 = new Date();
+
     const gridSize = _msg.data.gridSize;
 
     const connectorDescriptors = _msg.data.connectorDescriptors;
@@ -80,9 +84,12 @@ onmessage = function(_msg) {
         _cd.svgPath = computeConnectorSvg(_cd, anchorPointsSet, currentPointVisiblityMap);
     });
 
+    metrics.overallTime = (new Date()) - overallTimeT1;
+
     postMessage(
         {
-            "connectorDescriptors": connectorDescriptors
+            "connectorDescriptors": connectorDescriptors,
+            "metrics": metrics
         }
     );
 
