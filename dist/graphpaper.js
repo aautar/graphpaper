@@ -216,8 +216,8 @@ Line.prototype.computeIntersection = function(_otherLine) {
     const paramA = paramANumer / paramDenom;
     const paramB = paramBNumer / paramDenom;
 
-    const xIntersect = _startPoint.getX() + paramA*(_endPoint.getX()-_startPoint.getX());
-    const yIntersect = _startPoint.getY() + paramA*(_endPoint.getY()-_startPoint.getY());
+    const xIntersect = this.__startPoint.getX() + paramA*(this.__endPoint.getX()-this.__startPoint.getX());
+    const yIntersect = this.__startPoint.getY() + paramA*(this.__endPoint.getY()-this.__startPoint.getY());
     
     if(paramA > 1.0 || paramA < 0.0 || paramB > 1.0 || paramB < 0.0) {
         return new LineIntersection(LINE_INTERSECTION_TYPE.LINE, new Point(xIntersect, yIntersect));
@@ -1182,9 +1182,6 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     _connectorRoutingWorker.onmessage = function(_msg) {
-
-        console.log(_msg.data.metrics);
-
         const connectorDescriptors = _msg.data.connectorDescriptors;
         const getConnectorDescriptorById = function(_id) {
             for(let i=0; i<connectorDescriptors.length; i++) {
