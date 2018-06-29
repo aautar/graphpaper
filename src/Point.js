@@ -5,48 +5,51 @@
  */
 function Point(_x, _y) {
 
-    /**
-     * @returns {Number}
-     */       
-    this.getX = function() {
-        return _x;
-    };
+    this.__x = _x;
+    this.__y = _y;
+};
 
-    /**
-     * @returns {Number}
-     */       
-    this.getY = function() {
-        return _y;
-    };
+/**
+ * @returns {Number}
+ */     
+Point.prototype.getX = function() {
+    return this.__x;
+};
 
-    /**
-     * @param {Point} _otherPoint
-     * @returns {Boolean}
-     */
-    this.isEqual = function(_otherPoint) {
-        if(_x === _otherPoint.getX() && _y === _otherPoint.getY()) {
-            return true;
-        }
+/**
+ * @returns {Number}
+ */     
+Point.prototype.getY = function() {
+    return this.__y;
+};
 
-        return false;
-    };
+/**
+ * @param {Point} _otherPoint
+ * @returns {Boolean}
+ */
+Point.prototype.isEqual = function(_otherPoint) {
+    if(this.__x === _otherPoint.getX() && this.__y === _otherPoint.getY()) {
+        return true;
+    }
 
-    /**
-     * @returns {Point}
-     */
-    this.getCartesianPoint = function(_canvasWidth, _canvasHeight) {
-        return new Point(
-            _x - (_canvasWidth * 0.5),
-            -_y + (_canvasHeight * 0.5)
-        );
-    };
+    return false;
+};
 
-    /**
-     * @returns {String}
-     */
-    this.toString = function() {
-        return _x + " " + _y;
-    };
+/**
+ * @returns {Point}
+ */
+Point.prototype.getCartesianPoint = function(_canvasWidth, _canvasHeight) {
+    return new Point(
+        this.__x - (_canvasWidth * 0.5),
+        -this.__y + (_canvasHeight * 0.5)
+    );
+};
+
+/**
+ * @returns {String}
+ */
+Point.prototype.toString = function() {
+    return this.__x + " " + this.__y;
 };
 
 export { Point };
