@@ -1478,21 +1478,30 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     /**
+     * 
+     * @param {ConnectorAnchor} _anchorA 
+     * @param {ConnectorAnchor} _anchorB 
+     */
+    this.makeNewConnectorFromAnchors = function(_anchorA, _anchorB) {
+        const newConnector = makeNewConnector(_anchorA, _anchorB, connectorsContainerDomElement);
+        const foundConnector = self.getConnector(newConnector.getId());
+
+        if(foundConnector === null) {
+            objectConnectors.push(newConnector);
+            newConnector.appendPathToContainerDomElement();
+            refreshAllConnectors();
+        }
+    };
+
+    /**
      * @param {ConnectorAnchor} _anchor
      */
     this.addConnectionAnchorToSelectionStack = function(_anchor) {
         connectorAnchorsSelected.push(_anchor);
 
         if(connectorAnchorsSelected.length === 2) {
-            const newConnector = makeNewConnector(connectorAnchorsSelected[0], connectorAnchorsSelected[1], connectorsContainerDomElement);
-            const foundConnector = self.getConnector(newConnector.getId());
-
+            self.makeNewConnectorFromAnchors(connectorAnchorsSelected[0], connectorAnchorsSelected[1]);
             connectorAnchorsSelected.length = 0;
-            if(foundConnector === null) {
-                objectConnectors.push(newConnector);
-                newConnector.appendPathToContainerDomElement();
-                refreshAllConnectors();
-            }
         }
     };
 
