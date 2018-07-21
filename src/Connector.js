@@ -5,6 +5,8 @@ import  {ConnectorAnchor} from './ConnectorAnchor';
  * @param {ConnectorAnchor} _anchorStart 
  * @param {ConnectorAnchor} _anchorEnd
  * @param {Element} _containerDomElement
+ * @param {String} _strokeColor
+ * @param {String} _strokeWidth
  */
 function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth) {
     

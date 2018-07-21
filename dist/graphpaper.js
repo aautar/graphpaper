@@ -694,6 +694,8 @@ function ConnectorAnchor(_domElement, _parentObject, _canvas) {
  * @param {ConnectorAnchor} _anchorStart 
  * @param {ConnectorAnchor} _anchorEnd
  * @param {Element} _containerDomElement
+ * @param {String} _strokeColor
+ * @param {String} _strokeWidth
  */
 function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth) {
     
@@ -1481,6 +1483,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      * 
      * @param {ConnectorAnchor} _anchorA 
      * @param {ConnectorAnchor} _anchorB 
+     * @returns {Connector}
      */
     this.makeNewConnectorFromAnchors = function(_anchorA, _anchorB) {
         const newConnector = makeNewConnector(_anchorA, _anchorB, connectorsContainerDomElement);
@@ -1490,7 +1493,50 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             objectConnectors.push(newConnector);
             newConnector.appendPathToContainerDomElement();
             refreshAllConnectors();
+            return newConnector;
         }
+
+        return foundConnector;
+    };
+
+    /**
+     * 
+     * @param {Object} _objA 
+     * @param {Object} _objB
+     * @returns {Object} 
+     */
+    this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB) {
+
+        const objAConnectorAnchors = _objA.getConnectorAnchors();
+        const objBConnectorAnchors = _objB.getConnectorAnchors();
+
+        var startAnchorIdxWithMinDist = 0;
+        var endAnchorIdxWithMinDist = 0;
+        var minDist = Number.MAX_VALUE;
+        
+        // Find best anchor element to connect startNote and endNote            
+        // Find anchors that produce shortest straight line distance
+        for(let x=0; x<objAConnectorAnchors.length; x++) {
+            for(let y=0; y<objBConnectorAnchors.length; y++) {
+                const aCentroid = objAConnectorAnchors[x].getCentroid();
+                const bCentroid = objBConnectorAnchors[y].getCentroid();
+                
+                const d = Math.sqrt(Math.pow(bCentroid.getX()-aCentroid.getX(),2) + Math.pow(bCentroid.getY()-aCentroid.getY(),2));
+                
+                if(d < minDist) {
+                    startAnchorIdxWithMinDist = x;
+                    endAnchorIdxWithMinDist = y;
+                    minDist = d;
+                }
+            }
+        }
+
+        return {
+            "objectAConnectorIndex": startAnchorIdxWithMinDist,
+            "objectAConnector": objAConnectorAnchors[startAnchorIdxWithMinDist],
+            "objectBConnectorIndex": endAnchorIdxWithMinDist,
+            "objectBConnector": objBConnectorAnchors[endAnchorIdxWithMinDist],
+        };
     };
 
     /**
