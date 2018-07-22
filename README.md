@@ -76,6 +76,11 @@ canvas.addObject(obj1);
 ```
 
  The object (`obj1`) will be added to the canvas and can now be translated by dragging the translation handle (`#translateHandle1`) or resized with the resize handle (`#resizeHandle1`). GraphPaper will take care of both mouse and touch interactions on the handle elements.
+ 
+## Canvas Dimensions
+
+The dimensions of a Canvas can be queried via the 'Canvas.getWidth()' and 'Canvas.getHeight()' methods.
+
 
 ## Events
 
