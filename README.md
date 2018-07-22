@@ -94,6 +94,14 @@ A new Grid object is created as follows:
 
 The 'Grid' constructor takes 3 parameters: the size of the grid, the color of the grid, and the style of the grid (GRID_STYLE.DOT or GRID_STYLE.LINE)
 
+## Canvas Objects
+
+* ‘Canvas.calcBoundingBox()‘ 
+Returns: ‘Rectangle‘
+
+This method will calculate and return the rectangular bounds/extents of the Canvas in which all CanvasObjects are enclosed
+
+
 
 ## Events
 
