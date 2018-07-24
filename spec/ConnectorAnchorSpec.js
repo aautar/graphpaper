@@ -34,7 +34,7 @@ describe("ConnectorAnchor.getWidth, ConnectorAnchor.getHeight", function() {
             bottom: anchorElemHeight,
           });
 
-        const anchor = new ConnectorAnchor(anchorElem, obj, {});
+        const anchor = new ConnectorAnchor('connector-anchor-id-123', anchorElem, {});
 
         expect(anchor.getWidth()).toBe(100);
         expect(anchor.getHeight()).toBe(200);

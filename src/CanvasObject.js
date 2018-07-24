@@ -26,6 +26,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     const connectorAnchors = [];
 
+    var nextConnectorAnchorIdSuffix = 1000;
+
     this.x = parseInt(_x);
     this.y = parseInt(_y);
     this.width = parseInt(_width);
@@ -36,21 +38,22 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Element} _connectorAnchorDomElement
      */    
     this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement) {
-        connectorAnchors.push(new ConnectorAnchor(_connectorAnchorDomElement, self, _canvas));
+        connectorAnchors.push(new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas));
+        nextConnectorAnchorIdSuffix++;
     };
 
     /**
      * @param {Element} _connectorAnchorDomElement
      */    
     this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement) {     
-        
-        const anchor = new ConnectorAnchor(_connectorAnchorDomElement, self, _canvas);
+        const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
 
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _canvas.addConnectionAnchorToSelectionStack(anchor);
         });
 
         connectorAnchors.push(anchor);
+        nextConnectorAnchorIdSuffix++;
     };
 
     /**

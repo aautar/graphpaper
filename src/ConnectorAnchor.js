@@ -2,20 +2,19 @@ import  {Point} from './Point';
 import  {Rectangle} from './Rectangle';
 
 /**
- * 
+ * @param {String} _id
  * @param {Element} _domElement
- * @param {CanvasObject} _parentObject
  * @param {Canvas} _canvas
  */
-function ConnectorAnchor(_domElement, _parentObject, _canvas) {
+function ConnectorAnchor(_id, _domElement, _canvas) {
     
     const self = this;
 
     /**
      * @returns {String}
      */
-    this.getObjectId = function() {
-        return _parentObject.getId();
+    this.getId = function() {
+        return _id;
     };
 
     /**
