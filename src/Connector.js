@@ -32,7 +32,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     /**
      * @type {Element}
      */
-    const pathElem = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    const pathElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
     pathElem.style.stroke = _strokeColor; 
     pathElem.style.strokeWidth = _strokeWidth;         
@@ -58,7 +58,21 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      */
     this.getId = function() {
         const objIds = [_anchorStart.getId(), _anchorEnd.getId()].sort();
-        return  objIds.join(':');
+        return objIds.join(':');
+    };
+
+    /**
+     * @returns {ConnectorAnchor}
+     */
+    this.getAnchorStart = function() {
+        return _anchorStart;
+    };
+
+    /**
+     * @returns {ConnectorAnchor}
+     */    
+    this.getAnchorEnd = function() {
+        return _anchorEnd;
     };
 
     /**

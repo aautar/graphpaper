@@ -594,7 +594,7 @@ function LineSet(_linesInput) {
 }
 
 /**
- * 
+ * @param {String} _id
  * @param {Element} _domElement
  * @param {Canvas} _canvas
  */
@@ -713,7 +713,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      * @param {Point} _pt 
      * @returns {String}
      */
-    const pathElem = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    const pathElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
     pathElem.style.stroke = _strokeColor; 
     pathElem.style.strokeWidth = _strokeWidth;         
@@ -739,7 +739,21 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      */
     this.getId = function() {
         const objIds = [_anchorStart.getId(), _anchorEnd.getId()].sort();
-        return  objIds.join(':');
+        return objIds.join(':');
+    };
+
+    /**
+     * @returns {ConnectorAnchor}
+     */
+    this.getAnchorStart = function() {
+        return _anchorStart;
+    };
+
+    /**
+     * @returns {ConnectorAnchor}
+     */    
+    this.getAnchorEnd = function() {
+        return _anchorEnd;
     };
 
     /**
@@ -1845,7 +1859,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Element} _connectorAnchorDomElement
      */    
     this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement) {
-        connectorAnchors.push(new ConnectorAnchor(_id + `${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas));
+        connectorAnchors.push(new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas));
         nextConnectorAnchorIdSuffix++;
     };
 
@@ -1853,7 +1867,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Element} _connectorAnchorDomElement
      */    
     this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement) {     
-        const anchor = new ConnectorAnchor(_id + `${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
+        const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
 
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _canvas.addConnectionAnchorToSelectionStack(anchor);
