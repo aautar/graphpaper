@@ -756,6 +756,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         return _anchorEnd;
     };
 
+    this.removePathElement = function() {
+        pathElem.remove();
+    };
+
     /**
      * @returns {Object}
      */
@@ -1062,6 +1066,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var currentPointVisiblityMap = null;
 
     const canvasObjects = [];
+
+    /**
+     * @type {Connector[]}
+     */
     const objectConnectors = [];
 
     var objectIdBeingDragged = null;
@@ -1505,6 +1513,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     this.removeAllConnectors = function() {
+        objectConnectors.forEach(function(_conn) {
+            _conn.removePathElement();
+        });
+
         objectConnectors.splice(0, objectConnectors.length);
     };
 

@@ -75,6 +75,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         return _anchorEnd;
     };
 
+    this.removePathElement = function() {
+        pathElem.remove();
+    };
+
     /**
      * @returns {Object}
      */

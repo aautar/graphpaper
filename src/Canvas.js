@@ -58,6 +58,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     var useTranslate3d = false; // better performance w/o it
     const canvasObjects = [];
+
+    /**
+     * @type {Connector[]}
+     */
     const objectConnectors = [];
 
     var objectIdBeingDragged = null;
@@ -503,6 +507,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     this.removeAllConnectors = function() {
+        objectConnectors.forEach(function(_conn) {
+            _conn.removePathElement();
+        });
+
         objectConnectors.splice(0, objectConnectors.length);
     };
 

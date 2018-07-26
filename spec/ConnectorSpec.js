@@ -62,3 +62,26 @@ describe("ConnectorAnchor.getAnchorEnd", function() {
     });
 
 });
+
+describe("ConnectorAnchor.removePathElement", function() {
+
+    it("remove SVG path element from DOM", function() {
+        const anchorStartElem = window.document.createElement('div');
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+
+        const anchorEndElem = window.document.createElement('div');
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+
+        const containerDomElem = window.document.createElement('div');
+
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
+        connector.appendPathToContainerDomElement(); 
+        
+        expect(containerDomElem.getElementsByTagName('path').length).toBe(1);
+
+        connector.removePathElement();
+
+        expect(containerDomElem.getElementsByTagName('path').length).toBe(0);
+    });
+
+});
