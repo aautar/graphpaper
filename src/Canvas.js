@@ -249,10 +249,16 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         _canvasDomElement.style.transition = transitionCss;
     };
 
+    /**
+     * @returns {Number}
+     */    
     this.getTransformOriginX = function() {
         return transformOriginX;
     };
 
+    /**
+     * @returns {Number}
+     */    
     this.getTransformOriginY = function() {
         return transformOriginY;
     };    
@@ -264,10 +270,16 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         return scaleFactor;
     };
 
+    /**
+     * @returns {Number}
+     */
     this.getTranslateX = function() {
         return translateX;
     };
 
+    /**
+     * @returns {Number}
+     */    
     this.getTranslateY = function() {
         return translateY;
     };    
@@ -488,6 +500,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         }
 
         return null;
+    };
+
+    this.removeAllConnectors = function() {
+        objectConnectors.splice(0, objectConnectors.length);
     };
 
     /**
