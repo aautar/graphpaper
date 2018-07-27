@@ -542,6 +542,22 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     /**
      * 
+     * @param {Connector} _connector
+     * @returns {Boolean}
+     */
+    this.removeConnector = function(_connector) {
+        for(let i=0; i<objectConnectors.length; i++) {
+            if(objectConnectors[i] === _connector) {
+                objectConnectors.splice(i, 1);
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    /**
+     * 
      * @param {ConnectorAnchor} _anchorA 
      * @param {ConnectorAnchor} _anchorB 
      * @returns {Connector}
@@ -593,10 +609,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         }
 
         return {
-            "objectAConnectorIndex": startAnchorIdxWithMinDist,
-            "objectAConnector": objAConnectorAnchors[startAnchorIdxWithMinDist],
-            "objectBConnectorIndex": endAnchorIdxWithMinDist,
-            "objectBConnector": objBConnectorAnchors[endAnchorIdxWithMinDist],
+            "objectAAnchorIndex": startAnchorIdxWithMinDist,
+            "objectAAnchor": objAConnectorAnchors[startAnchorIdxWithMinDist],
+            "objectBAnchorIndex": endAnchorIdxWithMinDist,
+            "objectBAnchor": objBConnectorAnchors[endAnchorIdxWithMinDist],
         };
     };
 
