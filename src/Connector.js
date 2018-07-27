@@ -57,8 +57,8 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      * @returns {String}
      */
     this.getId = function() {
-        const objIds = [_anchorStart.getId(), _anchorEnd.getId()].sort();
-        return objIds.join(':');
+        const anchorIds = [_anchorStart.getId(), _anchorEnd.getId()].sort();
+        return anchorIds.join(':');
     };
 
     /**

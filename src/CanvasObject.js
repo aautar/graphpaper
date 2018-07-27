@@ -36,14 +36,18 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     /**
      * @param {Element} _connectorAnchorDomElement
+     * @returns {ConnectorAnchor}
      */    
     this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement) {
-        connectorAnchors.push(new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas));
+        const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
+        connectorAnchors.push(newAnchor);
         nextConnectorAnchorIdSuffix++;
+        return newAnchor;
     };
 
     /**
      * @param {Element} _connectorAnchorDomElement
+     * @returns {ConnectorAnchor}
      */    
     this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement) {     
         const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
@@ -54,6 +58,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
         connectorAnchors.push(anchor);
         nextConnectorAnchorIdSuffix++;
+        return anchor;
     };
 
     /**
@@ -83,6 +88,22 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     this.getConnectorAnchors = function() {
         return connectorAnchors;
+    };
+
+    /**
+     * 
+     * @param {ConnectorAnchor} _anchor 
+     * @returns {Boolean}
+     */
+    this.hasConnectorAnchor = function(_anchor) {
+        const anchors = self.getConnectorAnchors();
+        for(let i=0; i<anchors.length; i++) {
+            if(anchors[i] === _anchor) {
+                return true;
+            }
+        }
+
+        return false;
     };
 
     /**

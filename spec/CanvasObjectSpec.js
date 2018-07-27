@@ -93,7 +93,7 @@ describe("CanvasObject", function() {
     );
 
     const anchorElem = window.document.createElement('div');
-    o.addInteractableConnectorAnchor(anchorElem);
+    o.addNonInteractableConnectorAnchor(anchorElem);
 
     expect(o.getConnectorAnchors().length).toBe(1);
   });  
@@ -117,4 +117,25 @@ describe("CanvasObject", function() {
     expect(o.getConnectorAnchors().length).toBe(1);
   }); 
 
+});
+
+describe("CanvasObject.hasConnectorAnchor", function() {
+  it("returns true if anchor is assigned to CanvasObject", function() {  
+    const o = new CanvasObject(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        {}, 
+        window.document.createElement('div'), 
+        window.document.createElement('div'), 
+        window.document.createElement('div')
+    );
+
+    const anchorElem = window.document.createElement('div');
+    const newAnchor = o.addInteractableConnectorAnchor(anchorElem);
+
+    expect(o.hasConnectorAnchor(newAnchor)).toBe(true);
+  }); 
 });
