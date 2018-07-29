@@ -7,6 +7,15 @@ import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
  * @param {Point} _endPoint
  */
 function Line(_startPoint, _endPoint) {   
+
+    if(typeof _startPoint === 'undefined' || _startPoint === null) {
+        throw "Line missing _startPoint";
+    }
+
+    if(typeof _endPoint === 'undefined' || _endPoint === null) {
+        throw "Line missing _endPoint";
+    }
+
     this.__startPoint = _startPoint;
     this.__endPoint = _endPoint;
 };

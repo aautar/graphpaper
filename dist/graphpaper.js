@@ -112,6 +112,15 @@ function LineIntersection(_type, _intersectionPoint) {
  * @param {Point} _endPoint
  */
 function Line(_startPoint, _endPoint) {   
+
+    if(typeof _startPoint === 'undefined' || _startPoint === null) {
+        throw "Line missing _startPoint";
+    }
+
+    if(typeof _endPoint === 'undefined' || _endPoint === null) {
+        throw "Line missing _endPoint";
+    }
+
     this.__startPoint = _startPoint;
     this.__endPoint = _endPoint;
 }
@@ -945,6 +954,11 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      */
     this.computeRoute = function(_startPoint, _endPoint) {
 
+        // if no valid startpoint or endpoint, we can't route
+        if(_startPoint === null ||_endPoint === null) {
+            return new PointSet();
+        }
+
         // find closest visible point in pointToVisiblePointSet
         const firstRoutingPoint = self.findVisiblePointClosestTo(_startPoint);
         if(firstRoutingPoint === null) {
@@ -957,6 +971,14 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         while(true) {
             const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPoint, _endPoint);
             if(routeSegment === null) {
+
+                // Is there unobstructed line to endpoint? 
+                // If not, failed to find route
+                const lastSegmentToEndpoint = new Line(pointsInRoute[pointsInRoute.length-1], _endPoint);
+                if(doesLineIntersectAnyBoundaryLines(lastSegmentToEndpoint)) {
+                    return new PointSet();
+                }
+
                 break;
             }
 

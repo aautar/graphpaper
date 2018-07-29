@@ -29,9 +29,11 @@ const computeConnectorSvg = function(_connectorDescriptor, _anchorPoints, _point
     const anchorEndCentroid = new Point(anchorEndStringParts[0], anchorEndStringParts[1]);
     const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(anchorStartCentroid);
 
+    // Find adjustedStart, adjustedEnd .. anchor points closest to the desired start point and end point
+    // Note that when desired start or end are closed off within a boundary, values will be null
     const adjustedStart = _anchorPoints
-        .findPointsCloseTo(anchorStartCentroid, anchorPointMinDist)
-        .findPointClosestTo(anchorEndCentroid);
+        .findPointsCloseTo(anchorStartCentroid, anchorPointMinDist) // get all points within radius
+        .findPointClosestTo(anchorEndCentroid); // for all points within radius, get the once closest to the endpoint
 
     const adjustedEnd = _anchorPoints
         .findPointsCloseTo(anchorEndCentroid, anchorPointMinDist)

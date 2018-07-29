@@ -94,7 +94,7 @@ describe("PointVisibilityMap.computeRoute", function() {
     });
 
 
-    it("returns PointSet with only 1 point, when routing is only possible to 1 point", function() {
+    it("returns empty PointSet, when routing is only possible to 1 point (unable to route to endpoint)", function() {
         const freePoints = new PointSet();
         freePoints.push(new Point(15, 15));
         freePoints.push(new Point(51, 1));
@@ -115,10 +115,7 @@ describe("PointVisibilityMap.computeRoute", function() {
 
         const routePointsArray = pointsInRoute.toArray();
 
-        expect(routePointsArray.length).toBe(1);
-        expect(routePointsArray[0].getX()).toBe(15);
-        expect(routePointsArray[0].getY()).toBe(15);
-
+        expect(routePointsArray.length).toBe(0);
     });
 
     it("returns PointSet with 3 point, routing around a boundary", function() {
