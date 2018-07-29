@@ -64,8 +64,8 @@ const obj1 = new GraphPaper.CanvasObject(
     44,                                                 // height
     canvas,                                             // parent GraphPaper.Canvas
     document.getElementById('obj1'),                    // object DOM element
-    document.getElementById('translateHandle1'),        // DOM element for the object's translation handle
-    document.getElementById('resizeHandle1')            // DOM element for the object's resize handle
+    [document.getElementById('translateHandle1')],      // DOM elements for the object's translation handles
+    [document.getElementById('resizeHandle1')]          // DOM elements for the object's resize handles
 );
 ```
 
@@ -77,10 +77,6 @@ canvas.addObject(obj1);
 
  The object (`obj1`) will be added to the canvas and can now be translated by dragging the translation handle (`#translateHandle1`) or resized with the resize handle (`#resizeHandle1`). GraphPaper will take care of both mouse and touch interactions on the handle elements.
  
-## Canvas Dimensions
-
-The dimensions of a Canvas can be queried via the 'Canvas.getWidth()' and 'Canvas.getHeight()' methods.
-
 ## The Grid
 
 The grid rendered on a Canvas along with the "snap to grid" behavior a Canvas will impart on objects is controlled based on the properties of a `Grid` object assigned to the Canvas.
@@ -94,13 +90,19 @@ A new Grid object is created as follows:
 
 The `Grid` constructor takes 3 parameters: the size of the grid, the color of the grid, and the style of the grid (GRID_STYLE.DOT or GRID_STYLE.LINE)
 
+
+## Canvas Dimensions
+
+* `Canvas.getWidth()`, `Canvas.getHeight()`
+Returns: `Number`
+
+
 ## Canvas Objects
 
-* ‘Canvas.calcBoundingBox()‘ 
-Returns: ‘Rectangle‘
+* `Canvas.calcBoundingBox()`
+Returns: `Rectangle`
 
 This method will calculate and return the rectangular bounds/extents of the Canvas in which all CanvasObjects are enclosed
-
 
 
 ## Events

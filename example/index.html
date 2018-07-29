@@ -29,6 +29,7 @@
 
         <div id="obj1" class="obj">
             <div id="translateHandle1" class="translateHandle"></div>
+            <div id="translateHandle1b" class="translateHandle" style="margin-left:-45px;"></div>
             <div id="resizeHandle1"  class="resizeHandle"></div>
             <div id="connectorAnchor1" class="connectorAnchor"></div>
         </div>
@@ -72,8 +73,8 @@
             44, 
             canvas,
             document.getElementById('obj1'), 
-            document.getElementById('translateHandle1'),
-            document.getElementById('resizeHandle1')
+            [document.getElementById('translateHandle1'), document.getElementById('translateHandle1b')],
+            [document.getElementById('resizeHandle1')]
         );
 
         obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
@@ -87,8 +88,8 @@
             44, 
             canvas,
             document.getElementById('obj2'), 
-            document.getElementById('translateHandle2'),
-            document.getElementById('resizeHandle2')
+            [document.getElementById('translateHandle2')],
+            [document.getElementById('resizeHandle2')]
         );
 
         obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
@@ -101,8 +102,8 @@
             44, 
             canvas,
             document.getElementById('obj3'), 
-            document.getElementById('translateHandle3'),
-            document.getElementById('resizeHandle3')
+            [document.getElementById('translateHandle3')],
+            [document.getElementById('resizeHandle3')]
         );
 
         obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3'));        

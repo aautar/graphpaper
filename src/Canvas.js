@@ -752,8 +752,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const handleMove = function(_x, _y) {
         const obj = self.getObjectById(objectIdBeingDragged);
-        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
-        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
+        const translateOffset = obj.getTranslateHandleOffset();
+        const mx = self.snapToGrid(_x + translateOffset.getX());
+        const my = self.snapToGrid(_y + translateOffset.getY());
         
         objectDragX = mx;
         objectDragY = my;		
@@ -772,9 +773,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const handleMoveEnd = function(_x, _y) {
         const obj = self.getObjectById(objectIdBeingDragged);
-        
-        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
-        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
+        const translateOffset = obj.getTranslateHandleOffset();
+        const mx = self.snapToGrid(_x + translateOffset.getX());
+        const my = self.snapToGrid(_y + translateOffset.getY());
 
         const mxStart = objectDragStartX;
         const myStart = objectDragStartY;

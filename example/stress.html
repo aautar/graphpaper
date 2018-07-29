@@ -63,8 +63,8 @@
                 44, 
                 canvas,
                 document.getElementById(`obj${i}`), 
-                document.getElementById(`translateHandle${i}`),
-                document.getElementById(`resizeHandle${i}`)
+                [document.getElementById(`translateHandle${i}`)],
+                [document.getElementById(`resizeHandle${i}`)]
             );
 
             obj.addInteractableConnectorAnchor(document.getElementById(`connectorAnchor${i}`));

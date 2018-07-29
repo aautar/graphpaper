@@ -1756,8 +1756,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const handleMove = function(_x, _y) {
         const obj = self.getObjectById(objectIdBeingDragged);
-        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
-        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
+        const translateOffset = obj.getTranslateHandleOffset();
+        const mx = self.snapToGrid(_x + translateOffset.getX());
+        const my = self.snapToGrid(_y + translateOffset.getY());
         
         obj.translate(mx, my);
         emitEvent(Event.OBJECT_TRANSLATED, { 'object': obj });      
@@ -1773,9 +1774,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const handleMoveEnd = function(_x, _y) {
         const obj = self.getObjectById(objectIdBeingDragged);
-        
-        const mx = self.snapToGrid(_x + obj.getTranslateHandleOffsetX());
-        const my = self.snapToGrid(_y + obj.getTranslateHandleOffsetY());
+        const translateOffset = obj.getTranslateHandleOffset();
+        const mx = self.snapToGrid(_x + translateOffset.getX());
+        const my = self.snapToGrid(_y + translateOffset.getY());
 
         const mxStart = objectDragStartX;
         const myStart = objectDragStartY;
@@ -1903,10 +1904,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
  * @param {Number} _height
  * @param {Canvas} _canvas
  * @param {Element} _domElement
- * @param {Element} _translateHandleDomElement
- * @param {Element} _resizeHandleDomElement
+ * @param {Element[]} _translateHandleDomElements
+ * @param {Element[]} _resizeHandleDomElements
  */
-function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElement, _resizeHandleDomElement) {
+function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
 
     const self = this;
 
@@ -1917,8 +1918,19 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     const connectorAnchors = [];
 
+    /**
+     * @type {Number}
+     */
     var nextConnectorAnchorIdSuffix = 1000;
 
+    /**
+     * @type {Element}
+     */
+    var currentTranslateHandleElementActivated = null;
+
+    /**
+     * @type {Element}
+     */
     this.x = parseInt(_x);
     this.y = parseInt(_y);
     this.width = parseInt(_width);
@@ -1998,17 +2010,17 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     };
 
     /**
-     * @returns {Number}
+     * @returns {Point|null}
      */    
-    this.getTranslateHandleOffsetX = function() {
-        return -(_translateHandleDomElement.offsetLeft + _translateHandleDomElement.offsetWidth * 0.5);
-    };
+    this.getTranslateHandleOffset = function() {
+        if(currentTranslateHandleElementActivated) {
+            return new Point(
+                -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
+                -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
+            );
+        }
 
-    /**
-     * @returns {Number}
-     */    
-    this.getTranslateHandleOffsetY = function() {
-        return -(_translateHandleDomElement.offsetTop  + _translateHandleDomElement.offsetHeight * 0.5);
+        return null;
     };
 
     /**
@@ -2173,24 +2185,37 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     this.setResizeStartCallback = function(_resizeStartFunc) {
         resizeStart = _resizeStartFunc;
-    }; 
-    
+    };
 
-    _translateHandleDomElement.addEventListener('touchstart', function(e) {
-        moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
-    });
+    const bindTranslateHandleElements = function() {
+        _translateHandleDomElements.forEach((_el) => {
+            _el.addEventListener('touchstart', function(e) {
+                currentTranslateHandleElementActivated = _el;
+                moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
+            });
+        
+            _el.addEventListener('mousedown', function (e) {
+                currentTranslateHandleElementActivated = _el;
+                moveStart(self, e.pageX, e.pageY, false);                
+            });
+        });
+    };
 
-    _translateHandleDomElement.addEventListener('mousedown', function (e) {
-        moveStart(self, e.pageX, e.pageY, false);
-    });
+    const bindResizeHandleElements = function() {
+        _resizeHandleDomElements.forEach((_el) => {        
+            _el.addEventListener('mousedown', function (e) {
+                if (e.which !== MOUSE_MIDDLE_BUTTON) {
+                    return;
+                }
+        
+                resizeStart(self, e.pageX, e.pageY);
+            });    
+        });
+    };
 
-    _resizeHandleDomElement.addEventListener('mousedown', function (e) {
-        if (e.which !== MOUSE_MIDDLE_BUTTON) {
-            return;
-        }
 
-        resizeStart(self, e.pageX, e.pageY);
-    });    
+    bindTranslateHandleElements();
+    bindResizeHandleElements();
 }
 
 /**
