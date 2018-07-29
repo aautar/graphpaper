@@ -16,8 +16,8 @@ describe("Cluster", function() {
             _height, 
             {}, 
             mockDomElem, 
-            mockDomElem, 
-            mockDomElem
+            [mockDomElem], 
+            [mockDomElem]
         );
 
         return o;

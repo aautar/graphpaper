@@ -18,8 +18,8 @@ describe("ConnectorAnchor.getWidth, ConnectorAnchor.getHeight", function() {
             1000, 
             {}, 
             window.document.createElement('div'), 
-            window.document.createElement('div'), 
-            window.document.createElement('div')
+            [window.document.createElement('div')], 
+            [window.document.createElement('div')]
         );
 
         const anchorElemWidth = 100;

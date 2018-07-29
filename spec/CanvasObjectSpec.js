@@ -1,8 +1,9 @@
 const jsdom = require("jsdom");
 import {Rectangle} from '../src/Rectangle.js';
 import {CanvasObject} from '../src/CanvasObject.js';
+import { Point } from "../src/Point.js";
 
-const { JSDOM } = jsdom;
+const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 
@@ -17,8 +18,8 @@ describe("CanvasObject", function() {
         20, 
         {}, 
         window.document.createElement('div'), 
-        window.document.createElement('div'), 
-        window.document.createElement('div')
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
     );
 
     expect(o.getBoundingRectange().getLeft()).toBe(100);
@@ -27,15 +28,26 @@ describe("CanvasObject", function() {
     expect(o.getBoundingRectange().getBottom()).toBe(220);
   });
   
-  it("getTranslateHandleOffsetX return handle x-offset", function() {
+  it("getTranslateHandleOffset returns Point with x-offset and y-offset", function() {
   
-    var mockDomElem = {
-      addEventListener: function() { },
-      offsetLeft: 10,
-      offsetWidth: 100,
-      offsetTop: 20,
-      offsetHeight: 150      
-    };
+    const expectedOffset = new Point(-60, -95);
+
+    var translateHandleElement = window.document.createElement('div');
+
+    Object.defineProperties(translateHandleElement, {
+      offsetLeft: {
+        get: function() { return 10; }
+      },
+      offsetTop: {
+        get: function() { return 20; }
+      },
+      offsetHeight: {
+        get: function() { return 150; }
+      },
+      offsetWidth: {
+        get: function() { return 100; }
+      }
+    });    
 
     var o = new CanvasObject(
         "obj-123",
@@ -44,40 +56,17 @@ describe("CanvasObject", function() {
         10, 
         20, 
         {}, 
-        mockDomElem, 
-        mockDomElem, 
-        mockDomElem
+        window.document.createElement('div'), 
+        [translateHandleElement], 
+        [window.document.createElement('div')]
     );
 
-    expect(o.getTranslateHandleOffsetX()).toBe(-60);
+    const event = new window.Event('mousedown')
+    translateHandleElement.dispatchEvent(event);
+
+    expect(o.getTranslateHandleOffset().getX()).toBe(-60);
+    expect(o.getTranslateHandleOffset().getY()).toBe(-95);
   });      
-
-
-  it("getTranslateHandleOffsetX return handle x-offset", function() {
-  
-    var mockDomElem = {
-      addEventListener: function() { },
-      offsetLeft: 10,
-      offsetWidth: 100,
-      offsetTop: 20,
-      offsetHeight: 150
-    };
-
-    var o = new CanvasObject(
-        "obj-123",
-        100, 
-        200, 
-        10, 
-        20, 
-        {}, 
-        mockDomElem, 
-        mockDomElem, 
-        mockDomElem
-    );
-
-    expect(o.getTranslateHandleOffsetY()).toBe(-95);
-  });  
-
 
   it("addNonInteractableConnectorAnchor adds ConnectorAnchor to CanvasObject", function() {  
     const o = new CanvasObject(
@@ -88,8 +77,8 @@ describe("CanvasObject", function() {
         20, 
         {}, 
         window.document.createElement('div'), 
-        window.document.createElement('div'), 
-        window.document.createElement('div')
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
     );
 
     const anchorElem = window.document.createElement('div');
@@ -107,8 +96,8 @@ describe("CanvasObject", function() {
         20, 
         {}, 
         window.document.createElement('div'), 
-        window.document.createElement('div'), 
-        window.document.createElement('div')
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
     );
 
     const anchorElem = window.document.createElement('div');
@@ -129,8 +118,8 @@ describe("CanvasObject.hasConnectorAnchor", function() {
         20, 
         {}, 
         window.document.createElement('div'), 
-        window.document.createElement('div'), 
-        window.document.createElement('div')
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
     );
 
     const anchorElem = window.document.createElement('div');

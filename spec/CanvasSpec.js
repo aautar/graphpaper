@@ -19,8 +19,8 @@ describe("Canvas", function() {
             _height, 
             {}, 
             domElem, 
-            domElem, 
-            domElem
+            [domElem], 
+            [domElem]
         );
 
         return o;
@@ -112,8 +112,8 @@ describe("Canvas", function() {
             "200", 
             canvas, 
             objElement, 
-            objTranslateHandleElem,
-            objResizeHandleElem
+            [objTranslateHandleElem],
+            [objResizeHandleElem]
         );
         
         canvas.addObject(o);
@@ -180,8 +180,8 @@ describe("Canvas", function() {
             "200", 
             canvas, 
             objElement, 
-            objTranslateHandleElem,
-            objResizeHandleElem
+            [objTranslateHandleElem],
+            [objResizeHandleElem]
         );
         
         canvas.addObject(o);
@@ -225,8 +225,8 @@ describe("Canvas", function() {
             "200", 
             canvas, 
             objElement, 
-            objTranslateHandleElem,
-            objResizeHandleElem
+            [objTranslateHandleElem],
+            [objResizeHandleElem]
         );
         
         canvas.addObject(o);
