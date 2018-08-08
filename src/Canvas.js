@@ -116,9 +116,51 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     /**
+     * 
+     * @param {CanvasObject[]} _objs 
+     * @returns {Point[]}
+     */
+    const getAccessibleRoutingPointsFromObjectAnchors = function(_objs) {
+
+        const allRoutingPoints = [];
+        const filteredRoutingPoints = [];
+
+        _objs.forEach((_o) => {
+            const routingPoints = _o.getConnectorAnchorRoutingPoints(self.getGridSize());
+            routingPoints.forEach((_rp) => {
+                allRoutingPoints.push(_rp);
+            });            
+        });
+
+
+        allRoutingPoints.forEach((_pt) => {
+
+            var isPointWithinObj = false;
+
+            for(let i=0; i<_objs.length; i++) {
+                const obj = _objs[i];
+                const boundingRect = obj.getBoundingRectange();
+                if(boundingRect.checkIsPointWithin(_pt)) {
+                    isPointWithinObj = true;
+                    break;
+                }
+            }
+
+            if(!isPointWithinObj) {
+                filteredRoutingPoints.push(_pt);
+            }
+            
+        });
+
+        return filteredRoutingPoints;
+
+    };
+
+    /**
      * @returns {PointSet}
      */
     const getConnectorRoutingPoints = function() {
+
         const pointSet = new PointSet();
         canvasObjects.forEach(function(_obj) {
             const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
@@ -127,11 +169,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             });
         });
 
-        canvasObjects.forEach(function(_obj) {
-            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
-            objAnchorRoutingPoints.forEach(function(_rp) {
-                pointSet.push(_rp);
-            });
+
+        const routingPoints = getAccessibleRoutingPointsFromObjectAnchors(canvasObjects);
+        routingPoints.forEach((_rp) => {
+            pointSet.push(_rp);
         });
 
         return pointSet;
@@ -140,11 +181,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     const getConnectorAnchorPoints = function() {
         const pointSet = new PointSet();
         
-        canvasObjects.forEach(function(_obj) {
-            const objAnchorRoutingPoints = _obj.getConnectorAnchorRoutingPoints(self.getGridSize());
-            objAnchorRoutingPoints.forEach(function(_rp) {
-                pointSet.push(_rp);
-            });
+        const routingPoints = getAccessibleRoutingPointsFromObjectAnchors(canvasObjects);
+        routingPoints.forEach((_rp) => {
+            pointSet.push(_rp);
         });
 
         return pointSet;
