@@ -135,7 +135,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         allRoutingPoints.forEach((_pt) => {
 
-            var isPointWithinObj = false;
+            let isPointWithinObj = false;
 
             for(let i=0; i<_objs.length; i++) {
                 const obj = _objs[i];
