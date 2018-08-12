@@ -30,6 +30,16 @@ function PointSet(_pointsInput) {
     };
 
     /**
+     * @param {PointSet} _ps
+     */
+    this.pushPointSet = function(_ps) {
+        const possibleNewPoints = _ps.toArray();
+        for(let i=0; i<possibleNewPoints.length; i++) {
+            self.push(possibleNewPoints[i]);
+        }
+    };
+
+    /**
      * 
      * @param {Point} _point 
      * @returns {Point}

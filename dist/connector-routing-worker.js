@@ -242,6 +242,16 @@ function PointSet(_pointsInput) {
     };
 
     /**
+     * @param {PointSet} _ps
+     */
+    this.pushPointSet = function(_ps) {
+        const possibleNewPoints = _ps.toArray();
+        for(let i=0; i<possibleNewPoints.length; i++) {
+            self.push(possibleNewPoints[i]);
+        }
+    };
+
+    /**
      * 
      * @param {Point} _point 
      * @returns {Point}
@@ -654,27 +664,27 @@ const pointToSvgLineTo = function(_pt) {
 /**
  * 
  * @param {Object} _connectorDescriptor
- * @param {PointSet} _anchorPoints
+ * @param {PointSet} _routingPointsAroundAnchorSet
  * @param {PointVisibilityMap} _pointVisibilityMap 
  * 
  * @returns {String}
  */
-const computeConnectorSvg = function(_connectorDescriptor, _anchorPoints, _pointVisibilityMap) {
+const computeConnectorSvg = function(_connectorDescriptor, _routingPointsAroundAnchorSet, _pointVisibilityMap) {
 
     const anchorStartStringParts = _connectorDescriptor.anchor_start_centroid.split(' ');
     const anchorEndStringParts = _connectorDescriptor.anchor_end_centroid.split(' ');
 
     const anchorStartCentroid = new Point(anchorStartStringParts[0], anchorStartStringParts[1]);
     const anchorEndCentroid = new Point(anchorEndStringParts[0], anchorEndStringParts[1]);
-    const anchorPointMinDist = _anchorPoints.findDistanceToPointClosestTo(anchorStartCentroid);
+    const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
 
     // Find adjustedStart, adjustedEnd .. anchor points closest to the desired start point and end point
     // Note that when desired start or end are closed off within a boundary, values will be null
-    const adjustedStart = _anchorPoints
+    const adjustedStart = _routingPointsAroundAnchorSet
         .findPointsCloseTo(anchorStartCentroid, anchorPointMinDist) // get all points within radius
         .findPointClosestTo(anchorEndCentroid); // for all points within radius, get the once closest to the endpoint
 
-    const adjustedEnd = _anchorPoints
+    const adjustedEnd = _routingPointsAroundAnchorSet
         .findPointsCloseTo(anchorEndCentroid, anchorPointMinDist)
         .findPointClosestTo(anchorStartCentroid);
 
@@ -712,9 +722,9 @@ onmessage = function(_msg) {
     const boundaryLinesFloat64Array = new Float64Array(boundaryLinesArrayBuffer);
     const boundaryLinesSet = new LineSet(boundaryLinesFloat64Array);    
 
-    const anchorPointsArrayBuffer = _msg.data.anchorPoints;
-    const anchorPointsFloat64Array = new Float64Array(anchorPointsArrayBuffer);
-    const anchorPointsSet = new PointSet(anchorPointsFloat64Array);    
+    const routingPointsAroundAnchorArrayBuffer = _msg.data.routingPointsAroundAnchor;
+    const routingPointsAroundAnchorFloat64Array = new Float64Array(routingPointsAroundAnchorArrayBuffer);
+    const routingPointsAroundAnchorSet = new PointSet(routingPointsAroundAnchorFloat64Array);    
     
     const currentPointVisiblityMap = new PointVisibilityMap(
         routingPointsSet,
@@ -722,7 +732,7 @@ onmessage = function(_msg) {
     );
 
     connectorDescriptors.forEach(function(_cd) {
-        _cd.svgPath = computeConnectorSvg(_cd, anchorPointsSet, currentPointVisiblityMap);
+        _cd.svgPath = computeConnectorSvg(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
     });
 
     metrics.overallTime = (new Date()) - overallTimeT1;
