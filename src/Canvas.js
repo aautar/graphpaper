@@ -656,14 +656,20 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             // Find best anchor element to connect startNote and endNote            
             // Find anchors that produce shortest straight line distance
             for(let x=0; x<objAConnectorAnchors.length; x++) {
+
+                const objANumValidRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(objAConnectorAnchors[x].getId()) || 0;
+                if(objANumValidRoutingPoints === 0) {
+                    continue;
+                }
+
                 for(let y=0; y<objBConnectorAnchors.length; y++) {
                     const aCentroid = objAConnectorAnchors[x].getCentroid();
                     const bCentroid = objBConnectorAnchors[y].getCentroid();
                     
                     const d = Math.sqrt(Math.pow(bCentroid.getX()-aCentroid.getX(),2) + Math.pow(bCentroid.getY()-aCentroid.getY(),2));
-                    const numValidRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(objBConnectorAnchors[y].getId()) || 0;
+                    const objBNumValidRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(objBConnectorAnchors[y].getId()) || 0;
                     
-                    if(d < minDist && numValidRoutingPoints > 0) {
+                    if(d < minDist && objBNumValidRoutingPoints > 0) {
                         startAnchorIdxWithMinDist = x;
                         endAnchorIdxWithMinDist = y;
                         minDist = d;

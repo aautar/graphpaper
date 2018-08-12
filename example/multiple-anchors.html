@@ -39,15 +39,14 @@
             <div id="resizeHandle2" class="resizeHandle"></div>
             <div id="connectorAnchor2a" class="connectorAnchor"></div>
             <div id="connectorAnchor2b" class="connectorAnchor" style="right:auto; left:-18px"></div>            
-        </div>        
+        </div>
 
-
-        <div id="obj3" class="obj">
+        <div id="obj3" class="obj" style="background:#f00;">
             <div id="translateHandle3" class="translateHandle"></div>
             <div id="resizeHandle3" class="resizeHandle"></div>
             <div id="connectorAnchor3a" class="connectorAnchor"></div>
-            <div id="connectorAnchor3b" class="connectorAnchor" style="right:auto; left:-18px"></div>                
-        </div>        
+            <div id="connectorAnchor3b" class="connectorAnchor" style="right:auto; left:-18px"></div>            
+        </div>              
 
     </div>
 
@@ -117,6 +116,14 @@
         canvas.addObject(obj1);
         canvas.addObject(obj2);
         canvas.addObject(obj3);
+
+        canvas.on('object-translated', function() {
+            canvas.findBestConnectorAnchorsToConnectObjects(obj1, obj2, function(_bestAnchor) {
+
+                console.log(_bestAnchor);
+
+            });
+        });
 
     </script>
 
