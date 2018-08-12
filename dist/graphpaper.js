@@ -1199,7 +1199,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                     isPointWithinObj = true;
 
-                    var currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchor.getId()) || 0;
+                    const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchor.getId()) || 0;
                     connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchor.getId(), currentNumRoutingPoints - 1);
                 }
             }
@@ -1210,10 +1210,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             
         });
 
-        console.log(connectorAnchorToNumValidRoutingPoints);
-
         return filteredRoutingPoints;
-
     };
 
     /**
@@ -1684,38 +1681,54 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      * @param {Object} _objB
      * @returns {Object} 
      */
-    this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB) {
+    this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
 
-        const objAConnectorAnchors = _objA.getConnectorAnchors();
-        const objBConnectorAnchors = _objB.getConnectorAnchors();
-
-        var startAnchorIdxWithMinDist = 0;
-        var endAnchorIdxWithMinDist = 0;
-        var minDist = Number.MAX_VALUE;
-        
-        // Find best anchor element to connect startNote and endNote            
-        // Find anchors that produce shortest straight line distance
-        for(let x=0; x<objAConnectorAnchors.length; x++) {
-            for(let y=0; y<objBConnectorAnchors.length; y++) {
-                const aCentroid = objAConnectorAnchors[x].getCentroid();
-                const bCentroid = objBConnectorAnchors[y].getCentroid();
-                
-                const d = Math.sqrt(Math.pow(bCentroid.getX()-aCentroid.getX(),2) + Math.pow(bCentroid.getY()-aCentroid.getY(),2));
-                
-                if(d < minDist) {
-                    startAnchorIdxWithMinDist = x;
-                    endAnchorIdxWithMinDist = y;
-                    minDist = d;
+        const searchFunc = (_searchData) => {
+            const objAConnectorAnchors = _searchData.objectA.getConnectorAnchors();
+            const objBConnectorAnchors = _searchData.objectB.getConnectorAnchors();
+    
+            var startAnchorIdxWithMinDist = 0;
+            var endAnchorIdxWithMinDist = 0;
+            var minDist = Number.MAX_VALUE;
+            
+            // Find best anchor element to connect startNote and endNote            
+            // Find anchors that produce shortest straight line distance
+            for(let x=0; x<objAConnectorAnchors.length; x++) {
+                for(let y=0; y<objBConnectorAnchors.length; y++) {
+                    const aCentroid = objAConnectorAnchors[x].getCentroid();
+                    const bCentroid = objBConnectorAnchors[y].getCentroid();
+                    
+                    const d = Math.sqrt(Math.pow(bCentroid.getX()-aCentroid.getX(),2) + Math.pow(bCentroid.getY()-aCentroid.getY(),2));
+                    const numValidRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(objBConnectorAnchors[y].getId()) || 0;
+                    
+                    if(d < minDist && numValidRoutingPoints > 0) {
+                        startAnchorIdxWithMinDist = x;
+                        endAnchorIdxWithMinDist = y;
+                        minDist = d;
+                    }
                 }
             }
-        }
-
-        return {
-            "objectAAnchorIndex": startAnchorIdxWithMinDist,
-            "objectAAnchor": objAConnectorAnchors[startAnchorIdxWithMinDist],
-            "objectBAnchorIndex": endAnchorIdxWithMinDist,
-            "objectBAnchor": objBConnectorAnchors[endAnchorIdxWithMinDist],
+    
+            _searchData.cb(
+                {
+                    "objectAAnchorIndex": startAnchorIdxWithMinDist,
+                    "objectAAnchor": objAConnectorAnchors[startAnchorIdxWithMinDist],
+                    "objectBAnchorIndex": endAnchorIdxWithMinDist,
+                    "objectBAnchor": objBConnectorAnchors[endAnchorIdxWithMinDist],
+                }
+            );
         };
+
+
+        setTimeout(function() {
+            searchFunc(
+                {
+                    "objectA": _objA,
+                    "objectB": _objB,
+                    "cb": _onFound
+                }
+            );
+        }, 10);
     };
 
     /**
