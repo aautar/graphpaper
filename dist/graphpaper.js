@@ -420,6 +420,16 @@ function PointSet(_pointsInput) {
     };
 
     /**
+     * @param {PointSet} _ps
+     */
+    this.pushPointSet = function(_ps) {
+        const possibleNewPoints = _ps.toArray();
+        for(let i=0; i<possibleNewPoints.length; i++) {
+            self.push(possibleNewPoints[i]);
+        }
+    };
+
+    /**
      * 
      * @param {Point} _point 
      * @returns {Point}
@@ -1113,6 +1123,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const eventHandlers = new Map();
 
+    /**
+     * ConnectorAnchor -> Number map
+     */
+    const connectorAnchorToNumValidRoutingPoints = new Map();
 
     /**
      * @returns {PointVisibilityMap}
@@ -1150,35 +1164,53 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const getAccessibleRoutingPointsFromObjectAnchors = function(_objs) {
 
+        connectorAnchorToNumValidRoutingPoints.clear();
+
         const allRoutingPoints = [];
         const filteredRoutingPoints = [];
 
         _objs.forEach((_o) => {
-            const routingPoints = _o.getConnectorAnchorRoutingPoints(self.getGridSize());
-            routingPoints.forEach((_rp) => {
-                allRoutingPoints.push(_rp);
-            });            
+            const anchors = _o.getConnectorAnchors();
+
+            anchors.forEach((_a) => {
+                const routingPoints = _a.getRoutingPoints(self.getGridSize());
+                routingPoints.forEach((_rp) => {
+                    allRoutingPoints.push(
+                        {
+                            "routingPoint": _rp,
+                            "parentAnchor": _a
+                        }
+                    );
+                });      
+
+                connectorAnchorToNumValidRoutingPoints.set(_a.getId(), routingPoints.length);
+            });
+
         });
 
 
-        allRoutingPoints.forEach((_pt) => {
+        allRoutingPoints.forEach((_rp) => {
 
             let isPointWithinObj = false;
 
             for(let i=0; i<_objs.length; i++) {
                 const obj = _objs[i];
                 const boundingRect = obj.getBoundingRectange();
-                if(boundingRect.checkIsPointWithin(_pt)) {
+                if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                     isPointWithinObj = true;
-                    break;
+
+                    var currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchor.getId()) || 0;
+                    connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchor.getId(), currentNumRoutingPoints - 1);
                 }
             }
 
             if(!isPointWithinObj) {
-                filteredRoutingPoints.push(_pt);
+                filteredRoutingPoints.push(_rp.routingPoint);
             }
             
         });
+
+        console.log(connectorAnchorToNumValidRoutingPoints);
 
         return filteredRoutingPoints;
 
@@ -1187,8 +1219,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     /**
      * @returns {PointSet}
      */
-    const getConnectorRoutingPoints = function() {
-
+    const getObjectExtentRoutingPoints = function() {
         const pointSet = new PointSet();
         canvasObjects.forEach(function(_obj) {
             const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
@@ -1197,16 +1228,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             });
         });
 
-
-        const routingPoints = getAccessibleRoutingPointsFromObjectAnchors(canvasObjects);
-        routingPoints.forEach((_rp) => {
-            pointSet.push(_rp);
-        });
-
         return pointSet;
     };
 
-    const getConnectorAnchorPoints = function() {
+    /**
+     * @returns {PointSet}
+     */    
+    const getConnectorRoutingPointsAroundAnchor = function() {
         const pointSet = new PointSet();
         
         const routingPoints = getAccessibleRoutingPointsFromObjectAnchors(canvasObjects);
@@ -1246,8 +1274,15 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             connectorDescriptors.push(_c.getDescriptor());
         });
 
-        const anchorPointsFloat64Array = (getConnectorAnchorPoints()).toFloat64Array();
-        const routingPointsFloat64Array = (getConnectorRoutingPoints()).toFloat64Array();
+        const routingPointsAroundAnchor = getConnectorRoutingPointsAroundAnchor();
+        const objectExtentRoutingPoints = getObjectExtentRoutingPoints();
+
+        const allRoutingPoints = new PointSet();        
+        allRoutingPoints.pushPointSet(routingPointsAroundAnchor);
+        allRoutingPoints.pushPointSet(objectExtentRoutingPoints);
+
+        const routingPointsAroundAnchorFloat64Array = routingPointsAroundAnchor.toFloat64Array();
+        const routingPointsFloat64Array = allRoutingPoints.toFloat64Array();
         const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
         _connectorRoutingWorker.postMessage(
             {
@@ -1255,12 +1290,12 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 "connectorDescriptors": connectorDescriptors,
                 "routingPoints": routingPointsFloat64Array.buffer,
                 "boundaryLines": boundaryLinesFloat64Array.buffer,
-                "anchorPoints": anchorPointsFloat64Array.buffer
+                "routingPointsAroundAnchor": routingPointsAroundAnchorFloat64Array.buffer
             },
             [
                 routingPointsFloat64Array.buffer,
                 boundaryLinesFloat64Array.buffer,
-                anchorPointsFloat64Array.buffer
+                routingPointsAroundAnchorFloat64Array.buffer
             ]
         );
     };
