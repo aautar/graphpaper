@@ -630,6 +630,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     this.removeConnector = function(_connector) {
         for(let i=0; i<objectConnectors.length; i++) {
             if(objectConnectors[i] === _connector) {
+                _connector.removePathElement();
                 objectConnectors.splice(i, 1);
                 return true;
             }
