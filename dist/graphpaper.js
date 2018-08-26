@@ -1638,7 +1638,7 @@ var GraphPaper = (function (exports) {
                 const aS = _conn.getAnchorStart();
                 const aE = _conn.getAnchorEnd();
 
-                if(_obj.hasConnectorAnchor(aS) && _obj.hasConnectorAnchor(aE)) {
+                if(_obj.hasConnectorAnchor(aS) || _obj.hasConnectorAnchor(aE)) {
                     foundConnectors.push(_conn);
                 }
 
