@@ -27,6 +27,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         DBLCLICK: "dblclick",
         CLICK: "click",
         OBJECT_ADDED: "object-added",
+        OBJECT_REMOVED: "object-removed",
         OBJECT_RESIZED: "object-resized",
         OBJECT_TRANSLATED: "object-translated"
     };
@@ -561,6 +562,26 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         refreshAllConnectors();       
 
         emitEvent(Event.OBJECT_ADDED, { "object":_obj });
+    };
+
+    /**
+     * Remove object from the canvas
+     * Note: as caller is responsible for putting object into the DOM, caller is responsible for removing it from the DOM
+     * 
+     * @param {String} _objId
+     * @returns {Boolean} 
+     */
+    this.removeObject = function(_objId) {
+        for(let i=0; i<canvasObjects.length; i++) {
+            if(canvasObjects[i].getId() === _objId) {
+                canvasObjects.splice(i, 1);
+                refreshAllConnectors();
+                emitEvent(Event.OBJECT_REMOVED, { "object":canvasObjects[i] });
+                return true;
+            }
+        }
+
+        return false;
     };
 
     /**

@@ -1065,6 +1065,7 @@ var GraphPaper = (function (exports) {
             DBLCLICK: "dblclick",
             CLICK: "click",
             OBJECT_ADDED: "object-added",
+            OBJECT_REMOVED: "object-removed",
             OBJECT_RESIZED: "object-resized",
             OBJECT_TRANSLATED: "object-translated"
         };
@@ -1600,6 +1601,26 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * Remove object from the canvas
+         * Note: as caller is responsible for putting object into the DOM, caller is responsible for removing it from the DOM
+         * 
+         * @param {String} _objId
+         * @returns {Boolean} 
+         */
+        this.removeObject = function(_objId) {
+            for(let i=0; i<canvasObjects.length; i++) {
+                if(canvasObjects[i].getId() === _objId) {
+                    canvasObjects.splice(i, 1);
+                    refreshAllConnectors();
+                    emitEvent(Event.OBJECT_REMOVED, { "object":canvasObjects[i] });
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        /**
          * @param {String} _id
          * @returns {Connector|null}
          */    
@@ -2074,6 +2095,10 @@ var GraphPaper = (function (exports) {
         this.y = parseInt(_y);
         this.width = parseInt(_width);
         this.height = parseInt(_height);
+
+        /**
+         * @deprecated this should no longer be used to indicate to a Canvas that the object is deleted
+         */
         this.isDeleted = false;
 
         /**

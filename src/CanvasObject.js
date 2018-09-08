@@ -54,6 +54,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.y = parseInt(_y);
     this.width = parseInt(_width);
     this.height = parseInt(_height);
+
+    /**
+     * @deprecated this should no longer be used to indicate to a Canvas that the object is deleted
+     */
     this.isDeleted = false;
 
     /**

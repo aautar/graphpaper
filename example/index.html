@@ -78,7 +78,6 @@
         );
 
         obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
-        obj1.translate(100,100);
 
         const obj2 = new GraphPaper.CanvasObject(
             'obj2', 
@@ -93,6 +92,7 @@
         );
 
         obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
+        obj2.translate(100, 100);
 
         const obj3 = new GraphPaper.CanvasObject(
             'obj3', 
@@ -115,6 +115,8 @@
 
         obj3.suspendTranslateInteractions();
         obj3.resumeTranslateInteractions();
+
+        //canvas.removeObject(obj2.getId());
 
     </script>
 
