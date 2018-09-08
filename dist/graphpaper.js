@@ -2309,17 +2309,35 @@ var GraphPaper = (function (exports) {
             resizeStart = _resizeStartFunc;
         };
 
+        this.suspendTranslateInteractions = function() {
+            unbindTranslateHandleElements();
+        };
+
+        this.resumeTranslateInteractions = function() {
+            bindTranslateHandleElements();
+        };
+
+        const translateTouchStartHandler = function(e) {
+            currentTranslateHandleElementActivated = e.target;
+            moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
+        };
+
+        const translateMouseDownHandler = function(e) {
+            currentTranslateHandleElementActivated = e.target;
+            moveStart(self, e.pageX, e.pageY, false);   
+        };
+
+        const unbindTranslateHandleElements = function() {
+            _translateHandleDomElements.forEach((_el) => {
+                _el.removeEventListener('touchstart', translateTouchStartHandler);        
+                _el.removeEventListener('mousedown', translateMouseDownHandler);
+            });
+        };
+
         const bindTranslateHandleElements = function() {
             _translateHandleDomElements.forEach((_el) => {
-                _el.addEventListener('touchstart', function(e) {
-                    currentTranslateHandleElementActivated = _el;
-                    moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
-                });
-            
-                _el.addEventListener('mousedown', function (e) {
-                    currentTranslateHandleElementActivated = _el;
-                    moveStart(self, e.pageX, e.pageY, false);                
-                });
+                _el.addEventListener('touchstart', translateTouchStartHandler);        
+                _el.addEventListener('mousedown', translateMouseDownHandler);
             });
         };
 
