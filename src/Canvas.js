@@ -545,8 +545,18 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      * @param {CanvasObject} _obj
      */
     this.addObject = function(_obj) {
-        _obj.setResizeStartCallback(handleResizeStart);
-        _obj.setMoveStartCallback(handleMoveStart);
+        _obj.on('obj-resize-start', handleResizeStart);
+        _obj.on('obj-resize', function(e) {
+            emitEvent(Event.OBJECT_RESIZED, { 'object': e.obj });
+            refreshAllConnectors();    
+        });
+
+        _obj.on('obj-translate-start', handleMoveStart);
+        _obj.on('obj-translate', function(e) {
+            emitEvent(Event.OBJECT_TRANSLATED, { 'object': e.obj });
+            refreshAllConnectors();    
+        });
+
         canvasObjects.push(_obj);
         refreshAllConnectors();       
 
@@ -827,27 +837,22 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     /**
      * 
-     * @param {CanvasObject} _obj
-     * @param {Number} _x 
-     * @param {Number} _y 
+     * @param {Object} _e 
      */
-    const handleResizeStart = function(_obj, _x, _y) {       
-        objectIdBeingResized = _obj.getId();
+    const handleResizeStart = function(_e) {       
+        objectIdBeingResized = _e.obj.getId();
     };    
 
     /**
      * 
-     * @param {CanvasObject} _obj
-     * @param {Number} _x 
-     * @param {Number} _y 
-     * @param {Boolean} _isTouchMove
+     * @param {Object} _e
      */
-    const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {     
-        objectIdBeingDragged = _obj.getId();
-        objectDragX = _x;
-        objectDragY = _y;
-        objectDragStartX = _x;
-        objectDragStartY = _y;        
+    const handleMoveStart = function(_e) {     
+        objectIdBeingDragged = _e.obj.getId();
+        objectDragX = _e.x;
+        objectDragY = _e.y;
+        objectDragStartX = _e.x;
+        objectDragStartY = _e.y;        
     };    
 
     /**
@@ -865,10 +870,6 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         objectDragY = my;		
 
         obj.translate(mx, my);
-        emitEvent(Event.OBJECT_TRANSLATED, { 'object': obj });      
-
-        // refresh connectors
-        refreshAllConnectors();
     };
 
     /**
@@ -888,8 +889,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         if(mxStart == mx && myStart == my) {
             // we didn't drag it anywhere
         } else {
-            obj.translate(mx, my);
-            emitEvent(Event.OBJECT_TRANSLATED, { 'object': obj });            
+            obj.translate(mx, my);       
         }
     };         
 
@@ -910,11 +910,6 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         const newHeight = ((my - top)+1);
 
         obj.resize(newWidth, newHeight);
-
-        // refresh connectors
-        refreshAllConnectors();
-
-        emitEvent(Event.OBJECT_RESIZED, { 'object': obj });
     };
 
     this.initTransformationHandlers = function() {

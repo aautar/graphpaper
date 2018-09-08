@@ -1102,6 +1102,9 @@ var GraphPaper = (function (exports) {
 
         var objectIdBeingDragged = null;
         var objectIdBeingResized = null;
+        
+        var objectDragX = 0.0;
+        var objectDragY = 0.0;
         var objectDragStartX = 0.0;
         var objectDragStartY = 0.0;
 
@@ -1578,8 +1581,18 @@ var GraphPaper = (function (exports) {
          * @param {CanvasObject} _obj
          */
         this.addObject = function(_obj) {
-            _obj.setResizeStartCallback(handleResizeStart);
-            _obj.setMoveStartCallback(handleMoveStart);
+            _obj.on('obj-resize-start', handleResizeStart);
+            _obj.on('obj-resize', function(e) {
+                emitEvent(Event.OBJECT_RESIZED, { 'object': e.obj });
+                refreshAllConnectors();    
+            });
+
+            _obj.on('obj-translate-start', handleMoveStart);
+            _obj.on('obj-translate', function(e) {
+                emitEvent(Event.OBJECT_TRANSLATED, { 'object': e.obj });
+                refreshAllConnectors();    
+            });
+
             canvasObjects.push(_obj);
             refreshAllConnectors();       
 
@@ -1860,25 +1873,22 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {CanvasObject} _obj
-         * @param {Number} _x 
-         * @param {Number} _y 
+         * @param {Object} _e 
          */
-        const handleResizeStart = function(_obj, _x, _y) {       
-            objectIdBeingResized = _obj.getId();
+        const handleResizeStart = function(_e) {       
+            objectIdBeingResized = _e.obj.getId();
         };    
 
         /**
          * 
-         * @param {CanvasObject} _obj
-         * @param {Number} _x 
-         * @param {Number} _y 
-         * @param {Boolean} _isTouchMove
+         * @param {Object} _e
          */
-        const handleMoveStart = function(_obj, _x, _y, _isTouchMove) {     
-            objectIdBeingDragged = _obj.getId();
-            objectDragStartX = _x;
-            objectDragStartY = _y;        
+        const handleMoveStart = function(_e) {     
+            objectIdBeingDragged = _e.obj.getId();
+            objectDragX = _e.x;
+            objectDragY = _e.y;
+            objectDragStartX = _e.x;
+            objectDragStartY = _e.y;        
         };    
 
         /**
@@ -1891,12 +1901,11 @@ var GraphPaper = (function (exports) {
             const translateOffset = obj.getTranslateHandleOffset();
             const mx = self.snapToGrid(_x + translateOffset.getX());
             const my = self.snapToGrid(_y + translateOffset.getY());
+            
+            objectDragX = mx;
+            objectDragY = my;		
 
             obj.translate(mx, my);
-            emitEvent(Event.OBJECT_TRANSLATED, { 'object': obj });      
-
-            // refresh connectors
-            refreshAllConnectors();
         };
 
         /**
@@ -1914,8 +1923,7 @@ var GraphPaper = (function (exports) {
             const myStart = objectDragStartY;
 
             if(mxStart == mx && myStart == my) ; else {
-                obj.translate(mx, my);
-                emitEvent(Event.OBJECT_TRANSLATED, { 'object': obj });            
+                obj.translate(mx, my);       
             }
         };         
 
@@ -1936,11 +1944,6 @@ var GraphPaper = (function (exports) {
             const newHeight = ((my - top)+1);
 
             obj.resize(newWidth, newHeight);
-
-            // refresh connectors
-            refreshAllConnectors();
-
-            emitEvent(Event.OBJECT_RESIZED, { 'object': obj });
         };
 
         this.initTransformationHandlers = function() {
@@ -2057,6 +2060,15 @@ var GraphPaper = (function (exports) {
          * @type {Element}
          */
         var currentTranslateHandleElementActivated = null;
+
+        const Event = {
+            TRANSLATE_START: 'obj-translate-start',
+            TRANSLATE: 'obj-translate',
+            RESIZE_START: 'obj-resize-start',
+            RESIZE: 'obj-resize'
+        };
+
+        const eventNameToHandlerFunc = new Map();
 
         this.x = parseInt(_x);
         this.y = parseInt(_y);
@@ -2190,6 +2202,11 @@ var GraphPaper = (function (exports) {
 
             _domElement.style.left = parseInt(self.x) + 'px';
             _domElement.style.top = parseInt(self.y) + 'px';
+
+            const observers = eventNameToHandlerFunc.get(Event.TRANSLATE) || [];
+            observers.forEach(function(handler) {
+                handler({"obj":self, "x": _x, "y": _y});
+            });
         };
 
         /**
@@ -2216,6 +2233,11 @@ var GraphPaper = (function (exports) {
 
             _domElement.style.width = parseInt(self.width) + 'px';
             _domElement.style.height = parseInt(self.height) + 'px';
+
+            const observers = eventNameToHandlerFunc.get(Event.RESIZE) || [];
+            observers.forEach(function(handler) {
+                handler({"obj":self, "width": _width, "height": _height});
+            });
         };
 
         /**
@@ -2271,42 +2293,33 @@ var GraphPaper = (function (exports) {
             ];
         };
 
-
         /**
          * 
-         * @param {CanvasObject} _obj 
-         * @param {Number} _x 
-         * @param {Number} _y 
-         * @param {Boolean} _isTouchMove 
+         * @param {String} _eventName 
+         * @param {*} _handlerFunc 
          */
-        var moveStart = function(_obj, _x, _y, _isTouchMove) {
-
+        this.on = function(_eventName, _handlerFunc) {
+            const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
+            allHandlers.push(_handlerFunc);
+            eventNameToHandlerFunc.set(_eventName, allHandlers);        
         };
 
         /**
          * 
-         * @param {CanvasObject} _obj 
-         * @param {Number} _x 
-         * @param {Number} _y 
+         * @param {String} _eventName 
+         * @param {*} _callback 
          */
-        var resizeStart = function(_obj, _x, _y) {
+        this.off = function(_eventName, _callback) {
+            const allCallbacks = eventHandlers.get(_eventName) || [];
 
-        };
+            for(let i=0; i<allCallbacks.length; i++) {
+                if(allCallbacks[i] === _callback) {
+                    allCallbacks.splice(i, 1);
+                    break;
+                }
+            }
 
-        /**
-         * 
-         * @param {*} _moveStartFunc 
-         */
-        this.setMoveStartCallback = function(_moveStartFunc) {
-            moveStart = _moveStartFunc;
-        }; 
-
-        /**
-         * 
-         * @param {*} _moveStartFunc 
-         */
-        this.setResizeStartCallback = function(_resizeStartFunc) {
-            resizeStart = _resizeStartFunc;
+            eventHandlers.set(_eventName, allCallbacks);
         };
 
         this.suspendTranslateInteractions = function() {
@@ -2319,12 +2332,32 @@ var GraphPaper = (function (exports) {
 
         const translateTouchStartHandler = function(e) {
             currentTranslateHandleElementActivated = e.target;
-            moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
+
+            const observers = eventNameToHandlerFunc.get(Event.TRANSLATE_START) || [];
+            observers.forEach(function(handler) {
+                handler({
+                    "obj": self,
+                    "x": e.touches[0].pageX, 
+                    "y": e.touches[0].pageY,
+                    "isTouch": true
+                });
+            });        
+
         };
 
         const translateMouseDownHandler = function(e) {
             currentTranslateHandleElementActivated = e.target;
-            moveStart(self, e.pageX, e.pageY, false);   
+            
+            const observers = eventNameToHandlerFunc.get(Event.TRANSLATE_START) || [];
+            observers.forEach(function(handler) {
+                handler({
+                    "obj": self,
+                    "x": e.pageX, 
+                    "y": e.pageY,
+                    "isTouch": false
+                });
+            });        
+            
         };
 
         const unbindTranslateHandleElements = function() {
@@ -2347,7 +2380,17 @@ var GraphPaper = (function (exports) {
                     if (e.which !== MOUSE_MIDDLE_BUTTON) {
                         return;
                     }
-                    resizeStart(self, e.pageX, e.pageY);
+                    
+                    const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+                    observers.forEach(function(handler) {
+                        handler({
+                            "obj": self,
+                            "x": e.pageX, 
+                            "y": e.pageY,
+                            "isTouch": false
+                        });
+                    });                
+
                 });    
             });
         };

@@ -1,6 +1,6 @@
 {
   "name": "graphpaper-ui",
-  "version": "14.2.0",
+  "version": "15.0.0",
   "main": "src/GraphPaper.js",
   "repository": "https://github.com/aautar/graphpaper.git",
   "author": "Avishkar Autar <aautar@digital-radiation.com>",

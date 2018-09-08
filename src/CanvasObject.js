@@ -41,6 +41,15 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      */
     var currentResizeHandleElementActivated = null;
 
+    const Event = {
+        TRANSLATE_START: 'obj-translate-start',
+        TRANSLATE: 'obj-translate',
+        RESIZE_START: 'obj-resize-start',
+        RESIZE: 'obj-resize'
+    };
+
+    const eventNameToHandlerFunc = new Map();
+
     this.x = parseInt(_x);
     this.y = parseInt(_y);
     this.width = parseInt(_width);
@@ -173,6 +182,11 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
         _domElement.style.left = parseInt(self.x) + 'px';
         _domElement.style.top = parseInt(self.y) + 'px';
+
+        const observers = eventNameToHandlerFunc.get(Event.TRANSLATE) || [];
+        observers.forEach(function(handler) {
+            handler({"obj":self, "x": _x, "y": _y});
+        });
     };
 
     /**
@@ -199,7 +213,12 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
         _domElement.style.width = parseInt(self.width) + 'px';
         _domElement.style.height = parseInt(self.height) + 'px';
-    }
+
+        const observers = eventNameToHandlerFunc.get(Event.RESIZE) || [];
+        observers.forEach(function(handler) {
+            handler({"obj":self, "width": _width, "height": _height});
+        });
+    };
 
     /**
      * @returns {Boolean}
@@ -254,42 +273,33 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         ];
     };
 
-
     /**
      * 
-     * @param {CanvasObject} _obj 
-     * @param {Number} _x 
-     * @param {Number} _y 
-     * @param {Boolean} _isTouchMove 
+     * @param {String} _eventName 
+     * @param {*} _handlerFunc 
      */
-    var moveStart = function(_obj, _x, _y, _isTouchMove) {
-
+    this.on = function(_eventName, _handlerFunc) {
+        const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
+        allHandlers.push(_handlerFunc);
+        eventNameToHandlerFunc.set(_eventName, allHandlers);        
     };
 
     /**
      * 
-     * @param {CanvasObject} _obj 
-     * @param {Number} _x 
-     * @param {Number} _y 
+     * @param {String} _eventName 
+     * @param {*} _callback 
      */
-    var resizeStart = function(_obj, _x, _y) {
+    this.off = function(_eventName, _callback) {
+        const allCallbacks = eventHandlers.get(_eventName) || [];
 
-    };
+        for(let i=0; i<allCallbacks.length; i++) {
+            if(allCallbacks[i] === _callback) {
+                allCallbacks.splice(i, 1);
+                break;
+            }
+        }
 
-    /**
-     * 
-     * @param {*} _moveStartFunc 
-     */
-    this.setMoveStartCallback = function(_moveStartFunc) {
-        moveStart = _moveStartFunc;
-    }; 
-
-    /**
-     * 
-     * @param {*} _moveStartFunc 
-     */
-    this.setResizeStartCallback = function(_resizeStartFunc) {
-        resizeStart = _resizeStartFunc;
+        eventHandlers.set(_eventName, allCallbacks);
     };
 
     this.suspendTranslateInteractions = function() {
@@ -302,12 +312,32 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     const translateTouchStartHandler = function(e) {
         currentTranslateHandleElementActivated = e.target;
-        moveStart(self, e.touches[0].pageX, e.touches[0].pageY, true);
+
+        const observers = eventNameToHandlerFunc.get(Event.TRANSLATE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "obj": self,
+                "x": e.touches[0].pageX, 
+                "y": e.touches[0].pageY,
+                "isTouch": true
+            });
+        });        
+
     };
 
     const translateMouseDownHandler = function(e) {
         currentTranslateHandleElementActivated = e.target;
-        moveStart(self, e.pageX, e.pageY, false);   
+        
+        const observers = eventNameToHandlerFunc.get(Event.TRANSLATE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "obj": self,
+                "x": e.pageX, 
+                "y": e.pageY,
+                "isTouch": false
+            });
+        });        
+        
     };
 
     const unbindTranslateHandleElements = function() {
@@ -332,7 +362,17 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
                 }
         
                 currentResizeHandleElementActivated = _el;
-                resizeStart(self, e.pageX, e.pageY);
+                
+                const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+                observers.forEach(function(handler) {
+                    handler({
+                        "obj": self,
+                        "x": e.pageX, 
+                        "y": e.pageY,
+                        "isTouch": false
+                    });
+                });                
+
             });    
         });
     };
