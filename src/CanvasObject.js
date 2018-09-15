@@ -210,13 +210,18 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     /**
      * @param {Number} _width
      * @param {Number} _height
+     * @param {Function} _domElementStyleUpdateOverrideFunc
      */
-    this.resize = function(_width, _height) {
+    this.resize = function(_width, _height, _domElementStyleUpdateOverrideFunc) {            
         self.width = _width;
         self.height = _height;
 
-        _domElement.style.width = parseInt(self.width) + 'px';
-        _domElement.style.height = parseInt(self.height) + 'px';
+        if(_domElementStyleUpdateOverrideFunc) {
+            _domElementStyleUpdateOverrideFunc(_domElement);
+        } else {
+            _domElement.style.width = parseInt(self.width) + 'px';
+            _domElement.style.height = parseInt(self.height) + 'px';
+        }
 
         const observers = eventNameToHandlerFunc.get(Event.RESIZE) || [];
         observers.forEach(function(handler) {
