@@ -118,6 +118,15 @@
 
         //canvas.removeObject(obj2.getId());
 
+        canvas.translate(400, 200);
+        canvas.scale(0.4, true);     
+                   
+        canvas.applyTransform();
+
+        canvas.on('click', (e) => {
+            obj1.translate(e.targetPoint.getX(), e.targetPoint.getY());
+        });
+
     </script>
 
 </body>

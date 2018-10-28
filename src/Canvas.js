@@ -1,3 +1,4 @@
+import {MatrixMath} from './MatrixMath';
 import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
@@ -53,7 +54,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var scaleFactor = 1.0;
     var invScaleFactor = 1.0;    
 
-    var pendingTransforms = [];
+    const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    var currentTransformationMatrix = identityMatrix.slice(0);
 
     var currentPointVisiblityMap = null;
 
@@ -378,7 +380,16 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         scaleFactor = _scaleFactor;
         invScaleFactor = 1.0 / scaleFactor;        
 
-        pendingTransforms.push(`scale3d(${scaleFactor},${scaleFactor},${scaleFactor})`);
+        currentTransformationMatrix = MatrixMath.mat4Multiply(
+            currentTransformationMatrix, 
+            [
+                scaleFactor, 0, 0, 0, 
+                0, scaleFactor, 0, 0, 
+                0, 0, 1, 1, 
+                0, 0, 0, 1
+            ]
+        );
+
         return self;
     };
 
@@ -390,13 +401,23 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     this.translate = function(_x, _y) {
         translateX = _x;
         translateY = _y;
-        pendingTransforms.push(`translate3d(${translateX}px,${translateY}px,0)`);
+
+        currentTransformationMatrix = MatrixMath.mat4Multiply(
+            currentTransformationMatrix, 
+            [
+                1, 0, 0, 0, 
+                0, 1, 0, 0, 
+                0, 0, 1, 0, 
+                translateX, translateY, 0, 1
+            ]
+        );
+
         return self;
     };
 
     this.applyTransform = function() {
-        _canvasDomElement.style.transform = pendingTransforms.join(" ");
-        pendingTransforms.length = 0;
+        const matElems = currentTransformationMatrix.join(",");
+        _canvasDomElement.style.transform = `matrix3d(${matElems})`;
     };
 
     this.resetTransform = function() {
@@ -404,6 +425,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         invScaleFactor = 1.0;
         translateX = 0.0;
         translateY = 0.0;
+        currentTransformationMatrix = identityMatrix.splice(0);
         _canvasDomElement.style.transform = "none";
     };
 
@@ -787,7 +809,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         // dblclick on empty area of canvas
         _canvasDomElement.addEventListener('dblclick', function (e) {
-            dblClickTapHandler(e.pageX, e.pageY);
+            dblClickTapHandler(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
         });
 
         // click anywhere on canvas
@@ -798,7 +820,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             }
 
             const eventData = {
-                'targetPoint': new Point(e.pageX, e.pageY),
+                'targetPoint': new Point((e.pageX - translateX) * invScaleFactor, (e.pageY - translateY) * invScaleFactor),
                 'canvasObjectClicked': canvasObjectClicked
             };
     
@@ -814,8 +836,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             var dblTapDetected = false;  // flag specifying if we detected a double-tap
 
             // Position of the touch
-            var x = e.changedTouches[0].pageX;
-            var y = e.changedTouches[0].pageY;
+            var x = e.changedTouches[0].pageX * invScaleFactor;
+            var y = e.changedTouches[0].pageY * invScaleFactor;
 
             var now = new Date().getTime();
 
