@@ -1,3 +1,4 @@
+import {MatrixMath} from './MatrixMath';
 import  {CanvasObject} from './CanvasObject';
 import  {Rectangle} from './Rectangle';
 import  {Point} from './Point';
@@ -53,7 +54,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var scaleFactor = 1.0;
     var invScaleFactor = 1.0;    
 
-    var pendingTransforms = [];
+    const invTransformationMatrixStack = [];
+    var currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    var currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
     var currentPointVisiblityMap = null;
 
@@ -378,7 +381,28 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         scaleFactor = _scaleFactor;
         invScaleFactor = 1.0 / scaleFactor;        
 
-        pendingTransforms.push(`scale3d(${scaleFactor},${scaleFactor},${scaleFactor})`);
+        const scaleMat = 
+            [
+                scaleFactor, 0, 0, 0, 
+                0, scaleFactor, 0, 0, 
+                0, 0, scaleFactor, 1, 
+                0, 0, 0, 1
+            ];
+
+        currentTransformationMatrix = MatrixMath.mat4Multiply(
+            currentTransformationMatrix, 
+            scaleMat
+        );
+
+        invTransformationMatrixStack.push(
+            [
+                invScaleFactor, 0, 0, 0, 
+                0, invScaleFactor, 0, 0, 
+                0, 0, invScaleFactor, 1, 
+                0, 0, 0, 1
+            ]
+        );
+
         return self;
     };
 
@@ -390,13 +414,40 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     this.translate = function(_x, _y) {
         translateX = _x;
         translateY = _y;
-        pendingTransforms.push(`translate3d(${translateX}px,${translateY}px,0)`);
+
+        const translateMatrix =             
+            [
+                1, 0, 0, 0, 
+                0, 1, 0, 0, 
+                0, 0, 1, 0, 
+                translateX, translateY, 0, 1
+            ];
+
+        currentTransformationMatrix = MatrixMath.mat4Multiply(
+            currentTransformationMatrix, 
+            translateMatrix
+        ); 
+
+        invTransformationMatrixStack.push(
+            [
+                1, 0, 0, -translateX, 
+                0, 1, 0, -translateY, 
+                0, 0, 1, 0, 
+                0, 0, 0, 1
+            ]
+        );
+
         return self;
     };
 
     this.applyTransform = function() {
-        _canvasDomElement.style.transform = pendingTransforms.join(" ");
-        pendingTransforms.length = 0;
+        const matElems = currentTransformationMatrix.join(",");
+        _canvasDomElement.style.transform = `matrix3d(${matElems})`;
+
+        currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+        for(let i=0; i<invTransformationMatrixStack.length; i++) {
+            currentInvTransformationMatrix = MatrixMath.mat4Multiply(currentInvTransformationMatrix, invTransformationMatrixStack[i]);
+        }
     };
 
     this.resetTransform = function() {
@@ -404,6 +455,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         invScaleFactor = 1.0;
         translateX = 0.0;
         translateY = 0.0;
+        currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+        currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+        invTransformationMatrixStack.length = 0;
         _canvasDomElement.style.transform = "none";
     };
 
@@ -787,7 +841,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         // dblclick on empty area of canvas
         _canvasDomElement.addEventListener('dblclick', function (e) {
-            dblClickTapHandler(e.pageX, e.pageY);
+
+            const invTransformedPos = MatrixMath.vecMat4Multiply(
+                [e.pageX, e.pageY, 0, 1],
+                currentInvTransformationMatrix
+            );
+
+            dblClickTapHandler(invTransformedPos[0], invTransformedPos[1]);
         });
 
         // click anywhere on canvas
@@ -797,8 +857,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 canvasObjectClicked = true;
             }
 
+            const invTransformedPos = MatrixMath.vecMat4Multiply(
+                [e.pageX, e.pageY, 0, 1],
+                currentInvTransformationMatrix
+            );
+
             const eventData = {
-                'targetPoint': new Point(e.pageX, e.pageY),
+                'targetPoint': new Point(invTransformedPos[0], invTransformedPos[1]),
                 'canvasObjectClicked': canvasObjectClicked
             };
     
@@ -814,8 +879,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             var dblTapDetected = false;  // flag specifying if we detected a double-tap
 
             // Position of the touch
-            var x = e.changedTouches[0].pageX;
-            var y = e.changedTouches[0].pageY;
+            const invTransformedPos = MatrixMath.vecMat4Multiply(
+                [e.changedTouches[0].pageX, e.changedTouches[0].pageY, 0, 1],
+                currentInvTransformationMatrix
+            );            
+
+            var x = invTransformedPos[0];
+            var y = invTransformedPos[1];            
 
             var now = new Date().getTime();
 
@@ -937,7 +1007,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (objectIdBeingDragged !== null) {
-                handleMove(e.touches[0].pageX * invScaleFactor, e.touches[0].pageY * invScaleFactor);       
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleMove(invTransformedPos[0], invTransformedPos[1]);       
 
                 // if we're transforming an object, make sure we don't scroll the canvas
                 e.preventDefault();
@@ -945,12 +1021,24 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
-            if (objectIdBeingDragged !== null) {				
-                handleMove(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
+            if (objectIdBeingDragged !== null) {		
+                
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.pageX, e.pageY, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleMove(invTransformedPos[0], invTransformedPos[1]);
             }
 
             if(objectIdBeingResized !== null) {
-                handleResize(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.pageX, e.pageY, 0, 1],
+                    currentInvTransformationMatrix
+                );     
+
+                handleResize(invTransformedPos[0], invTransformedPos[1]);
             }
         });
 
@@ -965,7 +1053,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         _canvasDomElement.addEventListener('mouseup', function (e) {
             if (e.which === 1) {
                 if(objectIdBeingDragged !== null) {
-                    handleMoveEnd(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
+
+                    const invTransformedPos = MatrixMath.vecMat4Multiply(
+                        [e.pageX, e.pageY, 0, 1],
+                        currentInvTransformationMatrix
+                    );                      
+
+                    handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
                 }            
 
                 if(objectIdBeingResized !== null) {
