@@ -54,8 +54,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var scaleFactor = 1.0;
     var invScaleFactor = 1.0;    
 
-    const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    var currentTransformationMatrix = identityMatrix.slice(0);
+    const invTransformationMatrixStack = [];
+    var currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    var currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
     var currentPointVisiblityMap = null;
 
@@ -380,12 +381,24 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         scaleFactor = _scaleFactor;
         invScaleFactor = 1.0 / scaleFactor;        
 
-        currentTransformationMatrix = MatrixMath.mat4Multiply(
-            currentTransformationMatrix, 
+        const scaleMat = 
             [
                 scaleFactor, 0, 0, 0, 
                 0, scaleFactor, 0, 0, 
-                0, 0, 1, 1, 
+                0, 0, scaleFactor, 1, 
+                0, 0, 0, 1
+            ];
+
+        currentTransformationMatrix = MatrixMath.mat4Multiply(
+            currentTransformationMatrix, 
+            scaleMat
+        );
+
+        invTransformationMatrixStack.push(
+            [
+                invScaleFactor, 0, 0, 0, 
+                0, invScaleFactor, 0, 0, 
+                0, 0, invScaleFactor, 1, 
                 0, 0, 0, 1
             ]
         );
@@ -402,13 +415,25 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         translateX = _x;
         translateY = _y;
 
-        currentTransformationMatrix = MatrixMath.mat4Multiply(
-            currentTransformationMatrix, 
+        const translateMatrix =             
             [
                 1, 0, 0, 0, 
                 0, 1, 0, 0, 
                 0, 0, 1, 0, 
                 translateX, translateY, 0, 1
+            ];
+
+        currentTransformationMatrix = MatrixMath.mat4Multiply(
+            currentTransformationMatrix, 
+            translateMatrix
+        ); 
+
+        invTransformationMatrixStack.push(
+            [
+                1, 0, 0, -translateX, 
+                0, 1, 0, -translateY, 
+                0, 0, 1, 0, 
+                0, 0, 0, 1
             ]
         );
 
@@ -418,6 +443,11 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     this.applyTransform = function() {
         const matElems = currentTransformationMatrix.join(",");
         _canvasDomElement.style.transform = `matrix3d(${matElems})`;
+
+        currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+        for(let i=0; i<invTransformationMatrixStack.length; i++) {
+            currentInvTransformationMatrix = MatrixMath.mat4Multiply(currentInvTransformationMatrix, invTransformationMatrixStack[i]);
+        }
     };
 
     this.resetTransform = function() {
@@ -425,7 +455,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         invScaleFactor = 1.0;
         translateX = 0.0;
         translateY = 0.0;
-        currentTransformationMatrix = identityMatrix.splice(0);
+        currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+        currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+        invTransformationMatrixStack.length = 0;
         _canvasDomElement.style.transform = "none";
     };
 
@@ -819,8 +851,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 canvasObjectClicked = true;
             }
 
+            const invTransformedPos = MatrixMath.vecMat4Multiply(
+                [e.pageX, e.pageY, 0, 1],
+                currentInvTransformationMatrix
+            );
+
             const eventData = {
-                'targetPoint': new Point((e.pageX - translateX) * invScaleFactor, (e.pageY - translateY) * invScaleFactor),
+                'targetPoint': new Point(invTransformedPos[0], invTransformedPos[1]),
                 'canvasObjectClicked': canvasObjectClicked
             };
     
