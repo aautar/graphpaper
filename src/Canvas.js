@@ -841,7 +841,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         // dblclick on empty area of canvas
         _canvasDomElement.addEventListener('dblclick', function (e) {
-            dblClickTapHandler(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
+
+            const invTransformedPos = MatrixMath.vecMat4Multiply(
+                [e.pageX, e.pageY, 0, 1],
+                currentInvTransformationMatrix
+            );
+
+            dblClickTapHandler(invTransformedPos[0], invTransformedPos[1]);
         });
 
         // click anywhere on canvas
@@ -873,8 +879,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             var dblTapDetected = false;  // flag specifying if we detected a double-tap
 
             // Position of the touch
-            var x = e.changedTouches[0].pageX * invScaleFactor;
-            var y = e.changedTouches[0].pageY * invScaleFactor;
+            const invTransformedPos = MatrixMath.vecMat4Multiply(
+                [e.changedTouches[0].pageX, e.changedTouches[0].pageY, 0, 1],
+                currentInvTransformationMatrix
+            );            
+
+            var x = invTransformedPos[0];
+            var y = invTransformedPos[1];            
 
             var now = new Date().getTime();
 
@@ -996,7 +1007,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (objectIdBeingDragged !== null) {
-                handleMove(e.touches[0].pageX * invScaleFactor, e.touches[0].pageY * invScaleFactor);       
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleMove(invTransformedPos[0], invTransformedPos[1]);       
 
                 // if we're transforming an object, make sure we don't scroll the canvas
                 e.preventDefault();
@@ -1004,12 +1021,24 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
-            if (objectIdBeingDragged !== null) {				
-                handleMove(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
+            if (objectIdBeingDragged !== null) {		
+                
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.pageX, e.pageY, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleMove(invTransformedPos[0], invTransformedPos[1]);
             }
 
             if(objectIdBeingResized !== null) {
-                handleResize(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.pageX, e.pageY, 0, 1],
+                    currentInvTransformationMatrix
+                );     
+
+                handleResize(invTransformedPos[0], invTransformedPos[1]);
             }
         });
 
@@ -1024,7 +1053,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         _canvasDomElement.addEventListener('mouseup', function (e) {
             if (e.which === 1) {
                 if(objectIdBeingDragged !== null) {
-                    handleMoveEnd(e.pageX * invScaleFactor, e.pageY * invScaleFactor);
+
+                    const invTransformedPos = MatrixMath.vecMat4Multiply(
+                        [e.pageX, e.pageY, 0, 1],
+                        currentInvTransformationMatrix
+                    );                      
+
+                    handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
                 }            
 
                 if(objectIdBeingResized !== null) {
