@@ -753,6 +753,12 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     
     const self = this;
 
+    const eventNameToHandlerFunc = new Map();
+
+    const Event = {
+        CLICK: 'connector-click'
+    };
+
     if(typeof _strokeColor === 'undefined') {
         _strokeColor = '#000';
     }
@@ -770,6 +776,13 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     pathElem.setAttribute("d", 'M0 0 L0 0');
     pathElem.style.stroke = _strokeColor; 
     pathElem.style.strokeWidth = _strokeWidth;         
+
+    pathElem.addEventListener("click", function(e) {
+        const observers = eventNameToHandlerFunc.get(Event.CLICK) || [];
+        observers.forEach(function(handler) {
+            handler({"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
+        });
+    });
 
     /**
      * @type {Element}
@@ -823,6 +836,35 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
             "anchor_end_centroid": _anchorEnd.getCentroid().toString(),
         };
     };
+
+    /**
+     * 
+     * @param {String} _eventName 
+     * @param {*} _handlerFunc 
+     */
+    this.on = function(_eventName, _handlerFunc) {
+        const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
+        allHandlers.push(_handlerFunc);
+        eventNameToHandlerFunc.set(_eventName, allHandlers);        
+    };
+
+    /**
+     * 
+     * @param {String} _eventName 
+     * @param {*} _callback 
+     */
+    this.off = function(_eventName, _callback) {
+        const allCallbacks = eventHandlers.get(_eventName) || [];
+
+        for(let i=0; i<allCallbacks.length; i++) {
+            if(allCallbacks[i] === _callback) {
+                allCallbacks.splice(i, 1);
+                break;
+            }
+        }
+
+        eventHandlers.set(_eventName, allCallbacks);
+    };    
 }
 
 /**
