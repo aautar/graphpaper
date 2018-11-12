@@ -1,6 +1,7 @@
 const jsdom = require("jsdom");
 import {Canvas} from '../src/Canvas.js';
 import {CanvasObject} from '../src/CanvasObject.js';
+import {ConnectorAnchor} from '../src/ConnectorAnchor.js';
 import {GRID_STYLE,Grid} from '../src/Grid.js';
 
 const { JSDOM } = jsdom;
@@ -275,3 +276,103 @@ describe("Canvas", function() {
 
 });
 
+describe("Canvas connectors", function() {
+
+    const makeAnchor = function(_id, _canvas) {
+        const anchorElemWidth = 100;
+        const anchorElemHeight = 200;
+
+        const anchorElem = window.document.createElement('div');
+        anchorElem.getBoundingClientRect = () => ({
+            anchorElemWidth,
+            anchorElemHeight,
+            top: 0,
+            left: 0,
+            right: anchorElemWidth,
+            bottom: anchorElemHeight,
+          });
+
+        return new ConnectorAnchor(_id, anchorElem, _canvas);
+    };
+
+    const makeCanvasObject = function(_id, _x, _y, _width, _height) {
+        const domElem = window.document.createElement('div');
+        domElem.getBoundingClientRect = () => ({
+            _width,
+            _height,
+            top: _y,
+            left: _x,
+            right: _x + _width,
+            bottom: _y + _height,
+          });
+
+        const o = new CanvasObject(
+            _id,
+            _x, 
+            _y, 
+            _width, 
+            _height, 
+            {}, 
+            domElem, 
+            [domElem], 
+            [domElem]
+        );
+
+        return o;
+    };
+
+    const canvasDomElement = window.document.createElement('div');
+    const document = window.document;
+
+    const pvWorkerMock = {
+        postMessage: function() { }
+    };
+
+
+    it("makeNewConnectorFromAnchors creates new Connector with correct ID", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initInteractionHandlers();
+
+
+        const anchorA = makeAnchor("objA-anchor", canvas);
+        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        objA.addNonInteractableConnectorAnchor(anchorA);
+
+        const anchorB = makeAnchor("objB-anchor", canvas);
+        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        objB.addNonInteractableConnectorAnchor(anchorB);
+
+        const connector = canvas.makeNewConnectorFromAnchors(anchorA, anchorB);
+
+        expect(connector.getId()).toBe('objA-anchor:objB-anchor');
+
+    });
+
+    it("getObjectsConnectedViaConnector returns connected Objects", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initInteractionHandlers();
+
+        const anchorA = makeAnchor("objA-anchor", canvas);
+        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        objA.addNonInteractableConnectorAnchor({});
+        const objAAnchors = objA.getConnectorAnchors();
+        objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves
+
+        const anchorB = makeAnchor("objB-anchor", canvas);
+        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        objB.addNonInteractableConnectorAnchor({});
+        const objBAnchors = objB.getConnectorAnchors();
+        objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
+
+        canvas.addObject(objA);
+        canvas.addObject(objB);
+
+        const connector = canvas.makeNewConnectorFromAnchors(anchorA, anchorB);
+        const objects = canvas.getObjectsConnectedViaConnector(connector.getId());
+
+        expect(objects.length).toBe(2);
+        expect(objects[0].getId()).toBe(objA.getId());
+        expect(objects[1].getId()).toBe(objB.getId());
+    });    
+
+});
