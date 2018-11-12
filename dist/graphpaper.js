@@ -827,6 +827,22 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
+     * @param {String} _cl
+     * @returns {undefined}
+     */
+    this.addClassToDomElement = function(_cl) {
+        pathElem.classList.add(_cl);
+    };
+
+    /**
+     * @param {String} _cl
+     * @returns {undefined}
+     */    
+    this.removeClassFromDomElement = function(_cl) {
+        pathElem.classList.remove(_cl);
+    };
+
+    /**
      * @returns {Object}
      */
     this.getDescriptor = function() {
