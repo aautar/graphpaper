@@ -680,6 +680,36 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     /**
      * 
+     * @param {String} _connectorId
+     * @returns {Array} 
+     */
+    this.getObjectsConnectedViaConnector = function(_connectorId) {
+        const foundObjects = [];
+
+        const allObjs = self.getAllObjects();
+
+        objectConnectors.forEach((_conn) => {
+
+            if(_conn.getId() !== _connectorId) {
+                return;
+            }
+
+            const aS = _conn.getAnchorStart();
+            const aE = _conn.getAnchorEnd();
+
+            allObjs.forEach((_o) => {
+                if(_o.hasConnectorAnchor(aS) || _o.hasConnectorAnchor(aE)) {
+                    foundObjects.push(_o);
+                }
+            });
+
+        });
+
+        return foundObjects;        
+    };
+
+    /**
+     * 
      * @param {CanvasObject} _obj
      * @returns {Connector[]} 
      */
