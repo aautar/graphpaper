@@ -653,6 +653,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     /**
+     * @returns {Connector[]}
+     */
+    this.getAllConnectors = function() {
+        return objectConnectors;
+    };
+
+    /**
      * 
      * @param {CanvasObject} _objA 
      * @param {CanvasObject} _objB 
