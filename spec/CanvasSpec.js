@@ -401,4 +401,35 @@ describe("Canvas connectors", function() {
         expect(connectorsBetObjects[0].getId()).toBe("objA-anchor:objB-anchor");
     });        
 
+    it("getConnectorsConnectedToObject returns correct connector", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initInteractionHandlers();
+
+        const anchorA = makeAnchor("objA-anchor", canvas);
+        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        objA.addNonInteractableConnectorAnchor({});
+        const objAAnchors = objA.getConnectorAnchors();
+        objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves
+
+        const anchorB = makeAnchor("objB-anchor", canvas);
+        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        objB.addNonInteractableConnectorAnchor({});
+        const objBAnchors = objB.getConnectorAnchors();
+        objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
+
+        canvas.addObject(objA);
+        canvas.addObject(objB);
+
+        canvas.makeNewConnectorFromAnchors(anchorA, anchorB);
+        const connectorsConnectedToA = canvas.getConnectorsConnectedToObject(objA);
+        const connectorsConnectedToB = canvas.getConnectorsConnectedToObject(objB);
+
+        expect(connectorsConnectedToA.length).toBe(1);
+        expect(connectorsConnectedToA[0].getId()).toBe("objA-anchor:objB-anchor");
+
+        expect(connectorsConnectedToB.length).toBe(1);
+        expect(connectorsConnectedToB[0].getId()).toBe("objA-anchor:objB-anchor");
+        
+    });         
+
 });
