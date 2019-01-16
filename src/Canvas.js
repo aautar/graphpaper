@@ -1055,6 +1055,20 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 // if we're transforming an object, make sure we don't scroll the canvas
                 e.preventDefault();
             }
+
+
+            if(objectIdBeingResized !== null) {
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
+                    currentInvTransformationMatrix
+                );     
+
+                handleResize(invTransformedPos[0], invTransformedPos[1]);
+
+                e.preventDefault();
+            }            
+
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
@@ -1080,11 +1094,17 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });
 
         _canvasDomElement.addEventListener('touchend', function (e) {
+
+            // e.touches is empty..
+            // Need to use e.changedTouches for final x,y ???
+
             if(objectIdBeingDragged !== null) {
-                const obj = self.getObjectById(objectIdBeingDragged);
                 objectIdBeingDragged = null;
+            }           
+            
+            if(objectIdBeingResized !== null) {
                 objectIdBeingResized = null;  
-            }            
+            }
         });
 
         _canvasDomElement.addEventListener('mouseup', function (e) {

@@ -363,26 +363,42 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         });
     };
 
-    const bindResizeHandleElements = function() {
-        _resizeHandleDomElements.forEach((_el) => {        
-            _el.addEventListener('mousedown', function (e) {
-                if (e.which !== MOUSE_MIDDLE_BUTTON) {
-                    return;
-                }
-        
-                currentResizeHandleElementActivated = _el;
-                
-                const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
-                observers.forEach(function(handler) {
-                    handler({
-                        "obj": self,
-                        "x": e.pageX, 
-                        "y": e.pageY,
-                        "isTouch": false
-                    });
-                });                
+    const resizeMouseDownHandler = function(e) {
+        if (e.which !== MOUSE_MIDDLE_BUTTON) {
+            return;
+        }
 
-            });    
+        currentResizeHandleElementActivated = e.target;
+        
+        const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "obj": self,
+                "x": e.pageX, 
+                "y": e.pageY,
+                "isTouch": false
+            });
+        });    
+    };
+
+    const resizeTouchStartHandler = function(e) {
+        currentResizeHandleElementActivated = e.target;
+        
+        const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "obj": self,
+                "x": e.touches[0].pageX,  
+                "y": e.touches[0].pageY, 
+                "isTouch": true
+            });
+        });    
+    };    
+
+    const bindResizeHandleElements = function() {
+        _resizeHandleDomElements.forEach((_el) => {
+            _el.addEventListener('touchstart', resizeTouchStartHandler);  
+            _el.addEventListener('mousedown', resizeMouseDownHandler);  
         });
     };
 

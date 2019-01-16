@@ -2186,6 +2186,20 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 // if we're transforming an object, make sure we don't scroll the canvas
                 e.preventDefault();
             }
+
+
+            if(objectIdBeingResized !== null) {
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
+                    currentInvTransformationMatrix
+                );     
+
+                handleResize(invTransformedPos[0], invTransformedPos[1]);
+
+                e.preventDefault();
+            }            
+
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
@@ -2211,11 +2225,17 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });
 
         _canvasDomElement.addEventListener('touchend', function (e) {
+
+            // e.touches is empty..
+            // Need to use e.changedTouches for final x,y ???
+
             if(objectIdBeingDragged !== null) {
-                const obj = self.getObjectById(objectIdBeingDragged);
                 objectIdBeingDragged = null;
+            }           
+            
+            if(objectIdBeingResized !== null) {
                 objectIdBeingResized = null;  
-            }            
+            }
         });
 
         _canvasDomElement.addEventListener('mouseup', function (e) {
@@ -2313,6 +2333,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     /**
      * @type {Element}
      */
+    var currentResizeHandleElementActivated = null;
+
     const Event = {
         TRANSLATE_START: 'obj-translate-start',
         TRANSLATE: 'obj-translate',
@@ -2635,24 +2657,42 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         });
     };
 
-    const bindResizeHandleElements = function() {
-        _resizeHandleDomElements.forEach((_el) => {        
-            _el.addEventListener('mousedown', function (e) {
-                if (e.which !== MOUSE_MIDDLE_BUTTON) {
-                    return;
-                }
-        
-                const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
-                observers.forEach(function(handler) {
-                    handler({
-                        "obj": self,
-                        "x": e.pageX, 
-                        "y": e.pageY,
-                        "isTouch": false
-                    });
-                });                
+    const resizeMouseDownHandler = function(e) {
+        if (e.which !== MOUSE_MIDDLE_BUTTON) {
+            return;
+        }
 
-            });    
+        currentResizeHandleElementActivated = e.target;
+        
+        const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "obj": self,
+                "x": e.pageX, 
+                "y": e.pageY,
+                "isTouch": false
+            });
+        });    
+    };
+
+    const resizeTouchStartHandler = function(e) {
+        currentResizeHandleElementActivated = e.target;
+        
+        const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "obj": self,
+                "x": e.touches[0].pageX,  
+                "y": e.touches[0].pageY, 
+                "isTouch": true
+            });
+        });    
+    };    
+
+    const bindResizeHandleElements = function() {
+        _resizeHandleDomElements.forEach((_el) => {
+            _el.addEventListener('touchstart', resizeTouchStartHandler);  
+            _el.addEventListener('mousedown', resizeMouseDownHandler);  
         });
     };
 
