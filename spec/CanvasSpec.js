@@ -90,7 +90,9 @@ describe("Canvas", function() {
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         canvas.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
 
-        expect(canvasDomElement.style.background).toBe("url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiI+PHJlY3Qgd2lkdGg9IjEiIGhlaWdodD0iMSIgeD0iMTEiIHk9IjExIiBzdHlsZT0iZmlsbDojNDI0MjQyIiAvPjwvc3ZnPg==) repeat");
+        expect(canvasDomElement.style.backgroundImage).toBe("url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiI+PHJlY3Qgd2lkdGg9IjEiIGhlaWdodD0iMSIgeD0iMTEiIHk9IjExIiBzdHlsZT0iZmlsbDojNDI0MjQyIiAvPjwvc3ZnPg==)");
+        expect(canvasDomElement.style.backgroundRepeat).toBe("repeat");
+        expect(canvasDomElement.style.backgroundColor).toBe("rgb(255, 255, 255)");
     });
 
 
