@@ -106,7 +106,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     this.setGrid = function(_grid) {
         grid = _grid;
-        _canvasDomElement.style.background = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "') repeat";
+        _canvasDomElement.style.backgroundImage = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "')";
+        _canvasDomElement.style.backgroundRepeat = "repeat";
+        _canvasDomElement.style.backgroundColor = "#fff";
     };
 
     /**
