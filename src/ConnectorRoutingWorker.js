@@ -87,6 +87,8 @@ onmessage = function(_msg) {
     });
 
     metrics.overallTime = (new Date()) - overallTimeT1;
+    metrics.numRoutingPoints = routingPointsSet.count();
+    metrics.numBoundaryLines = boundaryLinesSet.count();
 
     postMessage(
         {
