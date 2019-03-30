@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/graphpaper
     docker:
-      - image: circleci/node:7.10.0
+      - image: circleci/node:10.0.0
     environment:
       - NODE_ENV: development      
     steps:
@@ -12,14 +12,14 @@ jobs:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: Install modules
-          command: yarn install --verbose
+          command: npm install
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
       - run:
           name: Run tests
-          command: yarn test
+          command: npm test
 workflows:
   version: 2
   build-n-deploy:
