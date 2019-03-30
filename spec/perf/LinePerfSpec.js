@@ -16,7 +16,7 @@ describe("Line.computeIntersection performance", function() {
         }
 
         const td = Date.now() - startTime;
-        console.info(`\n\nLine.computeIntersection performance: ${td}ms\n\n`);        
+        console.info(`\n\nLine.computeIntersection performance: ${td}ms`);        
 
         expect(true).toBe(true);
     });
