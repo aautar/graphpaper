@@ -18,12 +18,13 @@ describe("PointVisibilityMap.computeRoute performance", function() {
             freePoints.push(new Point(5000 + i, -1)); // dummy point to inc. computational cost
         }
 
+        let startTime = Date.now();
+                
         const pointVisibilityMap = new PointVisibilityMap(
             freePoints, 
             new LineSet(boundaryLines)
         );
 
-        let startTime = Date.now();
         const pointsInRoute = pointVisibilityMap.computeRoute(
             new Point(14,14),
             new Point(75, 25)
