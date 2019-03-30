@@ -51,11 +51,11 @@ function ConnectorAnchor(_id, _domElement, _canvas) {
      * @returns {Point}
      */
     this.getCentroid = function() {
-        const viewportRect = _domElement.getBoundingClientRect();
+        const viewportRelativeRect = _domElement.getBoundingClientRect();
         const pageOffset = _canvas.getPageOffset();        
         return new Point(
-            viewportRect.left + pageOffset.getX() + (self.getWidth() * 0.5), 
-            viewportRect.top + pageOffset.getY() + (self.getHeight() * 0.5)
+            viewportRelativeRect.left + pageOffset.getX() + (self.getWidth() * 0.5), 
+            viewportRelativeRect.top + pageOffset.getY() + (self.getHeight() * 0.5)
         );
     };
 
