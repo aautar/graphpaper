@@ -157,13 +157,15 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         var currentMaxLength = Number.MAX_SAFE_INTEGER;
 
         pointToVisiblePointSet.forEach(function(_visiblePoints, _ptKey) {
+
             const lineOfSight = new Line(_point, _ptKey);
-            if(!doesLineIntersectAnyBoundaryLines(lineOfSight)) {
-                if(lineOfSight.getLength() < currentMaxLength) {
-                    resultPoint = _ptKey;
-                    currentMaxLength = lineOfSight.getLength();
-                }
+            const lineOfSightLength = lineOfSight.getLength();
+
+            if(lineOfSightLength < currentMaxLength && !doesLineIntersectAnyBoundaryLines(lineOfSight)) {
+                resultPoint = _ptKey;
+                currentMaxLength = lineOfSightLength;
             };
+            
         });
         
         return resultPoint;
