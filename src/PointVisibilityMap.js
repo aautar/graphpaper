@@ -65,67 +65,48 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
 
     /**
      * 
-     * @param {Map<Point,Number>} _visiblePointToCost 
-     */
-    const getMinimumCostPointFromMap = function(_visiblePointToCost) {
-        var minCost = Number.MAX_SAFE_INTEGER;
-        var pointWithMinCost = null;
-        for (var [_vp, _cost] of _visiblePointToCost.entries()) {
-            if(_cost < minCost) {
-                pointWithMinCost = _vp;
-                minCost = _cost;
-            }
-        }
-
-        if (pointWithMinCost === null) {
-            return null;
-        }
-
-        return {
-            "cost": minCost,
-            "point": pointWithMinCost
-        };
-    };
-
-    /**
-     * 
      * @param {Number} _currentRouteLength 
      * @param {Point[]} _pointsInRoute 
      * @param {Point} _currentPoint 
      * @param {Point} _endPoint 
+     * @returns {Object|null}
      */
     const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPoint, _endPoint) {
 
-        const visiblePointToCost = new Map();
-        var visiblePoints = pointToVisiblePointSet.get(_currentPoint);
-
-        // filter out _pointsInRoute
-        visiblePoints = visiblePoints.filter(function(_vp) {
-            for(let i=0; i<_pointsInRoute.length; i++) {
-                if(_vp.isEqual(_pointsInRoute[i])) {
-                    return false;
-                }
-            }
-            return true;
-        });
-        
+        //const visiblePointToCost = new Map();
+        var visiblePoints = pointToVisiblePointSet.get(_currentPoint);       
+        var curMinCost = Number.MAX_SAFE_INTEGER;
+        var visiblePointWithMinCost = null;
 
         visiblePoints.forEach(function(_vp) {
+            // ignore point if it's already in the route
+            for(let i=0; i<_pointsInRoute.length; i++) {
+                if(_vp.isEqual(_pointsInRoute[i])) {
+                    return; // point already in route, try another
+                }
+            }
+
             // g(n) = length/cost of _startPoint to _vp + _currentRouteLength
             const gn = (new Line(_currentPoint, _vp)).getLength() + _currentRouteLength;
 
             // h(n) = length/cost of _vp to _endPoint
             const hn = (new Line(_vp, _endPoint)).getLength();
 
-            visiblePointToCost.set(_vp, gn + hn);
+            // see if this is the new min
+            if((gn + hn) < curMinCost) {
+                curMinCost = gn + hn;
+                visiblePointWithMinCost = _vp;
+            }
         });
 
-        const nextPoint = getMinimumCostPointFromMap(visiblePointToCost);
-        if(nextPoint === null) {
+        if(curMinCost === Number.MAX_SAFE_INTEGER) {
             return null;
         }
 
-        return nextPoint;
+        return {
+            "cost": curMinCost,
+            "point": visiblePointWithMinCost
+        };
     };
 
     /**
@@ -165,7 +146,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
                 resultPoint = _ptKey;
                 currentMaxLength = lineOfSightLength;
             };
-            
+
         });
         
         return resultPoint;
@@ -180,7 +161,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
     this.computeRoute = function(_startPoint, _endPoint) {
 
         // if no valid startpoint or endpoint, we can't route
-        if(_startPoint === null ||_endPoint === null) {
+        if(_startPoint === null || _endPoint === null) {
             return new PointSet();
         }
 

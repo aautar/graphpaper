@@ -25,6 +25,13 @@ describe("PointVisibilityMap.computeRoute performance", function() {
             new LineSet(boundaryLines)
         );
 
+        let td = Date.now() - startTime;
+
+        console.info(`\n\nPointVisibilityMap constructor: ${td}ms`);        
+
+        startTime = Date.now();
+        
+
         const pointsInRoute = pointVisibilityMap.computeRoute(
             new Point(14,14),
             new Point(75, 25)
@@ -32,8 +39,9 @@ describe("PointVisibilityMap.computeRoute performance", function() {
 
         const routePointsArray = pointsInRoute.toArray();
 
-        const td = Date.now() - startTime;
-        console.info(`\n\nPointVisibilityMap.computeRoute: ${td}ms`);        
+        td = Date.now() - startTime;
+
+        console.info(`PointVisibilityMap.computeRoute: ${td}ms`);        
 
         expect(true).toBe(true);        
          
