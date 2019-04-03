@@ -445,7 +445,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
 
     const boundaryLinesArr = _boundaryLines.toArray();
     const freePointsArr = _freePoints.toArray();
-    const pointToVisibleSet = new Array(_freePoints.count());
+    const pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
 
     /**
      * @param {Line} _theLine
@@ -540,6 +540,32 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
     };
 
     /**
+     * 
+     * @param {Array} _pointsInRoute 
+     */
+    const optimizeRoute = function(_pointsInRoute) {
+
+        let ptrA = 0;
+
+        while(true) {
+
+            if(ptrA+2 >= _pointsInRoute.length) {
+                break;
+            }            
+
+            const ln = new Line(_pointsInRoute[ptrA], _pointsInRoute[ptrA + 2]);
+
+            if(!doesLineIntersectAnyBoundaryLines(ln)) {
+                _pointsInRoute.splice(ptrA + 1, 1);
+            } else {
+                ptrA++;
+            }
+
+        }
+
+    };
+
+    /**
      * @param {Point} _point
      * @returns {Point|null}
      */
@@ -627,6 +653,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
             }
         }
 
+        optimizeRoute(pointsInRoute);
 
         return new PointSet(pointsInRoute);
 
