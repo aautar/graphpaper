@@ -14,11 +14,8 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
     const self = this;
 
     const boundaryLinesArr = _boundaryLines.toArray();
-
-    /**
-     * @type Map<Point,Point[]>
-     */
-    const pointToVisiblePointSet = new Map();
+    const freePointsArr = _freePoints.toArray();
+    const pointToVisibleSet = new Array(_freePoints.count());
 
     /**
      * @param {Line} _theLine
@@ -37,30 +34,34 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
     };
 
     const computePointsVisibility = function() {
-
-        const freePointsArray = _freePoints.toArray();
-
-        for(let i=0; i<freePointsArray.length; i++) {
-            pointToVisiblePointSet.set(freePointsArray[i], []);        
+        for(let i=0; i<freePointsArr.length; i++) {
+            pointToVisibleSet[i] = [];   
         }
 
-        for(let i=0; i<freePointsArray.length; i++) {            
-            for(let j=i+1; j<freePointsArray.length; j++) {
+        for(let i=0; i<freePointsArr.length; i++) {            
+            for(let j=i+1; j<freePointsArr.length; j++) {
 
                 // line representing line-of-sight between the 2 points
-                const ijLine = new Line(freePointsArray[i], freePointsArray[j]);
+                const ijLine = new Line(freePointsArr[i], freePointsArr[j]);
 
                 if(!doesLineIntersectAnyBoundaryLines(ijLine)) {
-                    const visiblePointsI = pointToVisiblePointSet.get(freePointsArray[i]);
-                    visiblePointsI.push(freePointsArray[j]);
-                    pointToVisiblePointSet.set(freePointsArray[i], visiblePointsI);
-
-                    const visiblePointsJ = pointToVisiblePointSet.get(freePointsArray[j]);
-                    visiblePointsJ.push(freePointsArray[i]);
-                    pointToVisiblePointSet.set(freePointsArray[j], visiblePointsJ);                    
+                    pointToVisibleSet[i].push(freePointsArr[j]);
+                    pointToVisibleSet[j].push(freePointsArr[i]);
                 }
             }
         }
+    };
+
+    const getVisiblePointsFrom = function(_currentPoint) {
+        for(let i=0; i<freePointsArr.length; i++) {
+
+            if(freePointsArr[i].isEqual(_currentPoint)) {
+                const visiblePoints = pointToVisibleSet[i];
+                return visiblePoints;
+            }            
+        }
+
+        return [];
     };
 
     /**
@@ -73,8 +74,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      */
     const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPoint, _endPoint) {
 
-        //const visiblePointToCost = new Map();
-        var visiblePoints = pointToVisiblePointSet.get(_currentPoint);       
+        var visiblePoints = getVisiblePointsFrom(_currentPoint);       
         var curMinCost = Number.MAX_SAFE_INTEGER;
         var visiblePointWithMinCost = null;
 
@@ -117,7 +117,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         var resultPoint = null;
         var currentMaxLength = Number.MAX_SAFE_INTEGER;
 
-        pointToVisiblePointSet.forEach(function(_visiblePoints, _ptKey) {
+        freePointsArr.forEach(function(_ptKey) {
             const lineOfSight = new Line(_point, _ptKey);
             if(lineOfSight.getLength() < currentMaxLength) {
                 resultPoint = _ptKey;
@@ -137,13 +137,13 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         var resultPoint = null;
         var currentMaxLength = Number.MAX_SAFE_INTEGER;
 
-        pointToVisiblePointSet.forEach(function(_visiblePoints, _ptKey) {
+        freePointsArr.forEach(function(_freePt) {
 
-            const lineOfSight = new Line(_point, _ptKey);
+            const lineOfSight = new Line(_point, _freePt);
             const lineOfSightLength = lineOfSight.getLength();
 
             if(lineOfSightLength < currentMaxLength && !doesLineIntersectAnyBoundaryLines(lineOfSight)) {
-                resultPoint = _ptKey;
+                resultPoint = _freePt;
                 currentMaxLength = lineOfSightLength;
             };
 
@@ -165,7 +165,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
             return new PointSet();
         }
 
-        // find closest visible point in pointToVisiblePointSet
+        // find closest visible point 
         const firstRoutingPoint = self.findVisiblePointClosestTo(_startPoint);
         if(firstRoutingPoint === null) {
             return new PointSet();
