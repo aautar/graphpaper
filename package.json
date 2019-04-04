@@ -1,14 +1,19 @@
 {
   "name": "graphpaper-ui",
-  "version": "15.7.1",
+  "version": "16.0.0",
   "main": "src/GraphPaper.js",
   "repository": "https://github.com/aautar/graphpaper.git",
   "author": "Avishkar Autar <aautar@digital-radiation.com>",
   "license": "MIT",
   "devDependencies": {
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "babel-preset-minify": "^0.5.0",
     "jasmine-es6": "0.4.0",
     "jsdom": "^11.11.0",
-    "process-nextick-args": "^1.0.7"
+    "process-nextick-args": "^1.0.7",
+    "rollup-plugin-babel": "^4.3.2"
   },
   "scripts": {
     "test": "./node_modules/.bin/jasmine"
