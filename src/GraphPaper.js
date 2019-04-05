@@ -1,4 +1,5 @@
 export * from './MatrixMath';
+export * from './SvgPathBuilder';
 export * from './Dimensions';
 export * from './Rectangle';
 export * from './Point';

@@ -2,15 +2,7 @@ import {Point} from './Point';
 import {PointSet} from './PointSet';
 import {LineSet} from './LineSet';
 import {PointVisibilityMap} from './PointVisibilityMap';
-
-/**
- * 
- * @param {Point} _pt 
- * @returns {String}
- */
-const pointToSvgLineTo = function(_pt) {
-    return "L" + _pt.getX() + " " + _pt.getY();
-};
+import {SvgPathBuilder} from './SvgPathBuilder';
 
 /**
  * 
@@ -42,17 +34,15 @@ const computeConnectorSvg = function(_connectorDescriptor, _routingPointsAroundA
     const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
     const routingPointsArray = routingPoints.toArray();
 
-    const lineToString = [];
-    routingPointsArray.forEach(function(_rp) {
-        lineToString.push(pointToSvgLineTo(_rp));
-    });
+    // Put together all points for path
+    const allPointsForPath = [];
+    allPointsForPath.push(anchorStartCentroid);
+    for(let i=0; i<routingPointsArray.length; i++) {
+        allPointsForPath.push(routingPointsArray[i]);
+    }
+    allPointsForPath.push(anchorEndCentroid);
 
-    lineToString.push(pointToSvgLineTo(anchorEndCentroid));
-
-    const startCoordString = anchorStartCentroid.getX() + " " + anchorStartCentroid.getY();
-    const pathString = 'M' + startCoordString + lineToString.join(" ");
-
-    return pathString;
+    return SvgPathBuilder.pointsToPath(allPointsForPath);
 };
 
 onmessage = function(_msg) {
