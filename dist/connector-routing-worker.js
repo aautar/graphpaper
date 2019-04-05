@@ -701,9 +701,9 @@ const SvgPathBuilder = {
  * @param {PointSet} _routingPointsAroundAnchorSet
  * @param {PointVisibilityMap} _pointVisibilityMap 
  * 
- * @returns {String}
+ * @returns {Object}
  */
-const computeConnectorSvg = function(_connectorDescriptor, _routingPointsAroundAnchorSet, _pointVisibilityMap) {
+const computeConnectorPath = function(_connectorDescriptor, _routingPointsAroundAnchorSet, _pointVisibilityMap) {
 
     const anchorStartStringParts = _connectorDescriptor.anchor_start_centroid.split(' ');
     const anchorEndStringParts = _connectorDescriptor.anchor_end_centroid.split(' ');
@@ -727,13 +727,15 @@ const computeConnectorSvg = function(_connectorDescriptor, _routingPointsAroundA
 
     // Put together all points for path
     const allPointsForPath = [anchorStartCentroid, ...routingPointsArray, anchorEndCentroid];
-    /*allPointsForPath.push(anchorStartCentroid);
-    for(let i=0; i<routingPointsArray.length; i++) {
-        allPointsForPath.push(routingPointsArray[i]);
-    }
-    allPointsForPath.push(anchorEndCentroid);*/
 
-    return SvgPathBuilder.pointsToPath(allPointsForPath);
+    return {
+        "svgPath": SvgPathBuilder.pointsToPath(allPointsForPath),
+        "pointsInPath": allPointsForPath,
+    }
+};
+
+const convertArrayBufferToFloat64Array = function(_ab) {
+    return new Float64Array(_ab);
 };
 
 onmessage = function(_msg) {
@@ -746,17 +748,9 @@ onmessage = function(_msg) {
 
     const connectorDescriptors = _msg.data.connectorDescriptors;
 
-    const routingPointsArrayBuffer = _msg.data.routingPoints;
-    const routingPointsFloat64Array = new Float64Array(routingPointsArrayBuffer);
-    const routingPointsSet = new PointSet(routingPointsFloat64Array);
-
-    const boundaryLinesArrayBuffer = _msg.data.boundaryLines;
-    const boundaryLinesFloat64Array = new Float64Array(boundaryLinesArrayBuffer);
-    const boundaryLinesSet = new LineSet(boundaryLinesFloat64Array);    
-
-    const routingPointsAroundAnchorArrayBuffer = _msg.data.routingPointsAroundAnchor;
-    const routingPointsAroundAnchorFloat64Array = new Float64Array(routingPointsAroundAnchorArrayBuffer);
-    const routingPointsAroundAnchorSet = new PointSet(routingPointsAroundAnchorFloat64Array);    
+    const routingPointsSet = new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPoints));
+    const boundaryLinesSet = new LineSet(convertArrayBufferToFloat64Array(_msg.data.boundaryLines));    
+    const routingPointsAroundAnchorSet = new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPointsAroundAnchor));    
     
     const currentPointVisiblityMap = new PointVisibilityMap(
         routingPointsSet,
@@ -764,7 +758,9 @@ onmessage = function(_msg) {
     );
 
     connectorDescriptors.forEach(function(_cd) {
-        _cd.svgPath = computeConnectorSvg(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
+        const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
+        _cd.svgPath = pathData.svgPath;
+        _cd.pointsInPath = pathData.pointsInPath;
     });
 
     metrics.overallTime = (new Date()) - overallTimeT1;
