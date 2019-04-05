@@ -726,12 +726,12 @@ const computeConnectorSvg = function(_connectorDescriptor, _routingPointsAroundA
     const routingPointsArray = routingPoints.toArray();
 
     // Put together all points for path
-    const allPointsForPath = [];
-    allPointsForPath.push(anchorStartCentroid);
+    const allPointsForPath = [anchorStartCentroid, ...routingPointsArray, anchorEndCentroid];
+    /*allPointsForPath.push(anchorStartCentroid);
     for(let i=0; i<routingPointsArray.length; i++) {
         allPointsForPath.push(routingPointsArray[i]);
     }
-    allPointsForPath.push(anchorEndCentroid);
+    allPointsForPath.push(anchorEndCentroid);*/
 
     return SvgPathBuilder.pointsToPath(allPointsForPath);
 };
