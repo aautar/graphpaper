@@ -27,13 +27,9 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     }
 
     /**
-     * 
-     * @param {Point} _pt 
-     * @returns {String}
+     * @type {Point[]|null}
      */
-    const pointToSvgLineTo = function(_pt) {
-        return "L" + _pt.getX() + " " + _pt.getY();
-    };
+    let pathPoints = null;
 
     /**
      * @type {Element}
@@ -60,9 +56,18 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
-     * @param {String} _svgPath
+     * @returns {Point[]|null}
      */
-    this.refresh = function(_svgPath) {
+    this.getPathPoints = function() {
+        return pathPoints;
+    };
+
+    /**
+     * @param {String} _svgPath
+     * @param {Point[]} _pathPoints
+     */
+    this.refresh = function(_svgPath, _pathPoints) {
+        pathPoints = _pathPoints;
         pathElem.setAttribute("d", _svgPath);
     };
 

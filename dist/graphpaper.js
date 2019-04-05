@@ -801,9 +801,12 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     }
 
     /**
-     * 
-     * @param {Point} _pt 
-     * @returns {String}
+     * @type {Point[]|null}
+     */
+    let pathPoints = null;
+
+    /**
+     * @type {Element}
      */
     const pathElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
@@ -827,9 +830,18 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
-     * @param {String} _svgPath
+     * @returns {Point[]|null}
      */
-    this.refresh = function(_svgPath) {
+    this.getPathPoints = function() {
+        return pathPoints;
+    };
+
+    /**
+     * @param {String} _svgPath
+     * @param {Point[]} _pathPoints
+     */
+    this.refresh = function(_svgPath, _pathPoints) {
+        pathPoints = _pathPoints;
         pathElem.setAttribute("d", _svgPath);
     };
 
@@ -1454,7 +1466,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         objectConnectors.forEach(function(_c) {
             const descriptor = getConnectorDescriptorById(_c.getId());
             if(descriptor) {
-                _c.refresh(descriptor.svgPath);
+                _c.refresh(descriptor.svgPath, descriptor.pointsInPath);
             }
         });
     };

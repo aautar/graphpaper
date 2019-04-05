@@ -708,8 +708,8 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
     const anchorStartStringParts = _connectorDescriptor.anchor_start_centroid.split(' ');
     const anchorEndStringParts = _connectorDescriptor.anchor_end_centroid.split(' ');
 
-    const anchorStartCentroid = new Point(anchorStartStringParts[0], anchorStartStringParts[1]);
-    const anchorEndCentroid = new Point(anchorEndStringParts[0], anchorEndStringParts[1]);
+    const anchorStartCentroid = new Point(parseFloat(anchorStartStringParts[0]), parseFloat(anchorStartStringParts[1]));
+    const anchorEndCentroid = new Point(parseFloat(anchorEndStringParts[0]), parseFloat(anchorEndStringParts[1]));
     const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
 
     // Find adjustedStart, adjustedEnd .. anchor points closest to the desired start point and end point
