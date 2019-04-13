@@ -739,6 +739,24 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         return foundConnectors;        
     };
 
+    /**
+     * @param {String} _connectorAnchorId
+     * @returns {Object|null} 
+     */
+    this.getObjectWithConnectorAnchor = function(_connectorAnchorId) {
+        const allObjects = self.getAllObjects();
+        for(let i=0; i<allObjects.length; i++) {                
+            const anchors = allObjects[i].getConnectorAnchors();
+            for(let j=0; j<anchors.length; j++) {
+                if(anchors[j].getId() === _connectorAnchorId) {
+                    return allObjects[i];
+                }
+            }
+        }
+
+        return null;
+    };    
+
     this.removeAllConnectors = function() {
         objectConnectors.forEach(function(_conn) {
             _conn.removePathElement();

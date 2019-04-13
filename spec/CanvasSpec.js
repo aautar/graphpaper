@@ -335,7 +335,6 @@ describe("Canvas connectors", function() {
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
-
         const anchorA = makeAnchor("objA-anchor", canvas);
         const objA = makeCanvasObject("objA", 100, 100, 100, 100);
         objA.addNonInteractableConnectorAnchor(anchorA);
@@ -349,6 +348,50 @@ describe("Canvas connectors", function() {
         expect(connector.getId()).toBe('objA-anchor:objB-anchor');
 
     });
+
+    it("getObjectWithConnectorAnchor returns correct CanvasObject", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initInteractionHandlers();
+
+        const anchorA = makeAnchor("objA-anchor", canvas);
+        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        objA.addNonInteractableConnectorAnchor(anchorA);
+        const objAAnchors = objA.getConnectorAnchors();
+        objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves        
+
+        const anchorB = makeAnchor("objB-anchor", canvas);
+        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        objB.addNonInteractableConnectorAnchor(anchorB);
+        const objBAnchors = objB.getConnectorAnchors();
+        objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves        
+
+        canvas.addObject(objA);
+        canvas.addObject(objB);        
+
+        expect(canvas.getObjectWithConnectorAnchor("objB-anchor").getId()).toBe("objB");
+    });    
+
+    it("getObjectWithConnectorAnchor return null if CanvasObject doesn't exist", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initInteractionHandlers();
+
+        const anchorA = makeAnchor("objA-anchor", canvas);
+        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        objA.addNonInteractableConnectorAnchor(anchorA);
+        const objAAnchors = objA.getConnectorAnchors();
+        objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves        
+
+        const anchorB = makeAnchor("objB-anchor", canvas);
+        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        objB.addNonInteractableConnectorAnchor(anchorB);
+        const objBAnchors = objB.getConnectorAnchors();
+        objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves        
+
+        canvas.addObject(objA);
+        canvas.addObject(objB);        
+
+        expect(canvas.getObjectWithConnectorAnchor("objC-anchor")).toBe(null);
+    });        
 
     it("getObjectsConnectedViaConnector returns connected Objects", function() {
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
