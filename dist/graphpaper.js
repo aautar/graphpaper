@@ -837,6 +837,22 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
+     * @returns {Line[]}
+     */
+    this.getPathLines = function() {
+        if(pathPoints === null || pathPoints.length < 2) {
+            return [];
+        }
+
+        const lines = [];
+        for(let i=0; i<pathPoints.length-1; i++) {
+            lines.push(new Line(pathPoints[i], pathPoints[i+1]));
+        }
+
+        return lines;
+    };
+
+    /**
      * @param {String} _svgPath
      * @param {Point[]} _pathPoints
      */
@@ -1466,7 +1482,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         objectConnectors.forEach(function(_c) {
             const descriptor = getConnectorDescriptorById(_c.getId());
             if(descriptor) {
-                _c.refresh(descriptor.svgPath, descriptor.pointsInPath);
+                const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
+                _c.refresh(descriptor.svgPath, ps.toArray());
             }
         });
     };

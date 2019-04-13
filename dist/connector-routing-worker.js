@@ -759,8 +759,11 @@ onmessage = function(_msg) {
 
     connectorDescriptors.forEach(function(_cd) {
         const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
+
+        const pointsInPathPointSet = new PointSet(pathData.pointsInPath);
+
         _cd.svgPath = pathData.svgPath;
-        _cd.pointsInPath = pathData.pointsInPath;
+        _cd.pointsInPath = pointsInPathPointSet.toFloat64Array().buffer;
     });
 
     metrics.overallTime = (new Date()) - overallTimeT1;

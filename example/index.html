@@ -48,6 +48,12 @@
             <div id="connectorAnchor3" class="connectorAnchor"></div>
         </div>        
 
+        <div id="obj4" class="obj">
+            <div id="translateHandle4" class="translateHandle"></div>
+            <div id="resizeHandle4" class="resizeHandle"></div>
+            <div id="connectorAnchor4" class="connectorAnchor"></div>
+        </div>            
+
     </div>
 
 
@@ -115,9 +121,25 @@
         obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3'));        
         obj3.translate(200,200);
 
+        const obj4 = new GraphPaper.CanvasObject(
+            'obj4', 
+            0, 
+            0, 
+            44, 
+            44, 
+            canvas,
+            document.getElementById('obj4'), 
+            [document.getElementById('translateHandle4')],
+            [document.getElementById('resizeHandle4')]
+        );
+
+        obj4.addInteractableConnectorAnchor(document.getElementById('connectorAnchor4'));        
+        obj4.translate(400,200);
+
         canvas.addObject(obj1);
         canvas.addObject(obj2);
         canvas.addObject(obj3);
+        canvas.addObject(obj4);
 
         obj3.suspendTranslateInteractions();
         obj3.resumeTranslateInteractions();

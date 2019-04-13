@@ -280,7 +280,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         objectConnectors.forEach(function(_c) {
             const descriptor = getConnectorDescriptorById(_c.getId());
             if(descriptor) {
-                _c.refresh(descriptor.svgPath, descriptor.pointsInPath);
+                const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
+                _c.refresh(descriptor.svgPath, ps.toArray());
             }
         });
     };
