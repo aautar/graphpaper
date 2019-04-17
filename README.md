@@ -12,22 +12,7 @@ Used as the basis for sheets in [ScratchGraph](https://scratchgraph.com)
 
 ## The Basics
 
-Some basic CSS styling + DOM elements we'll use:
-
-```css
-* { margin:0; padding:0; font-family:LatoRegular; font-size:14px; font-weight:normal; }
-html, body { width:100%; height:100%; }
-body { background:#fff; }
-ul, li { list-style:none; }
-path { fill: none; }
-
-#paper { border:2px solid #f00; width:1000px; height:1000px; overflow:hidden; position:relative; transform-origin:0 0; transition:transform 0.55s ease-in-out; }
-
-.obj { display:flex; align-items:center; justify-content:center; position:absolute; width:44px; height:44px; background:#fff; border:1px solid #0094ff; border-radius:4px; }
-.translateHandle { cursor:move; display:block; width:12px; height:12px; background:#0094ff; border-radius:12px; }
-.resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:3px; right:3px; width:12px; height:12px; background:url(resize-handle.svg) 0 0 no-repeat; } 
-.connectorAnchor { cursor:pointer; display:block; position:absolute; top:0px; right:-18px; width:12px; height:12px; background:#fff; border:2px solid rgb(0, 109, 201); border-radius:4px; }
-```
+Some DOM elements we'll use for GraphPaper.Canvas (`#paper`) and GraphPaper.CanvasObject (`#obj1`):
 
 ```html
 <div id="paper">
@@ -38,6 +23,10 @@ path { fill: none; }
     </div>
 </div>
 ```
+
+We'll assume styling/layout based on the CSS in [this example](https://github.com/aautar/graphpaper/blob/master/example/index.html).
+
+Unless otherwise specified, units for size and positioning are [CSS pixels](https://www.w3.org/TR/CSS2/syndata.html#length-units).
 
 ### Create a canvas
 
@@ -90,6 +79,14 @@ To get all objects on the canvas:
 ```javascript
 canvas.getAllObjects();
 ```
+
+To get all objects around a certain point:
+
+```javascript
+canvas.getObjectsAroundPoint(targetX, targetY, radius);
+```
+
+Note that this function tests for surrounding objects based on intersection of a box centered at (targetX, targetY) with the given radius.
 
 ### Remove the object from the canvas
 
