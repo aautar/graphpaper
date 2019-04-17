@@ -75,11 +75,21 @@ const obj1 = new GraphPaper.CanvasObject(
 canvas.addObject(obj1);
 ```
 
- The object (`obj1`) will be added to the canvas and can now be translated by dragging the translation handle (`#translateHandle1`) or resized with the resize handle (`#resizeHandle1`). GraphPaper will take care of both mouse and touch interactions on the handle elements.
- 
-## The Grid
+The object (`obj1`) will be added to the canvas and can now be translated by dragging the translation handle (`#translateHandle1`) or resized with the resize handle (`#resizeHandle1`). GraphPaper will take care of both mouse and touch interactions on the handle elements.
 
-The grid rendered on a Canvas along with the "snap to grid" behavior a Canvas will impart on objects is controlled based on the properties of a `Grid` object assigned to the Canvas.
+### Remove the object from the canvas
+
+```javascript
+canvas.removeObject(obj1.getId());
+```
+
+The object (`obj1`) will "remove" the object from the canvas. Remove in this context means that the object will no longer be managed by the canvas, it won't respond to canvas changes and it won't emit object events.
+
+Note that the caller is responsible for removing the object's DOM elements, due to the caller being responsible for the creation of the DOM elements.
+ 
+### Change the grid
+
+The grid rendered on a Canvas, along with the "snap to grid" behavior a Canvas will impart on objects, is set via the properties of a `Grid` object assigned to the Canvas.
 
 A Grid is assigned/changed on a Canvas via the `Canvas.setGrid(_newGrid)` method.
 
