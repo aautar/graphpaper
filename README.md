@@ -77,6 +77,20 @@ canvas.addObject(obj1);
 
 The object (`obj1`) will be added to the canvas and can now be translated by dragging the translation handle (`#translateHandle1`) or resized with the resize handle (`#resizeHandle1`). GraphPaper will take care of both mouse and touch interactions on the handle elements.
 
+### Get object(s)
+
+To get a specific object by its ID:
+
+```javascript
+canvas.getObjectById(obj1.getId());
+```
+
+To get all objects on the canvas:
+
+```javascript
+canvas.getAllObjects();
+```
+
 ### Remove the object from the canvas
 
 ```javascript
