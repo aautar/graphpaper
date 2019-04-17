@@ -75,6 +75,21 @@ describe("Canvas", function() {
         expect(retunedCanvasObjects[0]).toBe(o);
     });    
 
+    it("getObjectsAroundPoint returns surrounding object", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+
+        var mockDomElem = {
+            addEventListener: function() { }
+        };
+
+        var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
+        canvas.addObject(o);
+
+        const retunedCanvasObjects = canvas.getObjectsAroundPoint(105, 210);
+
+        expect(retunedCanvasObjects.length).toBe(1);
+        expect(retunedCanvasObjects[0]).toBe(o);
+    });        
 
     it("getObjectsAroundPoint does not return objects outside box-radius of 1px", function() {
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
@@ -82,7 +97,7 @@ describe("Canvas", function() {
         var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
 
-        const retunedCanvasObjects = canvas.getObjectsAroundPoint(111, 221);
+        const retunedCanvasObjects = canvas.getObjectsAroundPoint(112, 222);
         expect(retunedCanvasObjects.length).toBe(0);
     });
 

@@ -511,12 +511,21 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     /**
      * @param {Number} _x
      * @param {Number} _y
+     * @param {Number} _radius
      * @returns {CanvasObject[]}
      */
-    this.getObjectsAroundPoint = function(_x, _y) {
-        var result = [];
+    this.getObjectsAroundPoint = function(_x, _y, _radius) {
 
-        var ptRect = new Rectangle(_x, _y, _x+1, _y+1);
+        _radius = _radius || 1.0;
+
+        const result = [];
+
+        const ptRect = new Rectangle(
+            _x - _radius, 
+            _y - _radius, 
+            _x + _radius, 
+            _y + _radius
+        );
 
         canvasObjects.forEach(function(_obj) {
             if(!_obj.getIsDeleted() && ptRect.checkIntersect(_obj.getBoundingRectange())) {
