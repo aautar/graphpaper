@@ -509,6 +509,51 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };    
 
     /**
+     * @returns {Rectangle}
+     */
+    this.calcBoundingBox = function() {
+
+        var minTop = null;
+        var minLeft = null;
+        var maxBottom = null;
+        var maxRight = null;
+
+        canvasObjects.forEach(function(element, index, array) {
+
+            const left = element.getX();
+            const top = element.getY();  
+            const right = left + element.getWidth();
+            const bottom = top + element.getHeight();
+
+            if(minLeft === null || left < minLeft) {
+                minLeft = left;
+            }
+
+            if(minTop === null || top < minTop) {
+                minTop = top;
+            }
+
+            if(maxBottom === null || bottom > maxBottom) {
+                maxBottom = bottom;
+            }        
+
+            if(maxRight === null || right > maxRight) {
+                maxRight = right;
+            }
+
+        }); 
+
+        if(minTop === null || minLeft === null || maxBottom === null || maxRight === null) {
+            minTop = 0;
+            minLeft = 0;
+            maxBottom = self.getHeight();
+            maxRight = self.getWidth();            
+        }
+
+        return new Rectangle(minLeft, minTop, maxRight, maxBottom);
+    };
+
+    /**
      * @param {Number} _x
      * @param {Number} _y
      * @param {Number} _radius
@@ -535,45 +580,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         return result;
     };
-    
-    /**
-     * @returns {Rectangle}
-     */
-    this.calcBoundingBox = function() {
-
-        var minTop = null;
-        var minLeft = null;
-        var maxBottom = null;
-        var maxRight = null;
-
-        canvasObjects.forEach(function(element, index, array) {
-
-            var left = parseInt(element.getX());
-            var top = parseInt(element.getY());  
-            var right = left + parseInt(element.getWidth());
-            var bottom = top + parseInt(element.getHeight());  
-
-            if(minLeft === null || left < minLeft) {
-                minLeft = left;
-            }
-
-            if(minTop === null || top < minTop) {
-                minTop = top;
-            }
-
-            if(maxBottom === null || bottom > maxBottom) {
-                maxBottom = bottom;
-            }        
-
-            if(maxRight === null || right > maxRight) {
-                maxRight = right;
-            }              
-
-        }); 
-
-        return new Rectangle(minLeft, minTop, maxRight, maxBottom);
-    };
-  
+      
     /**
      * @returns {CanvasObject[]}
      */

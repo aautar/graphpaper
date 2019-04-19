@@ -28,11 +28,50 @@ describe("Canvas", function() {
     };
 
     const canvasDomElement = window.document.createElement('div');
+    Object.defineProperty(canvasDomElement, 'offsetWidth', {value: 1000});
+    Object.defineProperty(canvasDomElement, 'offsetHeight', {value: 2000});
+
     const document = window.document;
 
     const pvWorkerMock = {
         postMessage: function() { }
     };
+
+    it("getWidth returns canvas width", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        expect(canvas.getWidth()).toBe(1000);
+    });
+
+    it("getHeight returns canvas width", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        expect(canvas.getHeight()).toBe(2000);
+    });    
+
+    it("calcBoundingBox returns bounding box for entire canvas when empty", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const bbox = canvas.calcBoundingBox();
+
+        expect(bbox.getLeft()).toBe(0);
+        expect(bbox.getTop()).toBe(0);
+        expect(bbox.getBottom()).toBe(2000);
+        expect(bbox.getRight()).toBe(1000);
+    });        
+
+    it("calcBoundingBox returns bounding box for area encompassing objects", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+
+        const o1 = makeCanvasObject("obj-1", 100, 200, 10, 20);
+        const o2 = makeCanvasObject("obj-2", 400, 200, 10, 20);
+        canvas.addObject(o1);
+        canvas.addObject(o2);
+
+        const bbox = canvas.calcBoundingBox();
+
+        expect(bbox.getLeft()).toBe(100);
+        expect(bbox.getTop()).toBe(200);
+        expect(bbox.getBottom()).toBe(220);
+        expect(bbox.getRight()).toBe(410);
+    });            
 
     it("snapToGrid snaps coordinate to grid", function() {
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
