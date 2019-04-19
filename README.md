@@ -98,6 +98,26 @@ The object (`obj1`) will "remove" the object from the canvas. Remove in this con
 
 Note that the caller is responsible for removing the object's DOM elements, due to the caller being responsible for the creation of the DOM elements.
  
+### Get canvas dimensions
+
+You can use the following methods to get the width and heigh to a canvas:
+
+```javascript
+canvas.getWidth();
+```
+
+```javascript
+canvas.getHeight();
+```
+
+### Get canvas bounding box
+
+```javascript
+canvas.calcBoundingBox();
+```
+
+This methods will return a `Graphpaper.Rectangle` representing the "active" area of a canvas. The rectange will be [bounding box](https://en.wikipedia.org/wiki/Minimum_bounding_box) of the region containing objects on the canvas. If there are no objects on the canvas, the rectangle will represent the entire canvas.
+
 ### Change the grid
 
 The grid rendered on a Canvas, along with the "snap to grid" behavior a Canvas will impart on objects, is set via the properties of a `Grid` object assigned to the Canvas.
@@ -110,13 +130,6 @@ A new Grid object is created as follows:
 (this is the default grid created and assigned to a Canvas upon construction)
 
 The `Grid` constructor takes 3 parameters: the size of the grid, the color of the grid, and the style of the grid (GRID_STYLE.DOT or GRID_STYLE.LINE)
-
-## Canvas Dimensions
-
-* `Canvas.getWidth()`, `Canvas.getHeight()`
-
- Returns: `Number`
-
 
 ## Canvas Objects
 
