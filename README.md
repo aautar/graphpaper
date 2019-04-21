@@ -100,11 +100,13 @@ Note that the caller is responsible for removing the object's DOM elements, due 
  
 ### Get canvas dimensions
 
-You can use the following methods to get the width and heigh to a canvas:
+Get the width of a canvas:
 
 ```javascript
 canvas.getWidth();
 ```
+
+Get the height of a canvas:
 
 ```javascript
 canvas.getHeight();
@@ -133,11 +135,55 @@ The `Grid` constructor takes 3 parameters: the size of the grid, the color of th
 
 ## Canvas Objects
 
-* `Canvas.calcBoundingBox()`
+### Get the position of an object
 
- Returns: `Rectangle`
+Get `x` (left) position of object:
 
-This method will calculate and return the rectangular bounds/extents of the Canvas in which all CanvasObjects are enclosed
+```javascript
+obj1.getX();
+```
+
+Get `y` (top) position of object:
+
+```javascript
+obj1.getY();
+```
+
+### Move an object
+
+Programmatically move an object:
+
+```javascript
+obj1.translate(targetX, targetY);
+```
+
+### Get the size of an object
+
+Get the width of an object:
+
+```javascript
+obj1.getWidth();
+```
+
+Get the height of an object:
+
+```javascript
+obj1.getHeight();
+```
+
+Get the bounding rectangle of an object:
+
+```javascript
+obj1.getBoundingRectange();
+```
+
+### Resize an object
+
+Programmatically resize an object:
+
+```javascript
+obj1.resize(newWidth, newHeight);
+```
 
 
 ## Events
