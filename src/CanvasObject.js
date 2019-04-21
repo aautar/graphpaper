@@ -56,11 +56,6 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.height = _height;
 
     /**
-     * @deprecated this should no longer be used to indicate to a Canvas that the object is deleted
-     */
-    this.isDeleted = false;
-
-    /**
      * @param {Element} _connectorAnchorDomElement
      * @returns {ConnectorAnchor}
      */    
@@ -156,6 +151,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     };
 
     /**
+     * @deprecated Use CanvasObject.translate()
      * @param {Number} _x
      */
     this.setX = function(_x) {
@@ -170,6 +166,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     };
 
     /**
+     * @deprecated Use CanvasObject.translate()
      * @param {Number} _y
      */
     this.setY = function(_y) {
@@ -227,13 +224,6 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         observers.forEach(function(handler) {
             handler({"obj":self, "width": _width, "height": _height});
         });
-    };
-
-    /**
-     * @returns {Boolean}
-     */
-    this.getIsDeleted = function() {
-        return self.isDeleted;
     };
 
     /**

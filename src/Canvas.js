@@ -573,7 +573,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         );
 
         canvasObjects.forEach(function(_obj) {
-            if(!_obj.getIsDeleted() && ptRect.checkIntersect(_obj.getBoundingRectange())) {
+            if(ptRect.checkIntersect(_obj.getBoundingRectange())) {
                 result.push(_obj);
             }
         });
