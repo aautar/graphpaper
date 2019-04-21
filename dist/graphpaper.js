@@ -2452,10 +2452,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     const eventNameToHandlerFunc = new Map();
 
-    this.x = parseInt(_x);
-    this.y = parseInt(_y);
-    this.width = parseInt(_width);
-    this.height = parseInt(_height);
+    this.x = _x;
+    this.y = _y;
+    this.width = _width;
+    this.height = _height;
 
     /**
      * @deprecated this should no longer be used to indicate to a Canvas that the object is deleted
@@ -2586,8 +2586,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         self.x = _x;
         self.y = _y;
 
-        _domElement.style.left = parseInt(self.x) + 'px';
-        _domElement.style.top = parseInt(self.y) + 'px';
+        _domElement.style.left = self.x + 'px';
+        _domElement.style.top = self.y + 'px';
 
         const observers = eventNameToHandlerFunc.get(Event.TRANSLATE) || [];
         observers.forEach(function(handler) {
@@ -2621,8 +2621,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
         if(_domElementStyleUpdateOverrideFunc) {
             _domElementStyleUpdateOverrideFunc(_domElement);
         } else {
-            _domElement.style.width = parseInt(self.width) + 'px';
-            _domElement.style.height = parseInt(self.height) + 'px';
+            _domElement.style.width = self.width + 'px';
+            _domElement.style.height = self.height + 'px';
         }
 
         const observers = eventNameToHandlerFunc.get(Event.RESIZE) || [];
@@ -2659,10 +2659,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Rectangle}
      */
     this.getBoundingRectange = function() {
-        const left = parseInt(self.x);
-        const top = parseInt(self.y);
-        const right = left + parseInt(self.width);
-        const bottom = top + parseInt(self.height);
+        const left = self.x;
+        const top = self.y;
+        const right = left + self.width;
+        const bottom = top + self.height;
 
         return new Rectangle(left, top, right, bottom);
     };
