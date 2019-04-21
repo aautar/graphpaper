@@ -2452,10 +2452,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     const eventNameToHandlerFunc = new Map();
 
-    this.x = _x;
-    this.y = _y;
-    this.width = _width;
-    this.height = _height;
+    let x = _x;
+    let y = _y;
+    let width = _width;
+    let height = _height;
 
     /**
      * @param {Element} _connectorAnchorDomElement
@@ -2549,30 +2549,14 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Number}
      */
     this.getX = function() {
-        return self.x;
-    };
-
-    /**
-     * @deprecated Use CanvasObject.translate()
-     * @param {Number} _x
-     */
-    this.setX = function(_x) {
-        self.x = _x;
+        return x;
     };
 
     /**
      * @returns {Number}
      */
     this.getY = function() {
-        return self.y;
-    };
-
-    /**
-     * @deprecated Use CanvasObject.translate()
-     * @param {Number} _y
-     */
-    this.setY = function(_y) {
-        self.y = _y;
+        return y;
     };
 
     /**
@@ -2580,11 +2564,11 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Number} _y
      */
     this.translate = function(_x, _y) {
-        self.x = _x;
-        self.y = _y;
+        x = _x;
+        y = _y;
 
-        _domElement.style.left = self.x + 'px';
-        _domElement.style.top = self.y + 'px';
+        _domElement.style.left = x + 'px';
+        _domElement.style.top = y + 'px';
 
         const observers = eventNameToHandlerFunc.get(Event.TRANSLATE) || [];
         observers.forEach(function(handler) {
@@ -2596,14 +2580,14 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Number}
      */
     this.getWidth = function() {
-        return self.width;
+        return width;
     };
 
     /**
      * @returns {Number}
      */
     this.getHeight = function() {
-        return self.height;
+        return height;
     };
 
     /**
@@ -2612,14 +2596,14 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Function} _domElementStyleUpdateOverrideFunc
      */
     this.resize = function(_width, _height, _domElementStyleUpdateOverrideFunc) {            
-        self.width = _width;
-        self.height = _height;
+        width = _width;
+        height = _height;
 
         if(_domElementStyleUpdateOverrideFunc) {
             _domElementStyleUpdateOverrideFunc(_domElement);
         } else {
-            _domElement.style.width = self.width + 'px';
-            _domElement.style.height = self.height + 'px';
+            _domElement.style.width = width + 'px';
+            _domElement.style.height = height + 'px';
         }
 
         const observers = eventNameToHandlerFunc.get(Event.RESIZE) || [];
@@ -2649,10 +2633,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {Rectangle}
      */
     this.getBoundingRectange = function() {
-        const left = self.x;
-        const top = self.y;
-        const right = left + self.width;
-        const bottom = top + self.height;
+        const left = x;
+        const top = y;
+        const right = left + width;
+        const bottom = top + height;
 
         return new Rectangle(left, top, right, bottom);
     };
@@ -2955,8 +2939,21 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @returns {Cluster[]}
      */
     this.areObjectsClose = function(_objA, _objB) {
-        const nA = new Rectangle(_objA.x-_boxExtentOffset, _objA.y-_boxExtentOffset, _objA.x + _objA.width + _boxExtentOffset, _objA.y + _objA.height + _boxExtentOffset);
-        const nB = new Rectangle(_objB.x-_boxExtentOffset, _objB.y-_boxExtentOffset, _objB.x + _objB.width + _boxExtentOffset, _objB.y + _objB.height + _boxExtentOffset);
+
+        const nA = new Rectangle(
+            _objA.getX() - _boxExtentOffset, 
+            _objA.getY() - _boxExtentOffset, 
+            _objA.getX() + _objA.getWidth() + _boxExtentOffset, 
+            _objA.getY() + _objA.getHeight() + _boxExtentOffset
+        );
+
+        const nB = new Rectangle(
+            _objB.getX() - _boxExtentOffset, 
+            _objB.getY() - _boxExtentOffset, 
+            _objB.getX() + _objB.getWidth() + _boxExtentOffset, 
+            _objB.getY() + _objB.getHeight() + _boxExtentOffset
+        );
+        
         return nA.checkIntersect(nB);
     };
    
