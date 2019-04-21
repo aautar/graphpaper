@@ -2,12 +2,21 @@ import {BoxClusterDetector} from '../src/BoxClusterDetector.js';
 import {CanvasObject} from '../src/CanvasObject.js';
 import {Cluster} from '../src/Cluster.js';
 
+const createMockDomElem = function() {
+    const mockDomElem = {
+      addEventListener: function() { },
+      style: {
+        top: 0,
+        left: 0
+      }      
+    };
+
+    return mockDomElem;
+};
+
 describe("BoxClusterDetector::areObjectsClose", function() {
     
   it("returns true for 2 objects close to each other", function() {
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
 
     const o1 = new CanvasObject(
         "obj-123",
@@ -16,9 +25,9 @@ describe("BoxClusterDetector::areObjectsClose", function() {
         10, 
         20, 
         {}, 
-        mockDomElem, 
-        [mockDomElem], 
-        [mockDomElem]
+        createMockDomElem(), 
+        [createMockDomElem()], 
+        [createMockDomElem()]
     );
 
     const o2 = new CanvasObject(
@@ -28,9 +37,9 @@ describe("BoxClusterDetector::areObjectsClose", function() {
       10, 
       20, 
       {}, 
-      mockDomElem, 
-      [mockDomElem], 
-      [mockDomElem]
+      createMockDomElem(), 
+      [createMockDomElem()], 
+      [createMockDomElem()]
     );        
 
     const detector = new BoxClusterDetector(12.0);
@@ -39,10 +48,6 @@ describe("BoxClusterDetector::areObjectsClose", function() {
   });
 
   it("returns false for 2 objects not near each other", function() {
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
     const o1 = new CanvasObject(
         "obj-123",
         100, 
@@ -50,9 +55,9 @@ describe("BoxClusterDetector::areObjectsClose", function() {
         10, 
         20, 
         {}, 
-        mockDomElem, 
-        [mockDomElem], 
-        [mockDomElem]
+        createMockDomElem(), 
+        [createMockDomElem()], 
+        [createMockDomElem()]
     );
 
     const o2 = new CanvasObject(
@@ -62,9 +67,9 @@ describe("BoxClusterDetector::areObjectsClose", function() {
       10, 
       20, 
       {}, 
-      mockDomElem, 
-      [mockDomElem], 
-      [mockDomElem]
+      createMockDomElem(), 
+      [createMockDomElem()], 
+      [createMockDomElem()]
     );        
 
     const detector = new BoxClusterDetector(12.0);
@@ -78,10 +83,6 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
 
   it("returns empty array if passed empty array of objects under consideration", function() {
 
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
     const o = new CanvasObject(
         "obj-123",
         100, 
@@ -89,9 +90,9 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
         10, 
         20, 
         {}, 
-        mockDomElem, 
-        [mockDomElem], 
-        [mockDomElem]
+        createMockDomElem(), 
+        [createMockDomElem()], 
+        [createMockDomElem()]
     );
 
     const detector = new BoxClusterDetector(12.0);
@@ -101,10 +102,6 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
 
 
   it("returns an array with close by objects", function() {
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
     const o1 = new CanvasObject(
         "obj-123",
         100, 
@@ -112,9 +109,9 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
         10, 
         20, 
         {}, 
-        mockDomElem, 
-        [mockDomElem], 
-        [mockDomElem]
+        createMockDomElem(), 
+        [createMockDomElem()], 
+        [createMockDomElem()]
     );
 
     const o2 = new CanvasObject(
@@ -124,9 +121,9 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
       10, 
       20, 
       {}, 
-      mockDomElem, 
-      [mockDomElem], 
-      [mockDomElem]
+      createMockDomElem(), 
+      [createMockDomElem()], 
+      [createMockDomElem()]
     );        
 
     const detector = new BoxClusterDetector(12.0);
@@ -140,10 +137,6 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
 describe("BoxClusterDetector::getClusterObjectsFromSeed", function() {
   
   it("produces result set with 3 objects aligned in row", function() {
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
     const o1 = new CanvasObject(
         "obj-123",
         100, 
@@ -151,9 +144,9 @@ describe("BoxClusterDetector::getClusterObjectsFromSeed", function() {
         10, 
         20, 
         {}, 
-        mockDomElem, 
-        [mockDomElem], 
-        [mockDomElem]
+        createMockDomElem(), 
+        [createMockDomElem()], 
+        [createMockDomElem()]
     );
 
     const o2 = new CanvasObject(
@@ -163,9 +156,9 @@ describe("BoxClusterDetector::getClusterObjectsFromSeed", function() {
       10, 
       20, 
       {}, 
-      mockDomElem, 
-      [mockDomElem], 
-      [mockDomElem]
+      createMockDomElem(), 
+      [createMockDomElem()], 
+      [createMockDomElem()]
     );        
 
     const o3 = new CanvasObject(
@@ -175,9 +168,9 @@ describe("BoxClusterDetector::getClusterObjectsFromSeed", function() {
       10, 
       20, 
       {}, 
-      mockDomElem, 
-      [mockDomElem], 
-      [mockDomElem]
+      createMockDomElem(), 
+      [createMockDomElem()], 
+      [createMockDomElem()]
     );        
 
     const resultSet = [o1];
@@ -199,12 +192,7 @@ describe("BoxClusterDetector::computeClusters", function() {
   });  
 
   it("return empty array of clusters for single object", function() {  
-
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
-    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
 
     const detector = new BoxClusterDetector(12.0);
     const clusters = detector.computeClusters([o1], []);
@@ -212,12 +200,8 @@ describe("BoxClusterDetector::computeClusters", function() {
   });
   
   it("return single Cluster for 2 objects close to each other", function() {  
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
-    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
 
     const idGenerator = function() {
       return "new-cluster-id";
@@ -233,13 +217,9 @@ describe("BoxClusterDetector::computeClusters", function() {
   });
 
   it("adds object to exiting Cluster and returns that Cluster", function() {  
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
-    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const newObj = new CanvasObject("obj-789", 112, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const newObj = new CanvasObject("obj-789", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
 
     const existingCluster = new Cluster("existing-cluster-id");
     existingCluster.addObject(o1);
@@ -260,13 +240,10 @@ describe("BoxClusterDetector::computeClusters", function() {
   });  
 
   it("return single Cluster for 3 objects close to each other", function() {  
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
 
-    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const o3 = new CanvasObject("obj-789", 112, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const o3 = new CanvasObject("obj-789", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
 
     const idGenerator = function() {
       return "new-cluster-id";
@@ -284,13 +261,9 @@ describe("BoxClusterDetector::computeClusters", function() {
 
 
   it("removes moved object from an existing cluster", function() {  
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
-    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const o3 = new CanvasObject("obj-789", 114, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const o3 = new CanvasObject("obj-789", 114, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
 
     const idGenerator = function() {
       return "new-cluster-id";
@@ -301,8 +274,7 @@ describe("BoxClusterDetector::computeClusters", function() {
     existingCluster.addObject(o2);    
     existingCluster.addObject(o3);    
 
-    o2.setX(1000);
-    o2.setY(1000);
+    o2.translate(1000.0, 1000.0);
 
     const detector = new BoxClusterDetector(12.0);
     const clusters = detector.computeClusters([o1,o2,o3], [existingCluster], idGenerator);
@@ -315,13 +287,9 @@ describe("BoxClusterDetector::computeClusters", function() {
   });      
 
   it("removes cluster when all objects have dispersed", function() {  
-    const mockDomElem = {
-      addEventListener: function() { }
-    };
-
-    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
-    const o3 = new CanvasObject("obj-789", 114, 200, 10, 20, {}, mockDomElem, [mockDomElem], [mockDomElem]);
+    const o1 = new CanvasObject("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const o2 = new CanvasObject("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+    const o3 = new CanvasObject("obj-789", 114, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
 
     const idGenerator = function() {
       return "new-cluster-id";
@@ -332,14 +300,9 @@ describe("BoxClusterDetector::computeClusters", function() {
     existingCluster.addObject(o2);    
     existingCluster.addObject(o3);    
 
-    o1.setX(1000);
-    o1.setY(1000);
-
-    o2.setX(2000);
-    o2.setY(2000);
-
-    o3.setX(3000);
-    o3.setY(3000);
+    o1.translate(1000.0, 1000.0);
+    o2.translate(2000.0, 2000.0);
+    o3.translate(3000.0, 3000.0);
 
     const detector = new BoxClusterDetector(12.0);
     const clusters = detector.computeClusters([o1,o2,o3], [existingCluster], idGenerator);
