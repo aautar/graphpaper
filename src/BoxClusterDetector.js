@@ -78,8 +78,21 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @returns {Boolean}
      */
     this.areObjectsClose = function(_objA, _objB) {
-        const nA = new Rectangle(_objA.x-_boxExtentOffset, _objA.y-_boxExtentOffset, _objA.x + _objA.width + _boxExtentOffset, _objA.y + _objA.height + _boxExtentOffset);
-        const nB = new Rectangle(_objB.x-_boxExtentOffset, _objB.y-_boxExtentOffset, _objB.x + _objB.width + _boxExtentOffset, _objB.y + _objB.height + _boxExtentOffset);
+
+        const nA = new Rectangle(
+            _objA.getX() - _boxExtentOffset, 
+            _objA.getY() - _boxExtentOffset, 
+            _objA.getX() + _objA.getWidth() + _boxExtentOffset, 
+            _objA.getY() + _objA.getHeight() + _boxExtentOffset
+        );
+
+        const nB = new Rectangle(
+            _objB.getX() - _boxExtentOffset, 
+            _objB.getY() - _boxExtentOffset, 
+            _objB.getX() + _objB.getWidth() + _boxExtentOffset, 
+            _objB.getY() + _objB.getHeight() + _boxExtentOffset
+        );
+        
         return nA.checkIntersect(nB);
     };
    
