@@ -93,6 +93,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         return totalLength;
     };
 
+
     /**
      * @param {String} _svgPath
      * @param {Point[]} _pathPoints

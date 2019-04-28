@@ -9,6 +9,13 @@ describe("Line.getLength", function() {
   });
 });
 
+describe("Line.getDirection", function() {
+  it("returns normalized direction vector for given line", function() {
+    const lineA = new Line(new Point(0,0), new Point(100,200));
+    expect(lineA.getDirection().toString()).toBe(`0.4472135954999579 0.8944271909999159`);
+  });
+});
+
 describe("Line.isEqual", function() {
   it("returns true if start and end points of line are the same", function() {
     const lineA = new Line(new Point(100,200), new Point(300,400));

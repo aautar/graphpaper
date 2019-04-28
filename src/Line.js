@@ -57,6 +57,23 @@ Line.prototype.getLength = function() {
 };
 
 /**
+ * Calculate unit length direction vector
+ * 
+ * @returns {Point}
+ */
+Line.prototype.getDirection = function() {
+    const dx = this.__endPoint.getX() - this.__startPoint.getX();
+    const dy = this.__endPoint.getY() - this.__startPoint.getY();
+
+    const len = Math.sqrt(dx*dx + dy*dy);
+
+    return new Point(       
+        dx / len,
+        dy / len
+    );    
+};
+
+/**
  * @param {Line} _otherLine
  * @returns {LINE_INTERSECTION_TYPE}
  */

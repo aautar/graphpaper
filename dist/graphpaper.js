@@ -229,6 +229,23 @@ Line.prototype.getLength = function() {
 };
 
 /**
+ * Calculate unit length direction vector
+ * 
+ * @returns {Point}
+ */
+Line.prototype.getDirection = function() {
+    const dx = this.__endPoint.getX() - this.__startPoint.getX();
+    const dy = this.__endPoint.getY() - this.__startPoint.getY();
+
+    const len = Math.sqrt(dx*dx + dy*dy);
+
+    return new Point(       
+        dx / len,
+        dy / len
+    );    
+};
+
+/**
  * @param {Line} _otherLine
  * @returns {LINE_INTERSECTION_TYPE}
  */
@@ -851,6 +868,21 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
         return lines;
     };
+
+    /**
+     * @returns {Number}
+     */
+    this.getLength = function() {
+        let totalLength = 0;
+
+        const pathLines = self.getPathLines();
+        for(let i=0; i<pathLines.length; i++) {
+            totalLength += pathLines[i].getLength();
+        }
+        
+        return totalLength;
+    };
+
 
     /**
      * @param {String} _svgPath
