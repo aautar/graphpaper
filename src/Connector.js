@@ -80,6 +80,20 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
+     * @returns {Number}
+     */
+    this.getLength = function() {
+        let totalLength = 0;
+
+        const pathLines = self.getPathLines();
+        for(let i=0; i<pathLines.length; i++) {
+            totalLength += pathLines[i].getLength();
+        }
+        
+        return totalLength;
+    };
+
+    /**
      * @param {String} _svgPath
      * @param {Point[]} _pathPoints
      */
