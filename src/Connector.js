@@ -1,5 +1,6 @@
 import  {ConnectorAnchor} from './ConnectorAnchor';
 import {Line} from './Line';
+import {Point} from './Point';
 
 /**
  * 
@@ -93,6 +94,32 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         return totalLength;
     };
 
+    /**
+     * @returns {Point}
+     */
+    this.getMidpoint = function() {
+        const totalLength = self.getLength();
+        const pathLines = self.getPathLines();
+
+        let lengthSoFar = pathLines[0].getLength();
+        let curPathLineWithMidpoint = pathLines[0];
+
+        for(let i=1; i<pathLines.length; i++) {
+            const pathLineLength = pathLines[i].getLength();
+            if(lengthSoFar + pathLineLength > totalLength/2.0) {
+                break;
+            } else {
+                curPathLineWithMidpoint = pathLines[i];
+                lengthSoFar += pathLineLength;
+            }
+        }
+
+        return new Point(
+            (curPathLineWithMidpoint.getStartPoint().getX() + curPathLineWithMidpoint.getEndPoint().getX()) / 2.0,
+            (curPathLineWithMidpoint.getStartPoint().getY() + curPathLineWithMidpoint.getEndPoint().getY()) / 2.0,
+        );
+
+    };
 
     /**
      * @param {String} _svgPath

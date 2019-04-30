@@ -88,7 +88,6 @@ describe("ConnectorAnchor.removePathElement", function() {
 });
 
 describe("ConnectorAnchor.getLength", function() {
-
     it("returns euclidean length of all path lines", function() {
         const anchorStartElem = window.document.createElement('div');
         const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
@@ -116,5 +115,55 @@ describe("ConnectorAnchor.getLength", function() {
         expect(connectorLength).toBe(1094.4523335381552);
 
     });
+});
 
+describe("ConnectorAnchor.getMidpoint", function() {
+
+    it("returns midpoint of path consisting of single segment", function() {
+        const anchorStartElem = window.document.createElement('div');
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+
+        const anchorEndElem = window.document.createElement('div');
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+
+        const containerDomElem = window.document.createElement('div');
+
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
+        connector.refresh(
+            "M100 100L500 500", 
+            [
+                new Point(100, 100),
+                new Point(500, 500),
+            ]
+        );
+
+        const midpoint = connector.getMidpoint();
+        expect(midpoint.toString()).toBe(`300 300`);
+    });
+
+    it("returns midpoint of path consisting of multiple segments", function() {
+        const anchorStartElem = window.document.createElement('div');
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+
+        const anchorEndElem = window.document.createElement('div');
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+
+        const containerDomElem = window.document.createElement('div');
+
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
+        connector.refresh(
+            "M1607 757L1629 757 L2003 925 L2494 925 L2534 781 L2556 781", 
+            [
+                new Point(1607, 757),
+                new Point(1629, 757), // midpoint line start
+                new Point(2003, 925), // midpoint line end
+                new Point(2494, 925),
+                new Point(2534, 781),
+                new Point(2556, 781)
+            ]
+        );
+
+        const midpoint = connector.getMidpoint();
+        expect(midpoint.toString()).toBe(`1816 841`);
+    });
 });
