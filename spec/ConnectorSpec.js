@@ -152,18 +152,16 @@ describe("ConnectorAnchor.getMidpoint", function() {
 
         const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
         connector.refresh(
-            "M1607 757L1629 757 L2003 925 L2494 925 L2534 781 L2556 781", 
+            "M100 100L100 90 L180 90 L180 100", 
             [
-                new Point(1607, 757),
-                new Point(1629, 757), // midpoint line start
-                new Point(2003, 925), // midpoint line end
-                new Point(2494, 925),
-                new Point(2534, 781),
-                new Point(2556, 781)
+                new Point(100, 100),
+                new Point(100, 90),
+                new Point(180, 90),
+                new Point(180, 100),
             ]
         );
 
         const midpoint = connector.getMidpoint();
-        expect(midpoint.toString()).toBe(`1816 841`);
+        expect(midpoint.toString()).toBe(`140 90`);
     });
 });

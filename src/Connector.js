@@ -101,22 +101,27 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         const totalLength = self.getLength();
         const pathLines = self.getPathLines();
 
-        let lengthSoFar = pathLines[0].getLength();
-        let curPathLineWithMidpoint = pathLines[0];
+        let lengthSoFar = 0;
+        let curPathLineWithMidpoint = null;
 
-        for(let i=1; i<pathLines.length; i++) {
+        for(let i=0; i<pathLines.length; i++) {
+            curPathLineWithMidpoint = pathLines[i];
             const pathLineLength = pathLines[i].getLength();
-            if(lengthSoFar + pathLineLength > totalLength/2.0) {
+            lengthSoFar += pathLineLength;
+
+            if(lengthSoFar >= totalLength/2.0) {
                 break;
-            } else {
-                curPathLineWithMidpoint = pathLines[i];
-                lengthSoFar += pathLineLength;
             }
         }
 
+        const lengthBeforeCur = (lengthSoFar - curPathLineWithMidpoint.getLength());
+        const midOnCurPath = (totalLength / 2.0) - lengthBeforeCur; // i.e. distance to midpoint
+
+        const p = midOnCurPath / curPathLineWithMidpoint.getLength();
+
         return new Point(
-            (curPathLineWithMidpoint.getStartPoint().getX() + curPathLineWithMidpoint.getEndPoint().getX()) / 2.0,
-            (curPathLineWithMidpoint.getStartPoint().getY() + curPathLineWithMidpoint.getEndPoint().getY()) / 2.0,
+            curPathLineWithMidpoint.getStartPoint().getX() + (p * (curPathLineWithMidpoint.getEndPoint().getX() - curPathLineWithMidpoint.getStartPoint().getX())),
+            curPathLineWithMidpoint.getStartPoint().getY() + (p * (curPathLineWithMidpoint.getEndPoint().getY() - curPathLineWithMidpoint.getStartPoint().getY()))
         );
 
     };
