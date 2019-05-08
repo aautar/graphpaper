@@ -27,6 +27,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     const Event = {
         DBLCLICK: "dblclick",
         CLICK: "click",
+        CONNECTOR_UPDATED: "connector-updated",
         OBJECT_ADDED: "object-added",
         OBJECT_REMOVED: "object-removed",
         OBJECT_RESIZED: "object-resized",
@@ -282,8 +283,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             if(descriptor) {
                 const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
                 _c.refresh(descriptor.svgPath, ps.toArray());
+                emitEvent(Event.CONNECTOR_UPDATED, { 'connector': _c });
             }
-        });
+        });        
     };
 
     var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {

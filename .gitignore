@@ -1,3 +1,4 @@
 node_modules
 html/index.nginx-debian.html
 .vagrant
+*.log
