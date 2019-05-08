@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GraphPaper</title>
+    <script src="../dist/graphpaper.js" type="text/javascript"></script>
+
+    <style type="text/css">
+        * { margin:0; padding:0; font-family:LatoRegular; font-size:14px; font-weight:normal; }
+        html, body { width:100%; height:100%; }
+        body { background:#fff; }
+        ul, li { list-style:none; }
+        path { fill: none; }
+
+        /* border, margin, and padding is not currently handled and will screw up transformations */
+        #paper { border:0px solid #f00; width:1000px; height:1000px; overflow:hidden; position:relative; transform-origin:0 0; }
+        
+        .obj { display:flex; align-items:center; justify-content:center; position:absolute; width:44px; height:44px; background:#fff; border:1px solid #0094ff; border-radius:4px; }
+        .translateHandle { cursor:move; display:block; width:12px; height:12px; background:#0094ff; border-radius:12px; }
+        .resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:3px; right:3px; width:12px; height:12px; background:url(resize-handle.svg) 0 0 no-repeat; } 
+        .connectorAnchor { cursor:pointer; display:block; position:absolute; top:0px; right:-18px; width:12px; height:12px; background:#fff; border:2px solid rgb(0, 109, 201); border-radius:4px; }
+    </style>
+
+</head>
+
+
+<body>
+    
+    <div id="paper">
+
+        <p id="label1" style="position:absolute; top:0; left:0;">test</p>
+
+        <div id="obj1" class="obj">
+            <div id="translateHandle1" class="translateHandle"></div>
+            <div id="translateHandle1b" class="translateHandle" style="margin-left:-45px;"></div>
+            <div id="resizeHandle1"  class="resizeHandle"></div>
+            <div id="connectorAnchor1" class="connectorAnchor"></div>
+        </div>
+
+        <div id="obj2" class="obj">
+            <div id="translateHandle2" class="translateHandle"></div>
+            <div id="resizeHandle2" class="resizeHandle"></div>
+            <div id="connectorAnchor2" class="connectorAnchor"></div>
+        </div>        
+
+    </div>
+
+
+    <script type="text/javascript">
+	
+        const canvas = new GraphPaper.Canvas(
+            document.getElementById('paper'), 
+            window,
+            new Worker('../dist/connector-routing-worker.js')
+        );
+
+        canvas.initInteractionHandlers();
+        canvas.initTransformationHandlers();
+
+        canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
+            const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
+            c.on("connector-click", function(e) {
+                console.log(e);
+            });
+
+            return c;
+        });
+
+        const obj1 = new GraphPaper.CanvasObject(
+            'obj1', 
+            0, 
+            0, 
+            44, 
+            44, 
+            canvas,
+            document.getElementById('obj1'), 
+            [document.getElementById('translateHandle1'), document.getElementById('translateHandle1b')],
+            [document.getElementById('resizeHandle1')]
+        );
+
+        obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
+
+        const obj2 = new GraphPaper.CanvasObject(
+            'obj2', 
+            0, 
+            0, 
+            44, 
+            44, 
+            canvas,
+            document.getElementById('obj2'), 
+            [document.getElementById('translateHandle2')],
+            [document.getElementById('resizeHandle2')]
+        );
+
+        obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
+        obj2.translate(100, 100);
+
+        canvas.addObject(obj1);
+        canvas.addObject(obj2);
+
+        canvas.on('connector-updated', (e) => {
+            if(e.connector.getId() === `obj1-1000:obj2-1000`) {
+
+                const mp = e.connector.getMidpoint();
+                const labelElem = document.getElementById('label1');
+                labelElem.style.left = `${mp.getX()}px`;
+                labelElem.style.top = `${mp.getY()}px`;          
+
+                const mpAngle = Math.atan2(e.connector.getMidpointDirection().getY(), e.connector.getMidpointDirection().getX());
+                labelElem.style.transform = `rotate(${mpAngle}rad)`;
+                
+            }            
+        });
+
+    </script>
+
+</body>
+
+</html>
