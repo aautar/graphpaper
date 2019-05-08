@@ -123,8 +123,35 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
             curPathLineWithMidpoint.getStartPoint().getX() + (p * (curPathLineWithMidpoint.getEndPoint().getX() - curPathLineWithMidpoint.getStartPoint().getX())),
             curPathLineWithMidpoint.getStartPoint().getY() + (p * (curPathLineWithMidpoint.getEndPoint().getY() - curPathLineWithMidpoint.getStartPoint().getY()))
         );
-
     };
+
+    /**
+     * @returns {Point}
+     */
+    this.getMidpointDirection = function() {
+        const totalLength = self.getLength();
+        const pathLines = self.getPathLines();
+
+        let lengthSoFar = 0;
+        let curPathLineWithMidpoint = null;
+
+        for(let i=0; i<pathLines.length; i++) {
+            curPathLineWithMidpoint = pathLines[i];
+            const pathLineLength = pathLines[i].getLength();
+            lengthSoFar += pathLineLength;
+
+            if(lengthSoFar >= totalLength/2.0) {
+                break;
+            }
+        }
+
+        if(curPathLineWithMidpoint === null) {
+            return pathLines[0].getDirection();
+        }
+
+        return curPathLineWithMidpoint.getDirection();
+    };
+
 
     /**
      * @param {String} _svgPath
