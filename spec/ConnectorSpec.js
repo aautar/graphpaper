@@ -165,3 +165,30 @@ describe("ConnectorAnchor.getMidpoint", function() {
         expect(midpoint.toString()).toBe(`140 90`);
     });
 });
+
+
+describe("ConnectorAnchor.getMidpointDirection", function() {
+    it("returns direction of midpoint segment", function() {
+        const anchorStartElem = window.document.createElement('div');
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+
+        const anchorEndElem = window.document.createElement('div');
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+
+        const containerDomElem = window.document.createElement('div');
+
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
+        connector.refresh(
+            "M100 100L100 90 L180 90 L180 100", 
+            [
+                new Point(100, 100),
+                new Point(100, 90),
+                new Point(180, 90),
+                new Point(180, 100),
+            ]
+        );
+
+        const mpDir = connector.getMidpointDirection();
+        expect(mpDir.toString()).toBe(`1 0`);
+    });
+});
