@@ -58,6 +58,20 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     };
 
     /**
+     * @param {String} _url
+     */    
+    this.setMarkerStartUrl = function(_url) {
+        pathElem.setAttribute(`marker-start`, `url(${_url})`);
+    };
+
+    /**
+     * @param {String} _url
+     */
+    this.setMarkerEndUrl = function(_url) {
+        pathElem.setAttribute(`marker-end`, `url(${_url})`);
+    };
+
+    /**
      * @returns {Point[]|null}
      */
     this.getPathPoints = function() {

@@ -25,7 +25,7 @@
 
 
 <body>
-    
+
     <div id="paper">
 
         <p id="label1" style="position:absolute; top:0; left:0;">test</p>
@@ -45,7 +45,17 @@
 
     </div>
 
+    <svg>
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="15" refY="5"
+                markerWidth="3" markerHeight="3"
+                orient="auto-start-reverse">
+                <path style="fill:#f00;" d="M 0 0 L 10 5 L 0 10 z" />
+            </marker>            
+        </defs>
+    </svg>
 
+        
     <script type="text/javascript">
 	
         const canvas = new GraphPaper.Canvas(
@@ -59,6 +69,8 @@
 
         canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
             const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
+            c.setMarkerEndUrl(`#arrow`);
+            
             c.on("connector-click", function(e) {
                 console.log(e);
             });
@@ -108,7 +120,7 @@
 
                 const mpAngle = Math.atan2(e.connector.getMidpointDirection().getY(), e.connector.getMidpointDirection().getX());
                 labelElem.style.transform = `rotate(${mpAngle}rad)`;
-                
+
             }            
         });
 
