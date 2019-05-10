@@ -32,7 +32,6 @@
 
         <div id="obj1" class="obj">
             <div id="translateHandle1" class="translateHandle"></div>
-            <div id="translateHandle1b" class="translateHandle" style="margin-left:-45px;"></div>
             <div id="resizeHandle1"  class="resizeHandle"></div>
             <div id="connectorAnchor1" class="connectorAnchor"></div>
         </div>
@@ -86,11 +85,11 @@
             44, 
             canvas,
             document.getElementById('obj1'), 
-            [document.getElementById('translateHandle1'), document.getElementById('translateHandle1b')],
+            [document.getElementById('translateHandle1')],
             [document.getElementById('resizeHandle1')]
         );
 
-        obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
+        const obj1Anchor = obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
 
         const obj2 = new GraphPaper.CanvasObject(
             'obj2', 
@@ -104,11 +103,12 @@
             [document.getElementById('resizeHandle2')]
         );
 
-        obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
+        const obj2Anchor = obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
         obj2.translate(100, 100);
 
         canvas.addObject(obj1);
         canvas.addObject(obj2);
+        canvas.makeNewConnectorFromAnchors(obj1Anchor, obj2Anchor);
 
         canvas.on('connector-updated', (e) => {
             if(e.connector.getId() === `obj1-1000:obj2-1000`) {
