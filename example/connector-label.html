@@ -28,7 +28,7 @@
 
     <div id="paper">
 
-        <p id="label1" style="position:absolute; top:0; left:0;">test</p>
+        <p id="label1" style="position:absolute; top:0; left:0; background:#000; color:#fff; padding:0px 8px;">test</p>
 
         <div id="obj1" class="obj">
             <div id="translateHandle1" class="translateHandle"></div>
@@ -113,12 +113,15 @@
         canvas.on('connector-updated', (e) => {
             if(e.connector.getId() === `obj1-1000:obj2-1000`) {
 
-                const mp = e.connector.getMidpoint();
-                const labelElem = document.getElementById('label1');
-                labelElem.style.left = `${mp.getX()}px`;
-                labelElem.style.top = `${mp.getY()}px`;          
+                const labelElem = document.getElementById('label1');                
+                const labelHalfWidth = labelElem.offsetWidth * 0.5;
+                const labelHalfHeight = labelElem.offsetHeight * 0.5;
 
+                const mp = e.connector.getMidpoint();
                 const mpAngle = Math.atan2(e.connector.getMidpointDirection().getY(), e.connector.getMidpointDirection().getX());
+
+                labelElem.style.left = `calc(${mp.getX()}px - ${labelHalfWidth}px)`;
+                labelElem.style.top = `calc(${mp.getY()}px - ${labelHalfHeight}px)`;          
                 labelElem.style.transform = `rotate(${mpAngle}rad)`;
 
             }            
