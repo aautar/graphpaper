@@ -117,7 +117,7 @@
         canvas.addObject(obj2);
         canvas.addObject(obj3);
 
-        canvas.on('object-translated', function() {
+        canvas.on(GraphPaper.CanvasEvent.OBJECT_TRANSLATED, function() {
             canvas.findBestConnectorAnchorsToConnectObjects(obj1, obj2, function(_bestAnchor) {
 
                 console.log(_bestAnchor);

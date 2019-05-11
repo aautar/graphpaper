@@ -1,4 +1,5 @@
-import  {ConnectorAnchor} from './ConnectorAnchor';
+import {ConnectorAnchor} from './ConnectorAnchor';
+import {ConnectorEvent} from './ConnectorEvent';
 import {Line} from './Line';
 import {Point} from './Point';
 
@@ -15,10 +16,6 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     const self = this;
 
     const eventNameToHandlerFunc = new Map();
-
-    const Event = {
-        CLICK: 'connector-click'
-    };
 
     if(typeof _strokeColor === 'undefined') {
         _strokeColor = '#000';
@@ -42,7 +39,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     pathElem.style.strokeWidth = _strokeWidth;         
 
     pathElem.addEventListener("click", function(e) {
-        const observers = eventNameToHandlerFunc.get(Event.CLICK) || [];
+        const observers = eventNameToHandlerFunc.get(ConnectorEvent.CLICK) || [];
         observers.forEach(function(handler) {
             handler({"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
         });
