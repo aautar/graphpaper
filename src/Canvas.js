@@ -1,13 +1,14 @@
 import {MatrixMath} from './MatrixMath';
-import  {CanvasObject} from './CanvasObject';
-import  {Rectangle} from './Rectangle';
-import  {Point} from './Point';
-import  {Line} from './Line';
-import  {PointSet} from './PointSet';
-import  {LineSet} from './LineSet';
-import  {Connector} from './Connector';
-import  {PointVisibilityMap} from './PointVisibilityMap';
-import  {GRID_STYLE, Grid} from './Grid';
+import {CanvasEvent} from './CanvasEvent';
+import {CanvasObject} from './CanvasObject';
+import {Rectangle} from './Rectangle';
+import {Point} from './Point';
+import {Line} from './Line';
+import {PointSet} from './PointSet';
+import {LineSet} from './LineSet';
+import {Connector} from './Connector';
+import {PointVisibilityMap} from './PointVisibilityMap';
+import {GRID_STYLE, Grid} from './Grid';
 
 /**
  * @callback HandleCanvasInteractionCallback
@@ -23,16 +24,6 @@ import  {GRID_STYLE, Grid} from './Grid';
 function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     const self = this;
-
-    const Event = {
-        DBLCLICK: "dblclick",
-        CLICK: "click",
-        CONNECTOR_UPDATED: "connector-updated",
-        OBJECT_ADDED: "object-added",
-        OBJECT_REMOVED: "object-removed",
-        OBJECT_RESIZED: "object-resized",
-        OBJECT_TRANSLATED: "object-translated"
-    };
 
     // Create container for SVG connectors
     const svgElem = _window.document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -283,7 +274,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             if(descriptor) {
                 const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
                 _c.refresh(descriptor.svgPath, ps.toArray());
-                emitEvent(Event.CONNECTOR_UPDATED, { 'connector': _c });
+                emitEvent(CanvasEvent.CONNECTOR_UPDATED, { 'connector': _c });
             }
         });        
     };
@@ -623,20 +614,20 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     this.addObject = function(_obj) {
         _obj.on('obj-resize-start', handleResizeStart);
         _obj.on('obj-resize', function(e) {
-            emitEvent(Event.OBJECT_RESIZED, { 'object': e.obj });
+            emitEvent(CanvasEvent.OBJECT_RESIZED, { 'object': e.obj });
             refreshAllConnectors();    
         });
 
         _obj.on('obj-translate-start', handleMoveStart);
         _obj.on('obj-translate', function(e) {
-            emitEvent(Event.OBJECT_TRANSLATED, { 'object': e.obj });
+            emitEvent(CanvasEvent.OBJECT_TRANSLATED, { 'object': e.obj });
             refreshAllConnectors();    
         });
 
         canvasObjects.push(_obj);
         refreshAllConnectors();       
 
-        emitEvent(Event.OBJECT_ADDED, { "object":_obj });
+        emitEvent(CanvasEvent.OBJECT_ADDED, { "object":_obj });
     };
 
     /**
@@ -651,7 +642,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             if(canvasObjects[i].getId() === _objId) {
                 canvasObjects.splice(i, 1);
                 refreshAllConnectors();
-                emitEvent(Event.OBJECT_REMOVED, { "object":canvasObjects[i] });
+                emitEvent(CanvasEvent.OBJECT_REMOVED, { "object":canvasObjects[i] });
                 return true;
             }
         }
@@ -906,7 +897,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             'objectsAroundPoint': objectsAroundPoint
         };
 
-        emitEvent(Event.DBLCLICK, eventData);
+        emitEvent(CanvasEvent.DBLCLICK, eventData);
     };
 
     /**
@@ -943,7 +934,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 'canvasObjectClicked': canvasObjectClicked
             };
     
-            emitEvent(Event.CLICK, eventData);
+            emitEvent(CanvasEvent.CLICK, eventData);
         });
 
         // touchend on canvas, logic to see if there was a double-tap
