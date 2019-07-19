@@ -1752,13 +1752,26 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     this.applyTransform = function() {
-        const matElems = currentTransformationMatrix.join(",");
-        _canvasDomElement.style.transform = `matrix3d(${matElems})`;
-
+        _canvasDomElement.style.transform = self.getTranformMatrixCss();
         currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         for(let i=0; i<invTransformationMatrixStack.length; i++) {
             currentInvTransformationMatrix = MatrixMath.mat4Multiply(currentInvTransformationMatrix, invTransformationMatrixStack[i]);
         }
+    };
+
+    /**
+     * @returns {Array}
+     */
+    this.getTransformMatrix = function() {
+        return currentTransformationMatrix;
+    };
+
+    /**
+     * @returns {String}
+     */    
+    this.getTranformMatrixCss = function() {
+        const matElems = currentTransformationMatrix.join(",");
+        return `matrix3d(${matElems})`;
     };
 
     this.resetTransform = function() {
