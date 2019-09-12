@@ -25,6 +25,32 @@ describe("Line.isEqual", function() {
   });
 });
 
+describe("Line.createScaledLine", function() {
+  it("returns Line with same start and end points for scaleFactor = 1.0, 1.0", function() {
+    const line = new Line(new Point(100,100), new Point(200,200));
+    const scaledLine = line.getCopyScaledRelativeToStart(1.0);
+
+    expect(scaledLine.getLength()).toBe(line.getLength());
+    expect(scaledLine.getStartPoint().getX()).toBe(100);
+    expect(scaledLine.getStartPoint().getY()).toBe(100);
+    expect(scaledLine.getEndPoint().getX()).toBe(200);
+    expect(scaledLine.getEndPoint().getY()).toBe(200);
+  });
+
+  it("returns Line with same start point, just shorted end point for scaleFactor = 1.0, 0.5", function() {
+    const line = new Line(new Point(100,100), new Point(200,200));
+    const scaledLine = line.getCopyScaledRelativeToStart(0.5);
+
+    expect(scaledLine.getLength()).toBe(line.getLength() * 0.5);
+    expect(scaledLine.getStartPoint().getX()).toBe(100);
+    expect(scaledLine.getStartPoint().getY()).toBe(100);
+    expect(scaledLine.getEndPoint().getX()).toBe(150);
+    expect(scaledLine.getEndPoint().getY()).toBe(150);
+  });
+
+
+});
+
 describe("Line.computeIntersection", function() {
  
   it("returns LINE_INTERSECTION_TYPE.LINESEG intersection type for intersection on line", function() {

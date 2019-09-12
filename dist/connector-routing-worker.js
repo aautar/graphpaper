@@ -157,6 +157,27 @@ Line.prototype.getDirection = function() {
 };
 
 /**
+ * Create a Line scaled by the specified scale factors
+ * 
+ * @returns {Line}
+ */
+Line.prototype.getCopyScaledRelativeToStart = function(scaleFactorEnd) {
+    const dx = this.__endPoint.getX() - this.__startPoint.getX();
+    const dy = this.__endPoint.getY() - this.__startPoint.getY();    
+
+    return new Line(
+        new Point(
+            this.__startPoint.getX(), 
+             this.__startPoint.getY()
+        ),
+        new Point(
+            this.__startPoint.getX() + (scaleFactorEnd * dx), 
+            this.__startPoint.getY() + (scaleFactorEnd * dy)
+        )
+    );
+};
+
+/**
  * @param {Line} _otherLine
  * @returns {LINE_INTERSECTION_TYPE}
  */
