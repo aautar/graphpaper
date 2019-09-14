@@ -96,7 +96,6 @@ function Dimensions(_width, _height) {
  * @param {Number} _y
  */
 function Point(_x, _y) {
-
     this.__x = _x;
     this.__y = _y;
 }
@@ -142,6 +141,21 @@ Point.prototype.getCartesianPoint = function(_canvasWidth, _canvasHeight) {
  */
 Point.prototype.toString = function() {
     return this.__x + " " + this.__y;
+};
+
+/**
+ * @returns {Number[]}
+ */
+Point.prototype.toArray = function() {
+    return [this.__x, this.__y];
+};
+
+/**
+ * @param {Number[]} _arr
+ * @returns {Point}
+ */
+Point.fromArray = function(_arr) {
+    return new Point(_arr[0], _arr[1]);
 };
 
 const LINE_INTERSECTION_TYPE = Object.freeze({
@@ -840,6 +854,8 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     const self = this;
 
     const eventNameToHandlerFunc = new Map();
+    let markerStartSize = 0;
+    let markerEndSize = 0;
 
     if(typeof _strokeColor === 'undefined') {
         _strokeColor = '#000';
@@ -880,16 +896,20 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
     /**
      * @param {String} _url
+     * @param {Number} _size
      */    
-    this.setMarkerStartUrl = function(_url) {
+    this.setMarkerStart = function(_url, _size) {
         pathElem.setAttribute(`marker-start`, `url(${_url})`);
+        markerStartSize = _size;
     };
 
     /**
      * @param {String} _url
+     * @param {Number} _size
      */
-    this.setMarkerEndUrl = function(_url) {
+    this.setMarkerEnd = function(_url, _size) {
         pathElem.setAttribute(`marker-end`, `url(${_url})`);
+        markerEndSize = _size;
     };
 
     /**
@@ -1045,8 +1065,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     this.getDescriptor = function() {
         return {
             "id": self.getId(),
-            "anchor_start_centroid": _anchorStart.getCentroid().toString(),
-            "anchor_end_centroid": _anchorEnd.getCentroid().toString(),
+            "anchor_start_centroid_arr": _anchorStart.getCentroid().toArray(),
+            "anchor_end_centroid_arr": _anchorEnd.getCentroid().toArray(),
+            "marker_start_size": markerStartSize,
+            "marker_end_size": markerEndSize
         };
     };
 

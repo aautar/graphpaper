@@ -7,7 +7,6 @@
  * @param {Number} _y
  */
 function Point(_x, _y) {
-
     this.__x = _x;
     this.__y = _y;
 }
@@ -53,6 +52,21 @@ Point.prototype.getCartesianPoint = function(_canvasWidth, _canvasHeight) {
  */
 Point.prototype.toString = function() {
     return this.__x + " " + this.__y;
+};
+
+/**
+ * @returns {Number[]}
+ */
+Point.prototype.toArray = function() {
+    return [this.__x, this.__y];
+};
+
+/**
+ * @param {Number[]} _arr
+ * @returns {Point}
+ */
+Point.fromArray = function(_arr) {
+    return new Point(_arr[0], _arr[1]);
 };
 
 const LINE_INTERSECTION_TYPE = Object.freeze({
@@ -743,12 +757,11 @@ const SvgPathBuilder = {
  * @returns {Object}
  */
 const computeConnectorPath = function(_connectorDescriptor, _routingPointsAroundAnchorSet, _pointVisibilityMap) {
+    const anchorStartCentroid = Point.fromArray(_connectorDescriptor.anchor_start_centroid_arr);
+    const anchorEndCentroid = Point.fromArray(_connectorDescriptor.anchor_end_centroid_arr);
+    const markerStartSize = _connectorDescriptor.marker_start_size;
+    const markerEndSize = _connectorDescriptor.marker_end_size;
 
-    const anchorStartStringParts = _connectorDescriptor.anchor_start_centroid.split(' ');
-    const anchorEndStringParts = _connectorDescriptor.anchor_end_centroid.split(' ');
-
-    let anchorStartCentroid = new Point(parseFloat(anchorStartStringParts[0]), parseFloat(anchorStartStringParts[1]));
-    let anchorEndCentroid = new Point(parseFloat(anchorEndStringParts[0]), parseFloat(anchorEndStringParts[1]));
     const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
 
     // Find adjustedStart, adjustedEnd .. anchor points closest to the desired start point and end point
@@ -763,16 +776,23 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
 
     const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
     const routingPointsArray = routingPoints.toArray();
+    let pathStartPoint = anchorStartCentroid;
+    let pathEndPoint = anchorEndCentroid;
 
-    if(routingPointsArray.length >= 1) {
-        let firstLeg = new Line(routingPointsArray[0], anchorStartCentroid);
-        firstLeg = firstLeg.createShortenedLine(0, 18);
-        routingPointsArray[0] = firstLeg.getStartPoint();
-        anchorStartCentroid = firstLeg.getEndPoint();
+    // Adjust path start point to account for marker
+    if(markerStartSize > 0.0 && routingPointsArray.length >= 1) {
+        let firstLeg = (new Line(routingPointsArray[0], anchorStartCentroid)).createShortenedLine(0, markerStartSize);
+        pathStartPoint = firstLeg.getEndPoint();
+    }
+
+    // Adjust path end point to account for marker
+    if(markerEndSize > 0.0 && routingPointsArray.length >= 1) {
+        let lastLeg = (new Line(routingPointsArray[routingPointsArray.length-1], anchorEndCentroid)).createShortenedLine(0, markerEndSize);
+        pathEndPoint = lastLeg.getEndPoint();
     }
 
     // Put together all points for path
-    const allPointsForPath = [anchorStartCentroid, ...routingPointsArray, anchorEndCentroid];
+    const allPointsForPath = [pathStartPoint, ...routingPointsArray, pathEndPoint];
 
     return {
         "svgPath": SvgPathBuilder.pointsToPath(allPointsForPath),
