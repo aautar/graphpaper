@@ -4,7 +4,6 @@
  * @param {Number} _y
  */
 function Point(_x, _y) {
-
     this.__x = _x;
     this.__y = _y;
 };
@@ -50,6 +49,21 @@ Point.prototype.getCartesianPoint = function(_canvasWidth, _canvasHeight) {
  */
 Point.prototype.toString = function() {
     return this.__x + " " + this.__y;
+};
+
+/**
+ * @returns {Number[]}
+ */
+Point.prototype.toArray = function() {
+    return [this.__x, this.__y];
+};
+
+/**
+ * @param {Number[]} _arr
+ * @returns {Point}
+ */
+Point.fromArray = function(_arr) {
+    return new Point(_arr[0], _arr[1]);
 };
 
 export { Point };

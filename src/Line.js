@@ -74,6 +74,28 @@ Line.prototype.getDirection = function() {
 };
 
 /**
+ * Create a Line shorted at the start and end by the specified amounts
+ * 
+ * @returns {Line}
+ */
+Line.prototype.createShortenedLine = function(startReduceByPx, endReduceByPx) {
+    const dx = this.__endPoint.getX() - this.__startPoint.getX();
+    const dy = this.__endPoint.getY() - this.__startPoint.getY();    
+    const dir = this.getDirection();
+
+    return new Line(
+        new Point(
+            this.__startPoint.getX() + (startReduceByPx * dir.getX()), 
+            this.__startPoint.getY() + (startReduceByPx * dir.getY())
+        ),
+        new Point(
+            (this.__startPoint.getX() + dx) - (endReduceByPx * dir.getX()), 
+            (this.__startPoint.getY() + dy) - (endReduceByPx * dir.getY())
+        )
+    );
+};
+
+/**
  * @param {Line} _otherLine
  * @returns {LINE_INTERSECTION_TYPE}
  */

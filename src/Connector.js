@@ -16,6 +16,8 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     const self = this;
 
     const eventNameToHandlerFunc = new Map();
+    let markerStartSize = 0;
+    let markerEndSize = 0;
 
     if(typeof _strokeColor === 'undefined') {
         _strokeColor = '#000';
@@ -56,16 +58,20 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
     /**
      * @param {String} _url
+     * @param {Number} _size
      */    
-    this.setMarkerStartUrl = function(_url) {
+    this.setMarkerStart = function(_url, _size) {
         pathElem.setAttribute(`marker-start`, `url(${_url})`);
+        markerStartSize = _size;
     };
 
     /**
      * @param {String} _url
+     * @param {Number} _size
      */
-    this.setMarkerEndUrl = function(_url) {
+    this.setMarkerEnd = function(_url, _size) {
         pathElem.setAttribute(`marker-end`, `url(${_url})`);
+        markerEndSize = _size;
     };
 
     /**
@@ -221,8 +227,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     this.getDescriptor = function() {
         return {
             "id": self.getId(),
-            "anchor_start_centroid": _anchorStart.getCentroid().toString(),
-            "anchor_end_centroid": _anchorEnd.getCentroid().toString(),
+            "anchor_start_centroid_arr": _anchorStart.getCentroid().toArray(),
+            "anchor_end_centroid_arr": _anchorEnd.getCentroid().toArray(),
+            "marker_start_size": markerStartSize,
+            "marker_end_size": markerEndSize
         };
     };
 
