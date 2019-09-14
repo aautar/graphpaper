@@ -25,10 +25,10 @@ describe("Line.isEqual", function() {
   });
 });
 
-describe("Line.createScaledLine", function() {
-  it("returns Line with same start and end points for scaleFactor = 1.0, 1.0", function() {
+describe("Line.createShortenedLine", function() {
+  it("returns Line with same start and end points when line is shorted by 0px, 0px", function() {
     const line = new Line(new Point(100,100), new Point(200,200));
-    const scaledLine = line.getCopyScaledRelativeToStart(1.0);
+    const scaledLine = line.createShortenedLine(0, 0);
 
     expect(scaledLine.getLength()).toBe(line.getLength());
     expect(scaledLine.getStartPoint().getX()).toBe(100);
@@ -37,17 +37,27 @@ describe("Line.createScaledLine", function() {
     expect(scaledLine.getEndPoint().getY()).toBe(200);
   });
 
-  it("returns Line with same start point, just shorted end point for scaleFactor = 1.0, 0.5", function() {
+  it("returns shortened Line when line is shortened by 10px, 10px", function() {
     const line = new Line(new Point(100,100), new Point(200,200));
-    const scaledLine = line.getCopyScaledRelativeToStart(0.5);
+    const scaledLine = line.createShortenedLine(10, 10);
 
-    expect(scaledLine.getLength()).toBe(line.getLength() * 0.5);
-    expect(scaledLine.getStartPoint().getX()).toBe(100);
-    expect(scaledLine.getStartPoint().getY()).toBe(100);
-    expect(scaledLine.getEndPoint().getX()).toBe(150);
-    expect(scaledLine.getEndPoint().getY()).toBe(150);
+    expect(scaledLine.getLength()).toBe(121.42135623730951);
+    expect(scaledLine.getStartPoint().getX()).toBe(107.07106781186548);
+    expect(scaledLine.getStartPoint().getY()).toBe(107.07106781186548);
+    expect(scaledLine.getEndPoint().getX()).toBe(192.92893218813452);
+    expect(scaledLine.getEndPoint().getY()).toBe(192.92893218813452);
   });
 
+  it("returns shortened Line when line is shortened by 0px, 10px", function() {
+    const line = new Line(new Point(0,0), new Point(0,100));
+    const scaledLine = line.createShortenedLine(0, 10);
+
+    expect(scaledLine.getLength()).toBe(90);
+    expect(scaledLine.getStartPoint().getX()).toBe(0);
+    expect(scaledLine.getStartPoint().getY()).toBe(0);
+    expect(scaledLine.getEndPoint().getX()).toBe(0);
+    expect(scaledLine.getEndPoint().getY()).toBe(90);
+  });
 
 });
 

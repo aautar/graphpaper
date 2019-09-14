@@ -157,22 +157,23 @@ Line.prototype.getDirection = function() {
 };
 
 /**
- * Create a Line scaled by the specified scale factors
+ * Create a Line shorted at the start and end by the specified amounts
  * 
  * @returns {Line}
  */
-Line.prototype.getCopyScaledRelativeToStart = function(scaleFactorEnd) {
+Line.prototype.createShortenedLine = function(startReduceByPx, endReduceByPx) {
     const dx = this.__endPoint.getX() - this.__startPoint.getX();
     const dy = this.__endPoint.getY() - this.__startPoint.getY();    
+    const dir = this.getDirection();
 
     return new Line(
         new Point(
-            this.__startPoint.getX(), 
-             this.__startPoint.getY()
+            this.__startPoint.getX() + (startReduceByPx * dir.getX()), 
+            this.__startPoint.getY() + (startReduceByPx * dir.getY())
         ),
         new Point(
-            this.__startPoint.getX() + (scaleFactorEnd * dx), 
-            this.__startPoint.getY() + (scaleFactorEnd * dy)
+            (this.__startPoint.getX() + dx) - (endReduceByPx * dir.getX()), 
+            (this.__startPoint.getY() + dy) - (endReduceByPx * dir.getY())
         )
     );
 };
@@ -746,8 +747,8 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
     const anchorStartStringParts = _connectorDescriptor.anchor_start_centroid.split(' ');
     const anchorEndStringParts = _connectorDescriptor.anchor_end_centroid.split(' ');
 
-    const anchorStartCentroid = new Point(parseFloat(anchorStartStringParts[0]), parseFloat(anchorStartStringParts[1]));
-    const anchorEndCentroid = new Point(parseFloat(anchorEndStringParts[0]), parseFloat(anchorEndStringParts[1]));
+    let anchorStartCentroid = new Point(parseFloat(anchorStartStringParts[0]), parseFloat(anchorStartStringParts[1]));
+    let anchorEndCentroid = new Point(parseFloat(anchorEndStringParts[0]), parseFloat(anchorEndStringParts[1]));
     const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
 
     // Find adjustedStart, adjustedEnd .. anchor points closest to the desired start point and end point
@@ -762,6 +763,13 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
 
     const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
     const routingPointsArray = routingPoints.toArray();
+
+    if(routingPointsArray.length >= 1) {
+        let firstLeg = new Line(routingPointsArray[0], anchorStartCentroid);
+        firstLeg = firstLeg.createShortenedLine(0, 18);
+        routingPointsArray[0] = firstLeg.getStartPoint();
+        anchorStartCentroid = firstLeg.getEndPoint();
+    }
 
     // Put together all points for path
     const allPointsForPath = [anchorStartCentroid, ...routingPointsArray, anchorEndCentroid];
