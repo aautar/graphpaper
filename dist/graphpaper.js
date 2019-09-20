@@ -1584,7 +1584,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         return new LineSet(boundaryLines);
     };    
 
-    const refreshAllConnectors = function() {
+    this.refreshAllConnectors = function() {
         const connectorDescriptors = [];
         objectConnectors.forEach(function(_c) {
             connectorDescriptors.push(_c.getDescriptor());
@@ -1987,17 +1987,17 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         _obj.on('obj-resize-start', handleResizeStart);
         _obj.on('obj-resize', function(e) {
             emitEvent(CanvasEvent.OBJECT_RESIZED, { 'object': e.obj });
-            refreshAllConnectors();    
+            self.refreshAllConnectors();    
         });
 
         _obj.on('obj-translate-start', handleMoveStart);
         _obj.on('obj-translate', function(e) {
             emitEvent(CanvasEvent.OBJECT_TRANSLATED, { 'object': e.obj });
-            refreshAllConnectors();    
+            self.refreshAllConnectors();    
         });
 
         canvasObjects.push(_obj);
-        refreshAllConnectors();       
+        self.refreshAllConnectors();       
 
         emitEvent(CanvasEvent.OBJECT_ADDED, { "object":_obj });
     };
@@ -2013,7 +2013,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         for(let i=0; i<canvasObjects.length; i++) {
             if(canvasObjects[i].getId() === _objId) {
                 canvasObjects.splice(i, 1);
-                refreshAllConnectors();
+                self.refreshAllConnectors();
                 emitEvent(CanvasEvent.OBJECT_REMOVED, { "object":canvasObjects[i] });
                 return true;
             }
@@ -2176,7 +2176,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         if(foundConnector === null) {
             objectConnectors.push(newConnector);
             newConnector.appendPathToContainerDomElement();
-            refreshAllConnectors();
+            self.refreshAllConnectors();
             return newConnector;
         }
 
