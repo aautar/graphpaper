@@ -65,6 +65,11 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         markerStartSize = _size;
     };
 
+    this.unsetMarkerStart = function() {
+        pathElem.removeAttribute(`marker-start`);
+        markerStartSize = 0;
+    };
+
     /**
      * @param {String} _url
      * @param {Number} _size
@@ -73,6 +78,11 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         pathElem.setAttribute(`marker-end`, `url(${_url})`);
         markerEndSize = _size;
     };
+
+    this.unsetMarkerEnd = function() {
+        pathElem.removeAttribute(`marker-end`);
+        markerEndSize = 0;
+    };    
 
     /**
      * @returns {Point[]|null}
