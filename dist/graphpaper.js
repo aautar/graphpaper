@@ -2635,10 +2635,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     const eventNameToHandlerFunc = new Map();
 
-    let x = _x;
-    let y = _y;
-    let width = _width;
-    let height = _height;
+    let x = null;
+    let y = null;
+    let width = null;
+    let height = null;
 
     /**
      * @param {Element} _connectorAnchorDomElement
@@ -2969,6 +2969,8 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
     bindTranslateHandleElements();
     bindResizeHandleElements();
+    self.translate(_x, _y);
+    self.resize(_width, _height);
 }
 
 /**

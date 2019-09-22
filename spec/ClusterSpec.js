@@ -1,26 +1,25 @@
+const jsdom = require("jsdom");
 import {Cluster} from '../src/Cluster'
 import {CanvasObject} from '../src/CanvasObject.js';
+
+const { JSDOM, Event } = jsdom;
+const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
+const window = dom.window;
 
 describe("Cluster", function() {
  
     function makeCanvasObject(_id, _x, _y, _width, _height) {
-        var mockDomElem = {
-            addEventListener: function() { }
-        };
-
-        var o = new CanvasObject(
+        return new CanvasObject(
             _id,
             _x, 
             _y, 
             _width, 
             _height, 
             {}, 
-            mockDomElem, 
-            [mockDomElem], 
-            [mockDomElem]
+            window.document.createElement('div'), 
+            [window.document.createElement('div')], 
+            [window.document.createElement('div')]
         );
-
-        return o;
     };    
 
     it("returns ID when getId is called", function() {

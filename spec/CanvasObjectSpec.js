@@ -7,8 +7,47 @@ const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 
+describe("CanvasObject constructor", function() {
+  it("translates object into initial position", function() { 
+
+    const objDomElem = window.document.createElement('div');
+    const o = new CanvasObject(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        {}, 
+        objDomElem, 
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
+    );
+
+    expect(objDomElem.style.left).toBe('100px');
+    expect(objDomElem.style.top).toBe('200px');
+  }); 
+
+  it("resizer object to initial size", function() { 
+
+    const objDomElem = window.document.createElement('div');
+    const o = new CanvasObject(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        {}, 
+        objDomElem, 
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
+    );
+
+    expect(objDomElem.style.width).toBe('10px');
+    expect(objDomElem.style.height).toBe('20px');
+  });   
+});
+
 describe("CanvasObject", function() {
- 
   it("getBoundingRectange returns correct bounding rectangle", function() {
     const o = new CanvasObject(
         "obj-123",
