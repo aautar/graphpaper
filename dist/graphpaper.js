@@ -1455,6 +1455,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const connectorAnchorToNumValidRoutingPoints = new Map();
 
+    var connectorRefreshTimeout = null;
+
     /**
      * @returns {PointVisibilityMap}
      */
@@ -1594,7 +1596,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         return new LineSet(boundaryLines);
     };    
 
-    this.refreshAllConnectors = function() {
+    const refreshAllConnectorsInternal = function() {
         const connectorDescriptors = [];
         objectConnectors.forEach(function(_c) {
             connectorDescriptors.push(_c.getDescriptor());
@@ -1624,6 +1626,22 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 routingPointsAroundAnchorFloat64Array.buffer
             ]
         );
+    };
+
+    this.refreshAllConnectors = function() {
+
+        // We'll try to coalesce refresh calls within 6.944ms
+        // For continuous calls, this corresponds to 144Hz, but actual
+        // performance is less given web worker overhead & path computation cost
+        
+        if(connectorRefreshTimeout !== null) {
+            clearTimeout(connectorRefreshTimeout);
+        }
+
+        connectorRefreshTimeout = setTimeout(function() {
+            connectorRefreshTimeout = null;
+            refreshAllConnectorsInternal();
+        }, 6.94);
     };
 
     _connectorRoutingWorker.onmessage = function(_msg) {
@@ -2422,15 +2440,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         const translateOffset = obj.getTranslateHandleOffset();
         const mx = self.snapToGrid(_x + translateOffset.getX());
         const my = self.snapToGrid(_y + translateOffset.getY());
-
-        const mxStart = objectDragStartX;
-        const myStart = objectDragStartY;
-
-        if(mxStart == mx && myStart == my) {
-            // we didn't drag it anywhere
-        } else {
-            obj.translate(mx, my);       
-        }
+        obj.translate(mx, my);       
     };         
 
     /**
@@ -2737,6 +2747,11 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Number} _y
      */
     this.translate = function(_x, _y) {
+
+        if(_x === x && _y === y) {
+            return;
+        }
+
         x = _x;
         y = _y;
 

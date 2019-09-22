@@ -162,6 +162,11 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {Number} _y
      */
     this.translate = function(_x, _y) {
+
+        if(_x === x && _y === y) {
+            return;
+        }
+
         x = _x;
         y = _y;
 
