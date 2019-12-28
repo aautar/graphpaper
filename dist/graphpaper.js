@@ -35,61 +35,6 @@ const MatrixMath = {
     }
 };
 
-const SvgPathBuilder = {
-
-    /**
-     * 
-     * @param {Point} _pt 
-     * @returns {String}
-     */
-    pointToLineTo: function(_pt) {
-        return "L" + _pt.getX() + " " + _pt.getY();
-    },
-
-    /**
-     * 
-     * @param {Point[]} _points 
-     * @returns {String}
-     */
-    pointsToPath: function(_points) {
-        const startPt = _points[0];
-
-        const lineToString = [];
-        for(let i=1; i<_points.length; i++) {
-            const p = _points[i];
-            lineToString.push(SvgPathBuilder.pointToLineTo(p));
-        }
-        
-        const startCoordString = startPt.getX() + " " + startPt.getY();
-        const pathString = 'M' + startCoordString + lineToString.join(" ");
-
-        return pathString;
-    },
-
-};
-
-/**
- * 
- * @param {Number} _width
- * @param {Number} _height
- */
-function Dimensions(_width, _height) {
-
-    /**
-     * @returns {Number}
-     */       
-    this.getWidth = function() {
-        return _width;
-    };
-
-    /**
-     * @returns {Number}
-     */       
-    this.getHeight = function() {
-        return _height;
-    };
-}
-
 /**
  * 
  * @param {Number} _x
@@ -354,6 +299,124 @@ Line.prototype.computeIntersection = function(_otherLine) {
         return new LineIntersection(LINE_INTERSECTION_TYPE.LINESEG, new Point(xIntersect, yIntersect));
     }
 };
+
+const SvgPathBuilder = {
+
+    /**
+     * 
+     * @param {Point} _pt 
+     * @returns {String}
+     */
+    pointToLineTo: function(_pt, _ptIndex) {
+        if(_ptIndex === 0) {
+            return "M" + _pt.getX() + " " + _pt.getY();
+        }
+
+        return "L" + _pt.getX() + " " + _pt.getY();
+    },
+
+    /**
+     * 
+     * @param {Point[]} _points 
+     * @param {Number} _curvaturePx 
+     * @returns {Point[]}
+     */
+    pointTripletToTesselatedCurvePoints(_points, _curvaturePx) {
+        if(_points.length !== 3) {
+            throw new Error("_points must be array of exactly 3 points");
+        }
+
+        const controlPoint = _points[1];
+
+        const lineA = new Line(_points[0], _points[1]);
+        const lineB = new Line(_points[1], _points[2]);
+
+        const lineAShortened = lineA.createShortenedLine(0, _curvaturePx * 0.5);
+        const lineBShortened = lineB.createShortenedLine(_curvaturePx * 0.5, 0);
+
+        return [
+            lineAShortened.getStartPoint(),
+            lineAShortened.getEndPoint(),
+            lineBShortened.getStartPoint(),
+            lineBShortened.getEndPoint(),
+        ];
+    },
+
+    /**
+     * 
+     * @param {Point[]} _points
+     * @param {Number} _curvaturePx
+     * @returns {String}
+     */
+    pointsToPath: function(_points, _curvaturePx) {
+        _curvaturePx = _curvaturePx || 0.0;
+
+        const svgPathParts = [];
+
+        if(_curvaturePx > 0.0) {
+
+            let ptIdx = 0;
+
+            while(_points.length >= 3) {
+                const ptA = _points.shift();
+                const ptB = _points.shift();
+                const ptC = _points.shift();
+
+                const newPts = SvgPathBuilder.pointTripletToTesselatedCurvePoints(
+                    [
+                        ptA,
+                        ptB,
+                        ptC,
+                    ],
+                    _curvaturePx
+                );                
+
+                _points.unshift(newPts[3]);
+                _points.unshift(newPts[2]);
+
+                for(let j=0; j<newPts.length-2; j++) {
+                    svgPathParts.push(SvgPathBuilder.pointToLineTo(newPts[j], ptIdx++));
+                }
+            }
+
+            while(_points.length > 0) {
+                const pt = _points.shift();
+                svgPathParts.push(SvgPathBuilder.pointToLineTo(pt, ptIdx++));
+            }
+
+        } else {
+            for(let i=0; i<_points.length; i++) {
+                const p = _points[i];
+                svgPathParts.push(SvgPathBuilder.pointToLineTo(p, i));
+            }
+        }
+
+        return svgPathParts.join(" ");        
+    },
+
+};
+
+/**
+ * 
+ * @param {Number} _width
+ * @param {Number} _height
+ */
+function Dimensions(_width, _height) {
+
+    /**
+     * @returns {Number}
+     */       
+    this.getWidth = function() {
+        return _width;
+    };
+
+    /**
+     * @returns {Number}
+     */       
+    this.getHeight = function() {
+        return _height;
+    };
+}
 
 /**
  * 
@@ -848,8 +911,9 @@ const ConnectorEvent = Object.freeze({
  * @param {Element} _containerDomElement
  * @param {String} _strokeColor
  * @param {String} _strokeWidth
+ * @param {Number} _curvaturePx
  */
-function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth) {
+function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx) {
     
     const self = this;
 
@@ -863,6 +927,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
     if(typeof _strokeWidth === 'undefined') {
         _strokeWidth = '2px';
+    }
+
+    if(typeof _curvaturePx === 'undefined') {
+        _curvaturePx = 0;
     }
 
     /**
@@ -1078,7 +1146,8 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
             "anchor_start_centroid_arr": _anchorStart.getCentroid().toArray(),
             "anchor_end_centroid_arr": _anchorEnd.getCentroid().toArray(),
             "marker_start_size": markerStartSize,
-            "marker_end_size": markerEndSize
+            "marker_end_size": markerEndSize,
+            "curvature_px": _curvaturePx
         };
     };
 

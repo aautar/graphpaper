@@ -14,7 +14,7 @@ describe("SvgPathBuilder.pointsToPath", function() {
 
         const svgPathStr = SvgPathBuilder.pointsToPath(points);
 
-        expect(svgPathStr).toBe("M0 0L10 10 L20 20 L20 100 L200 500");
+        expect(svgPathStr).toBe("M0 0 L10 10 L20 20 L20 100 L200 500");
     });
 
 });
