@@ -824,6 +824,7 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
     const anchorEndCentroid = Point.fromArray(_connectorDescriptor.anchor_end_centroid_arr);
     const markerStartSize = _connectorDescriptor.marker_start_size;
     const markerEndSize = _connectorDescriptor.marker_end_size;
+    const curvaturePx = _connectorDescriptor.curvature_px;
 
     const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
 
@@ -858,7 +859,7 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
     const allPointsForPath = [pathStartPoint, ...routingPointsArray, pathEndPoint];
 
     return {
-        "svgPath": SvgPathBuilder.pointsToPath(allPointsForPath),
+        "svgPath": SvgPathBuilder.pointsToPath(allPointsForPath, curvaturePx),
         "pointsInPath": allPointsForPath,
     }
 };

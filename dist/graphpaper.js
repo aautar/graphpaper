@@ -911,8 +911,9 @@ const ConnectorEvent = Object.freeze({
  * @param {Element} _containerDomElement
  * @param {String} _strokeColor
  * @param {String} _strokeWidth
+ * @param {Number} _curvaturePx
  */
-function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth) {
+function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx) {
     
     const self = this;
 
@@ -926,6 +927,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
     if(typeof _strokeWidth === 'undefined') {
         _strokeWidth = '2px';
+    }
+
+    if(typeof _curvaturePx === 'undefined') {
+        _curvaturePx = 0;
     }
 
     /**
@@ -1141,7 +1146,8 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
             "anchor_start_centroid_arr": _anchorStart.getCentroid().toArray(),
             "anchor_end_centroid_arr": _anchorEnd.getCentroid().toArray(),
             "marker_start_size": markerStartSize,
-            "marker_end_size": markerEndSize
+            "marker_end_size": markerEndSize,
+            "curvature_px": _curvaturePx
         };
     };
 
