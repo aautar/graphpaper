@@ -532,3 +532,17 @@ describe("Canvas connectors", function() {
     });         
 
 });
+
+describe("Canvas.initGroupObjectSelectionHandler", function() {
+    const canvasDomElement = window.document.createElement('div');
+    const pvWorkerMock = {
+        postMessage: function() { }
+    };
+
+    it("creates selection box DOM element", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initGroupObjectSelectionHandler();
+        
+        expect(canvasDomElement.getElementsByClassName("ia-selection-box").length).toBe(1);
+    });
+});

@@ -1115,6 +1115,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     this.initGroupObjectSelectionHandler = function() {
         // Create selection box DOM element
         const selBox = _window.document.createElement("div");
+        selBox.classList.add("ia-selection-box");
         selBox.style.display = "none";
         selBox.style.position = "absolute";
         selBox.style.left = "0px";
@@ -1122,6 +1123,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selBox.style.border = "1px solid #666";
         selBox.style.backgroundColor = "#999";
         selBox.style.opacity = "0.5";
+
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 
         _canvasDomElement.addEventListener('mousedown', function(e) {
