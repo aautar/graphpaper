@@ -1469,6 +1469,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     svgElem.style.width = "100%";
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
+
+    // Create selection box element
+    var selectionBoxElem = null;
    
     /**
      * @type {Grid}
@@ -1511,6 +1514,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         lastTouchY: null,
         lastTouchTime: null
     };
+
+    var groupSelectionStartX = 0.0;
+    var groupSelectionStartY = 0.0;
+    var groupSelectionStarted = false;
 
     const connectorAnchorsSelected = [];
 
@@ -2531,6 +2538,63 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         obj.resize(newWidth, newHeight);
     };
 
+    const handleGroupSelectionStart = function(_x, _y) {
+        groupSelectionStartX = _x;
+        groupSelectionStartY = _y;
+        groupSelectionStarted = true;
+
+        selectionBoxElem.style.left = `${groupSelectionStartX}px`;
+        selectionBoxElem.style.top = `${groupSelectionStartY}px`;
+        selectionBoxElem.style.width = `0px`;
+        selectionBoxElem.style.height = `0px`;
+        selectionBoxElem.style.display = "block";
+    };
+
+    this.initGroupObjectSelectionHandler = function() {
+        // Create selection box DOM element
+        const selBox = _window.document.createElement("div");
+        selBox.style.display = "none";
+        selBox.style.position = "absolute";
+        selBox.style.left = "0px";
+        selBox.style.top = "0px";
+        selBox.style.border = "1px solid #666";
+        selBox.style.backgroundColor = "#999";
+        selBox.style.opacity = "0.5";
+        selectionBoxElem = _canvasDomElement.appendChild(selBox);
+
+        _canvasDomElement.addEventListener('mousedown', function(e) {
+            if(e.target !== svgElem) { // hacky, but b/c of the SVG overlay, events propagate from the overlay
+                return;
+            }
+
+            if (objectIdBeingDragged !== null) {
+                return;
+            }
+    
+            if(objectIdBeingResized !== null) {
+                return;
+            }            
+
+            handleGroupSelectionStart(e.pageX, e.pageY);
+        });
+
+        _canvasDomElement.addEventListener('touchstart', function(e) {
+            if(e.target !== svgElem) { // hacky, but b/c of the SVG overlay, events propagate from the overlay
+                return;
+            }
+
+            if (objectIdBeingDragged !== null) {
+                return;
+            }
+    
+            if(objectIdBeingResized !== null) {
+                return;
+            }
+
+            handleGroupSelectionStart(e.touches[0].pageX, e.touches[0].pageY);
+        });
+    };
+
     this.initTransformationHandlers = function() {
         
         _canvasDomElement.addEventListener('touchmove', function (e) {
@@ -2582,6 +2646,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
                 handleResize(invTransformedPos[0], invTransformedPos[1]);
             }
+
+            if(groupSelectionStarted) {
+                const width = e.pageX - groupSelectionStartX;
+                const height = e.pageY - groupSelectionStartY;
+                selectionBoxElem.style.width = `${width}px`;
+                selectionBoxElem.style.height = `${height}px`;
+            }
         });
 
         _canvasDomElement.addEventListener('touchend', function (e) {
@@ -2608,7 +2679,12 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                     );                      
 
                     handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
-                }            
+                }
+
+                if(groupSelectionStarted) {
+                    groupSelectionStarted = false;
+                    selectionBoxElem.style.display = "none";
+                }
 
                 objectIdBeingDragged = null;
                 objectIdBeingResized = null;
