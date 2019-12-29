@@ -77,11 +77,11 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         lastTouchTime: null
     };
 
-    var groupSelectionStartX = 0.0;
-    var groupSelectionStartY = 0.0;
-    var groupSelectionEndX = 0.0;
-    var groupSelectionEndY = 0.0;
-    var groupSelectionStarted = false;
+    var multiObjectSelectionStartX = 0.0;
+    var multiObjectSelectionStartY = 0.0;
+    var multiObjectSelectionEndX = 0.0;
+    var multiObjectSelectionEndY = 0.0;
+    var multiObjectSelectionStarted = false;
 
     const connectorAnchorsSelected = [];
 
@@ -1128,31 +1128,48 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         obj.resize(newWidth, newHeight);
     };
 
-    const handleGroupSelectionStart = function(_x, _y) {
-        groupSelectionStartX = _x;
-        groupSelectionStartY = _y;
-        groupSelectionStarted = true;
+    const handleMultiObjectSelectionStart = function(_x, _y, _targetElem) {
+        if(_targetElem !== svgElem) { // hacky, but b/c of the SVG overlay, events propagate from the overlay
+            return;
+        }
 
-        selectionBoxElem.style.left = `${groupSelectionStartX}px`;
-        selectionBoxElem.style.top = `${groupSelectionStartY}px`;
+        if(objectIdBeingDragged !== null) {
+            return;
+        }
+
+        if(objectIdBeingResized !== null) {
+            return;
+        }        
+
+        multiObjectSelectionStartX = _x;
+        multiObjectSelectionStartY = _y;
+        multiObjectSelectionStarted = true;
+
+        selectionBoxElem.style.left = `${multiObjectSelectionStartX}px`;
+        selectionBoxElem.style.top = `${multiObjectSelectionStartY}px`;
         selectionBoxElem.style.width = `0px`;
         selectionBoxElem.style.height = `0px`;
         selectionBoxElem.style.display = "block";
     };
 
-    const handleGroupSelectionEnd = function() {
-        groupSelectionStarted = false;
-        selectionBoxElem.style.display = "none";
+    const handleMultiObjectSelectionEnd = function() {
+        multiObjectSelectionStarted = false;
 
         const selectionRect = new Rectangle(
-            groupSelectionStartX, 
-            groupSelectionStartY, 
-            groupSelectionEndX, 
-            groupSelectionEndY
+            multiObjectSelectionStartX, 
+            multiObjectSelectionStartY, 
+            multiObjectSelectionEndX, 
+            multiObjectSelectionEndY
         );
 
         const selectedObjects = self.getObjectsWithinRect(selectionRect);
         const boundingRect = self.calcBoundingRectForObjects(selectedObjects);
+
+        selectionBoxElem.style.left = `${boundingRect.getLeft()}px`;
+        selectionBoxElem.style.top = `${boundingRect.getTop()}px`;
+        selectionBoxElem.style.width = `${boundingRect.getWidth()}px`;
+        selectionBoxElem.style.height = `${boundingRect.getHeight()}px`;
+        selectionBoxElem.style.display = "none";
 
         emitEvent(
             CanvasEvent.MULTIPLE_OBJECTS_SELECTED, 
@@ -1163,7 +1180,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         );
     };
 
-    this.initGroupObjectSelectionHandler = function() {
+    this.initMultiObjectSelectionHandler = function() {
         // Create selection box DOM element
         const selBox = _window.document.createElement("div");
         selBox.classList.add("ia-selection-box");
@@ -1178,35 +1195,11 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 
         _canvasDomElement.addEventListener('mousedown', function(e) {
-            if(e.target !== svgElem) { // hacky, but b/c of the SVG overlay, events propagate from the overlay
-                return;
-            }
-
-            if (objectIdBeingDragged !== null) {
-                return;
-            }
-    
-            if(objectIdBeingResized !== null) {
-                return;
-            }            
-
-            handleGroupSelectionStart(e.pageX, e.pageY);
+            handleMultiObjectSelectionStart(e.pageX, e.pageY, e.target);
         });
 
         _canvasDomElement.addEventListener('touchstart', function(e) {
-            if(e.target !== svgElem) { // hacky, but b/c of the SVG overlay, events propagate from the overlay
-                return;
-            }
-
-            if (objectIdBeingDragged !== null) {
-                return;
-            }
-    
-            if(objectIdBeingResized !== null) {
-                return;
-            }
-
-            handleGroupSelectionStart(e.touches[0].pageX, e.touches[0].pageY);
+            handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
         });
     };
 
@@ -1262,11 +1255,11 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 handleResize(invTransformedPos[0], invTransformedPos[1]);
             }
 
-            if(groupSelectionStarted) {
-                groupSelectionEndX = e.pageX;
-                groupSelectionEndY = e.pageY;
-                const width = groupSelectionEndX - groupSelectionStartX;
-                const height = groupSelectionEndY - groupSelectionStartY;
+            if(multiObjectSelectionStarted) {
+                multiObjectSelectionEndX = e.pageX;
+                multiObjectSelectionEndY = e.pageY;
+                const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
+                const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
                 selectionBoxElem.style.width = `${width}px`;
                 selectionBoxElem.style.height = `${height}px`;
             }
@@ -1285,8 +1278,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 objectIdBeingResized = null;  
             }
 
-            if(groupSelectionStarted) {
-                handleGroupSelectionEnd();
+            if(multiObjectSelectionStarted) {
+                handleMultiObjectSelectionEnd();
             }            
         });
 
@@ -1305,8 +1298,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 if(objectIdBeingResized !== null) {
                 }
 
-                if(groupSelectionStarted) {
-                    handleGroupSelectionEnd();
+                if(multiObjectSelectionStarted) {
+                    handleMultiObjectSelectionEnd();
                 }
 
                 objectIdBeingDragged = null;
