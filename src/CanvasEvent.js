@@ -5,7 +5,8 @@ const CanvasEvent = Object.freeze({
     OBJECT_ADDED: "object-added",
     OBJECT_REMOVED: "object-removed",
     OBJECT_RESIZED: "object-resized",
-    OBJECT_TRANSLATED: "object-translated"
+    OBJECT_TRANSLATED: "object-translated",
+    MULTIPLE_OBJECTS_SELECTED: "multiple-objects-selected",
 });
 
 

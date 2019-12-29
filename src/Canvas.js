@@ -79,6 +79,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     var groupSelectionStartX = 0.0;
     var groupSelectionStartY = 0.0;
+    var groupSelectionEndX = 0.0;
+    var groupSelectionEndY = 0.0;
     var groupSelectionStarted = false;
 
     const connectorAnchorsSelected = [];
@@ -537,24 +539,24 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     this.getHeight = function() {
         return _canvasDomElement.offsetHeight;
-    };    
+    };
 
     /**
+     * @param {Object[]} _objs 
      * @returns {Rectangle}
      */
-    this.calcBoundingBox = function() {
-
+    this.calcBoundingRectForObjects = function(_objs) {
         var minTop = null;
         var minLeft = null;
         var maxBottom = null;
         var maxRight = null;
 
-        canvasObjects.forEach(function(element, index, array) {
-
-            const left = element.getX();
-            const top = element.getY();  
-            const right = left + element.getWidth();
-            const bottom = top + element.getHeight();
+        _objs.forEach(function(_obj, index, array) {
+            const objRect = _obj.getBoundingRectange();
+            const left = objRect.getLeft();
+            const top = objRect.getTop();  
+            const right = objRect.getRight();
+            const bottom = objRect.getBottom();
 
             if(minLeft === null || left < minLeft) {
                 minLeft = left;
@@ -571,17 +573,27 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             if(maxRight === null || right > maxRight) {
                 maxRight = right;
             }
-
-        }); 
+        });
 
         if(minTop === null || minLeft === null || maxBottom === null || maxRight === null) {
             minTop = 0;
             minLeft = 0;
-            maxBottom = self.getHeight();
-            maxRight = self.getWidth();            
+            maxBottom = 0;
+            maxRight = 0;            
         }
 
         return new Rectangle(minLeft, minTop, maxRight, maxBottom);
+    };
+
+    /**
+     * @returns {Rectangle}
+     */
+    this.calcBoundingBox = function() {
+        if(canvasObjects.length === 0) {    
+            return new Rectangle(0, 0, self.getWidth(), self.getHeight());     
+        }
+
+        return self.calcBoundingRectForObjects(canvasObjects);
     };
 
     /**
@@ -611,6 +623,22 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         return result;
     };
+
+    /**
+     * @param {Rectangle} _rect
+     * @returns {CanvasObject[]}
+     */
+    this.getObjectsWithinRect = function(_rect) {
+        const result = [];
+
+        canvasObjects.forEach(function(_obj) {
+            if(_obj.getBoundingRectange().checkIsWithin(_rect)) {
+                result.push(_obj);
+            }
+        });
+
+        return result;
+    };    
       
     /**
      * @returns {CanvasObject[]}
@@ -1112,6 +1140,29 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selectionBoxElem.style.display = "block";
     };
 
+    const handleGroupSelectionEnd = function() {
+        groupSelectionStarted = false;
+        selectionBoxElem.style.display = "none";
+
+        const selectionRect = new Rectangle(
+            groupSelectionStartX, 
+            groupSelectionStartY, 
+            groupSelectionEndX, 
+            groupSelectionEndY
+        );
+
+        const selectedObjects = self.getObjectsWithinRect(selectionRect);
+        const boundingRect = self.calcBoundingRectForObjects(selectedObjects);
+
+        emitEvent(
+            CanvasEvent.MULTIPLE_OBJECTS_SELECTED, 
+            { 
+                'selectedObjects': selectedObjects,
+                'boundingRect': boundingRect
+            }
+        );
+    };
+
     this.initGroupObjectSelectionHandler = function() {
         // Create selection box DOM element
         const selBox = _window.document.createElement("div");
@@ -1212,8 +1263,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             }
 
             if(groupSelectionStarted) {
-                const width = e.pageX - groupSelectionStartX;
-                const height = e.pageY - groupSelectionStartY;
+                groupSelectionEndX = e.pageX;
+                groupSelectionEndY = e.pageY;
+                const width = groupSelectionEndX - groupSelectionStartX;
+                const height = groupSelectionEndY - groupSelectionStartY;
                 selectionBoxElem.style.width = `${width}px`;
                 selectionBoxElem.style.height = `${height}px`;
             }
@@ -1231,6 +1284,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             if(objectIdBeingResized !== null) {
                 objectIdBeingResized = null;  
             }
+
+            if(groupSelectionStarted) {
+                handleGroupSelectionEnd();
+            }            
         });
 
         _canvasDomElement.addEventListener('mouseup', function (e) {
@@ -1249,8 +1306,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 }
 
                 if(groupSelectionStarted) {
-                    groupSelectionStarted = false;
-                    selectionBoxElem.style.display = "none";
+                    handleGroupSelectionEnd();
                 }
 
                 objectIdBeingDragged = null;
