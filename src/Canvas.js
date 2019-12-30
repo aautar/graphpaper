@@ -89,9 +89,6 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var multiObjectSelectionEndY = 0.0;
     var multiObjectSelectionStarted = false;
 
-    var accMovementX = 0.0;
-    var accMovementY = 0.0;
-
     const connectorAnchorsSelected = [];
 
     /**
@@ -1103,8 +1100,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const handleGroupTransformationContainerMove = function(_accDX, _accDY) {
         const gtc = currentGroupTransformationContainerBeingDragged;        
-        gtc.translateOffsetFromInitial(_accDX, _accDY);
-    };    
+        gtc.translateByOffset(_accDX, _accDY);
+    };
 
     /**
      * 
@@ -1301,11 +1298,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             }
 
             if(currentGroupTransformationContainerBeingDragged !== null) {
-                accMovementX += e.movementX;
-                accMovementY += e.movementY;
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
-                    [accMovementX, accMovementY, 0, 1],
+                    [e.movementX, e.movementY, 0, 1],
                     currentInvTransformationMatrix
                 );                    
 
@@ -1356,9 +1350,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 }
 
                 if(currentGroupTransformationContainerBeingDragged !== null) {
+                    currentGroupTransformationContainerBeingDragged.endTranslate();
                     currentGroupTransformationContainerBeingDragged = null;
-                    accMovementX = 0.0;
-                    accMovementY = 0.0;
                 }
 
                 if(multiObjectSelectionStarted) {

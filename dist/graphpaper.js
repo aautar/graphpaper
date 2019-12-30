@@ -1544,9 +1544,6 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var multiObjectSelectionEndY = 0.0;
     var multiObjectSelectionStarted = false;
 
-    var accMovementX = 0.0;
-    var accMovementY = 0.0;
-
     const connectorAnchorsSelected = [];
 
     /**
@@ -2558,8 +2555,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     const handleGroupTransformationContainerMove = function(_accDX, _accDY) {
         const gtc = currentGroupTransformationContainerBeingDragged;        
-        gtc.translateOffsetFromInitial(_accDX, _accDY);
-    };    
+        gtc.translateByOffset(_accDX, _accDY);
+    };
 
     /**
      * 
@@ -2756,11 +2753,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             }
 
             if(currentGroupTransformationContainerBeingDragged !== null) {
-                accMovementX += e.movementX;
-                accMovementY += e.movementY;
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
-                    [accMovementX, accMovementY, 0, 1],
+                    [e.movementX, e.movementY, 0, 1],
                     currentInvTransformationMatrix
                 );                    
 
@@ -2808,9 +2802,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 }
 
                 if(currentGroupTransformationContainerBeingDragged !== null) {
+                    currentGroupTransformationContainerBeingDragged.endTranslate();
                     currentGroupTransformationContainerBeingDragged = null;
-                    accMovementX = 0.0;
-                    accMovementY = 0.0;
                 }
 
                 if(multiObjectSelectionStarted) {
@@ -3258,7 +3251,10 @@ function GroupTransformationContainer(_canvas, _objects)  {
 
     const self = this;
     const eventNameToHandlerFunc = new Map();
-    const boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+    var boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+
+    var accTranslateX = 0.0;
+    var accTranslateY = 0.0;    
 
     var currentLeft = boundingRect.getLeft();
     var currentTop = boundingRect.getTop();
@@ -3297,12 +3293,15 @@ function GroupTransformationContainer(_canvas, _objects)  {
     };
 
     /**
-     * @param {Number} _accDX
-     * @param {Number} _accDY
+     * @param {Number} _dx
+     * @param {Number} _dy
      */
-    this.translateOffsetFromInitial = function(_accDX, _accDY) {
-        currentLeft = canvas.snapToGrid(boundingRect.getLeft() + _accDX);
-        currentTop = canvas.snapToGrid(boundingRect.getTop() + _accDY);
+    this.translateByOffset = function(_dx, _dy) {
+        accTranslateX += _dx;
+        accTranslateY += _dy;
+
+        currentLeft = canvas.snapToGrid(boundingRect.getLeft() + accTranslateX);
+        currentTop = canvas.snapToGrid(boundingRect.getTop() + accTranslateY);
         selBox.style.left = `${currentLeft}px`;
         selBox.style.top = `${currentTop}px`;        
 
@@ -3315,6 +3314,12 @@ function GroupTransformationContainer(_canvas, _objects)  {
                 canvas.snapToGrid(currentTop + rp.y)
             );
         }
+    };
+
+    this.endTranslate = function() {
+        accTranslateX = 0.0;
+        accTranslateY = 0.0;
+        boundingRect = _canvas.calcBoundingRectForObjects(_objects);
     };
 
     this.initTranslateInteractionHandler = function() {
