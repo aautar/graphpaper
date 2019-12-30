@@ -588,6 +588,10 @@ function Rectangle(_left, _top, _right, _bottom)  {
     };
 }
 
+const GroupTransformationContainerEvent = Object.freeze({
+    TRANSLATE_START: 'group-transformation-container-translate-start'
+});
+
 const CanvasEvent = Object.freeze({
     DBLCLICK: "dblclick",
     CLICK: "click",
@@ -1485,9 +1489,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
 
-    // Create selection box element
+    // Selection box element
     var selectionBoxElem = null;
-   
+
+    // GroupTransformationContainers
+    const groupTransformationContainers = [];
+    var currentGroupTransformationContainerBeingDragged = null;
+  
     /**
      * @type {Grid}
      */
@@ -1535,6 +1543,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var multiObjectSelectionEndX = 0.0;
     var multiObjectSelectionEndY = 0.0;
     var multiObjectSelectionStarted = false;
+
+    var accMovementX = 0.0;
+    var accMovementY = 0.0;
 
     const connectorAnchorsSelected = [];
 
@@ -2513,6 +2524,44 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     /**
+     * @param {GroupTransformationContainer} _groupTransformationContainer
+     */
+    this.attachGroupTransformationContainer = function(_groupTransformationContainer) {
+        _canvasDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
+        groupTransformationContainers.push(_groupTransformationContainer);
+
+        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, function(e) {
+            currentGroupTransformationContainerBeingDragged = e.container;
+        });
+    };
+
+    /**
+     * @param {GroupTransformationContainer} _groupTransformationContainer
+     * @returns {Boolean}
+     */
+    this.detachGroupTransformationContainer = function(_groupTransformationContainer) {
+        for(let i=0; i<groupTransformationContainers.length; i++) {
+            if(groupTransformationContainers[i] === _groupTransformationContainer) {
+                _canvasDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
+                groupTransformationContainers.splice(i, 1);
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    /**
+     * 
+     * @param {Number} _accDX 
+     * @param {Number} _accDY 
+     */
+    const handleGroupTransformationContainerMove = function(_accDX, _accDY) {
+        const gtc = currentGroupTransformationContainerBeingDragged;        
+        gtc.translateOffsetFromInitial(_accDX, _accDY);
+    };    
+
+    /**
      * 
      * @param {Object} _e 
      */
@@ -2689,7 +2738,6 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
             if (objectIdBeingDragged !== null) {		
-                
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX, e.pageY, 0, 1],
                     currentInvTransformationMatrix
@@ -2699,13 +2747,24 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             }
 
             if(objectIdBeingResized !== null) {
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX, e.pageY, 0, 1],
                     currentInvTransformationMatrix
                 );     
 
                 handleResize(invTransformedPos[0], invTransformedPos[1]);
+            }
+
+            if(currentGroupTransformationContainerBeingDragged !== null) {
+                accMovementX += e.movementX;
+                accMovementY += e.movementY;
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [accMovementX, accMovementY, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);                
             }
 
             if(multiObjectSelectionStarted) {
@@ -2748,6 +2807,12 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                     handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
                 }
 
+                if(currentGroupTransformationContainerBeingDragged !== null) {
+                    currentGroupTransformationContainerBeingDragged = null;
+                    accMovementX = 0.0;
+                    accMovementY = 0.0;
+                }
+
                 if(multiObjectSelectionStarted) {
                     handleMultiObjectSelectionEnd();
                 }
@@ -2758,7 +2823,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });  
 
         _canvasDomElement.addEventListener('mousedown', function (e) {
-            if(objectIdBeingDragged !== null || objectIdBeingResized !== null) {
+            // if we're dragging something, stop propagation
+            if(currentGroupTransformationContainerBeingDragged !== null || objectIdBeingDragged !== null || objectIdBeingResized !== null) {
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -3065,7 +3131,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.on = function(_eventName, _handlerFunc) {
         const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
         allHandlers.push(_handlerFunc);
-        eventNameToHandlerFunc.set(_eventName, allHandlers);        
+        eventNameToHandlerFunc.set(_eventName, allHandlers);    
     };
 
     /**
@@ -3074,7 +3140,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {*} _callback 
      */
     this.off = function(_eventName, _callback) {
-        const allCallbacks = eventHandlers.get(_eventName) || [];
+        const allCallbacks = eventNameToHandlerFunc.get(_eventName) || [];
 
         for(let i=0; i<allCallbacks.length; i++) {
             if(allCallbacks[i] === _callback) {
@@ -3083,7 +3149,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
             }
         }
 
-        eventHandlers.set(_eventName, allCallbacks);
+        eventNameToHandlerFunc.set(_eventName, allCallbacks);
     };
 
     this.suspendTranslateInteractions = function() {
@@ -3182,6 +3248,134 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     bindResizeHandleElements();
     self.translate(_x, _y);
     self.resize(_width, _height);
+}
+
+/**
+ * @param {Canvas} _canvas
+ * @param {CanvasObject[]} _objects 
+ */
+function GroupTransformationContainer(_canvas, _objects)  {
+
+    const self = this;
+    const eventNameToHandlerFunc = new Map();
+    const boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+
+    var currentLeft = boundingRect.getLeft();
+    var currentTop = boundingRect.getTop();
+
+    const objPositionRelativeToBoundingRect = [];
+
+    _objects.forEach(function(_obj) {
+        const rp = {
+            "x": _obj.getX() - currentLeft,
+            "y": _obj.getY() - currentTop
+        };
+
+        objPositionRelativeToBoundingRect.push(rp);
+    });
+
+    const selBox = window.document.createElement("div");
+    selBox.style.display = "block";
+    selBox.style.position = "absolute";
+    selBox.style.left = `${currentLeft}px`;
+    selBox.style.top = `${currentTop}px`;
+    selBox.style.width = `${boundingRect.getWidth()}px`;
+    selBox.style.height = `${boundingRect.getHeight()}px`;    
+    selBox.style.border = "1px solid #666";
+    selBox.style.backgroundColor = "#999";
+    selBox.style.opacity = "0.5";
+
+    this.getContainerDomElement = function() {
+        return selBox;
+    };
+    
+    /**
+     * @returns {CanvasObject[]}
+     */
+    this.getObjects = function() {
+        return _objects;
+    };
+
+    /**
+     * @param {Number} _accDX
+     * @param {Number} _accDY
+     */
+    this.translateOffsetFromInitial = function(_accDX, _accDY) {
+        currentLeft = canvas.snapToGrid(boundingRect.getLeft() + _accDX);
+        currentTop = canvas.snapToGrid(boundingRect.getTop() + _accDY);
+        selBox.style.left = `${currentLeft}px`;
+        selBox.style.top = `${currentTop}px`;        
+
+        for(let i=0; i<_objects.length; i++) {
+            const obj = _objects[i];
+            const rp = objPositionRelativeToBoundingRect[i];
+
+            obj.translate(
+                canvas.snapToGrid(currentLeft + rp.x), 
+                canvas.snapToGrid(currentTop + rp.y)
+            );
+        }
+    };
+
+    this.initTranslateInteractionHandler = function() {
+        selBox.addEventListener('touchstart', translateTouchStartHandler);        
+        selBox.addEventListener('mousedown', translateMouseDownHandler);
+    };
+
+    /**
+     * 
+     * @param {String} _eventName 
+     * @param {*} _handlerFunc 
+     */
+    this.on = function(_eventName, _handlerFunc) {
+        const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
+        allHandlers.push(_handlerFunc);
+        eventNameToHandlerFunc.set(_eventName, allHandlers);        
+    };
+
+    /**
+     * 
+     * @param {String} _eventName 
+     * @param {*} _callback 
+     */
+    this.off = function(_eventName, _callback) {
+        const allCallbacks = eventNameToHandlerFunc.get(_eventName) || [];
+
+        for(let i=0; i<allCallbacks.length; i++) {
+            if(allCallbacks[i] === _callback) {
+                allCallbacks.splice(i, 1);
+                break;
+            }
+        }
+
+        eventNameToHandlerFunc.set(_eventName, allCallbacks);
+    };    
+
+    const translateTouchStartHandler = function(e) {
+        const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "container": self,
+                "x": e.touches[0].pageX, 
+                "y": e.touches[0].pageY,
+                "isTouch": true
+            });
+        });        
+
+    };
+
+    const translateMouseDownHandler = function(e) {       
+        const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "container": self,
+                "x": e.pageX, 
+                "y": e.pageY,
+                "isTouch": false
+            });
+        });        
+        
+    };    
 }
 
 /**
@@ -3512,6 +3706,8 @@ exports.Point = Point;
 exports.LINE_INTERSECTION_TYPE = LINE_INTERSECTION_TYPE;
 exports.LineIntersection = LineIntersection;
 exports.Line = Line;
+exports.GroupTransformationContainerEvent = GroupTransformationContainerEvent;
+exports.GroupTransformationContainer = GroupTransformationContainer;
 exports.CanvasEvent = CanvasEvent;
 exports.CanvasObject = CanvasObject;
 exports.Canvas = Canvas;

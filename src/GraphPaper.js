@@ -5,6 +5,8 @@ export * from './Rectangle';
 export * from './Point';
 export * from './LineIntersection';
 export * from './Line';
+export * from './GroupTransformationContainerEvent';
+export * from './GroupTransformationContainer';
 export * from './CanvasEvent';
 export * from './CanvasObject';
 export * from './Canvas';

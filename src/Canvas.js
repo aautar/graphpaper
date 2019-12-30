@@ -6,9 +6,11 @@ import {Point} from './Point';
 import {Line} from './Line';
 import {PointSet} from './PointSet';
 import {LineSet} from './LineSet';
+import {GroupTransformationContainer} from './GroupTransformationContainer';
 import {Connector} from './Connector';
 import {PointVisibilityMap} from './PointVisibilityMap';
 import {GRID_STYLE, Grid} from './Grid';
+import { GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
 
 /**
  * @callback HandleCanvasInteractionCallback
@@ -31,9 +33,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
 
-    // Create selection box element
+    // Selection box element
     var selectionBoxElem = null;
-   
+
+    // GroupTransformationContainers
+    const groupTransformationContainers = [];
+    var currentGroupTransformationContainerBeingDragged = null;
+  
     /**
      * @type {Grid}
      */
@@ -82,6 +88,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var multiObjectSelectionEndX = 0.0;
     var multiObjectSelectionEndY = 0.0;
     var multiObjectSelectionStarted = false;
+
+    var accMovementX = 0.0;
+    var accMovementY = 0.0;
 
     const connectorAnchorsSelected = [];
 
@@ -1060,6 +1069,44 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     /**
+     * @param {GroupTransformationContainer} _groupTransformationContainer
+     */
+    this.attachGroupTransformationContainer = function(_groupTransformationContainer) {
+        _canvasDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
+        groupTransformationContainers.push(_groupTransformationContainer);
+
+        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, function(e) {
+            currentGroupTransformationContainerBeingDragged = e.container;
+        });
+    };
+
+    /**
+     * @param {GroupTransformationContainer} _groupTransformationContainer
+     * @returns {Boolean}
+     */
+    this.detachGroupTransformationContainer = function(_groupTransformationContainer) {
+        for(let i=0; i<groupTransformationContainers.length; i++) {
+            if(groupTransformationContainers[i] === _groupTransformationContainer) {
+                _canvasDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
+                groupTransformationContainers.splice(i, 1);
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    /**
+     * 
+     * @param {Number} _accDX 
+     * @param {Number} _accDY 
+     */
+    const handleGroupTransformationContainerMove = function(_accDX, _accDY) {
+        const gtc = currentGroupTransformationContainerBeingDragged;        
+        gtc.translateOffsetFromInitial(_accDX, _accDY);
+    };    
+
+    /**
      * 
      * @param {Object} _e 
      */
@@ -1236,7 +1283,6 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
             if (objectIdBeingDragged !== null) {		
-                
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX, e.pageY, 0, 1],
                     currentInvTransformationMatrix
@@ -1246,13 +1292,24 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             }
 
             if(objectIdBeingResized !== null) {
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX, e.pageY, 0, 1],
                     currentInvTransformationMatrix
                 );     
 
                 handleResize(invTransformedPos[0], invTransformedPos[1]);
+            }
+
+            if(currentGroupTransformationContainerBeingDragged !== null) {
+                accMovementX += e.movementX;
+                accMovementY += e.movementY;
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [accMovementX, accMovementY, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);                
             }
 
             if(multiObjectSelectionStarted) {
@@ -1298,6 +1355,12 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 if(objectIdBeingResized !== null) {
                 }
 
+                if(currentGroupTransformationContainerBeingDragged !== null) {
+                    currentGroupTransformationContainerBeingDragged = null;
+                    accMovementX = 0.0;
+                    accMovementY = 0.0;
+                }
+
                 if(multiObjectSelectionStarted) {
                     handleMultiObjectSelectionEnd();
                 }
@@ -1308,7 +1371,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });  
 
         _canvasDomElement.addEventListener('mousedown', function (e) {
-            if(objectIdBeingDragged !== null || objectIdBeingResized !== null) {
+            // if we're dragging something, stop propagation
+            if(currentGroupTransformationContainerBeingDragged !== null || objectIdBeingDragged !== null || objectIdBeingResized !== null) {
                 e.preventDefault();
                 e.stopPropagation();
             }
