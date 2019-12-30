@@ -1173,6 +1173,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     const handleMultiObjectSelectionStart = function(_x, _y, _targetElem) {
+        if(multiObjectSelectionStarted) {
+            return; // already doing selection
+        }
+
         if(_targetElem !== svgElem) { // hacky, but b/c of the SVG overlay, events propagate from the overlay
             return;
         }
@@ -1187,6 +1191,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         multiObjectSelectionStartX = _x;
         multiObjectSelectionStartY = _y;
+        multiObjectSelectionEndX = _x;
+        multiObjectSelectionEndY = _y;
         multiObjectSelectionStarted = true;
 
         selectionBoxElem.style.left = `${multiObjectSelectionStartX}px`;
