@@ -2700,6 +2700,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 
         _canvasDomElement.addEventListener('mousedown', function(e) {
+            if (e.which !== 1) {
+                return;
+            }
+            
             handleMultiObjectSelectionStart(e.pageX, e.pageY, e.target);
         });
 
