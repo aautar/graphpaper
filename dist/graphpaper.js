@@ -1506,6 +1506,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     var transformOriginX = 0;
     var transformOriginY = 0;
 
+    var touchMoveLastX = 0.0;
+    var touchMoveLastY = 0.0;
+
     var translateX = 0;
     var translateY = 0;
     var scaleFactor = 1.0;
@@ -2550,12 +2553,12 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     /**
      * 
-     * @param {Number} _accDX 
-     * @param {Number} _accDY 
+     * @param {Number} _dx 
+     * @param {Number} _dy 
      */
-    const handleGroupTransformationContainerMove = function(_accDX, _accDY) {
+    const handleGroupTransformationContainerMove = function(_dx, _dy) {
         const gtc = currentGroupTransformationContainerBeingDragged;        
-        gtc.translateByOffset(_accDX, _accDY);
+        gtc.translateByOffset(_dx, _dy);
     };
 
     /**
@@ -2703,7 +2706,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             if (e.which !== 1) {
                 return;
             }
-            
+
             handleMultiObjectSelectionStart(e.pageX, e.pageY, e.target);
         });
 
@@ -2713,34 +2716,59 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     this.initTransformationHandlers = function() {
-        
+
+        _canvasDomElement.addEventListener('touchstart', function(e) {
+            touchMoveLastX = e.touches[0].pageX;
+            touchMoveLastY = e.touches[0].pageY;
+        });
+
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (objectIdBeingDragged !== null) {
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
                     currentInvTransformationMatrix
                 );                    
 
-                handleMove(invTransformedPos[0], invTransformedPos[1]);       
-
+                handleMove(invTransformedPos[0], invTransformedPos[1]);
                 // if we're transforming an object, make sure we don't scroll the canvas
                 e.preventDefault();
             }
 
-
             if(objectIdBeingResized !== null) {
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
                     currentInvTransformationMatrix
                 );     
 
                 handleResize(invTransformedPos[0], invTransformedPos[1]);
-
                 e.preventDefault();
-            }            
+            }
 
+            if(currentGroupTransformationContainerBeingDragged !== null) {
+                const dx = e.touches[0].pageX - touchMoveLastX;
+                const dy = e.touches[0].pageY - touchMoveLastY;
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [dx, dy, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);        
+                e.preventDefault();        
+            }
+
+            if(multiObjectSelectionStarted) {
+                multiObjectSelectionEndX = e.touches[0].pageX;
+                multiObjectSelectionEndY = e.touches[0].pageY;
+                const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
+                const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
+                selectionBoxElem.style.width = `${width}px`;
+                selectionBoxElem.style.height = `${height}px`;
+                e.preventDefault();      
+            }
+
+            touchMoveLastX = e.touches[0].pageX;
+            touchMoveLastY = e.touches[0].pageY;
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
@@ -2794,9 +2822,14 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 objectIdBeingResized = null;  
             }
 
+            if(currentGroupTransformationContainerBeingDragged !== null) {
+                currentGroupTransformationContainerBeingDragged.endTranslate();
+                currentGroupTransformationContainerBeingDragged = null;
+            }            
+
             if(multiObjectSelectionStarted) {
                 handleMultiObjectSelectionEnd();
-            }            
+            }
         });
 
         _canvasDomElement.addEventListener('mouseup', function (e) {
