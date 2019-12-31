@@ -3,6 +3,7 @@ import {Canvas} from '../src/Canvas.js';
 import {CanvasObject} from '../src/CanvasObject.js';
 import {ConnectorAnchor} from '../src/ConnectorAnchor.js';
 import {GRID_STYLE,Grid} from '../src/Grid.js';
+import { CanvasEvent } from '../src/CanvasEvent.js';
 
 const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
@@ -537,7 +538,7 @@ describe("Canvas.initMultiObjectSelectionHandler", function() {
     const canvasDomElement = window.document.createElement('div');
     const pvWorkerMock = {
         postMessage: function() { }
-    };
+    };        
 
     it("creates selection box DOM element", function() {
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
@@ -545,4 +546,62 @@ describe("Canvas.initMultiObjectSelectionHandler", function() {
 
         expect(canvasDomElement.getElementsByClassName("ia-selection-box").length).toBe(1);
     });
+});
+
+describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
+    var canvasDomElement = null;
+    var pvWorkerMock = null;
+
+    beforeEach(function() {
+        window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
+        canvasDomElement = window.document.createElement('div');
+        pvWorkerMock = {
+            postMessage: function() { }
+        };    
+    });    
+
+    it("emits event on mousedown", function() {
+        const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
+        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initMultiObjectSelectionHandler();
+        canvas.on(CanvasEvent.MULTIPLE_OBJECT_SELECTION_STARTED, selectionStartedCallback);
+
+        const event = new window.MouseEvent('mousedown', {
+            'bubbles': true,
+            'cancelable': true,
+            'which': 1            
+        });
+
+        // Note that these events need to be dispatched from the SVG overlay element
+        const svgOverlayElem = canvasDomElement.getElementsByTagNameNS("http://www.w3.org/2000/svg", "svg")[0];
+        svgOverlayElem.dispatchEvent(event);
+
+        expect(selectionStartedCallback).toHaveBeenCalled()        
+    });
+
+    it("emits event on touchstart", function() {
+        const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
+        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initMultiObjectSelectionHandler();
+        canvas.on(CanvasEvent.MULTIPLE_OBJECT_SELECTION_STARTED, selectionStartedCallback);
+
+        const event = new window.TouchEvent('touchstart', {
+            'bubbles': true,
+            'cancelable': true,
+            'touches': [
+                {
+                    'pageX': 0,
+                    'pageY': 0
+                }
+            ]          
+        });
+
+        // Note that these events need to be dispatched from the SVG overlay element
+        const svgOverlayElem = canvasDomElement.getElementsByTagNameNS("http://www.w3.org/2000/svg", "svg")[0];
+        svgOverlayElem.dispatchEvent(event);
+
+        expect(selectionStartedCallback).toHaveBeenCalled()        
+    });    
 });

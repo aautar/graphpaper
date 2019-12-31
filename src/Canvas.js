@@ -1203,6 +1203,14 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selectionBoxElem.style.width = `0px`;
         selectionBoxElem.style.height = `0px`;
         selectionBoxElem.style.display = "block";
+
+        emitEvent(
+            CanvasEvent.MULTIPLE_OBJECT_SELECTION_STARTED,
+            { 
+                'x': _x,
+                'y': _y
+            }
+        );
     };
 
     const handleMultiObjectSelectionEnd = function() {

@@ -600,6 +600,7 @@ const CanvasEvent = Object.freeze({
     OBJECT_REMOVED: "object-removed",
     OBJECT_RESIZED: "object-resized",
     OBJECT_TRANSLATED: "object-translated",
+    MULTIPLE_OBJECT_SELECTION_STARTED: "multiple-object-selection-started",
     MULTIPLE_OBJECTS_SELECTED: "multiple-objects-selected",
 });
 
@@ -2658,6 +2659,14 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selectionBoxElem.style.width = `0px`;
         selectionBoxElem.style.height = `0px`;
         selectionBoxElem.style.display = "block";
+
+        emitEvent(
+            CanvasEvent.MULTIPLE_OBJECT_SELECTION_STARTED,
+            { 
+                'x': _x,
+                'y': _y
+            }
+        );
     };
 
     const handleMultiObjectSelectionEnd = function() {
