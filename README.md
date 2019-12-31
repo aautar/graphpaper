@@ -215,7 +215,7 @@ obj1.resize(newWidth, newHeight);
 Use the `Canvas.on()` method to add an event handler
 
 ```javascript
-canvas.on('click', (eventData) => {
+canvas.on(GraphPaper.CanvasEvent.CLICK, (eventData) => {
     // a click on the Canvas
 });
 ```
@@ -234,6 +234,5 @@ Events emitted:
 Use the `Canvas.off()` method to remove an event handler
 
 ```javascript
-canvas.off('click', registeredCallbackFunction);
+canvas.off(GraphPaper.CanvasEvent.CLICK, registeredCallbackFunction);
 ```
-
