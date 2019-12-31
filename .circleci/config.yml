@@ -29,6 +29,21 @@ jobs:
           name: Creating /dist files with rollup
           command: rollup -c
 
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+
+      - deploy:
+          name: Updating version num and publishing
+          command: |
+            if [[ "${CIRCLE_TAG}" =~ v[0-9]+(\.[0-9]+)* ]]; then
+              npm --no-git-tag-version version ${CIRCLE_TAG:1}
+              npm publish
+            fi
+
+      - store_artifacts:
+          path: ~/repo/dist          
+
 workflows:
   version: 2
   build-n-deploy:
