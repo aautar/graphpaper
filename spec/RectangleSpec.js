@@ -139,3 +139,17 @@ describe("Rectangle.checkIsPointWithin", function() {
   });  
 
 });
+
+describe("Rectangle.getWidth", function() {
+  it("returns correct width", function() {
+    const r = new Rectangle(1, 2, 200, 200);
+    expect(r.getWidth()).toBe(199);
+  });
+});
+
+describe("Rectangle.getHeight", function() {
+  it("returns correct height", function() {
+    const r = new Rectangle(1, 2, 200, 200);
+    expect(r.getHeight()).toBe(198);
+  });
+});

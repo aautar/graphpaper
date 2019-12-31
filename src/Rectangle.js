@@ -42,6 +42,20 @@ function Rectangle(_left, _top, _right, _bottom)  {
     };
 
     /**
+     * @returns {Number}
+     */    
+    this.getWidth = function() {
+        return _right - _left;
+    };
+
+    /**
+     * @returns {Number}
+     */    
+    this.getHeight = function() {
+        return _bottom - _top;
+    };
+
+    /**
      * @returns {Point[]}
      */
     this.getPoints = function() {

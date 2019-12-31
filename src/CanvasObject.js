@@ -269,7 +269,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.on = function(_eventName, _handlerFunc) {
         const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
         allHandlers.push(_handlerFunc);
-        eventNameToHandlerFunc.set(_eventName, allHandlers);        
+        eventNameToHandlerFunc.set(_eventName, allHandlers);    
     };
 
     /**
@@ -278,7 +278,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {*} _callback 
      */
     this.off = function(_eventName, _callback) {
-        const allCallbacks = eventHandlers.get(_eventName) || [];
+        const allCallbacks = eventNameToHandlerFunc.get(_eventName) || [];
 
         for(let i=0; i<allCallbacks.length; i++) {
             if(allCallbacks[i] === _callback) {
@@ -287,7 +287,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
             }
         }
 
-        eventHandlers.set(_eventName, allCallbacks);
+        eventNameToHandlerFunc.set(_eventName, allCallbacks);
     };
 
     this.suspendTranslateInteractions = function() {

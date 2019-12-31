@@ -453,6 +453,20 @@ function Rectangle(_left, _top, _right, _bottom)  {
     };
 
     /**
+     * @returns {Number}
+     */    
+    this.getWidth = function() {
+        return _right - _left;
+    };
+
+    /**
+     * @returns {Number}
+     */    
+    this.getHeight = function() {
+        return _bottom - _top;
+    };
+
+    /**
      * @returns {Point[]}
      */
     this.getPoints = function() {
@@ -574,6 +588,10 @@ function Rectangle(_left, _top, _right, _bottom)  {
     };
 }
 
+const GroupTransformationContainerEvent = Object.freeze({
+    TRANSLATE_START: 'group-transformation-container-translate-start'
+});
+
 const CanvasEvent = Object.freeze({
     DBLCLICK: "dblclick",
     CLICK: "click",
@@ -581,7 +599,8 @@ const CanvasEvent = Object.freeze({
     OBJECT_ADDED: "object-added",
     OBJECT_REMOVED: "object-removed",
     OBJECT_RESIZED: "object-resized",
-    OBJECT_TRANSLATED: "object-translated"
+    OBJECT_TRANSLATED: "object-translated",
+    MULTIPLE_OBJECTS_SELECTED: "multiple-objects-selected",
 });
 
 /**
@@ -1469,7 +1488,14 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     svgElem.style.width = "100%";
     svgElem.style.height = "100%";
     const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
-   
+
+    // Selection box element
+    var selectionBoxElem = null;
+
+    // GroupTransformationContainers
+    const groupTransformationContainers = [];
+    var currentGroupTransformationContainerBeingDragged = null;
+  
     /**
      * @type {Grid}
      */
@@ -1479,6 +1505,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     var transformOriginX = 0;
     var transformOriginY = 0;
+
+    var touchMoveLastX = 0.0;
+    var touchMoveLastY = 0.0;
 
     var translateX = 0;
     var translateY = 0;
@@ -1511,6 +1540,12 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         lastTouchY: null,
         lastTouchTime: null
     };
+
+    var multiObjectSelectionStartX = 0.0;
+    var multiObjectSelectionStartY = 0.0;
+    var multiObjectSelectionEndX = 0.0;
+    var multiObjectSelectionEndY = 0.0;
+    var multiObjectSelectionStarted = false;
 
     const connectorAnchorsSelected = [];
 
@@ -1968,24 +2003,24 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     this.getHeight = function() {
         return _canvasDomElement.offsetHeight;
-    };    
+    };
 
     /**
+     * @param {Object[]} _objs 
      * @returns {Rectangle}
      */
-    this.calcBoundingBox = function() {
-
+    this.calcBoundingRectForObjects = function(_objs) {
         var minTop = null;
         var minLeft = null;
         var maxBottom = null;
         var maxRight = null;
 
-        canvasObjects.forEach(function(element, index, array) {
-
-            const left = element.getX();
-            const top = element.getY();  
-            const right = left + element.getWidth();
-            const bottom = top + element.getHeight();
+        _objs.forEach(function(_obj, index, array) {
+            const objRect = _obj.getBoundingRectange();
+            const left = objRect.getLeft();
+            const top = objRect.getTop();  
+            const right = objRect.getRight();
+            const bottom = objRect.getBottom();
 
             if(minLeft === null || left < minLeft) {
                 minLeft = left;
@@ -2002,17 +2037,27 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             if(maxRight === null || right > maxRight) {
                 maxRight = right;
             }
-
-        }); 
+        });
 
         if(minTop === null || minLeft === null || maxBottom === null || maxRight === null) {
             minTop = 0;
             minLeft = 0;
-            maxBottom = self.getHeight();
-            maxRight = self.getWidth();            
+            maxBottom = 0;
+            maxRight = 0;            
         }
 
         return new Rectangle(minLeft, minTop, maxRight, maxBottom);
+    };
+
+    /**
+     * @returns {Rectangle}
+     */
+    this.calcBoundingBox = function() {
+        if(canvasObjects.length === 0) {    
+            return new Rectangle(0, 0, self.getWidth(), self.getHeight());     
+        }
+
+        return self.calcBoundingRectForObjects(canvasObjects);
     };
 
     /**
@@ -2042,6 +2087,22 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         return result;
     };
+
+    /**
+     * @param {Rectangle} _rect
+     * @returns {CanvasObject[]}
+     */
+    this.getObjectsWithinRect = function(_rect) {
+        const result = [];
+
+        canvasObjects.forEach(function(_obj) {
+            if(_obj.getBoundingRectange().checkIsWithin(_rect)) {
+                result.push(_obj);
+            }
+        });
+
+        return result;
+    };    
       
     /**
      * @returns {CanvasObject[]}
@@ -2463,6 +2524,44 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     /**
+     * @param {GroupTransformationContainer} _groupTransformationContainer
+     */
+    this.attachGroupTransformationContainer = function(_groupTransformationContainer) {
+        _canvasDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
+        groupTransformationContainers.push(_groupTransformationContainer);
+
+        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, function(e) {
+            currentGroupTransformationContainerBeingDragged = e.container;
+        });
+    };
+
+    /**
+     * @param {GroupTransformationContainer} _groupTransformationContainer
+     * @returns {Boolean}
+     */
+    this.detachGroupTransformationContainer = function(_groupTransformationContainer) {
+        for(let i=0; i<groupTransformationContainers.length; i++) {
+            if(groupTransformationContainers[i] === _groupTransformationContainer) {
+                _canvasDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
+                groupTransformationContainers.splice(i, 1);
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    /**
+     * 
+     * @param {Number} _dx 
+     * @param {Number} _dy 
+     */
+    const handleGroupTransformationContainerMove = function(_dx, _dy) {
+        const gtc = currentGroupTransformationContainerBeingDragged;        
+        gtc.translateByOffset(_dx, _dy);
+    };
+
+    /**
      * 
      * @param {Object} _e 
      */
@@ -2531,40 +2630,149 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         obj.resize(newWidth, newHeight);
     };
 
+    const handleMultiObjectSelectionStart = function(_x, _y, _targetElem) {
+        if(multiObjectSelectionStarted) {
+            return; // already doing selection
+        }
+
+        if(_targetElem !== svgElem) { // hacky, but b/c of the SVG overlay, events propagate from the overlay
+            return;
+        }
+
+        if(objectIdBeingDragged !== null) {
+            return;
+        }
+
+        if(objectIdBeingResized !== null) {
+            return;
+        }        
+
+        multiObjectSelectionStartX = _x;
+        multiObjectSelectionStartY = _y;
+        multiObjectSelectionEndX = _x;
+        multiObjectSelectionEndY = _y;
+        multiObjectSelectionStarted = true;
+
+        selectionBoxElem.style.left = `${multiObjectSelectionStartX}px`;
+        selectionBoxElem.style.top = `${multiObjectSelectionStartY}px`;
+        selectionBoxElem.style.width = `0px`;
+        selectionBoxElem.style.height = `0px`;
+        selectionBoxElem.style.display = "block";
+    };
+
+    const handleMultiObjectSelectionEnd = function() {
+        multiObjectSelectionStarted = false;
+
+        const selectionRect = new Rectangle(
+            multiObjectSelectionStartX, 
+            multiObjectSelectionStartY, 
+            multiObjectSelectionEndX, 
+            multiObjectSelectionEndY
+        );
+
+        const selectedObjects = self.getObjectsWithinRect(selectionRect);
+        const boundingRect = self.calcBoundingRectForObjects(selectedObjects);
+
+        selectionBoxElem.style.left = `${boundingRect.getLeft()}px`;
+        selectionBoxElem.style.top = `${boundingRect.getTop()}px`;
+        selectionBoxElem.style.width = `${boundingRect.getWidth()}px`;
+        selectionBoxElem.style.height = `${boundingRect.getHeight()}px`;
+        selectionBoxElem.style.display = "none";
+
+        emitEvent(
+            CanvasEvent.MULTIPLE_OBJECTS_SELECTED, 
+            { 
+                'selectedObjects': selectedObjects,
+                'boundingRect': boundingRect
+            }
+        );
+    };
+
+    this.initMultiObjectSelectionHandler = function() {
+        // Create selection box DOM element
+        const selBox = _window.document.createElement("div");
+        selBox.classList.add("ia-selection-box");
+        selBox.style.display = "none";
+        selBox.style.position = "absolute";
+        selBox.style.left = "0px";
+        selBox.style.top = "0px";
+        selBox.style.border = "1px solid #666";
+        selBox.style.backgroundColor = "#999";
+        selBox.style.opacity = "0.5";
+
+        selectionBoxElem = _canvasDomElement.appendChild(selBox);
+
+        _canvasDomElement.addEventListener('mousedown', function(e) {
+            if (e.which !== 1) {
+                return;
+            }
+
+            handleMultiObjectSelectionStart(e.pageX, e.pageY, e.target);
+        });
+
+        _canvasDomElement.addEventListener('touchstart', function(e) {
+            handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
+        });
+    };
+
     this.initTransformationHandlers = function() {
-        
+
+        _canvasDomElement.addEventListener('touchstart', function(e) {
+            touchMoveLastX = e.touches[0].pageX;
+            touchMoveLastY = e.touches[0].pageY;
+        });
+
         _canvasDomElement.addEventListener('touchmove', function (e) {
             if (objectIdBeingDragged !== null) {
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
                     currentInvTransformationMatrix
                 );                    
 
-                handleMove(invTransformedPos[0], invTransformedPos[1]);       
-
+                handleMove(invTransformedPos[0], invTransformedPos[1]);
                 // if we're transforming an object, make sure we don't scroll the canvas
                 e.preventDefault();
             }
 
-
             if(objectIdBeingResized !== null) {
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
                     currentInvTransformationMatrix
                 );     
 
                 handleResize(invTransformedPos[0], invTransformedPos[1]);
-
                 e.preventDefault();
-            }            
+            }
 
+            if(currentGroupTransformationContainerBeingDragged !== null) {
+                const dx = e.touches[0].pageX - touchMoveLastX;
+                const dy = e.touches[0].pageY - touchMoveLastY;
+
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [dx, dy, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);        
+                e.preventDefault();        
+            }
+
+            if(multiObjectSelectionStarted) {
+                multiObjectSelectionEndX = e.touches[0].pageX;
+                multiObjectSelectionEndY = e.touches[0].pageY;
+                const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
+                const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
+                selectionBoxElem.style.width = `${width}px`;
+                selectionBoxElem.style.height = `${height}px`;
+                e.preventDefault();      
+            }
+
+            touchMoveLastX = e.touches[0].pageX;
+            touchMoveLastY = e.touches[0].pageY;
         });
 
         _canvasDomElement.addEventListener('mousemove', function (e) {
             if (objectIdBeingDragged !== null) {		
-                
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX, e.pageY, 0, 1],
                     currentInvTransformationMatrix
@@ -2574,13 +2782,30 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             }
 
             if(objectIdBeingResized !== null) {
-
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX, e.pageY, 0, 1],
                     currentInvTransformationMatrix
                 );     
 
                 handleResize(invTransformedPos[0], invTransformedPos[1]);
+            }
+
+            if(currentGroupTransformationContainerBeingDragged !== null) {
+                const invTransformedPos = MatrixMath.vecMat4Multiply(
+                    [e.movementX, e.movementY, 0, 1],
+                    currentInvTransformationMatrix
+                );                    
+
+                handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);                
+            }
+
+            if(multiObjectSelectionStarted) {
+                multiObjectSelectionEndX = e.pageX;
+                multiObjectSelectionEndY = e.pageY;
+                const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
+                const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
+                selectionBoxElem.style.width = `${width}px`;
+                selectionBoxElem.style.height = `${height}px`;
             }
         });
 
@@ -2596,6 +2821,15 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             if(objectIdBeingResized !== null) {
                 objectIdBeingResized = null;  
             }
+
+            if(currentGroupTransformationContainerBeingDragged !== null) {
+                currentGroupTransformationContainerBeingDragged.endTranslate();
+                currentGroupTransformationContainerBeingDragged = null;
+            }            
+
+            if(multiObjectSelectionStarted) {
+                handleMultiObjectSelectionEnd();
+            }
         });
 
         _canvasDomElement.addEventListener('mouseup', function (e) {
@@ -2608,7 +2842,16 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                     );                      
 
                     handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
-                }            
+                }
+
+                if(currentGroupTransformationContainerBeingDragged !== null) {
+                    currentGroupTransformationContainerBeingDragged.endTranslate();
+                    currentGroupTransformationContainerBeingDragged = null;
+                }
+
+                if(multiObjectSelectionStarted) {
+                    handleMultiObjectSelectionEnd();
+                }
 
                 objectIdBeingDragged = null;
                 objectIdBeingResized = null;
@@ -2616,7 +2859,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });  
 
         _canvasDomElement.addEventListener('mousedown', function (e) {
-            if(objectIdBeingDragged !== null || objectIdBeingResized !== null) {
+            // if we're dragging something, stop propagation
+            if(currentGroupTransformationContainerBeingDragged !== null || objectIdBeingDragged !== null || objectIdBeingResized !== null) {
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -2923,7 +3167,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     this.on = function(_eventName, _handlerFunc) {
         const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
         allHandlers.push(_handlerFunc);
-        eventNameToHandlerFunc.set(_eventName, allHandlers);        
+        eventNameToHandlerFunc.set(_eventName, allHandlers);    
     };
 
     /**
@@ -2932,7 +3176,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @param {*} _callback 
      */
     this.off = function(_eventName, _callback) {
-        const allCallbacks = eventHandlers.get(_eventName) || [];
+        const allCallbacks = eventNameToHandlerFunc.get(_eventName) || [];
 
         for(let i=0; i<allCallbacks.length; i++) {
             if(allCallbacks[i] === _callback) {
@@ -2941,7 +3185,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
             }
         }
 
-        eventHandlers.set(_eventName, allCallbacks);
+        eventNameToHandlerFunc.set(_eventName, allCallbacks);
     };
 
     this.suspendTranslateInteractions = function() {
@@ -3040,6 +3284,146 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
     bindResizeHandleElements();
     self.translate(_x, _y);
     self.resize(_width, _height);
+}
+
+/**
+ * @param {Canvas} _canvas
+ * @param {CanvasObject[]} _objects 
+ */
+function GroupTransformationContainer(_canvas, _objects)  {
+
+    const self = this;
+    const eventNameToHandlerFunc = new Map();
+    var boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+
+    var accTranslateX = 0.0;
+    var accTranslateY = 0.0;    
+
+    var currentLeft = boundingRect.getLeft();
+    var currentTop = boundingRect.getTop();
+
+    const objPositionRelativeToBoundingRect = [];
+
+    _objects.forEach(function(_obj) {
+        const rp = {
+            "x": _obj.getX() - currentLeft,
+            "y": _obj.getY() - currentTop
+        };
+
+        objPositionRelativeToBoundingRect.push(rp);
+    });
+
+    const selBox = window.document.createElement("div");
+    selBox.style.display = "block";
+    selBox.style.position = "absolute";
+    selBox.style.left = `${currentLeft}px`;
+    selBox.style.top = `${currentTop}px`;
+    selBox.style.width = `${boundingRect.getWidth()}px`;
+    selBox.style.height = `${boundingRect.getHeight()}px`;    
+    selBox.style.border = "1px solid #666";
+    selBox.style.backgroundColor = "#999";
+    selBox.style.opacity = "0.5";
+
+    this.getContainerDomElement = function() {
+        return selBox;
+    };
+    
+    /**
+     * @returns {CanvasObject[]}
+     */
+    this.getObjects = function() {
+        return _objects;
+    };
+
+    /**
+     * @param {Number} _dx
+     * @param {Number} _dy
+     */
+    this.translateByOffset = function(_dx, _dy) {
+        accTranslateX += _dx;
+        accTranslateY += _dy;
+
+        currentLeft = canvas.snapToGrid(boundingRect.getLeft() + accTranslateX);
+        currentTop = canvas.snapToGrid(boundingRect.getTop() + accTranslateY);
+        selBox.style.left = `${currentLeft}px`;
+        selBox.style.top = `${currentTop}px`;        
+
+        for(let i=0; i<_objects.length; i++) {
+            const obj = _objects[i];
+            const rp = objPositionRelativeToBoundingRect[i];
+
+            obj.translate(
+                canvas.snapToGrid(currentLeft + rp.x), 
+                canvas.snapToGrid(currentTop + rp.y)
+            );
+        }
+    };
+
+    this.endTranslate = function() {
+        accTranslateX = 0.0;
+        accTranslateY = 0.0;
+        boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+    };
+
+    this.initTranslateInteractionHandler = function() {
+        selBox.addEventListener('touchstart', translateTouchStartHandler);        
+        selBox.addEventListener('mousedown', translateMouseDownHandler);
+    };
+
+    /**
+     * 
+     * @param {String} _eventName 
+     * @param {*} _handlerFunc 
+     */
+    this.on = function(_eventName, _handlerFunc) {
+        const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
+        allHandlers.push(_handlerFunc);
+        eventNameToHandlerFunc.set(_eventName, allHandlers);        
+    };
+
+    /**
+     * 
+     * @param {String} _eventName 
+     * @param {*} _callback 
+     */
+    this.off = function(_eventName, _callback) {
+        const allCallbacks = eventNameToHandlerFunc.get(_eventName) || [];
+
+        for(let i=0; i<allCallbacks.length; i++) {
+            if(allCallbacks[i] === _callback) {
+                allCallbacks.splice(i, 1);
+                break;
+            }
+        }
+
+        eventNameToHandlerFunc.set(_eventName, allCallbacks);
+    };    
+
+    const translateTouchStartHandler = function(e) {
+        const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "container": self,
+                "x": e.touches[0].pageX, 
+                "y": e.touches[0].pageY,
+                "isTouch": true
+            });
+        });        
+
+    };
+
+    const translateMouseDownHandler = function(e) {       
+        const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE_START) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "container": self,
+                "x": e.pageX, 
+                "y": e.pageY,
+                "isTouch": false
+            });
+        });        
+        
+    };    
 }
 
 /**
@@ -3370,6 +3754,8 @@ exports.Point = Point;
 exports.LINE_INTERSECTION_TYPE = LINE_INTERSECTION_TYPE;
 exports.LineIntersection = LineIntersection;
 exports.Line = Line;
+exports.GroupTransformationContainerEvent = GroupTransformationContainerEvent;
+exports.GroupTransformationContainer = GroupTransformationContainer;
 exports.CanvasEvent = CanvasEvent;
 exports.CanvasObject = CanvasObject;
 exports.Canvas = Canvas;
