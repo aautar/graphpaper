@@ -221,13 +221,13 @@ canvas.on('click', (eventData) => {
 ```
 
 Events emitted:
-
-- click
-- dblclick
-- object-added
-- object-translated
-- object-resized
-
+- `CanvasEvent.DBLCLICK` ("dblclick")
+- `CanvasEvent.CLICK` ("click")
+- `CanvasEvent.CONNECTOR_UPDATED` ("connector-updated")
+- `CanvasEvent.OBJECT_ADDED` ("object-added")
+- `CanvasEvent.OBJECT_REMOVED` ("object-translated")
+- `CanvasEvent.OBJECT_RESIZED` ("object-resized")
+- `CanvasEvent.MULTIPLE_OBJECTS_SELECTED` ("multiple-objects-selected")
 
 ### Remove event handler
 
