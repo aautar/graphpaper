@@ -2688,7 +2688,15 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         );
     };
 
-    this.initMultiObjectSelectionHandler = function() {
+    this.initMultiObjectSelectionHandler = function(_borderStyle, _backgroundStyle) {
+        if(typeof _borderStyle === 'undefined') {
+            _borderStyle = "1px solid rgb(158, 158, 158)";
+        }
+
+        if(typeof _backgroundStyle === 'undefined') {
+            _backgroundStyle = "rgba(153, 153, 153, 0.5)";
+        }
+
         // Create selection box DOM element
         const selBox = _window.document.createElement("div");
         selBox.classList.add("ia-selection-box");
@@ -2696,9 +2704,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selBox.style.position = "absolute";
         selBox.style.left = "0px";
         selBox.style.top = "0px";
-        selBox.style.border = "1px solid #666";
-        selBox.style.backgroundColor = "#999";
-        selBox.style.opacity = "0.5";
+        selBox.style.border = _borderStyle;
+        selBox.style.background = _backgroundStyle;
 
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 
@@ -3290,7 +3297,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
  * @param {Canvas} _canvas
  * @param {CanvasObject[]} _objects 
  */
-function GroupTransformationContainer(_canvas, _objects)  {
+function GroupTransformationContainer(_canvas, _objects, _borderStyle, _backgroundStyle)  {
 
     const self = this;
     const eventNameToHandlerFunc = new Map();
@@ -3313,6 +3320,14 @@ function GroupTransformationContainer(_canvas, _objects)  {
         objPositionRelativeToBoundingRect.push(rp);
     });
 
+    if(typeof _borderStyle === 'undefined') {
+        _borderStyle = "1px solid rgb(158, 158, 158)";
+    }
+
+    if(typeof _backgroundStyle === 'undefined') {
+        _backgroundStyle = "rgba(153, 153, 153, 0.5)";
+    }
+
     const selBox = window.document.createElement("div");
     selBox.style.display = "block";
     selBox.style.position = "absolute";
@@ -3320,9 +3335,8 @@ function GroupTransformationContainer(_canvas, _objects)  {
     selBox.style.top = `${currentTop}px`;
     selBox.style.width = `${boundingRect.getWidth()}px`;
     selBox.style.height = `${boundingRect.getHeight()}px`;    
-    selBox.style.border = "1px solid #666";
-    selBox.style.backgroundColor = "#999";
-    selBox.style.opacity = "0.5";
+    selBox.style.border = _borderStyle;
+    selBox.style.backgroundColor = _backgroundStyle;
 
     this.getContainerDomElement = function() {
         return selBox;

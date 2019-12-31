@@ -1233,7 +1233,15 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         );
     };
 
-    this.initMultiObjectSelectionHandler = function() {
+    this.initMultiObjectSelectionHandler = function(_borderStyle, _backgroundStyle) {
+        if(typeof _borderStyle === 'undefined') {
+            _borderStyle = "1px solid rgb(158, 158, 158)";
+        }
+
+        if(typeof _backgroundStyle === 'undefined') {
+            _backgroundStyle = "rgba(153, 153, 153, 0.5)";
+        }
+
         // Create selection box DOM element
         const selBox = _window.document.createElement("div");
         selBox.classList.add("ia-selection-box");
@@ -1241,9 +1249,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selBox.style.position = "absolute";
         selBox.style.left = "0px";
         selBox.style.top = "0px";
-        selBox.style.border = "1px solid #666";
-        selBox.style.backgroundColor = "#999";
-        selBox.style.opacity = "0.5";
+        selBox.style.border = _borderStyle;
+        selBox.style.background = _backgroundStyle;
 
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 
