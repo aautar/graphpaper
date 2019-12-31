@@ -133,6 +133,28 @@ A new Grid object is created as follows:
 
 The `Grid` constructor takes 3 parameters: the size of the grid, the color of the grid, and the style of the grid (GRID_STYLE.DOT or GRID_STYLE.LINE)
 
+### Enable multi-object selection
+Initialize multi-object selection on a canvas:
+
+```javascript
+canvas.initMultiObjectSelectionHandler()
+```
+
+Clicking and dragging (or touching and dragging) on an empty area of the canvas will now create a selection rectangle, once the user is done (releases mouse button or end touch interaction), the canvas will emit a `CanvasEvent.MULTIPLE_OBJECTS_SELECTED` event.
+
+```javascript
+canvas.on(GraphPaper.CanvasEvent.MULTIPLE_OBJECTS_SELECTED, function(e) {
+    console.log(e);
+});
+```
+
+The event object (e) has 2 fields:
+- `selectedObjects` contains objects within the selection rectangle
+- `boundingRect` is a bounding rectangle around the selected objects
+
+### Group (multi-object) transformation
+TBD
+
 ## Canvas Objects
 
 ### Get the position of an object
