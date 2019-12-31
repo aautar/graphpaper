@@ -2631,21 +2631,28 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         obj.resize(newWidth, newHeight);
     };
 
+    /**
+     * 
+     * @param {Number} _x 
+     * @param {Number} _y 
+     * @param {Element} _targetElem 
+     * @returns {Boolean}
+     */
     const handleMultiObjectSelectionStart = function(_x, _y, _targetElem) {
         if(multiObjectSelectionStarted) {
-            return; // already doing selection
+            return false; // already doing selection
         }
 
         if(_targetElem !== svgElem) { // hacky, but b/c of the SVG overlay, events propagate from the overlay
-            return;
+            return false;
         }
 
         if(objectIdBeingDragged !== null) {
-            return;
+            return false;
         }
 
         if(objectIdBeingResized !== null) {
-            return;
+            return false;
         }        
 
         multiObjectSelectionStartX = _x;
@@ -2667,6 +2674,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 'y': _y
             }
         );
+
+        return true;
     };
 
     const handleMultiObjectSelectionEnd = function() {
@@ -2723,11 +2732,17 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 return;
             }
 
-            handleMultiObjectSelectionStart(e.pageX, e.pageY, e.target);
+            const hasSelectionStarted = handleMultiObjectSelectionStart(e.pageX, e.pageY, e.target);
+            if(hasSelectionStarted) {
+                e.preventDefault(); // prevents text selection from triggering
+            }
         });
 
         _canvasDomElement.addEventListener('touchstart', function(e) {
-            handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
+            const hasSelectionStarted = handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
+            if(hasSelectionStarted) {
+                e.preventDefault(); // prevents text selection from triggering
+            }            
         });
     };
 
