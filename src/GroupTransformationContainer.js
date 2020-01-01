@@ -65,8 +65,8 @@ function GroupTransformationContainer(_canvas, _objects, _borderStyle, _backgrou
         accTranslateX += _dx;
         accTranslateY += _dy;
 
-        currentLeft = canvas.snapToGrid(boundingRect.getLeft() + accTranslateX);
-        currentTop = canvas.snapToGrid(boundingRect.getTop() + accTranslateY);
+        currentLeft = _canvas.snapToGrid(boundingRect.getLeft() + accTranslateX);
+        currentTop = _canvas.snapToGrid(boundingRect.getTop() + accTranslateY);
         selBox.style.left = `${currentLeft}px`;
         selBox.style.top = `${currentTop}px`;        
 
@@ -75,8 +75,8 @@ function GroupTransformationContainer(_canvas, _objects, _borderStyle, _backgrou
             const rp = objPositionRelativeToBoundingRect[i];
 
             obj.translate(
-                canvas.snapToGrid(currentLeft + rp.x), 
-                canvas.snapToGrid(currentTop + rp.y)
+                _canvas.snapToGrid(currentLeft + rp.x), 
+                _canvas.snapToGrid(currentTop + rp.y)
             );
         }
     };
