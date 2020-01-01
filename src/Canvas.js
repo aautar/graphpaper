@@ -1250,15 +1250,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         );
     };
 
-    this.initMultiObjectSelectionHandler = function(_borderStyle, _backgroundStyle) {
-        if(typeof _borderStyle === 'undefined') {
-            _borderStyle = "1px solid rgb(158, 158, 158)";
-        }
-
-        if(typeof _backgroundStyle === 'undefined') {
-            _backgroundStyle = "rgba(153, 153, 153, 0.5)";
-        }
-
+    /**
+     * @param {String[]} _selectionRectStyleCssClasses
+     */
+    this.initMultiObjectSelectionHandler = function(_selectionRectStyleCssClasses) {
         // Create selection box DOM element
         const selBox = _window.document.createElement("div");
         selBox.classList.add("ia-selection-box");
@@ -1266,8 +1261,17 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selBox.style.position = "absolute";
         selBox.style.left = "0px";
         selBox.style.top = "0px";
-        selBox.style.border = _borderStyle;
-        selBox.style.background = _backgroundStyle;
+
+        if(typeof _selectionRectStyleCssClasses === 'undefined' || _selectionRectStyleCssClasses.length === 0) {
+            selBox.style.border = "1px solid rgb(158, 158, 158)";
+            selBox.style.background = "rgba(153, 153, 153, 0.5)";            
+        } else {
+            // CSS classes will control styling for things GraphPaper doesn't care about
+            // (GraphPaper style concerns are handled via inline styles which will always take precedance)
+            _selectionRectStyleCssClasses.forEach(function(_class) {
+                selBox.classList.add(_class);
+            });
+        }
 
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 

@@ -8,6 +8,37 @@ const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 
+describe("GroupTransformationContainer", function() {
+    var canvasDomElement = null;
+    var pvWorkerMock = null;
+
+    beforeEach(function() {
+        window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
+        canvasDomElement = window.document.createElement('div');
+        pvWorkerMock = {
+            postMessage: function() { }
+        };    
+    });    
+
+    it("creates transformation rect DOM element", function() {        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const gtc = new GroupTransformationContainer(canvas, []);
+        canvas.attachGroupTransformationContainer(gtc);
+
+        expect(canvasDomElement.getElementsByClassName("ia-group-transformation-container").length).toBe(1);
+    });
+
+    it("creates transformation rect DOM element with given style classes", function() {        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const gtc = new GroupTransformationContainer(canvas, [], ['style1', 'style2']);
+        canvas.attachGroupTransformationContainer(gtc);
+        
+        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        expect(gtcDomElem.classList.contains('style1')).toBe(true);
+        expect(gtcDomElem.classList.contains('style2')).toBe(true);
+    });    
+});
+
 describe("GroupTransformationContainer.translateByOffset", function() {
     var canvasDomElement = null;
     var pvWorkerMock = null;

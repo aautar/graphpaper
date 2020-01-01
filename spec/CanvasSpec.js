@@ -535,16 +535,30 @@ describe("Canvas connectors", function() {
 });
 
 describe("Canvas.initMultiObjectSelectionHandler", function() {
-    const canvasDomElement = window.document.createElement('div');
-    const pvWorkerMock = {
-        postMessage: function() { }
-    };        
+    var canvasDomElement = null;
+    var pvWorkerMock = null;
+
+    beforeEach(function() {
+        window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
+        canvasDomElement = window.document.createElement('div');
+        pvWorkerMock = {
+            postMessage: function() { }
+        };    
+    });
 
     it("creates selection box DOM element", function() {
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
         canvas.initMultiObjectSelectionHandler();
-
         expect(canvasDomElement.getElementsByClassName("ia-selection-box").length).toBe(1);
+    });
+
+    it("creates selection box DOM element with given style classes", function() {
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.initMultiObjectSelectionHandler(['style1', 'style2']);
+
+        const elem = canvasDomElement.getElementsByClassName("ia-selection-box")[0];        
+        expect(elem.classList.contains('style1')).toBe(true);
+        expect(elem.classList.contains('style2')).toBe(true);
     });
 });
 

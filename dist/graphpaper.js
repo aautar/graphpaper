@@ -2706,15 +2706,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         );
     };
 
-    this.initMultiObjectSelectionHandler = function(_borderStyle, _backgroundStyle) {
-        if(typeof _borderStyle === 'undefined') {
-            _borderStyle = "1px solid rgb(158, 158, 158)";
-        }
-
-        if(typeof _backgroundStyle === 'undefined') {
-            _backgroundStyle = "rgba(153, 153, 153, 0.5)";
-        }
-
+    /**
+     * @param {String[]} _selectionRectStyleCssClasses
+     */
+    this.initMultiObjectSelectionHandler = function(_selectionRectStyleCssClasses) {
         // Create selection box DOM element
         const selBox = _window.document.createElement("div");
         selBox.classList.add("ia-selection-box");
@@ -2722,8 +2717,17 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         selBox.style.position = "absolute";
         selBox.style.left = "0px";
         selBox.style.top = "0px";
-        selBox.style.border = _borderStyle;
-        selBox.style.background = _backgroundStyle;
+
+        if(typeof _selectionRectStyleCssClasses === 'undefined' || _selectionRectStyleCssClasses.length === 0) {
+            selBox.style.border = "1px solid rgb(158, 158, 158)";
+            selBox.style.background = "rgba(153, 153, 153, 0.5)";            
+        } else {
+            // CSS classes will control styling for things GraphPaper doesn't care about
+            // (GraphPaper style concerns are handled via inline styles which will always take precedance)
+            _selectionRectStyleCssClasses.forEach(function(_class) {
+                selBox.classList.add(_class);
+            });
+        }
 
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 
@@ -3319,9 +3323,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
 
 /**
  * @param {Canvas} _canvas
- * @param {CanvasObject[]} _objects 
+ * @param {CanvasObject[]} _objects
+ * @param {String[]} _containerStyleCssClasses
  */
-function GroupTransformationContainer(_canvas, _objects, _borderStyle, _backgroundStyle)  {
+function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClasses)  {
 
     const self = this;
     const eventNameToHandlerFunc = new Map();
@@ -3344,23 +3349,27 @@ function GroupTransformationContainer(_canvas, _objects, _borderStyle, _backgrou
         objPositionRelativeToBoundingRect.push(rp);
     });
 
-    if(typeof _borderStyle === 'undefined') {
-        _borderStyle = "1px solid rgb(158, 158, 158)";
-    }
-
-    if(typeof _backgroundStyle === 'undefined') {
-        _backgroundStyle = "rgba(153, 153, 153, 0.5)";
-    }
-
     const selBox = window.document.createElement("div");
+    selBox.classList.add('ia-group-transformation-container');
     selBox.style.display = "block";
     selBox.style.position = "absolute";
     selBox.style.left = `${currentLeft}px`;
     selBox.style.top = `${currentTop}px`;
     selBox.style.width = `${boundingRect.getWidth()}px`;
     selBox.style.height = `${boundingRect.getHeight()}px`;    
-    selBox.style.border = _borderStyle;
-    selBox.style.backgroundColor = _backgroundStyle;
+
+    if(typeof _containerStyleCssClasses === 'undefined' || _containerStyleCssClasses.length === 0) {
+        // default styling if no classes are provided
+        selBox.style.border = "1px solid rgb(158, 158, 158)";
+        selBox.style.backgroundColor = "rgba(153, 153, 153, 0.5)";       
+    } else {
+        // CSS classes will control styling for things GraphPaper doesn't care about
+        // (GraphPaper style concerns are handled via inline styles which will always take precedance)
+        _containerStyleCssClasses.forEach(function(_class) {
+            selBox.classList.add(_class);
+        });
+    }
+
 
     this.getContainerDomElement = function() {
         return selBox;

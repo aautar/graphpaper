@@ -3,9 +3,10 @@ import {GroupTransformationContainerEvent} from './GroupTransformationContainerE
 
 /**
  * @param {Canvas} _canvas
- * @param {CanvasObject[]} _objects 
+ * @param {CanvasObject[]} _objects
+ * @param {String[]} _containerStyleCssClasses
  */
-function GroupTransformationContainer(_canvas, _objects, _borderStyle, _backgroundStyle)  {
+function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClasses)  {
 
     const self = this;
     const eventNameToHandlerFunc = new Map();
@@ -28,23 +29,27 @@ function GroupTransformationContainer(_canvas, _objects, _borderStyle, _backgrou
         objPositionRelativeToBoundingRect.push(rp);
     });
 
-    if(typeof _borderStyle === 'undefined') {
-        _borderStyle = "1px solid rgb(158, 158, 158)";
-    }
-
-    if(typeof _backgroundStyle === 'undefined') {
-        _backgroundStyle = "rgba(153, 153, 153, 0.5)";
-    }
-
     const selBox = window.document.createElement("div");
+    selBox.classList.add('ia-group-transformation-container');
     selBox.style.display = "block";
     selBox.style.position = "absolute";
     selBox.style.left = `${currentLeft}px`;
     selBox.style.top = `${currentTop}px`;
     selBox.style.width = `${boundingRect.getWidth()}px`;
     selBox.style.height = `${boundingRect.getHeight()}px`;    
-    selBox.style.border = _borderStyle;
-    selBox.style.backgroundColor = _backgroundStyle;
+
+    if(typeof _containerStyleCssClasses === 'undefined' || _containerStyleCssClasses.length === 0) {
+        // default styling if no classes are provided
+        selBox.style.border = "1px solid rgb(158, 158, 158)";
+        selBox.style.backgroundColor = "rgba(153, 153, 153, 0.5)";       
+    } else {
+        // CSS classes will control styling for things GraphPaper doesn't care about
+        // (GraphPaper style concerns are handled via inline styles which will always take precedance)
+        _containerStyleCssClasses.forEach(function(_class) {
+            selBox.classList.add(_class);
+        });
+    }
+
 
     this.getContainerDomElement = function() {
         return selBox;
