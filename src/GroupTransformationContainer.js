@@ -5,12 +5,23 @@ import {GroupTransformationContainerEvent} from './GroupTransformationContainerE
  * @param {Canvas} _canvas
  * @param {CanvasObject[]} _objects
  * @param {String[]} _containerStyleCssClasses
+ * @param {Number} _sizeAdjustmentPx
  */
-function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClasses)  {
+function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClasses, _sizeAdjustmentPx)  {
 
     const self = this;
     const eventNameToHandlerFunc = new Map();
-    var boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+
+    const calculateBoundingRect = function() {
+        var r = _canvas.calcBoundingRectForObjects(_objects);
+        if(_sizeAdjustmentPx) {
+            r = r.getUniformlyResizedCopy(_sizeAdjustmentPx);
+        }
+
+        return r;
+    };
+
+    var boundingRect = calculateBoundingRect();
 
     var accTranslateX = 0.0;
     var accTranslateY = 0.0;    
@@ -89,7 +100,7 @@ function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClass
     this.endTranslate = function() {
         accTranslateX = 0.0;
         accTranslateY = 0.0;
-        boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+        boundingRect = calculateBoundingRect();
     };
 
     this.initTranslateInteractionHandler = function() {
@@ -124,7 +135,7 @@ function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClass
         }
 
         eventNameToHandlerFunc.set(_eventName, allCallbacks);
-    };    
+    };
 
     const translateTouchStartHandler = function(e) {
         const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE_START) || [];

@@ -80,6 +80,19 @@ function Rectangle(_left, _top, _right, _bottom)  {
     };
 
     /**
+     * @param {Number} _resizeByPx
+     * @returns {Rectangle}
+     */
+    this.getUniformlyResizedCopy = function(_resizeByPx) {
+        return new Rectangle(
+            _left - _resizeByPx, 
+            _top - _resizeByPx, 
+            _right + _resizeByPx, 
+            _bottom + _resizeByPx
+        );
+    };
+
+    /**
      * Scale the bounding box by _gridSize, and return the points comprising the box
      * 
      * @param {Number} _gridSize

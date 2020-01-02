@@ -36,7 +36,66 @@ describe("GroupTransformationContainer", function() {
         const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
         expect(gtcDomElem.classList.contains('style1')).toBe(true);
         expect(gtcDomElem.classList.contains('style2')).toBe(true);
+    });
+
+    it("creates transformation rect DOM element with correct size", function() {        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        canvas.initMultiObjectSelectionHandler();
+        
+        const groupObjects = [
+            new CanvasObject(
+                "obj-123",
+                0, 
+                0, 
+                10, 
+                20, 
+                {}, 
+                window.document.createElement('div'), 
+                [window.document.createElement('div')], 
+                [window.document.createElement('div')]
+            )
+        ];
+
+        const gtc = new GroupTransformationContainer(canvas, groupObjects);
+        canvas.attachGroupTransformationContainer(gtc);
+
+        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        expect(gtcDomElem.style.left).toBe('0px');
+        expect(gtcDomElem.style.top).toBe('0px');        
+        expect(gtcDomElem.style.width).toBe('10px');
+        expect(gtcDomElem.style.height).toBe('20px');
     });    
+
+
+    it("creates transformation rect DOM element with correct adjusted size", function() {        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        canvas.initMultiObjectSelectionHandler();
+        
+        const groupObjects = [
+            new CanvasObject(
+                "obj-123",
+                0, 
+                0, 
+                10, 
+                20, 
+                {}, 
+                window.document.createElement('div'), 
+                [window.document.createElement('div')], 
+                [window.document.createElement('div')]
+            )
+        ];
+
+        const gtc = new GroupTransformationContainer(canvas, groupObjects, [], 10.0);
+        canvas.attachGroupTransformationContainer(gtc);
+
+        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        expect(gtcDomElem.style.left).toBe('-10px');
+        expect(gtcDomElem.style.top).toBe('-10px');        
+        expect(gtcDomElem.style.width).toBe('30px');
+        expect(gtcDomElem.style.height).toBe('40px');
+    });        
 });
 
 describe("GroupTransformationContainer.translateByOffset", function() {
