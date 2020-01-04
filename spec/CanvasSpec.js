@@ -595,6 +595,7 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
     });
 
     it("emits event on touchstart", function() {
+        jasmine.clock().install();
         const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
         
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
@@ -615,6 +616,8 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
         // Note that these events need to be dispatched from the SVG overlay element
         const svgOverlayElem = canvasDomElement.getElementsByTagNameNS("http://www.w3.org/2000/svg", "svg")[0];
         svgOverlayElem.dispatchEvent(event);
+
+        jasmine.clock().tick(1000);
 
         expect(selectionStartedCallback).toHaveBeenCalled()        
     });    
