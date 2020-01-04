@@ -491,6 +491,19 @@ function Rectangle(_left, _top, _right, _bottom)  {
     };
 
     /**
+     * @param {Number} _resizeByPx
+     * @returns {Rectangle}
+     */
+    this.getUniformlyResizedCopy = function(_resizeByPx) {
+        return new Rectangle(
+            _left - _resizeByPx, 
+            _top - _resizeByPx, 
+            _right + _resizeByPx, 
+            _bottom + _resizeByPx
+        );
+    };
+
+    /**
      * Scale the bounding box by _gridSize, and return the points comprising the box
      * 
      * @param {Number} _gridSize
@@ -1541,6 +1554,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         lastTouchY: null,
         lastTouchTime: null
     };
+
+    var touchHoldDelayTimeMs = 750.0;
+    var touchHoldStartInterval = null;
 
     var multiObjectSelectionStartX = 0.0;
     var multiObjectSelectionStartY = 0.0;
@@ -2731,6 +2747,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 
+        const handleTouchSelectionStart = function(e) {
+            const hasSelectionStarted = handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
+        };
+
         _canvasDomElement.addEventListener('mousedown', function(e) {
             if (e.which !== 1) {
                 return;
@@ -2743,11 +2763,18 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });
 
         _canvasDomElement.addEventListener('touchstart', function(e) {
-            const hasSelectionStarted = handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
-            if(hasSelectionStarted) {
-                e.preventDefault(); // prevents text selection from triggering
-            }            
+            touchHoldStartInterval = setInterval(function() {
+                handleTouchSelectionStart(e);
+            }, touchHoldDelayTimeMs);
         });
+
+        _canvasDomElement.addEventListener('touchend', function(e) {
+            clearInterval(touchHoldStartInterval);
+        });
+
+        _canvasDomElement.addEventListener('touchmove', function(e) {
+            clearInterval(touchHoldStartInterval);
+        });        
     };
 
     this.initTransformationHandlers = function() {
@@ -3325,12 +3352,23 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
  * @param {Canvas} _canvas
  * @param {CanvasObject[]} _objects
  * @param {String[]} _containerStyleCssClasses
+ * @param {Number} _sizeAdjustmentPx
  */
-function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClasses)  {
+function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClasses, _sizeAdjustmentPx)  {
 
     const self = this;
     const eventNameToHandlerFunc = new Map();
-    var boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+
+    const calculateBoundingRect = function() {
+        var r = _canvas.calcBoundingRectForObjects(_objects);
+        if(_sizeAdjustmentPx) {
+            r = r.getUniformlyResizedCopy(_sizeAdjustmentPx);
+        }
+
+        return r;
+    };
+
+    var boundingRect = calculateBoundingRect();
 
     var accTranslateX = 0.0;
     var accTranslateY = 0.0;    
@@ -3409,7 +3447,7 @@ function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClass
     this.endTranslate = function() {
         accTranslateX = 0.0;
         accTranslateY = 0.0;
-        boundingRect = _canvas.calcBoundingRectForObjects(_objects);
+        boundingRect = calculateBoundingRect();
     };
 
     this.initTranslateInteractionHandler = function() {
@@ -3444,7 +3482,7 @@ function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClass
         }
 
         eventNameToHandlerFunc.set(_eventName, allCallbacks);
-    };    
+    };
 
     const translateTouchStartHandler = function(e) {
         const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE_START) || [];

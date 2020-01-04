@@ -86,6 +86,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         lastTouchTime: null
     };
 
+    var touchHoldDelayTimeMs = 750.0;
+    var touchHoldStartInterval = null;
+
     var multiObjectSelectionStartX = 0.0;
     var multiObjectSelectionStartY = 0.0;
     var multiObjectSelectionEndX = 0.0;
@@ -1275,6 +1278,10 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         selectionBoxElem = _canvasDomElement.appendChild(selBox);
 
+        const handleTouchSelectionStart = function(e) {
+            const hasSelectionStarted = handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
+        };
+
         _canvasDomElement.addEventListener('mousedown', function(e) {
             if (e.which !== 1) {
                 return;
@@ -1287,11 +1294,18 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         });
 
         _canvasDomElement.addEventListener('touchstart', function(e) {
-            const hasSelectionStarted = handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
-            if(hasSelectionStarted) {
-                e.preventDefault(); // prevents text selection from triggering
-            }            
+            touchHoldStartInterval = setInterval(function() {
+                handleTouchSelectionStart(e);
+            }, touchHoldDelayTimeMs);
         });
+
+        _canvasDomElement.addEventListener('touchend', function(e) {
+            clearInterval(touchHoldStartInterval);
+        });
+
+        _canvasDomElement.addEventListener('touchmove', function(e) {
+            clearInterval(touchHoldStartInterval);
+        });        
     };
 
     this.initTransformationHandlers = function() {
