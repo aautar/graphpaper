@@ -2373,6 +2373,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
      */
     this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
         const searchFunc = (_searchData) => {
+            // !!! Note that a Canvas.getAccessibleRoutingPointsFromObjectAnchors() call must precede in order for connectorAnchorToNumValidRoutingPoints map to be populated and up-to-date
+            getAccessibleRoutingPointsFromObjectAnchors();
+
             const objAConnectorAnchors = _searchData.objectA.getConnectorAnchors();
             const objBConnectorAnchors = _searchData.objectB.getConnectorAnchors();
     
@@ -2421,7 +2424,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                     "cb": _onFound
                 }
             );
-        }, 0);
+        }, connectorRefreshBufferTime);
     };
 
     /**
