@@ -2374,7 +2374,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
         const searchFunc = (_searchData) => {
             // !!! Note that a Canvas.getAccessibleRoutingPointsFromObjectAnchors() call must precede in order for connectorAnchorToNumValidRoutingPoints map to be populated and up-to-date
-            getAccessibleRoutingPointsFromObjectAnchors();
+            getAccessibleRoutingPointsFromObjectAnchors([_objA, _objB]);
 
             const objAConnectorAnchors = _searchData.objectA.getConnectorAnchors();
             const objBConnectorAnchors = _searchData.objectB.getConnectorAnchors();
