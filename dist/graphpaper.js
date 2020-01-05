@@ -1534,6 +1534,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
     var currentPointVisiblityMap = null;
 
+    var connectorRefreshBufferTime = 6.94;
     const canvasObjects = [];
 
     /**
@@ -1749,10 +1750,16 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         );
     };
 
-    this.refreshAllConnectors = function() {
+    /**
+     * @param {Number} _bufferTimeMs
+     */
+    this.setConnectorRefreshBufferTime = function(_bufferTimeMs) {
+        connectorRefreshBufferTime = _bufferTimeMs;
+    };
 
-        // We'll try to coalesce refresh calls within 6.944ms
-        // For continuous calls, this corresponds to 144Hz, but actual
+    this.refreshAllConnectors = function() {
+        // We'll try to coalesce refresh calls within refreshBatchBufferTimeMs 
+        // Default is 6.944ms, for continuous calls, this corresponds to 144Hz, but actual
         // performance is less given web worker overhead & path computation cost
         
         if(connectorRefreshTimeout !== null) {
@@ -1762,7 +1769,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         connectorRefreshTimeout = setTimeout(function() {
             connectorRefreshTimeout = null;
             refreshAllConnectorsInternal();
-        }, 6.94);
+        }, connectorRefreshBufferTime);
     };
 
     _connectorRoutingWorker.onmessage = function(_msg) {
