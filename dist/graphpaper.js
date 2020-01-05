@@ -1556,6 +1556,21 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         lastTouchTime: null
     };
 
+    var debugPanelElem  = null;
+    var isShowingDebugPanel = false;
+
+    const metrics = {
+        connectorRoutingWorker: {
+            executionTime: null,
+            numRoutingPoints: null,
+            numBoundaryLines: null
+        },
+        refreshAllConnectorsInternal: {
+            executionTime: null
+        },
+        connectorsRefreshTime: null
+    };
+
     var touchHoldDelayTimeMs = 750.0;
     var touchHoldStartInterval = null;
 
@@ -1719,6 +1734,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };    
 
     const refreshAllConnectorsInternal = function() {
+        const executionTimeT1 = new Date();
         const connectorDescriptors = [];
         objectConnectors.forEach(function(_c) {
             connectorDescriptors.push(_c.getDescriptor());
@@ -1748,6 +1764,8 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 routingPointsAroundAnchorFloat64Array.buffer
             ]
         );
+
+        metrics.refreshAllConnectorsInternal.executionTime = (new Date()) - executionTimeT1;
     };
 
     /**
@@ -1773,6 +1791,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     };
 
     _connectorRoutingWorker.onmessage = function(_msg) {
+
+        const connectorsRefreshTimeT1 = new Date();
+
         const connectorDescriptors = _msg.data.connectorDescriptors;
         const getConnectorDescriptorById = function(_id) {
             for(let i=0; i<connectorDescriptors.length; i++) {
@@ -1792,6 +1813,13 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
                 emitEvent(CanvasEvent.CONNECTOR_UPDATED, { 'connector': _c });
             }
         });        
+
+        metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
+
+        metrics.connectorRoutingWorker.executionTime = _msg.data.metrics.overallTime;
+        metrics.connectorRoutingWorker.numBoundaryLines = _msg.data.metrics.numBoundaryLines;
+        metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
+        refreshDebugMetricsPanel();
     };
 
     var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {
@@ -2452,6 +2480,37 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         };
 
         emitEvent(CanvasEvent.DBLCLICK, eventData);
+    };
+
+    const refreshDebugMetricsPanel = function() {
+        if(!isShowingDebugPanel) {
+            return;
+        }
+
+        debugPanelElem.innerHTML = `
+            <p>refreshAllConnectorsInternal.executionTime = ${metrics.refreshAllConnectorsInternal.executionTime}</p>
+            <p>connectorRoutingWorker.executionTime = ${metrics.connectorRoutingWorker.executionTime}</p>
+            <p>connectorRoutingWorker.numRoutingPoints = ${metrics.connectorRoutingWorker.numRoutingPoints}</p>
+            <p>connectorRoutingWorker.numBoundaryLines = ${metrics.connectorRoutingWorker.numBoundaryLines}</p>
+            <p>connectorsRefreshTime = ${metrics.connectorsRefreshTime}</p>
+        `;
+    };
+
+    this.initDebugMetricsPanel = function() {
+        debugPanelElem = _window.document.createElement("div");
+        debugPanelElem.classList.add("graphpaper-debug-panel");
+        debugPanelElem.style.display = "block";
+        debugPanelElem.style.position = "fixed";
+        debugPanelElem.style.right = "0px";
+        debugPanelElem.style.top = "0px";
+        debugPanelElem.style.width = "400px";
+        debugPanelElem.style.height = "200px";
+        debugPanelElem.style.color = "#fff";
+        debugPanelElem.style.padding = "15px";
+        debugPanelElem.style.backgroundColor = "rgba(0,0,0,0.75)";
+        document.body.appendChild(debugPanelElem);
+
+        isShowingDebugPanel = true;
     };
 
     /**
