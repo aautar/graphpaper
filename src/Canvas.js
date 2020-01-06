@@ -94,7 +94,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         connectorRoutingWorker: {
             executionTime: null,
             numRoutingPoints: null,
-            numBoundaryLines: null
+            numBoundaryLines: null,
+            msgDecodeTime: null,
+            pointVisibilityMapCreationTime: null
         },
         refreshAllConnectorsInternal: {
             executionTime: null
@@ -350,6 +352,9 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         metrics.connectorRoutingWorker.executionTime = _msg.data.metrics.overallTime;
         metrics.connectorRoutingWorker.numBoundaryLines = _msg.data.metrics.numBoundaryLines;
         metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
+        metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
+        metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
+
         refreshDebugMetricsPanel();
     };
 
@@ -1020,9 +1025,11 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
 
         debugPanelElem.innerHTML = `
             <p>refreshAllConnectorsInternal.executionTime = ${metrics.refreshAllConnectorsInternal.executionTime}</p>
-            <p>connectorRoutingWorker.executionTime = ${metrics.connectorRoutingWorker.executionTime}</p>
-            <p>connectorRoutingWorker.numRoutingPoints = ${metrics.connectorRoutingWorker.numRoutingPoints}</p>
-            <p>connectorRoutingWorker.numBoundaryLines = ${metrics.connectorRoutingWorker.numBoundaryLines}</p>
+            <p>connectorRoutingWorker.executionTime = ${metrics.connectorRoutingWorker.executionTime}</p>            
+            <p>-- connectorRoutingWorker.msgDecodeTime = ${metrics.connectorRoutingWorker.msgDecodeTime}</p>
+            <p>-- connectorRoutingWorker.pointVisibilityMapCreationTime = ${metrics.connectorRoutingWorker.pointVisibilityMapCreationTime}</p>
+            <p>-- connectorRoutingWorker.numRoutingPoints = ${metrics.connectorRoutingWorker.numRoutingPoints}</p>
+            <p>-- connectorRoutingWorker.numBoundaryLines = ${metrics.connectorRoutingWorker.numBoundaryLines}</p>
             <p>connectorsRefreshTime = ${metrics.connectorsRefreshTime}</p>
         `;
     };
@@ -1034,7 +1041,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         debugPanelElem.style.position = "fixed";
         debugPanelElem.style.right = "0px";
         debugPanelElem.style.top = "0px";
-        debugPanelElem.style.width = "400px";
+        debugPanelElem.style.width = "450px";
         debugPanelElem.style.height = "200px";
         debugPanelElem.style.color = "#fff";
         debugPanelElem.style.padding = "15px";

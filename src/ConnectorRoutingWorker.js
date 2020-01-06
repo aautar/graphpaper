@@ -72,14 +72,18 @@ onmessage = function(_msg) {
 
     const connectorDescriptors = _msg.data.connectorDescriptors;
 
+    const msgDecodeTimeT1 = new Date();
     const routingPointsSet = new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPoints));
     const boundaryLinesSet = new LineSet(convertArrayBufferToFloat64Array(_msg.data.boundaryLines));    
     const routingPointsAroundAnchorSet = new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPointsAroundAnchor));    
+    metrics.msgDecodeTime = (new Date()) - msgDecodeTimeT1;
     
+    const pointVisibilityMapCreationTimeT1 = new Date();
     const currentPointVisiblityMap = new PointVisibilityMap(
         routingPointsSet,
         boundaryLinesSet
     );
+    metrics.pointVisibilityMapCreationTime = (new Date()) - pointVisibilityMapCreationTimeT1;
 
     connectorDescriptors.forEach(function(_cd) {
         const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
@@ -89,10 +93,10 @@ onmessage = function(_msg) {
         _cd.svgPath = pathData.svgPath;
         _cd.pointsInPath = pointsInPathPointSet.toFloat64Array().buffer;
     });
-
-    metrics.overallTime = (new Date()) - overallTimeT1;
+    
     metrics.numRoutingPoints = routingPointsSet.count();
     metrics.numBoundaryLines = boundaryLinesSet.count();
+    metrics.overallTime = (new Date()) - overallTimeT1;
 
     postMessage(
         {
