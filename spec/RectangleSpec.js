@@ -153,3 +153,15 @@ describe("Rectangle.getHeight", function() {
     expect(r.getHeight()).toBe(198);
   });
 });
+
+describe("Rectangle.getUniformlyResizedCopy", function() {
+  it("returns correctly sized Rectangle", function() {
+    const r = new Rectangle(100, 100, 200, 200);
+    const rScaled = r.getUniformlyResizedCopy(2);
+
+    expect(rScaled.getTop()).toBe(98);
+    expect(rScaled.getLeft()).toBe(98);
+    expect(rScaled.getRight()).toBe(202);
+    expect(rScaled.getBottom()).toBe(202);
+  });
+});
