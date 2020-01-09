@@ -1,9 +1,9 @@
-import {Point} from './Point';
-import {PointSet} from './PointSet';
-import {LineSet} from './LineSet';
-import {PointVisibilityMap} from './PointVisibilityMap';
-import {SvgPathBuilder} from './SvgPathBuilder';
-import {Line} from './Line';
+import {Point} from '../Point';
+import {PointSet} from '../PointSet';
+import {LineSet} from '../LineSet';
+import {PointVisibilityMap} from '../PointVisibilityMap';
+import {SvgPathBuilder} from '../SvgPathBuilder';
+import {Line} from '../Line';
 
 /**
  * 

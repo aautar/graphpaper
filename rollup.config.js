@@ -44,18 +44,18 @@ export default [
     ],        
   },  
   {
-    input: 'src/ConnectorRoutingWorker.js',
+    input: 'src/Workers/ConnectorRoutingWorker.js',
     output: {
       format: 'iife',
-      file: 'dist/connector-routing-worker.js',
+      file: 'dist/workers/connector-routing-worker.js',
       name: 'ConnectorRoutingWorker'
     }
   },
   {
-    input: 'src/ConnectorRoutingWorker.js',
+    input: 'src/Workers/ConnectorRoutingWorker.js',
     output: {
       format: 'iife',
-      file: 'dist/connector-routing-worker.min.js',
+      file: 'dist/workers/connector-routing-worker.min.js',
       name: 'ConnectorRoutingWorker',
       sourcemap: true  
     },

@@ -9,6 +9,10 @@ const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 
+global.Worker = function() { 
+    this.postMessage = function() { }
+};
+
 describe("Canvas", function() {
 
     const makeCanvasObject = function(_id, _x, _y, _width, _height) {

@@ -39,8 +39,7 @@
 	
         const canvas = new GraphPaper.Canvas(
             document.getElementById('paper'), 
-            window,
-            new Worker('../dist/connector-routing-worker.js')
+            window
         );
 
         canvas.initInteractionHandlers();

@@ -10,7 +10,8 @@ import {GroupTransformationContainer} from './GroupTransformationContainer';
 import {Connector} from './Connector';
 import {PointVisibilityMap} from './PointVisibilityMap';
 import {GRID_STYLE, Grid} from './Grid';
-import { GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
+import {GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
+import {ConnectorRoutingWorker as ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
 
 /**
  * @callback HandleCanvasInteractionCallback
@@ -21,9 +22,8 @@ import { GroupTransformationContainerEvent } from './GroupTransformationContaine
  /**
  * @param {Element} _canvasDomElement 
  * @param {Window} _window
- * @param {Worker} _connectorRoutingWorker
  */
-function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
+function Canvas(_canvasDomElement, _window) {
 
     const self = this;
 
@@ -126,6 +126,44 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
     const connectorAnchorToNumValidRoutingPoints = new Map();
 
     var connectorRefreshTimeout = null;
+
+    // Setup ConnectorRoutingWorker
+    const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
+    const connectorRoutingWorker = new Worker(workerUrl);
+    connectorRoutingWorker.onmessage = function(_msg) {
+
+        const connectorsRefreshTimeT1 = new Date();
+
+        const connectorDescriptors = _msg.data.connectorDescriptors;
+        const getConnectorDescriptorById = function(_id) {
+            for(let i=0; i<connectorDescriptors.length; i++) {
+                if(connectorDescriptors[i].id === _id) {
+                    return connectorDescriptors[i];
+                }
+            }
+
+            return null;
+        };
+
+        objectConnectors.forEach(function(_c) {
+            const descriptor = getConnectorDescriptorById(_c.getId());
+            if(descriptor) {
+                const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
+                _c.refresh(descriptor.svgPath, ps.toArray());
+                emitEvent(CanvasEvent.CONNECTOR_UPDATED, { 'connector': _c });
+            }
+        });        
+
+        metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
+
+        metrics.connectorRoutingWorker.executionTime = _msg.data.metrics.overallTime;
+        metrics.connectorRoutingWorker.numBoundaryLines = _msg.data.metrics.numBoundaryLines;
+        metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
+        metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
+        metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
+
+        refreshDebugMetricsPanel();
+    };    
 
     /**
      * @returns {PointVisibilityMap}
@@ -283,7 +321,7 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
         const routingPointsAroundAnchorFloat64Array = routingPointsAroundAnchor.toFloat64Array();
         const routingPointsFloat64Array = allRoutingPoints.toFloat64Array();
         const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
-        _connectorRoutingWorker.postMessage(
+        connectorRoutingWorker.postMessage(
             {
                 "gridSize": self.getGridSize(),
                 "connectorDescriptors": connectorDescriptors,
@@ -321,41 +359,6 @@ function Canvas(_canvasDomElement, _window, _connectorRoutingWorker) {
             connectorRefreshTimeout = null;
             refreshAllConnectorsInternal();
         }, connectorRefreshBufferTime);
-    };
-
-    _connectorRoutingWorker.onmessage = function(_msg) {
-
-        const connectorsRefreshTimeT1 = new Date();
-
-        const connectorDescriptors = _msg.data.connectorDescriptors;
-        const getConnectorDescriptorById = function(_id) {
-            for(let i=0; i<connectorDescriptors.length; i++) {
-                if(connectorDescriptors[i].id === _id) {
-                    return connectorDescriptors[i];
-                }
-            }
-
-            return null;
-        };
-
-        objectConnectors.forEach(function(_c) {
-            const descriptor = getConnectorDescriptorById(_c.getId());
-            if(descriptor) {
-                const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
-                _c.refresh(descriptor.svgPath, ps.toArray());
-                emitEvent(CanvasEvent.CONNECTOR_UPDATED, { 'connector': _c });
-            }
-        });        
-
-        metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
-
-        metrics.connectorRoutingWorker.executionTime = _msg.data.metrics.overallTime;
-        metrics.connectorRoutingWorker.numBoundaryLines = _msg.data.metrics.numBoundaryLines;
-        metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
-        metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
-        metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
-
-        refreshDebugMetricsPanel();
     };
 
     var makeNewConnector = function(_anchorStart, _anchorEnd, _containerDomElement) {
