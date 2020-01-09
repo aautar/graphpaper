@@ -13,6 +13,14 @@ global.Worker = function() {
     this.postMessage = function() { }
 };
 
+global.Blob = function() {
+
+};
+
+global.URL = {
+    createObjectURL: () => { return '#'; }
+};
+
 describe("Canvas", function() {
 
     const makeCanvasObject = function(_id, _x, _y, _width, _height) {

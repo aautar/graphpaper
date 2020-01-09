@@ -12,6 +12,14 @@ global.Worker = function() {
     this.postMessage = function() { }
 };
 
+global.Blob = function() {
+
+};
+
+global.URL = {
+    createObjectURL: () => { return '#'; }
+};
+
 describe("GroupTransformationContainer", function() {
     var canvasDomElement = null;
     var pvWorkerMock = null;
