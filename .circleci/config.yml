@@ -27,8 +27,8 @@ jobs:
           command: sudo npm install --global rollup
       
       - run: 
-          name: Creating /dist files with rollup
-          command: rollup -c
+          name: Building /dist files
+          command: npm run build
 
       - run:
           name: Authenticate with registry
