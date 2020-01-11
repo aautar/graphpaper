@@ -17,6 +17,6 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/jasmine", 
-    "build": "node build/stringify-workers.js && rollup -c"
+    "build": "rollup -c"
   }
 }
