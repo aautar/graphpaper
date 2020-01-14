@@ -1,5 +1,5 @@
 import babel from 'rollup-plugin-babel';
-import stringifyWorkersPlugin from './build/StringifyWorkersPlugin';
+import stringifyWorker from './build/rollup-plugin-stringify-worker';
 
 const babelConfig = {
   babelrc: false,
@@ -43,7 +43,12 @@ export default [
     },
     plugins: [
       babel(babelConfig),
-      stringifyWorkersPlugin()
+      stringifyWorker(
+        {
+          "srcBundleName": "connector-routing-worker.min.js",
+          "dest": "src/Workers/ConnectorRoutingWorker.string.js"
+        }
+      )
     ],        
   },  
   {

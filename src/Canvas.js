@@ -11,7 +11,7 @@ import {Connector} from './Connector';
 import {PointVisibilityMap} from './PointVisibilityMap';
 import {GRID_STYLE, Grid} from './Grid';
 import {GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
-import {ConnectorRoutingWorker as ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
+import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
 
 /**
  * @callback HandleCanvasInteractionCallback

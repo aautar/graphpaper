@@ -1,4 +1,4 @@
-const ConnectorRoutingWorker = `(function () {
+const ConnectorRoutingWorkerJsString = `(function () {
   'use strict';
 
   function _toConsumableArray(arr) {
@@ -38,4 +38,4 @@ const ConnectorRoutingWorker = `(function () {
   var computeConnectorPath=function computeConnectorPath(a,b,c){var d=Point.fromArray(a.anchor_start_centroid_arr),e=Point.fromArray(a.anchor_end_centroid_arr),f=a.marker_start_size,g=a.marker_end_size,h=a.curvature_px,i=b.findDistanceToPointClosestTo(d),j=b.findPointsCloseTo(d,i).findPointClosestTo(e),k=b.findPointsCloseTo(e,i).findPointClosestTo(d),l=c.computeRoute(j,k),m=l.toArray(),n=d,o=e;if(0<f&&1<=m.length){var q=new Line(m[0],d).createShortenedLine(0,f);n=q.getEndPoint();}if(0<g&&1<=m.length){var r=new Line(m[m.length-1],e).createShortenedLine(0,g);o=r.getEndPoint();}var p=[n].concat(_toConsumableArray(m),[o]);return {svgPath:SvgPathBuilder.pointsToPath(p,h),pointsInPath:p}},convertArrayBufferToFloat64Array=function convertArrayBufferToFloat64Array(a){return new Float64Array(a)};onmessage=function onmessage(a){var b={overallTime:null},c=new Date,d=a.data.gridSize,e=a.data.connectorDescriptors,f=new Date,g=new PointSet(convertArrayBufferToFloat64Array(a.data.routingPoints)),h=new LineSet(convertArrayBufferToFloat64Array(a.data.boundaryLines)),i=new PointSet(convertArrayBufferToFloat64Array(a.data.routingPointsAroundAnchor));b.msgDecodeTime=new Date-f;var j=new Date,k=new PointVisibilityMap(g,h);b.pointVisibilityMapCreationTime=new Date-j,e.forEach(function(a){var b=computeConnectorPath(a,i,k),c=new PointSet(b.pointsInPath);a.svgPath=b.svgPath,a.pointsInPath=c.toFloat64Array().buffer;}),b.numRoutingPoints=g.count(),b.numBoundaryLines=h.count(),b.overallTime=new Date-c,postMessage({connectorDescriptors:e,metrics:b});};
 
 }());
-`; export { ConnectorRoutingWorker }
+`; export { ConnectorRoutingWorkerJsString }

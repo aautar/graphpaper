@@ -1481,7 +1481,7 @@ var GraphPaper = (function (exports) {
 
     }
 
-    const ConnectorRoutingWorker = `(function () {
+    const ConnectorRoutingWorkerJsString = `(function () {
   'use strict';
 
   function _toConsumableArray(arr) {
@@ -1637,7 +1637,7 @@ var GraphPaper = (function (exports) {
         var connectorRefreshTimeout = null;
 
         // Setup ConnectorRoutingWorker
-        const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorker ]));
+        const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
         const connectorRoutingWorker = new Worker(workerUrl);
         connectorRoutingWorker.onmessage = function(_msg) {
 
