@@ -33,8 +33,7 @@ Unless otherwise specified, units for size and positioning are [CSS pixels](http
 ```javascript
 const canvas = new GraphPaper.Canvas(
     document.getElementById('paper'),                    // div to use
-    window,                                              // parent window 
-    new Worker('../dist/connector-routing-worker.js')    // required worker for connector routing
+    window                                              // parent window 
 );
 
 canvas.initTransformationHandlers();

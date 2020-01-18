@@ -8,6 +8,18 @@ const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 
+global.Worker = function() { 
+    this.postMessage = function() { }
+};
+
+global.Blob = function() {
+
+};
+
+global.URL = {
+    createObjectURL: () => { return '#'; }
+};
+
 describe("GroupTransformationContainer", function() {
     var canvasDomElement = null;
     var pvWorkerMock = null;
