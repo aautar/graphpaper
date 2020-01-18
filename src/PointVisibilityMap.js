@@ -45,8 +45,9 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
                 const ijLine = new Line(freePointsArr[i], freePointsArr[j]);
 
                 if(!doesLineIntersectAnyBoundaryLines(ijLine)) {
-                    pointToVisibleSet[i].push(freePointsArr[j]);
-                    pointToVisibleSet[j].push(freePointsArr[i]);
+                    // record indices into freePointsArr
+                    pointToVisibleSet[i].push(j);
+                    pointToVisibleSet[j].push(i);
                 }
             }
         }
@@ -56,7 +57,12 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         for(let i=0; i<freePointsArr.length; i++) {
 
             if(freePointsArr[i].isEqual(_currentPoint)) {
-                const visiblePoints = pointToVisibleSet[i];
+                const visiblePointIndices = pointToVisibleSet[i];
+                const visiblePoints = [];
+                visiblePointIndices.forEach((_vpIdx) => {
+                    visiblePoints.push(freePointsArr[_vpIdx]);
+                });
+
                 return visiblePoints;
             }            
         }
