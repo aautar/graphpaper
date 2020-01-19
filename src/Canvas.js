@@ -129,6 +129,12 @@ function Canvas(_canvasDomElement, _window) {
 
     // Setup ConnectorRoutingWorker
     const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
+    
+    const connectorCompleteComputeWorker = new Worker(workerUrl);
+    connectorCompleteComputeWorker.onmessage = function(_msg) {
+
+    };
+
     const connectorRoutingWorker = new Worker(workerUrl);
     connectorRoutingWorker.onmessage = function(_msg) {
 

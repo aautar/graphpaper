@@ -618,7 +618,13 @@
                 }
 
             }
+        };
 
+        /**
+         * @returns {Array}
+         */
+        this.getPointToVisibleSetData = function() {
+            return pointToVisibleSet;
         };
 
         /**
@@ -870,20 +876,29 @@
         return new Float64Array(_ab);
     };
 
-    onmessage = function(_msg) {
 
+    const requestQueue = [];
+    const processRequestQueue = function() {
+        if(requestQueue.length === 0) {
+            return;
+        }
+
+        // grab last request, toss the rest
+        const lastRequest = requestQueue.pop();
+        requestQueue.length = 0;
+
+        // process request
         const metrics = {};
         metrics.overallTime = null;
         const overallTimeT1 = new Date();
 
-        const gridSize = _msg.data.gridSize;
-
-        const connectorDescriptors = _msg.data.connectorDescriptors;
+        const gridSize = lastRequest.gridSize;
+        const connectorDescriptors = lastRequest.connectorDescriptors;
 
         const msgDecodeTimeT1 = new Date();
-        const routingPointsSet = new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPoints));
-        const boundaryLinesSet = new LineSet(convertArrayBufferToFloat64Array(_msg.data.boundaryLines));    
-        const routingPointsAroundAnchorSet = new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPointsAroundAnchor));    
+        const routingPointsSet = new PointSet(convertArrayBufferToFloat64Array(lastRequest.routingPoints));
+        const boundaryLinesSet = new LineSet(convertArrayBufferToFloat64Array(lastRequest.boundaryLines));    
+        const routingPointsAroundAnchorSet = new PointSet(convertArrayBufferToFloat64Array(lastRequest.routingPointsAroundAnchor));    
         metrics.msgDecodeTime = (new Date()) - msgDecodeTimeT1;
         
         const pointVisibilityMapCreationTimeT1 = new Date();
@@ -908,11 +923,18 @@
 
         postMessage(
             {
+                "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
                 "connectorDescriptors": connectorDescriptors,
                 "metrics": metrics
             }
         );
 
+    };
+
+    setInterval(processRequestQueue, 0);
+
+    onmessage = function(_req) {
+        requestQueue.push(_req.data);
     };
 
 }());

@@ -138,7 +138,13 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
             }
 
         }
+    };
 
+    /**
+     * @returns {Array}
+     */
+    this.getPointToVisibleSetData = function() {
+        return pointToVisibleSet;
     };
 
     /**
