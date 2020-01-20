@@ -21,6 +21,8 @@ global.URL = {
     createObjectURL: () => { return '#'; }
 };
 
+jasmine.clock().install();
+
 describe("Canvas", function() {
 
     const makeCanvasObject = function(_id, _x, _y, _width, _height) {
@@ -607,7 +609,6 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
     });
 
     it("emits event on touchstart", function() {
-        jasmine.clock().install();
         const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
         
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
@@ -631,6 +632,6 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
 
         jasmine.clock().tick(1000);
 
-        expect(selectionStartedCallback).toHaveBeenCalled()        
+        expect(selectionStartedCallback).toHaveBeenCalled();      
     });    
 });

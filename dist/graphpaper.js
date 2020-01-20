@@ -1646,6 +1646,7 @@ var GraphPaper = (function (exports) {
          */
         const connectorAnchorToNumValidRoutingPoints = new Map();
 
+        var connectorRefreshStartTime = null;
         var connectorRefreshTimeout = null;
 
         // Setup ConnectorRoutingWorker
@@ -1876,14 +1877,19 @@ var GraphPaper = (function (exports) {
         this.refreshAllConnectors = function() {
             // We'll try to coalesce refresh calls within refreshBatchBufferTimeMs 
             // Default is 6.944ms, for continuous calls, this corresponds to 144Hz, but actual
-            // performance is less given web worker overhead & path computation cost
-            
-            if(connectorRefreshTimeout !== null) {
-                clearTimeout(connectorRefreshTimeout);
+            // performance is less given web worker overhead, path computation cost, and browser minimum limit on setTimeout
+
+            if(connectorRefreshStartTime !== null) {
+                const tdelta = (new Date()) - connectorRefreshStartTime;
+                if(tdelta < connectorRefreshBufferTime) {
+                    return; // already scheduled
+                }
             }
 
+            connectorRefreshStartTime = new Date();        
             connectorRefreshTimeout = setTimeout(function() {
                 connectorRefreshTimeout = null;
+                connectorRefreshStartTime = null;
                 refreshAllConnectorsInternal();
             }, connectorRefreshBufferTime);
         };
