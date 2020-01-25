@@ -117,7 +117,7 @@ const processRequestQueue = function() {
 
 };
 
-setInterval(processRequestQueue, 0);
+setInterval(processRequestQueue, 6);
 
 onmessage = function(_req) {
     requestQueue.push(_req.data);
