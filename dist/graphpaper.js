@@ -935,7 +935,9 @@ var GraphPaper = (function (exports) {
     }
 
     const ConnectorEvent = Object.freeze({
-        CLICK: 'connector-click'
+        CLICK: 'connector-click',
+        MOUSE_ENTER: 'connector-mouse-enter',
+        MOUSE_LEAVE: 'connector-mouse-leave'
     });
 
     /**
@@ -986,6 +988,20 @@ var GraphPaper = (function (exports) {
                 handler({"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
             });
         });
+
+        pathElem.addEventListener("mouseenter", function(e) {
+            const observers = eventNameToHandlerFunc.get(ConnectorEvent.MOUSE_ENTER) || [];
+            observers.forEach(function(handler) {
+                handler({"connector":self, "pointerAtX": e.pageX, "pointerAtY": e.pageY});
+            });
+        });
+
+        pathElem.addEventListener("mouseleave", function(e) {
+            const observers = eventNameToHandlerFunc.get(ConnectorEvent.MOUSE_LEAVE) || [];
+            observers.forEach(function(handler) {
+                handler({"connector":self });
+            });
+        });        
 
         /**
          * @type {Element}

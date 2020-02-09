@@ -57,6 +57,14 @@
                 console.log(e);
             });
 
+            c.on(GraphPaper.ConnectorEvent.MOUSE_ENTER, function(e) {
+                console.log(`Connecter.MOUSE_ENTER ${e.connector.getId()}`);
+            });
+
+            c.on(GraphPaper.ConnectorEvent.MOUSE_LEAVE, function(e) {
+                console.log(`Connecter.MOUSE_LEAVE ${e.connector.getId()}`);
+            });            
+
             return c;
         });
 

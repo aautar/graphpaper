@@ -52,6 +52,20 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         });
     });
 
+    pathElem.addEventListener("mouseenter", function(e) {
+        const observers = eventNameToHandlerFunc.get(ConnectorEvent.MOUSE_ENTER) || [];
+        observers.forEach(function(handler) {
+            handler({"connector":self, "pointerAtX": e.pageX, "pointerAtY": e.pageY});
+        });
+    });
+
+    pathElem.addEventListener("mouseleave", function(e) {
+        const observers = eventNameToHandlerFunc.get(ConnectorEvent.MOUSE_LEAVE) || [];
+        observers.forEach(function(handler) {
+            handler({"connector":self });
+        });
+    });        
+
     /**
      * @type {Element}
      */
