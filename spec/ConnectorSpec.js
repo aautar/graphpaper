@@ -192,3 +192,59 @@ describe("ConnectorAnchor.getMidpointDirection", function() {
         expect(mpDir.toString()).toBe(`1 0`);
     });
 });
+
+describe("Connector.on", function() {
+    it("adds handler", function() {
+        const clickCallback = jasmine.createSpy("click-callback");
+        
+        const anchorStartElem = window.document.createElement('div');
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+
+        const anchorEndElem = window.document.createElement('div');
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+
+        const containerDomElem = window.document.createElement('div');
+
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
+        connector.appendPathToContainerDomElement();
+        connector.on('connector-click', clickCallback);
+
+        const event = new window.MouseEvent('click', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+
+        containerDomElem.getElementsByTagNameNS("http://www.w3.org/2000/svg", "path")[0].dispatchEvent(event);
+
+        expect(clickCallback).toHaveBeenCalled();        
+    }); 
+});
+
+describe("Connector.off", function() {
+    it("removes handler", function() {
+        const clickCallback = jasmine.createSpy("click-callback");
+        
+        const anchorStartElem = window.document.createElement('div');
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+
+        const anchorEndElem = window.document.createElement('div');
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+
+        const containerDomElem = window.document.createElement('div');
+        
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
+        connector.appendPathToContainerDomElement();
+        connector.on('connector-click', clickCallback);
+        connector.off('connector-click', clickCallback);
+
+        const event = new window.MouseEvent('click', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+        containerDomElem.getElementsByTagNameNS("http://www.w3.org/2000/svg", "path")[0].dispatchEvent(event);
+
+        expect(clickCallback).not.toHaveBeenCalled();        
+    }); 
+});

@@ -195,7 +195,6 @@ describe("Canvas", function() {
 
 
     it("emits dblclick event", function() {
-
         const dblclickCallback = jasmine.createSpy("dblclick-callback");
         
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
@@ -214,7 +213,6 @@ describe("Canvas", function() {
     });
 
     it("emits click event", function() {
-
         const clickCallback = jasmine.createSpy("click-callback");
         
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
@@ -326,7 +324,6 @@ describe("Canvas", function() {
         
 
     it("off removes handler", function() {
-
         const dblclickCallback = jasmine.createSpy("dblclick-callback");
         
         const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);

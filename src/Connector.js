@@ -281,7 +281,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      * @param {*} _callback 
      */
     this.off = function(_eventName, _callback) {
-        const allCallbacks = eventHandlers.get(_eventName) || [];
+        const allCallbacks = eventNameToHandlerFunc.get(_eventName) || [];
 
         for(let i=0; i<allCallbacks.length; i++) {
             if(allCallbacks[i] === _callback) {
@@ -290,7 +290,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
             }
         }
 
-        eventHandlers.set(_eventName, allCallbacks);
+        eventNameToHandlerFunc.set(_eventName, allCallbacks);
     };    
 };
 
