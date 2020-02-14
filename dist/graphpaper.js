@@ -983,24 +983,15 @@ var GraphPaper = (function (exports) {
         pathElem.style.strokeWidth = _strokeWidth;         
 
         pathElem.addEventListener("click", function(e) {
-            const observers = eventNameToHandlerFunc.get(ConnectorEvent.CLICK) || [];
-            observers.forEach(function(handler) {
-                handler({"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
-            });
+            self.dispatchEvent(ConnectorEvent.CLICK, {"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
         });
 
         pathElem.addEventListener("mouseenter", function(e) {
-            const observers = eventNameToHandlerFunc.get(ConnectorEvent.MOUSE_ENTER) || [];
-            observers.forEach(function(handler) {
-                handler({"connector":self, "pointerAtX": e.pageX, "pointerAtY": e.pageY});
-            });
+            self.dispatchEvent(ConnectorEvent.MOUSE_ENTER, {"connector":self, "pointerAtX": e.pageX, "pointerAtY": e.pageY});
         });
 
         pathElem.addEventListener("mouseleave", function(e) {
-            const observers = eventNameToHandlerFunc.get(ConnectorEvent.MOUSE_LEAVE) || [];
-            observers.forEach(function(handler) {
-                handler({"connector":self });
-            });
+            self.dispatchEvent(ConnectorEvent.MOUSE_LEAVE, {"connector":self });
         });        
 
         /**
@@ -1218,7 +1209,7 @@ var GraphPaper = (function (exports) {
          * @param {*} _callback 
          */
         this.off = function(_eventName, _callback) {
-            const allCallbacks = eventHandlers.get(_eventName) || [];
+            const allCallbacks = eventNameToHandlerFunc.get(_eventName) || [];
 
             for(let i=0; i<allCallbacks.length; i++) {
                 if(allCallbacks[i] === _callback) {
@@ -1227,8 +1218,19 @@ var GraphPaper = (function (exports) {
                 }
             }
 
-            eventHandlers.set(_eventName, allCallbacks);
-        };    
+            eventNameToHandlerFunc.set(_eventName, allCallbacks);
+        };
+
+        /**
+         * @param {String} _eventId
+         * @param {Object} _eventData
+         */
+        this.dispatchEvent = function(_eventId, _eventData) {
+            const observers = eventNameToHandlerFunc.get(_eventId) || [];
+            observers.forEach(function(handler) {
+                handler(_eventData);
+            });
+        };
     }
 
     /**
