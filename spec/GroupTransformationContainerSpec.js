@@ -107,6 +107,44 @@ describe("GroupTransformationContainer", function() {
         expect(gtcDomElem.style.top).toBe('-10px');        
         expect(gtcDomElem.style.width).toBe('30px');
         expect(gtcDomElem.style.height).toBe('40px');
+    });
+
+    it("displays group transformation rect DOM element when group has 1+ objects", function() {        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        canvas.initMultiObjectSelectionHandler();
+        
+        const groupObjects = [
+            new CanvasObject(
+                "obj-123",
+                0, 
+                0, 
+                10, 
+                20, 
+                {}, 
+                window.document.createElement('div'), 
+                [window.document.createElement('div')], 
+                [window.document.createElement('div')]
+            )
+        ];
+
+        const gtc = new GroupTransformationContainer(canvas, groupObjects, [], 10.0);
+        canvas.attachGroupTransformationContainer(gtc);
+
+        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        expect(gtcDomElem.style.display).toBe('block');
+    });    
+
+    it("does not display group transformation rect DOM element when group has 0 objects", function() {        
+        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        canvas.initMultiObjectSelectionHandler();
+        
+        const gtc = new GroupTransformationContainer(canvas, [], [], 10.0);
+        canvas.attachGroupTransformationContainer(gtc);
+
+        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        expect(gtcDomElem.style.display).toBe('none');
     });        
 });
 

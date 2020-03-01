@@ -8,7 +8,6 @@ import {GroupTransformationContainerEvent} from './GroupTransformationContainerE
  * @param {Number} _sizeAdjustmentPx
  */
 function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClasses, _sizeAdjustmentPx)  {
-
     const self = this;
     const eventNameToHandlerFunc = new Map();
 
@@ -42,12 +41,17 @@ function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClass
 
     const selBox = window.document.createElement("div");
     selBox.classList.add('ia-group-transformation-container');
-    selBox.style.display = "block";
+    selBox.style.display = "none";
     selBox.style.position = "absolute";
     selBox.style.left = `${currentLeft}px`;
     selBox.style.top = `${currentTop}px`;
     selBox.style.width = `${boundingRect.getWidth()}px`;
     selBox.style.height = `${boundingRect.getHeight()}px`;    
+
+    // only display the container if we have 1+ object in the group
+    if(_objects.length > 0) {
+        selBox.style.display = "block";
+    }
 
     if(typeof _containerStyleCssClasses === 'undefined' || _containerStyleCssClasses.length === 0) {
         // default styling if no classes are provided
