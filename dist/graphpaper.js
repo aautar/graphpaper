@@ -2880,6 +2880,32 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * 
+         * @param {Number} _endX 
+         * @param {Number} _endY 
+         */
+        const updateSelectionBoxEndPoint = function(_endX, _endY) {
+            multiObjectSelectionEndX = _endX;
+            multiObjectSelectionEndY = _endY;
+            const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
+            const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
+
+            if(width >= 0) {
+                selectionBoxElem.style.width = `${width}px`;
+            } else {
+                selectionBoxElem.style.left = `${_endX}px`;
+                selectionBoxElem.style.width = `${Math.abs(width)}px`;
+            }
+
+            if(height >= 0) {
+                selectionBoxElem.style.height = `${height}px`;
+            } else {
+                selectionBoxElem.style.top = `${_endY}px`;
+                selectionBoxElem.style.height = `${Math.abs(height)}px`;
+            }        
+        };
+
+        /**
          * @param {String[]} _selectionRectStyleCssClasses
          */
         this.initMultiObjectSelectionHandler = function(_selectionRectStyleCssClasses) {
@@ -2935,7 +2961,6 @@ var GraphPaper = (function (exports) {
         };
 
         this.initTransformationHandlers = function() {
-
             _canvasDomElement.addEventListener('touchstart', function(e) {
                 touchMoveLastX = e.touches[0].pageX;
                 touchMoveLastY = e.touches[0].pageY;
@@ -2977,13 +3002,8 @@ var GraphPaper = (function (exports) {
                 }
 
                 if(multiObjectSelectionStarted) {
-                    multiObjectSelectionEndX = e.touches[0].pageX;
-                    multiObjectSelectionEndY = e.touches[0].pageY;
-                    const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
-                    const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
-                    selectionBoxElem.style.width = `${width}px`;
-                    selectionBoxElem.style.height = `${height}px`;
-                    e.preventDefault();      
+                    updateSelectionBoxEndPoint(e.touches[0].pageX, e.e.touches[0].pageY);
+                    e.preventDefault();
                 }
 
                 touchMoveLastX = e.touches[0].pageX;
@@ -3019,24 +3039,7 @@ var GraphPaper = (function (exports) {
                 }
 
                 if(multiObjectSelectionStarted) {
-                    multiObjectSelectionEndX = e.pageX;
-                    multiObjectSelectionEndY = e.pageY;
-                    const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
-                    const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
-
-                    if(width >= 0) {
-                        selectionBoxElem.style.width = `${width}px`;
-                    } else {
-                        selectionBoxElem.style.left = `${e.pageX}px`;
-                        selectionBoxElem.style.width = `${Math.abs(width)}px`;
-                    }
-
-                    if(height >= 0) {
-                        selectionBoxElem.style.height = `${height}px`;
-                    } else {
-                        selectionBoxElem.style.top = `${e.pageY}px`;
-                        selectionBoxElem.style.height = `${Math.abs(height)}px`;
-                    }
+                    updateSelectionBoxEndPoint(e.pageX, e.pageY);
                 }
             });
 
