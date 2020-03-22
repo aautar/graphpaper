@@ -21,10 +21,6 @@ jobs:
       - run:
           name: Run tests
           command: npm test
-
-      - run: 
-          name: Installing rollup
-          command: sudo npm install --global rollup
       
       - run: 
           name: Building /dist files

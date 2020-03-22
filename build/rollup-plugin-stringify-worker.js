@@ -3,7 +3,7 @@ const fs = require('fs');
 const stringifyWorkerPlugin = function (options) {
     return {
         name: 'stringifyWorkerPlugin',
-        writeBundle(bundle) {
+        writeBundle(bundleOpts, bundle) {
 
             console.log(`Creating stringified worker...`);
             const workerCode = bundle[options.srcBundleName].code;

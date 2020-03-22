@@ -13,10 +13,11 @@
     "jasmine-es6": "0.4.0",
     "jsdom": "^11.12.0",
     "process-nextick-args": "^1.0.7",
+    "rollup": "^2.1.0",
     "rollup-plugin-babel": "^4.3.3"
   },
   "scripts": {
-    "test": "./node_modules/.bin/jasmine", 
+    "test": "./node_modules/.bin/jasmine",
     "build": "rollup -c"
   }
 }
