@@ -1316,10 +1316,10 @@ function Canvas(_canvasDomElement, _window) {
         multiObjectSelectionStarted = false;
 
         const selectionRect = new Rectangle(
-            multiObjectSelectionStartX, 
-            multiObjectSelectionStartY, 
-            multiObjectSelectionEndX, 
-            multiObjectSelectionEndY
+            Math.min(multiObjectSelectionStartX, multiObjectSelectionEndX), 
+            Math.min(multiObjectSelectionStartY, multiObjectSelectionEndY),
+            Math.max(multiObjectSelectionStartX, multiObjectSelectionEndX), 
+            Math.max(multiObjectSelectionStartY, multiObjectSelectionEndY)
         );
 
         const selectedObjects = self.getObjectsWithinRect(selectionRect);
@@ -1484,8 +1484,20 @@ function Canvas(_canvasDomElement, _window) {
                 multiObjectSelectionEndY = e.pageY;
                 const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
                 const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
-                selectionBoxElem.style.width = `${width}px`;
-                selectionBoxElem.style.height = `${height}px`;
+
+                if(width >= 0) {
+                    selectionBoxElem.style.width = `${width}px`;
+                } else {
+                    selectionBoxElem.style.left = `${e.pageX}px`;
+                    selectionBoxElem.style.width = `${Math.abs(width)}px`;
+                }
+
+                if(height >= 0) {
+                    selectionBoxElem.style.height = `${height}px`;
+                } else {
+                    selectionBoxElem.style.top = `${e.pageY}px`;
+                    selectionBoxElem.style.height = `${Math.abs(height)}px`;
+                }
             }
         });
 
