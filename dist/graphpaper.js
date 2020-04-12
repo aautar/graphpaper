@@ -821,6 +821,53 @@ var GraphPaper = (function (exports) {
         }
     };
 
+    const DebugMetricsPanel = function(_window) {
+        var debugPanelElem = null;
+        var isVisible = false;
+
+        this.init = function() {
+            debugPanelElem = _window.document.createElement("div");
+            debugPanelElem.classList.add("graphpaper-debug-panel");
+            debugPanelElem.style.display = "none";
+            debugPanelElem.style.position = "fixed";
+            debugPanelElem.style.right = "0px";
+            debugPanelElem.style.top = "0px";
+            debugPanelElem.style.width = "450px";
+            debugPanelElem.style.height = "200px";
+            debugPanelElem.style.color = "#fff";
+            debugPanelElem.style.padding = "15px";
+            debugPanelElem.style.backgroundColor = "rgba(0,0,0,0.75)";
+            _window.document.body.appendChild(debugPanelElem);
+        };
+
+        this.show = function() {
+            isVisible = true;
+            debugPanelElem.style.display = "block";
+        };
+
+        this.hide = function() {
+            isVisible = false;
+            debugPanelElem.style.display = "none";
+        };
+
+        this.refresh = function(_metrics) {
+            if(isVisible === false) {
+                return;
+            }
+
+            debugPanelElem.innerHTML = `
+            <p>refreshAllConnectorsInternal.executionTime = ${_metrics.refreshAllConnectorsInternal.executionTime}</p>
+            <p>connectorRoutingWorker.executionTime = ${_metrics.connectorRoutingWorker.executionTime}</p>            
+            <p>-- connectorRoutingWorker.msgDecodeTime = ${_metrics.connectorRoutingWorker.msgDecodeTime}</p>
+            <p>-- connectorRoutingWorker.pointVisibilityMapCreationTime = ${_metrics.connectorRoutingWorker.pointVisibilityMapCreationTime}</p>
+            <p>-- connectorRoutingWorker.numRoutingPoints = ${_metrics.connectorRoutingWorker.numRoutingPoints}</p>
+            <p>-- connectorRoutingWorker.numBoundaryLines = ${_metrics.connectorRoutingWorker.numBoundaryLines}</p>
+            <p>connectorsRefreshTime = ${_metrics.connectorsRefreshTime}</p>
+        `;
+        };
+
+    };
+
     /**
      * 
      * @param {Number} _dblTapSpeed 
@@ -1811,9 +1858,7 @@ var GraphPaper = (function (exports) {
         var objectDragStartY = 0.0;
 
         var doubleTapDetector = null;
-
-        var debugPanelElem  = null;
-        var isShowingDebugPanel = false;
+        const debugMetricsPanel = new DebugMetricsPanel(_window);
 
         const metrics = {
             connectorRoutingWorker: {
@@ -1887,7 +1932,7 @@ var GraphPaper = (function (exports) {
             metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
             metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
 
-            refreshDebugMetricsPanel();
+            debugMetricsPanel.refresh(metrics);
         };    
 
         /**
@@ -2661,37 +2706,9 @@ var GraphPaper = (function (exports) {
             emitEvent(CanvasEvent.DBLCLICK, eventData);
         };
 
-        const refreshDebugMetricsPanel = function() {
-            if(!isShowingDebugPanel) {
-                return;
-            }
-
-            debugPanelElem.innerHTML = `
-            <p>refreshAllConnectorsInternal.executionTime = ${metrics.refreshAllConnectorsInternal.executionTime}</p>
-            <p>connectorRoutingWorker.executionTime = ${metrics.connectorRoutingWorker.executionTime}</p>            
-            <p>-- connectorRoutingWorker.msgDecodeTime = ${metrics.connectorRoutingWorker.msgDecodeTime}</p>
-            <p>-- connectorRoutingWorker.pointVisibilityMapCreationTime = ${metrics.connectorRoutingWorker.pointVisibilityMapCreationTime}</p>
-            <p>-- connectorRoutingWorker.numRoutingPoints = ${metrics.connectorRoutingWorker.numRoutingPoints}</p>
-            <p>-- connectorRoutingWorker.numBoundaryLines = ${metrics.connectorRoutingWorker.numBoundaryLines}</p>
-            <p>connectorsRefreshTime = ${metrics.connectorsRefreshTime}</p>
-        `;
-        };
-
         this.initDebugMetricsPanel = function() {
-            debugPanelElem = _window.document.createElement("div");
-            debugPanelElem.classList.add("graphpaper-debug-panel");
-            debugPanelElem.style.display = "block";
-            debugPanelElem.style.position = "fixed";
-            debugPanelElem.style.right = "0px";
-            debugPanelElem.style.top = "0px";
-            debugPanelElem.style.width = "450px";
-            debugPanelElem.style.height = "200px";
-            debugPanelElem.style.color = "#fff";
-            debugPanelElem.style.padding = "15px";
-            debugPanelElem.style.backgroundColor = "rgba(0,0,0,0.75)";
-            document.body.appendChild(debugPanelElem);
-
-            isShowingDebugPanel = true;
+            debugMetricsPanel.init();
+            debugMetricsPanel.show();
         };
 
         /**

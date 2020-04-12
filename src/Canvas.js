@@ -3,6 +3,7 @@ import {AccessibleRoutingPointsFinder} from './AccessibleRoutingPointsFinder';
 import {CanvasEvent} from './CanvasEvent';
 import {CanvasObject} from './CanvasObject';
 import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
+import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
 import {DoubleTapDetector} from './DoubleTapDetector';
 import {Rectangle} from './Rectangle';
 import {Point} from './Point';
@@ -85,9 +86,7 @@ function Canvas(_canvasDomElement, _window) {
     var objectDragStartY = 0.0;
 
     var doubleTapDetector = null;
-
-    var debugPanelElem  = null;
-    var isShowingDebugPanel = false;
+    const debugMetricsPanel = new DebugMetricsPanel(_window);
 
     const metrics = {
         connectorRoutingWorker: {
@@ -161,7 +160,7 @@ function Canvas(_canvasDomElement, _window) {
         metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
         metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
 
-        refreshDebugMetricsPanel();
+        debugMetricsPanel.refresh(metrics);
     };    
 
     /**
@@ -935,37 +934,9 @@ function Canvas(_canvasDomElement, _window) {
         emitEvent(CanvasEvent.DBLCLICK, eventData);
     };
 
-    const refreshDebugMetricsPanel = function() {
-        if(!isShowingDebugPanel) {
-            return;
-        }
-
-        debugPanelElem.innerHTML = `
-            <p>refreshAllConnectorsInternal.executionTime = ${metrics.refreshAllConnectorsInternal.executionTime}</p>
-            <p>connectorRoutingWorker.executionTime = ${metrics.connectorRoutingWorker.executionTime}</p>            
-            <p>-- connectorRoutingWorker.msgDecodeTime = ${metrics.connectorRoutingWorker.msgDecodeTime}</p>
-            <p>-- connectorRoutingWorker.pointVisibilityMapCreationTime = ${metrics.connectorRoutingWorker.pointVisibilityMapCreationTime}</p>
-            <p>-- connectorRoutingWorker.numRoutingPoints = ${metrics.connectorRoutingWorker.numRoutingPoints}</p>
-            <p>-- connectorRoutingWorker.numBoundaryLines = ${metrics.connectorRoutingWorker.numBoundaryLines}</p>
-            <p>connectorsRefreshTime = ${metrics.connectorsRefreshTime}</p>
-        `;
-    };
-
     this.initDebugMetricsPanel = function() {
-        debugPanelElem = _window.document.createElement("div");
-        debugPanelElem.classList.add("graphpaper-debug-panel");
-        debugPanelElem.style.display = "block";
-        debugPanelElem.style.position = "fixed";
-        debugPanelElem.style.right = "0px";
-        debugPanelElem.style.top = "0px";
-        debugPanelElem.style.width = "450px";
-        debugPanelElem.style.height = "200px";
-        debugPanelElem.style.color = "#fff";
-        debugPanelElem.style.padding = "15px";
-        debugPanelElem.style.backgroundColor = "rgba(0,0,0,0.75)";
-        document.body.appendChild(debugPanelElem);
-
-        isShowingDebugPanel = true;
+        debugMetricsPanel.init();
+        debugMetricsPanel.show();
     };
 
     /**
