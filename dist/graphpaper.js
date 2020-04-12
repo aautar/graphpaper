@@ -2612,9 +2612,12 @@ var GraphPaper = (function (exports) {
          */
         this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
             const searchFunc = (_searchData) => {
-                // !!! Note that a Canvas.getAccessibleRoutingPointsFromObjectAnchors() call must precede in order for connectorAnchorToNumValidRoutingPoints map to be populated and up-to-date
-                const r = AccessibleRoutingPointsFinder.find([_objA, _objB], self.getGridSize());
-                const result = ClosestPairFinder.findClosestPairBetweenObjects(_searchData.objectA, _searchData.objectB, r.connectorAnchorToNumValidRoutingPoints);
+                const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_objA, _objB], self.getGridSize());
+                const result = ClosestPairFinder.findClosestPairBetweenObjects(
+                    _searchData.objectA, 
+                    _searchData.objectB, 
+                    accessibleRoutingPointsResult.connectorAnchorToNumValidRoutingPoints
+                );
         
                 _searchData.cb(result);
             };
