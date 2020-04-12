@@ -1,4 +1,5 @@
 import {MatrixMath} from './MatrixMath';
+import {AccessibleRoutingPointsFinder} from './AccessibleRoutingPointsFinder';
 import {CanvasEvent} from './CanvasEvent';
 import {CanvasObject} from './CanvasObject';
 import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
@@ -117,12 +118,6 @@ function Canvas(_canvasDomElement, _window) {
      * Event name -> Callback map
      */
     const eventHandlers = new Map();
-
-    /**
-     * ConnectorAnchor -> Number map
-     */
-    const connectorAnchorToNumValidRoutingPoints = new Map();
-
     var connectorRefreshStartTime = null;
     var connectorRefreshTimeout = null;
 
@@ -201,62 +196,6 @@ function Canvas(_canvasDomElement, _window) {
     };
 
     /**
-     * 
-     * @param {CanvasObject[]} _objs 
-     * @returns {Point[]}
-     */
-    const getAccessibleRoutingPointsFromObjectAnchors = function(_objs) {
-
-        connectorAnchorToNumValidRoutingPoints.clear();
-
-        const allRoutingPoints = [];
-        const filteredRoutingPoints = [];
-
-        _objs.forEach((_o) => {
-            const anchors = _o.getConnectorAnchors();
-
-            anchors.forEach((_a) => {
-                const routingPoints = _a.getRoutingPoints(self.getGridSize());
-                routingPoints.forEach((_rp) => {
-                    allRoutingPoints.push(
-                        {
-                            "routingPoint": _rp,
-                            "parentAnchor": _a
-                        }
-                    );
-                });      
-
-                connectorAnchorToNumValidRoutingPoints.set(_a.getId(), routingPoints.length);
-            });
-
-        });
-
-
-        allRoutingPoints.forEach((_rp) => {
-
-            let isPointWithinObj = false;
-
-            for(let i=0; i<_objs.length; i++) {
-                const obj = _objs[i];
-                const boundingRect = obj.getBoundingRectange();
-                if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
-                    isPointWithinObj = true;
-
-                    const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchor.getId()) || 0;
-                    connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchor.getId(), currentNumRoutingPoints - 1);
-                }
-            }
-
-            if(!isPointWithinObj) {
-                filteredRoutingPoints.push(_rp.routingPoint);
-            }
-            
-        });
-
-        return filteredRoutingPoints;
-    };
-
-    /**
      * @returns {PointSet}
      */
     const getObjectExtentRoutingPoints = function() {
@@ -276,9 +215,8 @@ function Canvas(_canvasDomElement, _window) {
      */    
     const getConnectorRoutingPointsAroundAnchor = function() {
         const pointSet = new PointSet();
-        
-        const routingPoints = getAccessibleRoutingPointsFromObjectAnchors(canvasObjects);
-        routingPoints.forEach((_rp) => {
+        const routingPointsResult = AccessibleRoutingPointsFinder.find(canvasObjects, self.getGridSize());
+        routingPointsResult.accessibleRoutingPoints.forEach((_rp) => {
             pointSet.push(_rp);
         });
 
@@ -950,9 +888,8 @@ function Canvas(_canvasDomElement, _window) {
     this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
         const searchFunc = (_searchData) => {
             // !!! Note that a Canvas.getAccessibleRoutingPointsFromObjectAnchors() call must precede in order for connectorAnchorToNumValidRoutingPoints map to be populated and up-to-date
-            getAccessibleRoutingPointsFromObjectAnchors([_objA, _objB]);
-
-            const result = ConnectorAnchorClosestPairFinder.findClosestPairBetweenObjects(_searchData.objectA, _searchData.objectB, connectorAnchorToNumValidRoutingPoints);
+            const r = AccessibleRoutingPointsFinder.find([_objA, _objB], self.getGridSize());
+            const result = ConnectorAnchorClosestPairFinder.findClosestPairBetweenObjects(_searchData.objectA, _searchData.objectB, r.connectorAnchorToNumValidRoutingPoints);
     
             _searchData.cb(result);
         };
