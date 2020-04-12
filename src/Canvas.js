@@ -2,6 +2,7 @@ import {MatrixMath} from './MatrixMath';
 import {CanvasEvent} from './CanvasEvent';
 import {CanvasObject} from './CanvasObject';
 import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
+import {DoubleTapDetector} from './DoubleTapDetector';
 import {Rectangle} from './Rectangle';
 import {Point} from './Point';
 import {Line} from './Line';
@@ -82,11 +83,7 @@ function Canvas(_canvasDomElement, _window) {
     var objectDragStartX = 0.0;
     var objectDragStartY = 0.0;
 
-    var dblTapDetectVars = {
-        lastTouchX: null,
-        lastTouchY: null,
-        lastTouchTime: null
-    };
+    var doubleTapDetector = null;
 
     var debugPanelElem  = null;
     var isShowingDebugPanel = false;
@@ -1037,6 +1034,8 @@ function Canvas(_canvasDomElement, _window) {
      */
     this.initInteractionHandlers = function(_dblTapSpeed, _dblTapRadius) {
 
+        doubleTapDetector = new DoubleTapDetector(_dblTapSpeed, _dblTapRadius);
+
         // dblclick on empty area of canvas
         _canvasDomElement.addEventListener('dblclick', function (e) {
 
@@ -1070,57 +1069,17 @@ function Canvas(_canvasDomElement, _window) {
 
         // touchend on canvas, logic to see if there was a double-tap
         _canvasDomElement.addEventListener('touchend', function(e) {
-            if(e.changedTouches.length <= 0) {
-                return false; // we have nothing to work with
+            const detectResult = doubleTapDetector.processTap(
+                e,
+                currentInvTransformationMatrix,
+            );
+
+            if(detectResult.doubleTapDetected) {
+                dblClickTapHandler(detectResult.touchX, detectResult.touchY);
             }
 
-            var dblTapDetected = false;  // flag specifying if we detected a double-tap
+            console.log(detectResult);
 
-            // Position of the touch
-            const invTransformedPos = MatrixMath.vecMat4Multiply(
-                [e.changedTouches[0].pageX, e.changedTouches[0].pageY, 0, 1],
-                currentInvTransformationMatrix
-            );            
-
-            var x = invTransformedPos[0];
-            var y = invTransformedPos[1];            
-
-            var now = new Date().getTime();
-
-            // Check if we have stored data for a previous touch (indicating we should test for a double-tap)
-            if(dblTapDetectVars.lastTouchTime !== null) {
-
-                var lastTouchTime = dblTapDetectVars.lastTouchTime;
-
-                // Compute time since the previous touch
-                var timeSinceLastTouch = now - lastTouchTime;
-
-                // Get the position of the last touch on the element
-                var lastX = dblTapDetectVars.lastTouchX;
-                var lastY = dblTapDetectVars.lastTouchY;
-
-                // Compute the distance from the last touch on the element
-                var distFromLastTouch = Math.sqrt( Math.pow(x-lastX,2) + Math.pow(y-lastY,2) );
-
-                if(timeSinceLastTouch <= _dblTapSpeed && distFromLastTouch <= _dblTapRadius) {
-                    // Flag that we detected a double tap
-                    dblTapDetected = true;
-
-                    // Call handler
-                    dblClickTapHandler(x, y);
-
-                    // Remove last touch info from element
-                    dblTapDetectVars.lastTouchTime = null;
-                    dblTapDetectVars.lastTouchX = null;
-                    dblTapDetectVars.lastTouchY = null;
-                }
-            }
-
-            if(!dblTapDetected) {
-                dblTapDetectVars.lastTouchTime = now;
-                dblTapDetectVars.lastTouchX = x;
-                dblTapDetectVars.lastTouchY = y;
-            }
         });
     };
 
