@@ -1017,9 +1017,6 @@ function Canvas(_canvasDomElement, _window) {
             if(detectResult.doubleTapDetected) {
                 dblClickTapHandler(detectResult.touchX, detectResult.touchY);
             }
-
-            console.log(detectResult);
-
         });
     };
 
