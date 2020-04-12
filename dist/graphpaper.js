@@ -611,16 +611,17 @@ var GraphPaper = (function (exports) {
         /**
          * Find routing points that are not occluded by objects
          * 
-         * @param {CanvasObject[]} _objs 
+         * @param {CanvasObject[]} _subjectObjects
+         * @param {CanvasObject[]} _occludableByObjects
          * @param {Number} _gridSize
          * @returns {Object[]}
          */
-        find: function(_objs, _gridSize) {
+        find: function(_subjectObjects, _occludableByObjects, _gridSize) {
             const connectorAnchorToNumValidRoutingPoints = new Map();
             const allRoutingPoints = [];
             const filteredRoutingPoints = [];
 
-            _objs.forEach((_o) => {
+            _subjectObjects.forEach((_o) => {
                 const anchors = _o.getConnectorAnchors();
 
                 anchors.forEach((_a) => {
@@ -641,8 +642,8 @@ var GraphPaper = (function (exports) {
             allRoutingPoints.forEach((_rp) => {
                 let isPointWithinObj = false;
 
-                for(let i=0; i<_objs.length; i++) {
-                    const obj = _objs[i];
+                for(let i=0; i<_occludableByObjects.length; i++) {
+                    const obj = _occludableByObjects[i];
                     const boundingRect = obj.getBoundingRectange();
                     if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                         isPointWithinObj = true;
@@ -1940,7 +1941,7 @@ var GraphPaper = (function (exports) {
          */    
         const getConnectorRoutingPointsAroundAnchor = function() {
             const pointSet = new PointSet();
-            const routingPointsResult = AccessibleRoutingPointsFinder.find(canvasObjects, self.getGridSize());
+            const routingPointsResult = AccessibleRoutingPointsFinder.find(canvasObjects, canvasObjects, self.getGridSize());
             routingPointsResult.accessibleRoutingPoints.forEach((_rp) => {
                 pointSet.push(_rp);
             });
@@ -2612,7 +2613,7 @@ var GraphPaper = (function (exports) {
          */
         this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
             const searchFunc = (_searchData) => {
-                const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_objA, _objB], self.getGridSize());
+                const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_objA, _objB], canvasObjects, self.getGridSize());
                 const result = ClosestPairFinder.findClosestPairBetweenObjects(
                     _searchData.objectA, 
                     _searchData.objectB, 
@@ -2742,9 +2743,6 @@ var GraphPaper = (function (exports) {
                 if(detectResult.doubleTapDetected) {
                     dblClickTapHandler(detectResult.touchX, detectResult.touchY);
                 }
-
-                console.log(detectResult);
-
             });
         };
 

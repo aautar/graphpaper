@@ -215,7 +215,7 @@ function Canvas(_canvasDomElement, _window) {
      */    
     const getConnectorRoutingPointsAroundAnchor = function() {
         const pointSet = new PointSet();
-        const routingPointsResult = AccessibleRoutingPointsFinder.find(canvasObjects, self.getGridSize());
+        const routingPointsResult = AccessibleRoutingPointsFinder.find(canvasObjects, canvasObjects, self.getGridSize());
         routingPointsResult.accessibleRoutingPoints.forEach((_rp) => {
             pointSet.push(_rp);
         });
@@ -887,7 +887,7 @@ function Canvas(_canvasDomElement, _window) {
      */
     this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
         const searchFunc = (_searchData) => {
-            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_objA, _objB], self.getGridSize());
+            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_objA, _objB], canvasObjects, self.getGridSize());
             const result = ConnectorAnchorClosestPairFinder.findClosestPairBetweenObjects(
                 _searchData.objectA, 
                 _searchData.objectB, 
