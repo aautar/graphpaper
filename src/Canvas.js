@@ -1,6 +1,7 @@
 import {MatrixMath} from './MatrixMath';
 import {CanvasEvent} from './CanvasEvent';
 import {CanvasObject} from './CanvasObject';
+import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
 import {Rectangle} from './Rectangle';
 import {Point} from './Point';
 import {Line} from './Line';
@@ -954,45 +955,10 @@ function Canvas(_canvasDomElement, _window) {
             // !!! Note that a Canvas.getAccessibleRoutingPointsFromObjectAnchors() call must precede in order for connectorAnchorToNumValidRoutingPoints map to be populated and up-to-date
             getAccessibleRoutingPointsFromObjectAnchors([_objA, _objB]);
 
-            const objAConnectorAnchors = _searchData.objectA.getConnectorAnchors();
-            const objBConnectorAnchors = _searchData.objectB.getConnectorAnchors();
+            const result = ConnectorAnchorClosestPairFinder.findClosestPairBetweenObjects(_searchData.objectA, _searchData.objectB, connectorAnchorToNumValidRoutingPoints);
     
-            var startAnchorIdxWithMinDist = 0;
-            var endAnchorIdxWithMinDist = 0;
-            var minDist = Number.MAX_VALUE;
-            
-            // Find best anchor element to connect startNote and endNote            
-            // Find anchors that produce shortest straight line distance
-            for(let x=0; x<objAConnectorAnchors.length; x++) {
-                const aCentroid = objAConnectorAnchors[x].getCentroid();
-                const objANumValidRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(objAConnectorAnchors[x].getId()) || 0;
-                if(objANumValidRoutingPoints === 0) {
-                    continue;
-                }
-
-                for(let y=0; y<objBConnectorAnchors.length; y++) {
-                    const bCentroid = objBConnectorAnchors[y].getCentroid();
-                    const d = Math.sqrt(Math.pow(bCentroid.getX()-aCentroid.getX(),2) + Math.pow(bCentroid.getY()-aCentroid.getY(),2));
-                    const objBNumValidRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(objBConnectorAnchors[y].getId()) || 0;
-                    
-                    if(d < minDist && objBNumValidRoutingPoints > 0) {
-                        startAnchorIdxWithMinDist = x;
-                        endAnchorIdxWithMinDist = y;
-                        minDist = d;
-                    }
-                }
-            }
-    
-            _searchData.cb(
-                {
-                    "objectAAnchorIndex": startAnchorIdxWithMinDist,
-                    "objectAAnchor": objAConnectorAnchors[startAnchorIdxWithMinDist],
-                    "objectBAnchorIndex": endAnchorIdxWithMinDist,
-                    "objectBAnchor": objBConnectorAnchors[endAnchorIdxWithMinDist],
-                }
-            );
+            _searchData.cb(result);
         };
-
 
         setTimeout(function() {
             searchFunc(

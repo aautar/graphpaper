@@ -619,6 +619,148 @@ var GraphPaper = (function (exports) {
     });
 
     /**
+     * @param {String} _id
+     * @param {Element} _domElement
+     * @param {Canvas} _canvas
+     */
+    function ConnectorAnchor(_id, _domElement, _canvas) {
+        
+        const self = this;
+
+        /**
+         * @returns {String}
+         */
+        this.getId = function() {
+            return _id;
+        };
+
+        /**
+         * @returns {Number}
+         */     
+        this.getX = function() {
+            return self.getCentroid().getX();
+        };
+
+        /**
+         * @returns {Number}
+         */     
+        this.getY = function() {
+            return self.getCentroid().getY();
+        };
+
+        /**
+         * @returns {Number}
+         */
+        this.getWidth = function() {
+            const r = _domElement.getBoundingClientRect();
+            return (r.right - r.left);
+        };
+
+        /**
+         * @returns {Number}
+         */
+        this.getHeight = function() {
+            const r = _domElement.getBoundingClientRect();
+            return (r.bottom - r.top);
+        };
+
+        /**
+         * @returns {Point}
+         */
+        this.getCentroid = function() {
+            const viewportRelativeRect = _domElement.getBoundingClientRect();
+            const pageOffset = _canvas.getPageOffset();        
+            return new Point(
+                viewportRelativeRect.left + pageOffset.getX() + (self.getWidth() * 0.5), 
+                viewportRelativeRect.top + pageOffset.getY() + (self.getHeight() * 0.5)
+            );
+        };
+
+        /**
+         * 
+         * @param {Number} _gridSize 
+         * @returns {Point[]}
+         */
+        this.getRoutingPoints = function(_gridSize) {
+
+            const centroid = self.getCentroid();
+            const halfWidth = self.getWidth() * 0.5;
+            const halfHeight = self.getHeight() * 0.5;
+
+            return [
+                new Point(centroid.getX() + halfWidth + _gridSize, centroid.getY()),
+                new Point(centroid.getX() - halfWidth - _gridSize, centroid.getY()),
+                new Point(centroid.getX(), centroid.getY() + halfHeight + _gridSize),
+                new Point(centroid.getX(), centroid.getY() - halfHeight - _gridSize),
+            ];
+        };
+
+        /**
+         * 
+         * @returns {Rectangle}
+         */
+        this.getBoundingRectange = function() {
+            const centroid = self.getCentroid();
+            const halfWidth = self.getWidth() * 0.5;
+            const halfHeight = self.getHeight() * 0.5;
+
+            return new Rectangle(
+                centroid.getX() - halfWidth, 
+                centroid.getY() - halfHeight, 
+                centroid.getX() + halfWidth, 
+                centroid.getY() + halfHeight
+            );
+        };
+    }
+
+    const ClosestPairFinder = {   
+        /**
+         * 
+         * @param {CanvasObject} _objA 
+         * @param {CanvasObject} _objB
+         * @param {Map<ConnectorAnchor, Number>} _connectorAnchorToNumValidRoutingPoints
+         * @returns {Object}
+         */
+        findClosestPairBetweenObjects: function(_objA, _objB, _connectorAnchorToNumValidRoutingPoints) {
+            const objAConnectorAnchors = _objA.getConnectorAnchors();
+            const objBConnectorAnchors = _objB.getConnectorAnchors();
+
+            var startAnchorIdxWithMinDist = 0;
+            var endAnchorIdxWithMinDist = 0;
+            var minDist = Number.MAX_VALUE;
+            
+            // Find best anchor element to connect _objA and _objB            
+            // Find anchors that produce shortest straight line distance
+            for(let x=0; x<objAConnectorAnchors.length; x++) {
+                const aCentroid = objAConnectorAnchors[x].getCentroid();
+                const objANumValidRoutingPoints = _connectorAnchorToNumValidRoutingPoints.get(objAConnectorAnchors[x].getId()) || 0;
+                if(objANumValidRoutingPoints === 0) {
+                    continue;
+                }
+
+                for(let y=0; y<objBConnectorAnchors.length; y++) {
+                    const bCentroid = objBConnectorAnchors[y].getCentroid();
+                    const d = Math.sqrt(Math.pow(bCentroid.getX()-aCentroid.getX(),2) + Math.pow(bCentroid.getY()-aCentroid.getY(),2));
+                    const objBNumValidRoutingPoints = _connectorAnchorToNumValidRoutingPoints.get(objBConnectorAnchors[y].getId()) || 0;
+                    
+                    if(d < minDist && objBNumValidRoutingPoints > 0) {
+                        startAnchorIdxWithMinDist = x;
+                        endAnchorIdxWithMinDist = y;
+                        minDist = d;
+                    }
+                }
+            }
+
+            return {
+                "objectAAnchorIndex": startAnchorIdxWithMinDist,
+                "objectAAnchor": objAConnectorAnchors[startAnchorIdxWithMinDist],
+                "objectBAnchorIndex": endAnchorIdxWithMinDist,
+                "objectBAnchor": objBConnectorAnchors[endAnchorIdxWithMinDist],
+            };
+        }
+    };
+
+    /**
      * Unique collection of Point objects
      * 
      * @param {Point[]|Float64Array|undefined} _pointsInput
@@ -837,101 +979,6 @@ var GraphPaper = (function (exports) {
         } else if(_linesInput && Object.prototype.toString.call(_linesInput) === '[object Float64Array]') {
             fromFloat64Array(_linesInput);
         }    
-    }
-
-    /**
-     * @param {String} _id
-     * @param {Element} _domElement
-     * @param {Canvas} _canvas
-     */
-    function ConnectorAnchor(_id, _domElement, _canvas) {
-        
-        const self = this;
-
-        /**
-         * @returns {String}
-         */
-        this.getId = function() {
-            return _id;
-        };
-
-        /**
-         * @returns {Number}
-         */     
-        this.getX = function() {
-            return self.getCentroid().getX();
-        };
-
-        /**
-         * @returns {Number}
-         */     
-        this.getY = function() {
-            return self.getCentroid().getY();
-        };
-
-        /**
-         * @returns {Number}
-         */
-        this.getWidth = function() {
-            const r = _domElement.getBoundingClientRect();
-            return (r.right - r.left);
-        };
-
-        /**
-         * @returns {Number}
-         */
-        this.getHeight = function() {
-            const r = _domElement.getBoundingClientRect();
-            return (r.bottom - r.top);
-        };
-
-        /**
-         * @returns {Point}
-         */
-        this.getCentroid = function() {
-            const viewportRelativeRect = _domElement.getBoundingClientRect();
-            const pageOffset = _canvas.getPageOffset();        
-            return new Point(
-                viewportRelativeRect.left + pageOffset.getX() + (self.getWidth() * 0.5), 
-                viewportRelativeRect.top + pageOffset.getY() + (self.getHeight() * 0.5)
-            );
-        };
-
-        /**
-         * 
-         * @param {Number} _gridSize 
-         * @returns {Point[]}
-         */
-        this.getRoutingPoints = function(_gridSize) {
-
-            const centroid = self.getCentroid();
-            const halfWidth = self.getWidth() * 0.5;
-            const halfHeight = self.getHeight() * 0.5;
-
-            return [
-                new Point(centroid.getX() + halfWidth + _gridSize, centroid.getY()),
-                new Point(centroid.getX() - halfWidth - _gridSize, centroid.getY()),
-                new Point(centroid.getX(), centroid.getY() + halfHeight + _gridSize),
-                new Point(centroid.getX(), centroid.getY() - halfHeight - _gridSize),
-            ];
-        };
-
-        /**
-         * 
-         * @returns {Rectangle}
-         */
-        this.getBoundingRectange = function() {
-            const centroid = self.getCentroid();
-            const halfWidth = self.getWidth() * 0.5;
-            const halfHeight = self.getHeight() * 0.5;
-
-            return new Rectangle(
-                centroid.getX() - halfWidth, 
-                centroid.getY() - halfHeight, 
-                centroid.getX() + halfWidth, 
-                centroid.getY() + halfHeight
-            );
-        };
     }
 
     const ConnectorEvent = Object.freeze({
@@ -2493,45 +2540,10 @@ var GraphPaper = (function (exports) {
                 // !!! Note that a Canvas.getAccessibleRoutingPointsFromObjectAnchors() call must precede in order for connectorAnchorToNumValidRoutingPoints map to be populated and up-to-date
                 getAccessibleRoutingPointsFromObjectAnchors([_objA, _objB]);
 
-                const objAConnectorAnchors = _searchData.objectA.getConnectorAnchors();
-                const objBConnectorAnchors = _searchData.objectB.getConnectorAnchors();
+                const result = ClosestPairFinder.findClosestPairBetweenObjects(_searchData.objectA, _searchData.objectB, connectorAnchorToNumValidRoutingPoints);
         
-                var startAnchorIdxWithMinDist = 0;
-                var endAnchorIdxWithMinDist = 0;
-                var minDist = Number.MAX_VALUE;
-                
-                // Find best anchor element to connect startNote and endNote            
-                // Find anchors that produce shortest straight line distance
-                for(let x=0; x<objAConnectorAnchors.length; x++) {
-                    const aCentroid = objAConnectorAnchors[x].getCentroid();
-                    const objANumValidRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(objAConnectorAnchors[x].getId()) || 0;
-                    if(objANumValidRoutingPoints === 0) {
-                        continue;
-                    }
-
-                    for(let y=0; y<objBConnectorAnchors.length; y++) {
-                        const bCentroid = objBConnectorAnchors[y].getCentroid();
-                        const d = Math.sqrt(Math.pow(bCentroid.getX()-aCentroid.getX(),2) + Math.pow(bCentroid.getY()-aCentroid.getY(),2));
-                        const objBNumValidRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(objBConnectorAnchors[y].getId()) || 0;
-                        
-                        if(d < minDist && objBNumValidRoutingPoints > 0) {
-                            startAnchorIdxWithMinDist = x;
-                            endAnchorIdxWithMinDist = y;
-                            minDist = d;
-                        }
-                    }
-                }
-        
-                _searchData.cb(
-                    {
-                        "objectAAnchorIndex": startAnchorIdxWithMinDist,
-                        "objectAAnchor": objAConnectorAnchors[startAnchorIdxWithMinDist],
-                        "objectBAnchorIndex": endAnchorIdxWithMinDist,
-                        "objectBAnchor": objBConnectorAnchors[endAnchorIdxWithMinDist],
-                    }
-                );
+                _searchData.cb(result);
             };
-
 
             setTimeout(function() {
                 searchFunc(
@@ -2902,7 +2914,7 @@ var GraphPaper = (function (exports) {
             } else {
                 selectionBoxElem.style.top = `${_endY}px`;
                 selectionBoxElem.style.height = `${Math.abs(height)}px`;
-            }        
+            }
         };
 
         /**
