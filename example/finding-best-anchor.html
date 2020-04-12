@@ -16,20 +16,23 @@
             <div id="resizeHandle1"  class="resizeHandle"></div>
             <div id="connectorAnchor1a" class="connectorAnchor"></div>
             <div id="connectorAnchor1b" class="connectorAnchor" style="right:auto; left:-18px"></div>
+            <div id="connectorAnchor1c" class="connectorAnchor" style="top:auto; bottom:-18px"></div>
         </div>
 
         <div id="obj2" class="obj">
             <div id="translateHandle2" class="translateHandle"></div>
             <div id="resizeHandle2" class="resizeHandle"></div>
             <div id="connectorAnchor2a" class="connectorAnchor"></div>
-            <div id="connectorAnchor2b" class="connectorAnchor" style="right:auto; left:-18px"></div>            
+            <div id="connectorAnchor2b" class="connectorAnchor" style="right:auto; left:-18px"></div>
+            <div id="connectorAnchor2c" class="connectorAnchor" style="top:auto; bottom:-18px"></div>
         </div>
 
-        <div id="obj3" class="obj" style="background:#f00;">
+        <div id="obj3" class="obj">
             <div id="translateHandle3" class="translateHandle"></div>
             <div id="resizeHandle3" class="resizeHandle"></div>
             <div id="connectorAnchor3a" class="connectorAnchor"></div>
-            <div id="connectorAnchor3b" class="connectorAnchor" style="right:auto; left:-18px"></div>            
+            <div id="connectorAnchor3b" class="connectorAnchor" style="right:auto; left:-18px"></div>
+            <div id="connectorAnchor3c" class="connectorAnchor" style="top:auto; bottom:-18px"></div>
         </div>              
 
     </div>
@@ -63,6 +66,7 @@
 
         obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1a'));
         obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1b'));
+        obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1c'));
         obj1.translate(100,100);
 
         const obj2 = new GraphPaper.CanvasObject(
@@ -79,6 +83,7 @@
 
         obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2a'));
         obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2b'));
+        obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2c'));
 
         const obj3 = new GraphPaper.CanvasObject(
             'obj3', 
@@ -93,12 +98,27 @@
         );
 
         obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3a'));        
-        obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3b'));  
+        obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3b'));
+        obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3c'));
         obj3.translate(200,200);
 
         canvas.addObject(obj1);
         canvas.addObject(obj2);
         canvas.addObject(obj3);
+
+        canvas.on(GraphPaper.CanvasEvent.OBJECT_TRANSLATED, function() {
+            canvas.findBestConnectorAnchorsToConnectObjects(obj1, obj2, function(_bestAnchors) {
+
+                // to optimize, we should only remove existing if it doesn't match the best
+                const currentConnectors = canvas.getConnectorsBetweenObjects(obj1, obj2);
+                for(let i=0; i<currentConnectors.length; i++) {
+                    canvas.removeConnector(currentConnectors[i]);      
+                }
+
+                canvas.makeNewConnectorFromAnchors(_bestAnchors.objectAAnchor, _bestAnchors.objectBAnchor);
+
+            });
+        });
 
     </script>
 
