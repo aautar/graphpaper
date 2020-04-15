@@ -19,26 +19,42 @@ const AccessibleRoutingPointsFinder = {
             const anchors = _o.getConnectorAnchors();
 
             anchors.forEach((_a) => {
-                const routingPoints = _a.getRoutingPoints(_gridSize);
-                routingPoints.forEach((_rp) => {
-                    allRoutingPoints.push(
-                        {
-                            "routingPoint": _rp,
-                            "parentAnchor": _a
-                        }
-                    );
-                });      
+                let isAnchorOccluded = false;
 
-                connectorAnchorToNumValidRoutingPoints.set(_a.getId(), routingPoints.length);
+                // check if anchor is occluded
+                for(let i=0; i<_occludableByObjects.length; i++) {
+                    const possibleOccluderBoundingRect = _occludableByObjects[i].getBoundingRectange();
+                    if(possibleOccluderBoundingRect.checkIsPointWithin(_a.getCentroid())) {
+                        connectorAnchorToNumValidRoutingPoints.set(_a.getId(), 0);
+                        isAnchorOccluded = true;
+                        break;
+                    }
+                }
+
+                if(!isAnchorOccluded) {
+                    const routingPoints = _a.getRoutingPoints(_gridSize);
+                    routingPoints.forEach((_rp) => {
+                        allRoutingPoints.push(
+                            {
+                                "routingPoint": _rp,
+                                "parentAnchor": _a
+                            }
+                        );
+                    });
+
+                    connectorAnchorToNumValidRoutingPoints.set(_a.getId(), routingPoints.length);
+                }
             });
         });
 
         allRoutingPoints.forEach((_rp) => {
             let isPointWithinObj = false;
 
+            // check if routing point is occluded
             for(let i=0; i<_occludableByObjects.length; i++) {
                 const obj = _occludableByObjects[i];
                 const boundingRect = obj.getBoundingRectange();
+
                 if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                     isPointWithinObj = true;
 
