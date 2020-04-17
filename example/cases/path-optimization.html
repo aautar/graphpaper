@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GraphPaper</title>
+    <script src="../../dist/graphpaper.js" type="text/javascript"></script>
+    <link href="../common.css" rel="stylesheet">
+</head>
+
+<body>
+    
+    <div id="paper">
+
+        <div id="obj1" class="obj">
+            <div id="translateHandle1" class="translateHandle"></div>
+            <div id="resizeHandle1"  class="resizeHandle"></div>
+            <div id="connectorAnchor1a" class="connectorAnchor"></div>
+            <div id="connectorAnchor1b" class="connectorAnchor" style="right:auto; left:-18px"></div>
+            <div id="connectorAnchor1c" class="connectorAnchor" style="top:auto; bottom:-18px"></div>
+        </div>
+
+        <div id="obj2" class="obj">
+            <div id="translateHandle2" class="translateHandle"></div>
+            <div id="resizeHandle2" class="resizeHandle"></div>
+            <div id="connectorAnchor2a" class="connectorAnchor"></div>
+            <div id="connectorAnchor2b" class="connectorAnchor" style="right:auto; left:-18px"></div>
+            <div id="connectorAnchor2c" class="connectorAnchor" style="top:auto; bottom:-18px"></div>
+        </div>
+
+        <div id="obj3" class="obj">
+            <div id="translateHandle3" class="translateHandle"></div>
+            <div id="resizeHandle3" class="resizeHandle"></div>
+            <div id="connectorAnchor3a" class="connectorAnchor"></div>
+            <div id="connectorAnchor3b" class="connectorAnchor" style="right:auto; left:-18px"></div>
+            <div id="connectorAnchor3c" class="connectorAnchor" style="top:auto; bottom:-18px"></div>
+        </div>              
+
+    </div>
+
+
+    <script type="text/javascript">
+	
+        const canvas = new GraphPaper.Canvas(
+            document.getElementById('paper'), 
+            window
+        );
+
+        canvas.initInteractionHandlers();
+        canvas.initTransformationHandlers();
+
+        canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
+            return new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
+        });
+
+        const obj1 = new GraphPaper.CanvasObject(
+            'obj1', 
+            0, 
+            0, 
+            68, 
+            212, 
+            canvas,
+            document.getElementById('obj1'), 
+            [document.getElementById('translateHandle1')],
+            [document.getElementById('resizeHandle1')]
+        );
+
+        obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1a'));
+        obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1b'));
+        obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1c'));
+        obj1.translate(100,100);
+
+        const obj2 = new GraphPaper.CanvasObject(
+            'obj2', 
+            0, 
+            0, 
+            52,
+            52,
+            canvas,
+            document.getElementById('obj2'), 
+            [document.getElementById('translateHandle2')],
+            [document.getElementById('resizeHandle2')]
+        );
+
+        obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2a'));
+        obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2b'));
+        obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2c'));
+        obj2.translate(395, 527);
+
+        const obj3 = new GraphPaper.CanvasObject(
+            'obj3', 
+            0, 
+            0, 
+            109, 
+            565, 
+            canvas,
+            document.getElementById('obj3'), 
+            [document.getElementById('translateHandle3')],
+            [document.getElementById('resizeHandle3')]
+        );
+
+        obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3a'));        
+        obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3b'));
+        obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3c'));
+        obj3.translate(251,95);
+
+        canvas.addObject(obj1);
+        canvas.addObject(obj2);
+        canvas.addObject(obj3);
+
+        const recreateConnectors = function() {
+            canvas.findBestConnectorAnchorsToConnectObjects(obj1, obj2, function(_bestAnchors) {
+
+            // to optimize, we should only remove existing if it doesn't match the best
+            const currentConnectors = canvas.getConnectorsBetweenObjects(obj1, obj2);
+            for(let i=0; i<currentConnectors.length; i++) {
+                canvas.removeConnector(currentConnectors[i]);      
+            }
+
+            canvas.makeNewConnectorFromAnchors(_bestAnchors.objectAAnchor, _bestAnchors.objectBAnchor);
+
+            });
+        };
+
+        canvas.on(GraphPaper.CanvasEvent.OBJECT_TRANSLATED, function() {
+            recreateConnectors();
+        });
+
+        recreateConnectors();
+
+    </script>
+
+</body>
+
+</html>

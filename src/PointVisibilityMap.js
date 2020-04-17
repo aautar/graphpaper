@@ -1,6 +1,7 @@
 import {Point} from './Point';
 import {Line} from './Line';
 import {PointSet} from './PointSet';
+import {PointVisibilityMapRouteOptimizer} from './PointVisibilityMapRouteOptimizer';
 import {LineSet} from './LineSet';
 import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
 
@@ -10,7 +11,6 @@ import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
  * @param {LineSet} _boundaryLines
  */
 function PointVisibilityMap(_freePoints, _boundaryLines) {
-
     const self = this;
 
     const boundaryLinesArr = _boundaryLines.toArray();
@@ -22,7 +22,6 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      * @returns {Boolean}
      */
     const doesLineIntersectAnyBoundaryLines = function(_theLine) {
-
         for(let b=0; b<boundaryLinesArr.length; b++) {
             const intersectionType = boundaryLinesArr[b].computeIntersectionType(_theLine);
             if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
@@ -53,6 +52,27 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
         }
     };
 
+
+    const arePointsVisibleToEachOther = function(_ptA, _ptB) {
+        for(let i=0; i<freePointsArr.length; i++) {
+            if(freePointsArr[i].isEqual(_ptA)) {
+                const visiblePointIndices = pointToVisibleSet[i];
+                for(let j=0; j<visiblePointIndices.length; j++) {
+                    if(freePointsArr[visiblePointIndices[j]].isEqual(_ptB)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    };
+
+    /**
+     * 
+     * @param {Point} _currentPoint 
+     * @returns {Point[]}
+     */
     const getVisiblePointsFrom = function(_currentPoint) {
         for(let i=0; i<freePointsArr.length; i++) {
 
@@ -64,7 +84,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
                 });
 
                 return visiblePoints;
-            }            
+            }
         }
 
         return [];
@@ -79,7 +99,6 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      * @returns {Object|null}
      */
     const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPoint, _endPoint) {
-
         var visiblePoints = getVisiblePointsFrom(_currentPoint);       
         var curMinCost = Number.MAX_SAFE_INTEGER;
         var visiblePointWithMinCost = null;
@@ -113,31 +132,6 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
             "cost": curMinCost,
             "point": visiblePointWithMinCost
         };
-    };
-
-    /**
-     * 
-     * @param {Array} _pointsInRoute 
-     */
-    const optimizeRoute = function(_pointsInRoute) {
-
-        let ptrA = 0;
-
-        while(true) {
-
-            if(ptrA+2 >= _pointsInRoute.length) {
-                break;
-            }            
-
-            const ln = new Line(_pointsInRoute[ptrA], _pointsInRoute[ptrA + 2]);
-
-            if(!doesLineIntersectAnyBoundaryLines(ln)) {
-                _pointsInRoute.splice(ptrA + 1, 1);
-            } else {
-                ptrA++;
-            }
-
-        }
     };
 
     /**
@@ -197,7 +191,6 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      * @return {PointSet}
      */
     this.computeRoute = function(_startPoint, _endPoint) {
-
         // if no valid startpoint or endpoint, we can't route
         if(_startPoint === null || _endPoint === null) {
             return new PointSet();
@@ -235,7 +228,7 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
             }
         }
 
-        optimizeRoute(pointsInRoute);
+        PointVisibilityMapRouteOptimizer.optimize(pointsInRoute, arePointsVisibleToEachOther);
 
         return new PointSet(pointsInRoute);
 

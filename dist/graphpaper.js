@@ -1486,13 +1486,44 @@ var GraphPaper = (function (exports) {
         };
     }
 
+    const PointVisibilityMapRouteOptimizer = {
+
+        /**
+         * 
+         * @param {Point[]} _pointsInRoute
+         * @param {Function} _arePointsVisibleToEachOther
+         */
+        optimize: function(_pointsInRoute, _arePointsVisibleToEachOther) {
+            let start = 0;
+            let end = _pointsInRoute.length - 1;
+
+            while(true) {
+                if((end-start) <= 1) {
+                    start++;
+                    end = _pointsInRoute.length - 1;
+
+                    if(start >= _pointsInRoute.length-2) {
+                        break;
+                    }
+                }
+
+                if(_arePointsVisibleToEachOther(_pointsInRoute[start], _pointsInRoute[end])) {
+                    _pointsInRoute.splice(start + 1, (end-start) - 1);
+                    end = _pointsInRoute.length - 1;
+                } else {
+                    end--;
+                }
+            }
+        }
+
+    };
+
     /**
      * 
      * @param {PointSet} _freePoints
      * @param {LineSet} _boundaryLines
      */
     function PointVisibilityMap(_freePoints, _boundaryLines) {
-
         const self = this;
 
         const boundaryLinesArr = _boundaryLines.toArray();
@@ -1504,7 +1535,6 @@ var GraphPaper = (function (exports) {
          * @returns {Boolean}
          */
         const doesLineIntersectAnyBoundaryLines = function(_theLine) {
-
             for(let b=0; b<boundaryLinesArr.length; b++) {
                 const intersectionType = boundaryLinesArr[b].computeIntersectionType(_theLine);
                 if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
@@ -1534,6 +1564,27 @@ var GraphPaper = (function (exports) {
             }
         };
 
+
+        const arePointsVisibleToEachOther = function(_ptA, _ptB) {
+            for(let i=0; i<freePointsArr.length; i++) {
+                if(freePointsArr[i].isEqual(_ptA)) {
+                    const visiblePointIndices = pointToVisibleSet[i];
+                    for(let j=0; j<visiblePointIndices.length; j++) {
+                        if(freePointsArr[visiblePointIndices[j]].isEqual(_ptB)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        };
+
+        /**
+         * 
+         * @param {Point} _currentPoint 
+         * @returns {Point[]}
+         */
         const getVisiblePointsFrom = function(_currentPoint) {
             for(let i=0; i<freePointsArr.length; i++) {
 
@@ -1545,7 +1596,7 @@ var GraphPaper = (function (exports) {
                     });
 
                     return visiblePoints;
-                }            
+                }
             }
 
             return [];
@@ -1560,7 +1611,6 @@ var GraphPaper = (function (exports) {
          * @returns {Object|null}
          */
         const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPoint, _endPoint) {
-
             var visiblePoints = getVisiblePointsFrom(_currentPoint);       
             var curMinCost = Number.MAX_SAFE_INTEGER;
             var visiblePointWithMinCost = null;
@@ -1594,31 +1644,6 @@ var GraphPaper = (function (exports) {
                 "cost": curMinCost,
                 "point": visiblePointWithMinCost
             };
-        };
-
-        /**
-         * 
-         * @param {Array} _pointsInRoute 
-         */
-        const optimizeRoute = function(_pointsInRoute) {
-
-            let ptrA = 0;
-
-            while(true) {
-
-                if(ptrA+2 >= _pointsInRoute.length) {
-                    break;
-                }            
-
-                const ln = new Line(_pointsInRoute[ptrA], _pointsInRoute[ptrA + 2]);
-
-                if(!doesLineIntersectAnyBoundaryLines(ln)) {
-                    _pointsInRoute.splice(ptrA + 1, 1);
-                } else {
-                    ptrA++;
-                }
-
-            }
         };
 
         /**
@@ -1677,7 +1702,6 @@ var GraphPaper = (function (exports) {
          * @return {PointSet}
          */
         this.computeRoute = function(_startPoint, _endPoint) {
-
             // if no valid startpoint or endpoint, we can't route
             if(_startPoint === null || _endPoint === null) {
                 return new PointSet();
@@ -1715,7 +1739,7 @@ var GraphPaper = (function (exports) {
                 }
             }
 
-            optimizeRoute(pointsInRoute);
+            PointVisibilityMapRouteOptimizer.optimize(pointsInRoute, arePointsVisibleToEachOther);
 
             return new PointSet(pointsInRoute);
 
@@ -1797,7 +1821,9 @@ var GraphPaper = (function (exports) {
 
   function LineSet(a){var b=this,c=[];this.push=function(a){var b=!1;return (c.forEach(function(c){a.isEqual(c)&&(b=!0);}),!b)&&(c.push(a),!0)},this.toArray=function(){return c},this.count=function(){return c.length},this.toFloat64Array=function(){for(var a=new Float64Array(4*c.length),b=0;b<c.length;b++)a[0+4*b]=c[b].getStartPoint().getX(),a[1+4*b]=c[b].getStartPoint().getY(),a[2+4*b]=c[b].getEndPoint().getX(),a[3+4*b]=c[b].getEndPoint().getY();return a};var d=function fromFloat64Array(a){c.length=0;for(var b=0;b<a.length;b+=4)c.push(new Line(new Point(a[b],a[b+1]),new Point(a[b+2],a[b+3])));};a&&Array.isArray(a)?a.forEach(b.push):a&&"[object Float64Array]"===Object.prototype.toString.call(a)&&d(a);}
 
-  function PointVisibilityMap(a,b){var c=this,d=b.toArray(),e=a.toArray(),f=Array(a.count()),g=function doesLineIntersectAnyBoundaryLines(a){for(var c,e=0;e<d.length;e++)if(c=d[e].computeIntersectionType(a),c===LINE_INTERSECTION_TYPE.LINESEG)return !0;return !1},h=function computePointsVisibility(){for(var a=0;a<e.length;a++)f[a]=[];for(var b=0;b<e.length;b++)for(var c,d=b+1;d<e.length;d++)c=new Line(e[b],e[d]),g(c)||(f[b].push(d),f[d].push(b));},i=function getVisiblePointsFrom(a){for(var c=0;c<e.length;c++)if(e[c].isEqual(a)){var b=function(){var a=f[c],b=[];return a.forEach(function(a){b.push(e[a]);}),{v:b}}();if("object"==typeof b)return b.v}return []},j=function routeToEndpoint(a,b,c,d){var e=i(c),f=Number.MAX_SAFE_INTEGER,g=null;return e.forEach(function(e){for(var k=0;k<b.length;k++)if(e.isEqual(b[k]))return;var h=new Line(c,e).getLength()+a,j=new Line(e,d).getLength();h+j<f&&(f=h+j,g=e);}),f===Number.MAX_SAFE_INTEGER?null:{cost:f,point:g}},k=function optimizeRoute(a){for(var b=0;!(b+2>=a.length);){var c=new Line(a[b],a[b+2]);g(c)?b++:a.splice(b+1,1);}};this.getPointToVisibleSetData=function(){return f},this.findPointClosestTo=function(a){var b=null,c=Number.MAX_SAFE_INTEGER;return e.forEach(function(d){var e=new Line(a,d);e.getLength()<c&&(b=d,c=e.getLength());}),b},this.findVisiblePointClosestTo=function(a){var b=null,c=Number.MAX_SAFE_INTEGER;return e.forEach(function(d){var e=new Line(a,d),f=e.getLength();f<c&&!g(e)&&(b=d,c=f);}),b},this.computeRoute=function(a,b){if(null===a||null===b)return new PointSet;var d=c.findVisiblePointClosestTo(a);if(null===d)return new PointSet;for(var e,f=0,h=[d],i=d;!0;){if(e=j(f,h,i,b),null===e){var l=new Line(h[h.length-1],b);if(g(l))return new PointSet;break}if(f+=new Line(i,e.point).getLength(),h.push(e.point),i=e.point,1>new Line(i,b).getLength())break}return k(h),new PointSet(h)},h();}
+  var PointVisibilityMapRouteOptimizer={optimize:function optimize(a,b){for(var c=0,d=a.length-1;!(1>=d-c&&(c++,d=a.length-1,c>=a.length-2));)b(a[c],a[d])?(a.splice(c+1,d-c-1),d=a.length-1):d--;}};
+
+  function PointVisibilityMap(a,b){var c=this,d=b.toArray(),e=a.toArray(),f=Array(a.count()),g=function doesLineIntersectAnyBoundaryLines(a){for(var c,e=0;e<d.length;e++)if(c=d[e].computeIntersectionType(a),c===LINE_INTERSECTION_TYPE.LINESEG)return !0;return !1},h=function computePointsVisibility(){for(var a=0;a<e.length;a++)f[a]=[];for(var b=0;b<e.length;b++)for(var c,d=b+1;d<e.length;d++)c=new Line(e[b],e[d]),g(c)||(f[b].push(d),f[d].push(b));},i=function arePointsVisibleToEachOther(a,b){for(var g=0;g<e.length;g++)if(e[g].isEqual(a))for(var c=f[g],d=0;d<c.length;d++)if(e[c[d]].isEqual(b))return !0;return !1},j=function getVisiblePointsFrom(a){for(var c=0;c<e.length;c++)if(e[c].isEqual(a)){var b=function(){var a=f[c],b=[];return a.forEach(function(a){b.push(e[a]);}),{v:b}}();if("object"==typeof b)return b.v}return []},k=function routeToEndpoint(a,b,c,d){var e=j(c),f=Number.MAX_SAFE_INTEGER,g=null;return e.forEach(function(e){for(var k=0;k<b.length;k++)if(e.isEqual(b[k]))return;var h=new Line(c,e).getLength()+a,j=new Line(e,d).getLength();h+j<f&&(f=h+j,g=e);}),f===Number.MAX_SAFE_INTEGER?null:{cost:f,point:g}};this.getPointToVisibleSetData=function(){return f},this.findPointClosestTo=function(a){var b=null,c=Number.MAX_SAFE_INTEGER;return e.forEach(function(d){var e=new Line(a,d);e.getLength()<c&&(b=d,c=e.getLength());}),b},this.findVisiblePointClosestTo=function(a){var b=null,c=Number.MAX_SAFE_INTEGER;return e.forEach(function(d){var e=new Line(a,d),f=e.getLength();f<c&&!g(e)&&(b=d,c=f);}),b},this.computeRoute=function(a,b){if(null===a||null===b)return new PointSet;var d=c.findVisiblePointClosestTo(a);if(null===d)return new PointSet;for(var e,f=0,h=[d],j=d;!0;){if(e=k(f,h,j,b),null===e){var l=new Line(h[h.length-1],b);if(g(l))return new PointSet;break}if(f+=new Line(j,e.point).getLength(),h.push(e.point),j=e.point,1>new Line(j,b).getLength())break}return PointVisibilityMapRouteOptimizer.optimize(h,i),new PointSet(h)},h();}
 
   var SvgPathBuilder={pointToLineTo:function pointToLineTo(a,b){return 0===b?"M"+a.getX()+" "+a.getY():"L"+a.getX()+" "+a.getY()},pointTripletToTesselatedCurvePoints:function pointTripletToTesselatedCurvePoints(a,b){if(3!==a.length)throw new Error("_points must be array of exactly 3 points");var c=a[1],d=new Line(a[0],a[1]),e=new Line(a[1],a[2]),f=d.createShortenedLine(0,.5*b),g=e.createShortenedLine(.5*b,0);return [f.getStartPoint(),f.getEndPoint(),g.getStartPoint(),g.getEndPoint()]},pointsToPath:function pointsToPath(a,b){b=b||0;var c=[];if(0<b){for(var h=0;3<=a.length;){var d=a.shift(),e=a.shift(),f=a.shift(),g=SvgPathBuilder.pointTripletToTesselatedCurvePoints([d,e,f],b);a.unshift(g[3]),a.unshift(g[2]);for(var k=0;k<g.length-2;k++)c.push(SvgPathBuilder.pointToLineTo(g[k],h++));}for(;0<a.length;){var j=a.shift();c.push(SvgPathBuilder.pointToLineTo(j,ptIdx++));}}else for(var l,m=0;m<a.length;m++)l=a[m],c.push(SvgPathBuilder.pointToLineTo(l,m));return c.join(" ")}};
 
