@@ -11,9 +11,9 @@ import {Point} from './Point';
  * @param {String} _strokeColor
  * @param {String} _strokeWidth
  * @param {Number} _curvaturePx
+ * @param {Boolean} _allowRouteOptimization
  */
-function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx) {
-    
+function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _allowRouteOptimization) {
     const self = this;
 
     const eventNameToHandlerFunc = new Map();
@@ -30,6 +30,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
     if(typeof _curvaturePx === 'undefined') {
         _curvaturePx = 0;
+    }
+
+    if(typeof _allowRouteOptimization === 'undefined') {
+        _allowRouteOptimization = true;
     }
 
     /**
@@ -251,7 +255,8 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
             "anchor_end_centroid_arr": _anchorEnd.getCentroid().toArray(),
             "marker_start_size": markerStartSize,
             "marker_end_size": markerEndSize,
-            "curvature_px": _curvaturePx
+            "curvature_px": _curvaturePx,
+            "allow_route_optimization": _allowRouteOptimization,
         };
     };
 

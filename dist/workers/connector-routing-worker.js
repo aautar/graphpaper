@@ -676,7 +676,6 @@
          * @returns {Point|null}
          */
         this.findVisiblePointClosestTo = function(_point) {
-
             var resultPoint = null;
             var currentMaxLength = Number.MAX_SAFE_INTEGER;
 
@@ -697,10 +696,11 @@
         /**
          * @param {Point} _startPoint
          * @param {Point} _endPoint
+         * @param {Boolean} _optimizeRoute
          * 
          * @return {PointSet}
          */
-        this.computeRoute = function(_startPoint, _endPoint) {
+        this.computeRoute = function(_startPoint, _endPoint, _optimizeRoute) {
             // if no valid startpoint or endpoint, we can't route
             if(_startPoint === null || _endPoint === null) {
                 return new PointSet();
@@ -738,7 +738,9 @@
                 }
             }
 
-            PointVisibilityMapRouteOptimizer.optimize(pointsInRoute, arePointsVisibleToEachOther);
+            if(_optimizeRoute) {
+                PointVisibilityMapRouteOptimizer.optimize(pointsInRoute, arePointsVisibleToEachOther);
+            }
 
             return new PointSet(pointsInRoute);
 
@@ -857,6 +859,7 @@
         const markerStartSize = _connectorDescriptor.marker_start_size;
         const markerEndSize = _connectorDescriptor.marker_end_size;
         const curvaturePx = _connectorDescriptor.curvature_px;
+        const optimizeRoute = _connectorDescriptor.allow_route_optimization;
 
         const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
 
@@ -870,7 +873,7 @@
             .findPointsCloseTo(anchorEndCentroid, anchorPointMinDist)
             .findPointClosestTo(anchorStartCentroid);
 
-        const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
+        const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
         const routingPointsArray = routingPoints.toArray();
         let pathStartPoint = anchorStartCentroid;
         let pathEndPoint = anchorEndCentroid;

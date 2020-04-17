@@ -19,6 +19,7 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
     const markerStartSize = _connectorDescriptor.marker_start_size;
     const markerEndSize = _connectorDescriptor.marker_end_size;
     const curvaturePx = _connectorDescriptor.curvature_px;
+    const optimizeRoute = _connectorDescriptor.allow_route_optimization;
 
     const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
 
@@ -32,7 +33,7 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
         .findPointsCloseTo(anchorEndCentroid, anchorPointMinDist)
         .findPointClosestTo(anchorStartCentroid);
 
-    const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd);
+    const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
     const routingPointsArray = routingPoints.toArray();
     let pathStartPoint = anchorStartCentroid;
     let pathEndPoint = anchorEndCentroid;

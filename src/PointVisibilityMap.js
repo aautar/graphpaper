@@ -165,7 +165,6 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
      * @returns {Point|null}
      */
     this.findVisiblePointClosestTo = function(_point) {
-
         var resultPoint = null;
         var currentMaxLength = Number.MAX_SAFE_INTEGER;
 
@@ -187,10 +186,11 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
     /**
      * @param {Point} _startPoint
      * @param {Point} _endPoint
+     * @param {Boolean} _optimizeRoute
      * 
      * @return {PointSet}
      */
-    this.computeRoute = function(_startPoint, _endPoint) {
+    this.computeRoute = function(_startPoint, _endPoint, _optimizeRoute) {
         // if no valid startpoint or endpoint, we can't route
         if(_startPoint === null || _endPoint === null) {
             return new PointSet();
@@ -228,7 +228,9 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
             }
         }
 
-        PointVisibilityMapRouteOptimizer.optimize(pointsInRoute, arePointsVisibleToEachOther);
+        if(_optimizeRoute) {
+            PointVisibilityMapRouteOptimizer.optimize(pointsInRoute, arePointsVisibleToEachOther);
+        }
 
         return new PointSet(pointsInRoute);
 
