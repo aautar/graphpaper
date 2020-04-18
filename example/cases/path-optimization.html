@@ -5,14 +5,27 @@
     <title>GraphPaper</title>
     <script src="../../dist/graphpaper.js" type="text/javascript"></script>
     <link href="../common.css" rel="stylesheet">
+
+    <style type="text/css">
+        button {
+            padding:10px; 
+            background-color:#aaa; 
+            outline:none;
+        }
+
+        button.active {
+            background-color: #00ff32;
+        }
+    </style>
+
 </head>
 
 <body>
     
     <div id="paper">
 
-        <div style="position:absolute; top:10px; right:0;">
-            <button id="btn-toggle-route-optimization" type="button">Toggle route optimization</button>
+        <div style="position:absolute; top:10px; left:10px;">
+            <button id="btn-toggle-route-optimization" class="active" type="button">Toggle route optimization</button>
         </div>
 
         <div id="obj1" class="obj">
@@ -133,6 +146,12 @@
         document.getElementById('btn-toggle-route-optimization').addEventListener('click', function(e) {
             optimizeConnectorRoute = !optimizeConnectorRoute;
             recreateConnectors();
+
+            if(optimizeConnectorRoute) {
+                document.getElementById('btn-toggle-route-optimization').classList.add('active');
+            } else {
+                document.getElementById('btn-toggle-route-optimization').classList.remove('active');
+            }
         });
 
         recreateConnectors();
