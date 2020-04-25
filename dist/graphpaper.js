@@ -625,19 +625,19 @@ var GraphPaper = (function (exports) {
                 const anchors = _o.getConnectorAnchors();
 
                 anchors.forEach((_a) => {
-                    let isAnchorOccluded = false;
 
                     // check if anchor is occluded
-                    for(let i=0; i<_occludableByObjects.length; i++) {
+                    // @todo Commented out for now, need a decision on how to handle anchors where centroid is on the occluder bounding rect
+                    /*for(let i=0; i<_occludableByObjects.length; i++) {
                         const possibleOccluderBoundingRect = _occludableByObjects[i].getBoundingRectange();
                         if(possibleOccluderBoundingRect.checkIsPointWithin(_a.getCentroid())) {
                             connectorAnchorToNumValidRoutingPoints.set(_a.getId(), 0);
                             isAnchorOccluded = true;
                             break;
                         }
-                    }
+                    }*/
 
-                    if(!isAnchorOccluded) {
+                    {
                         const routingPoints = _a.getRoutingPoints(_gridSize);
                         routingPoints.forEach((_rp) => {
                             allRoutingPoints.push(
@@ -3257,12 +3257,12 @@ var GraphPaper = (function (exports) {
      * @param {Number} _y
      * @param {Number} _width
      * @param {Number} _height
-     * @param {Canvas} _canvas
+     * @param {Canvas} _sheet
      * @param {Element} _domElement
      * @param {Element[]} _translateHandleDomElements
      * @param {Element[]} _resizeHandleDomElements
      */
-    function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
+    function CanvasObject(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
 
         const self = this;
 
@@ -3307,7 +3307,7 @@ var GraphPaper = (function (exports) {
          * @returns {ConnectorAnchor}
          */    
         this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement) {
-            const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
+            const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet);
             connectorAnchors.push(newAnchor);
             nextConnectorAnchorIdSuffix++;
             return newAnchor;
@@ -3318,10 +3318,10 @@ var GraphPaper = (function (exports) {
          * @returns {ConnectorAnchor}
          */    
         this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement) {     
-            const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
+            const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet);
 
             _connectorAnchorDomElement.addEventListener('click', function(e) {
-                _canvas.addConnectionAnchorToSelectionStack(anchor);
+                _sheet.addConnectionAnchorToSelectionStack(anchor);
             });
 
             connectorAnchors.push(anchor);

@@ -22,14 +22,15 @@ const AccessibleRoutingPointsFinder = {
                 let isAnchorOccluded = false;
 
                 // check if anchor is occluded
-                for(let i=0; i<_occludableByObjects.length; i++) {
+                // @todo Commented out for now, need a decision on how to handle anchors where centroid is on the occluder bounding rect
+                /*for(let i=0; i<_occludableByObjects.length; i++) {
                     const possibleOccluderBoundingRect = _occludableByObjects[i].getBoundingRectange();
                     if(possibleOccluderBoundingRect.checkIsPointWithin(_a.getCentroid())) {
                         connectorAnchorToNumValidRoutingPoints.set(_a.getId(), 0);
                         isAnchorOccluded = true;
                         break;
                     }
-                }
+                }*/
 
                 if(!isAnchorOccluded) {
                     const routingPoints = _a.getRoutingPoints(_gridSize);
