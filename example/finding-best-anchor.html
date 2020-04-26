@@ -40,7 +40,7 @@
 
     <script type="text/javascript">
 	
-        const canvas = new GraphPaper.Canvas(
+        const canvas = new GraphPaper.Sheet(
             document.getElementById('paper'), 
             window
         );
@@ -106,7 +106,7 @@
         canvas.addObject(obj2);
         canvas.addObject(obj3);
 
-        canvas.on(GraphPaper.CanvasEvent.OBJECT_TRANSLATED, function() {
+        canvas.on(GraphPaper.SheetEvent.OBJECT_TRANSLATED, function() {
             canvas.findBestConnectorAnchorsToConnectObjects(obj1, obj2, function(_bestAnchors) {
 
                 // to optimize, we should only remove existing if it doesn't match the best

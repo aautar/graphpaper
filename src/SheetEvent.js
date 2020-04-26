@@ -1,4 +1,4 @@
-const CanvasEvent = Object.freeze({
+const SheetEvent = Object.freeze({
     DBLCLICK: "dblclick",
     CLICK: "click",
     CONNECTOR_UPDATED: "connector-updated",
@@ -11,4 +11,4 @@ const CanvasEvent = Object.freeze({
 });
 
 
-export { CanvasEvent };
+export { SheetEvent };

@@ -1,6 +1,6 @@
 import {MatrixMath} from './MatrixMath';
 import {AccessibleRoutingPointsFinder} from './AccessibleRoutingPointsFinder';
-import {CanvasEvent} from './CanvasEvent';
+import {SheetEvent} from './SheetEvent';
 import {CanvasObject} from './CanvasObject';
 import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
 import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
@@ -18,24 +18,23 @@ import {GroupTransformationContainerEvent } from './GroupTransformationContainer
 import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
 
 /**
- * @callback HandleCanvasInteractionCallback
+ * @callback HandleSheetInteractionCallback
  * @param {String} interactionType
  * @param {Object} interactionData
  */ 
 
  /**
- * @param {Element} _canvasDomElement 
+ * @param {Element} _sheetDomElement 
  * @param {Window} _window
  */
-function Canvas(_canvasDomElement, _window) {
-
+function Sheet(_sheetDomElement, _window) {
     const self = this;
 
     // Create container for SVG connectors
     const svgElem = _window.document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgElem.style.width = "100%";
     svgElem.style.height = "100%";
-    const connectorsContainerDomElement = _canvasDomElement.appendChild(svgElem);
+    const connectorsContainerDomElement = _sheetDomElement.appendChild(svgElem);
 
     // Selection box element
     var selectionBoxElem = null;
@@ -70,7 +69,7 @@ function Canvas(_canvasDomElement, _window) {
 
     var connectorRefreshBufferTime = 6.94;
     var useTranslate3d = false; // better performance w/o it
-    const canvasObjects = [];
+    const sheetEntities = [];
 
     /**
      * @type {Connector[]}
@@ -148,7 +147,7 @@ function Canvas(_canvasDomElement, _window) {
             if(descriptor) {
                 const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
                 _c.refresh(descriptor.svgPath, ps.toArray());
-                emitEvent(CanvasEvent.CONNECTOR_UPDATED, { 'connector': _c });
+                emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
             }
         });        
 
@@ -175,9 +174,9 @@ function Canvas(_canvasDomElement, _window) {
      */
     this.setGrid = function(_grid) {
         grid = _grid;
-        _canvasDomElement.style.backgroundImage = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "')";
-        _canvasDomElement.style.backgroundRepeat = "repeat";
-        _canvasDomElement.style.backgroundColor = "#fff";
+        _sheetDomElement.style.backgroundImage = "url('data:image/svg+xml;base64," + _window.btoa(grid.getSvgImageTile()) + "')";
+        _sheetDomElement.style.backgroundRepeat = "repeat";
+        _sheetDomElement.style.backgroundColor = "#fff";
     };
 
     /**
@@ -199,7 +198,7 @@ function Canvas(_canvasDomElement, _window) {
      */
     const getObjectExtentRoutingPoints = function() {
         const pointSet = new PointSet();
-        canvasObjects.forEach(function(_obj) {
+        sheetEntities.forEach(function(_obj) {
             const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
             scaledPoints.forEach((_sp) => {
                 pointSet.push(_sp);
@@ -214,7 +213,7 @@ function Canvas(_canvasDomElement, _window) {
      */    
     const getConnectorRoutingPointsAroundAnchor = function() {
         const pointSet = new PointSet();
-        const routingPointsResult = AccessibleRoutingPointsFinder.find(canvasObjects, canvasObjects, self.getGridSize());
+        const routingPointsResult = AccessibleRoutingPointsFinder.find(sheetEntities, sheetEntities, self.getGridSize());
         routingPointsResult.accessibleRoutingPoints.forEach((_rp) => {
             pointSet.push(_rp);
         });
@@ -227,7 +226,7 @@ function Canvas(_canvasDomElement, _window) {
      */    
     const getConnectorBoundaryLines = function() {
         const boundaryLines = [];
-        canvasObjects.forEach(function(_obj) {
+        sheetEntities.forEach(function(_obj) {
             const lines = _obj.getBoundingRectange().getLines();
             lines.forEach((_l) => {
                 boundaryLines.push(_l);
@@ -339,7 +338,7 @@ function Canvas(_canvasDomElement, _window) {
      */
     this.setTransitionCss = function(_css) {
         transitionCss = _css;
-        _canvasDomElement.style.transition = transitionCss;
+        _sheetDomElement.style.transition = transitionCss;
     };
 
     /**
@@ -385,7 +384,7 @@ function Canvas(_canvasDomElement, _window) {
     this.setTransformOrigin = function(_x, _y) {
         transformOriginX = _x;
         transformOriginY = _y;
-        _canvasDomElement.style.transformOrigin = `${transformOriginX}px ${transformOriginY}px`;
+        _sheetDomElement.style.transformOrigin = `${transformOriginX}px ${transformOriginY}px`;
     };
 
     /**
@@ -465,7 +464,7 @@ function Canvas(_canvasDomElement, _window) {
     };
 
     this.applyTransform = function() {
-        _canvasDomElement.style.transform = self.getTranformMatrixCss();
+        _sheetDomElement.style.transform = self.getTranformMatrixCss();
         currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         for(let i=0; i<invTransformationMatrixStack.length; i++) {
             currentInvTransformationMatrix = MatrixMath.mat4Multiply(currentInvTransformationMatrix, invTransformationMatrixStack[i]);
@@ -495,7 +494,7 @@ function Canvas(_canvasDomElement, _window) {
         currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         invTransformationMatrixStack.length = 0;
-        _canvasDomElement.style.transform = "none";
+        _sheetDomElement.style.transform = "none";
     };
 
     /**
@@ -518,28 +517,28 @@ function Canvas(_canvasDomElement, _window) {
      * @returns {Number}
      */
     this.getOffsetLeft = function() {
-        return _canvasDomElement.offsetLeft;
+        return _sheetDomElement.offsetLeft;
     };
 
     /**
      * @returns {Number}
      */
     this.getOffsetTop = function() {
-        return _canvasDomElement.offsetTop;
+        return _sheetDomElement.offsetTop;
     };
 
     /**
      * @returns {Number}
      */
     this.getWidth = function() {
-        return _canvasDomElement.offsetWidth;
+        return _sheetDomElement.offsetWidth;
     };
 
     /**
      * @returns {Number}
      */
     this.getHeight = function() {
-        return _canvasDomElement.offsetHeight;
+        return _sheetDomElement.offsetHeight;
     };
 
     /**
@@ -590,11 +589,11 @@ function Canvas(_canvasDomElement, _window) {
      * @returns {Rectangle}
      */
     this.calcBoundingBox = function() {
-        if(canvasObjects.length === 0) {    
+        if(sheetEntities.length === 0) {    
             return new Rectangle(0, 0, self.getWidth(), self.getHeight());     
         }
 
-        return self.calcBoundingRectForObjects(canvasObjects);
+        return self.calcBoundingRectForObjects(sheetEntities);
     };
 
     /**
@@ -616,7 +615,7 @@ function Canvas(_canvasDomElement, _window) {
             _y + _radius
         );
 
-        canvasObjects.forEach(function(_obj) {
+        sheetEntities.forEach(function(_obj) {
             if(ptRect.checkIntersect(_obj.getBoundingRectange())) {
                 result.push(_obj);
             }
@@ -632,7 +631,7 @@ function Canvas(_canvasDomElement, _window) {
     this.getObjectsWithinRect = function(_rect) {
         const result = [];
 
-        canvasObjects.forEach(function(_obj) {
+        sheetEntities.forEach(function(_obj) {
             if(_obj.getBoundingRectange().checkIsWithin(_rect)) {
                 result.push(_obj);
             }
@@ -645,7 +644,7 @@ function Canvas(_canvasDomElement, _window) {
      * @returns {CanvasObject[]}
      */
     this.getAllObjects = function() {    
-        return canvasObjects;
+        return sheetEntities;
     };
 
     /**
@@ -655,7 +654,7 @@ function Canvas(_canvasDomElement, _window) {
      * @param {*} _eventData
      */
     this.publishSiblingObjectChange = function(_eventName, _eventData) {
-        canvasObjects.forEach(function(_obj) {
+        sheetEntities.forEach(function(_obj) {
             _obj.handleSiblingObjectChange(_eventName, _eventData);
         });
     };
@@ -666,7 +665,7 @@ function Canvas(_canvasDomElement, _window) {
      */   
     this.getObjectById = function(_id) {
         var foundObject = null;
-        canvasObjects.forEach(function(obj, index, array) {
+        sheetEntities.forEach(function(obj, index, array) {
             if(foundObject === null && obj.getId() === _id) {
                 foundObject = obj;
             }            
@@ -681,35 +680,35 @@ function Canvas(_canvasDomElement, _window) {
     this.addObject = function(_obj) {
         _obj.on('obj-resize-start', handleResizeStart);
         _obj.on('obj-resize', function(e) {
-            emitEvent(CanvasEvent.OBJECT_RESIZED, { 'object': e.obj });
+            emitEvent(SheetEvent.OBJECT_RESIZED, { 'object': e.obj });
             self.refreshAllConnectors();    
         });
 
         _obj.on('obj-translate-start', handleMoveStart);
         _obj.on('obj-translate', function(e) {
-            emitEvent(CanvasEvent.OBJECT_TRANSLATED, { 'object': e.obj });
+            emitEvent(SheetEvent.OBJECT_TRANSLATED, { 'object': e.obj });
             self.refreshAllConnectors();    
         });
 
-        canvasObjects.push(_obj);
+        sheetEntities.push(_obj);
         self.refreshAllConnectors();       
 
-        emitEvent(CanvasEvent.OBJECT_ADDED, { "object":_obj });
+        emitEvent(SheetEvent.OBJECT_ADDED, { "object":_obj });
     };
 
     /**
-     * Remove object from the canvas
+     * Remove object from the sheet
      * Note: as caller is responsible for putting object into the DOM, caller is responsible for removing it from the DOM
      * 
      * @param {String} _objId
      * @returns {Boolean} 
      */
     this.removeObject = function(_objId) {
-        for(let i=0; i<canvasObjects.length; i++) {
-            if(canvasObjects[i].getId() === _objId) {
-                canvasObjects.splice(i, 1);
+        for(let i=0; i<sheetEntities.length; i++) {
+            if(sheetEntities[i].getId() === _objId) {
+                sheetEntities.splice(i, 1);
                 self.refreshAllConnectors();
-                emitEvent(CanvasEvent.OBJECT_REMOVED, { "object":canvasObjects[i] });
+                emitEvent(SheetEvent.OBJECT_REMOVED, { "object":sheetEntities[i] });
                 return true;
             }
         }
@@ -886,7 +885,7 @@ function Canvas(_canvasDomElement, _window) {
      */
     this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
         const searchFunc = (_searchData) => {
-            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_objA, _objB], canvasObjects, self.getGridSize());
+            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_objA, _objB], sheetEntities, self.getGridSize());
             const result = ConnectorAnchorClosestPairFinder.findClosestPairBetweenObjects(
                 _searchData.objectA, 
                 _searchData.objectB, 
@@ -931,7 +930,7 @@ function Canvas(_canvasDomElement, _window) {
             'objectsAroundPoint': objectsAroundPoint
         };
 
-        emitEvent(CanvasEvent.DBLCLICK, eventData);
+        emitEvent(SheetEvent.DBLCLICK, eventData);
     };
 
     this.initDebugMetricsPanel = function() {
@@ -947,8 +946,8 @@ function Canvas(_canvasDomElement, _window) {
 
         doubleTapDetector = new DoubleTapDetector(_dblTapSpeed, _dblTapRadius);
 
-        // dblclick on empty area of canvas
-        _canvasDomElement.addEventListener('dblclick', function (e) {
+        // dblclick on empty area of the sheet
+        _sheetDomElement.addEventListener('dblclick', function (e) {
 
             const invTransformedPos = MatrixMath.vecMat4Multiply(
                 [e.pageX, e.pageY, 0, 1],
@@ -958,11 +957,11 @@ function Canvas(_canvasDomElement, _window) {
             dblClickTapHandler(invTransformedPos[0], invTransformedPos[1]);
         });
 
-        // click anywhere on canvas
-        _canvasDomElement.addEventListener('click', function (e) {
-            let canvasObjectClicked = false;
-            if(e.target !== _canvasDomElement) {
-                canvasObjectClicked = true;
+        // click anywhere on sheet
+        _sheetDomElement.addEventListener('click', function (e) {
+            let sheetEntityClicked = false;
+            if(e.target !== _sheetDomElement) {
+                sheetEntityClicked = true;
             }
 
             const invTransformedPos = MatrixMath.vecMat4Multiply(
@@ -972,14 +971,15 @@ function Canvas(_canvasDomElement, _window) {
 
             const eventData = {
                 'targetPoint': new Point(invTransformedPos[0], invTransformedPos[1]),
-                'canvasObjectClicked': canvasObjectClicked
+                'entityClicked': sheetEntityClicked,
+                'canvasObjectClicked': sheetEntityClicked // deprecated
             };
     
-            emitEvent(CanvasEvent.CLICK, eventData);
+            emitEvent(SheetEvent.CLICK, eventData);
         });
 
-        // touchend on canvas, logic to see if there was a double-tap
-        _canvasDomElement.addEventListener('touchend', function(e) {
+        // touchend on sheet, logic to see if there was a double-tap
+        _sheetDomElement.addEventListener('touchend', function(e) {
             const detectResult = doubleTapDetector.processTap(
                 e,
                 currentInvTransformationMatrix,
@@ -995,7 +995,7 @@ function Canvas(_canvasDomElement, _window) {
      * @param {GroupTransformationContainer} _groupTransformationContainer
      */
     this.attachGroupTransformationContainer = function(_groupTransformationContainer) {
-        _canvasDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
+        _sheetDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
         groupTransformationContainers.push(_groupTransformationContainer);
 
         _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, function(e) {
@@ -1010,7 +1010,7 @@ function Canvas(_canvasDomElement, _window) {
     this.detachGroupTransformationContainer = function(_groupTransformationContainer) {
         for(let i=0; i<groupTransformationContainers.length; i++) {
             if(groupTransformationContainers[i] === _groupTransformationContainer) {
-                _canvasDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
+                _sheetDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
                 groupTransformationContainers.splice(i, 1);
                 return true;
             }
@@ -1135,7 +1135,7 @@ function Canvas(_canvasDomElement, _window) {
         selectionBoxElem.style.display = "block";
 
         emitEvent(
-            CanvasEvent.MULTIPLE_OBJECT_SELECTION_STARTED,
+            SheetEvent.MULTIPLE_OBJECT_SELECTION_STARTED,
             { 
                 'x': _x,
                 'y': _y
@@ -1165,7 +1165,7 @@ function Canvas(_canvasDomElement, _window) {
         selectionBoxElem.style.display = "none";
 
         emitEvent(
-            CanvasEvent.MULTIPLE_OBJECTS_SELECTED, 
+            SheetEvent.MULTIPLE_OBJECTS_SELECTED, 
             { 
                 'selectedObjects': selectedObjects,
                 'boundingRect': boundingRect
@@ -1222,13 +1222,13 @@ function Canvas(_canvasDomElement, _window) {
             });
         }
 
-        selectionBoxElem = _canvasDomElement.appendChild(selBox);
+        selectionBoxElem = _sheetDomElement.appendChild(selBox);
 
         const handleTouchSelectionStart = function(e) {
             const hasSelectionStarted = handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
         };
 
-        _canvasDomElement.addEventListener('mousedown', function(e) {
+        _sheetDomElement.addEventListener('mousedown', function(e) {
             if (e.which !== 1) {
                 return;
             }
@@ -1239,28 +1239,28 @@ function Canvas(_canvasDomElement, _window) {
             }
         });
 
-        _canvasDomElement.addEventListener('touchstart', function(e) {
+        _sheetDomElement.addEventListener('touchstart', function(e) {
             touchHoldStartInterval = setInterval(function() {
                 handleTouchSelectionStart(e);
             }, touchHoldDelayTimeMs);
         });
 
-        _canvasDomElement.addEventListener('touchend', function(e) {
+        _sheetDomElement.addEventListener('touchend', function(e) {
             clearInterval(touchHoldStartInterval);
         });
 
-        _canvasDomElement.addEventListener('touchmove', function(e) {
+        _sheetDomElement.addEventListener('touchmove', function(e) {
             clearInterval(touchHoldStartInterval);
         });        
     };
 
     this.initTransformationHandlers = function() {
-        _canvasDomElement.addEventListener('touchstart', function(e) {
+        _sheetDomElement.addEventListener('touchstart', function(e) {
             touchMoveLastX = e.touches[0].pageX;
             touchMoveLastY = e.touches[0].pageY;
         });
 
-        _canvasDomElement.addEventListener('touchmove', function (e) {
+        _sheetDomElement.addEventListener('touchmove', function (e) {
             if (objectIdBeingDragged !== null) {
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
@@ -1268,7 +1268,7 @@ function Canvas(_canvasDomElement, _window) {
                 );                    
 
                 handleMove(invTransformedPos[0], invTransformedPos[1]);
-                // if we're transforming an object, make sure we don't scroll the canvas
+                // if we're transforming an object, make sure we don't scroll the sheet
                 e.preventDefault();
             }
 
@@ -1304,7 +1304,7 @@ function Canvas(_canvasDomElement, _window) {
             touchMoveLastY = e.touches[0].pageY;
         });
 
-        _canvasDomElement.addEventListener('mousemove', function (e) {
+        _sheetDomElement.addEventListener('mousemove', function (e) {
             if (objectIdBeingDragged !== null) {		
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX, e.pageY, 0, 1],
@@ -1337,7 +1337,7 @@ function Canvas(_canvasDomElement, _window) {
             }
         });
 
-        _canvasDomElement.addEventListener('touchend', function (e) {
+        _sheetDomElement.addEventListener('touchend', function (e) {
 
             // e.touches is empty..
             // Need to use e.changedTouches for final x,y ???
@@ -1360,7 +1360,7 @@ function Canvas(_canvasDomElement, _window) {
             }
         });
 
-        _canvasDomElement.addEventListener('mouseup', function (e) {
+        _sheetDomElement.addEventListener('mouseup', function (e) {
             if (e.which === 1) {
                 if(objectIdBeingDragged !== null) {
 
@@ -1389,7 +1389,7 @@ function Canvas(_canvasDomElement, _window) {
             }
         });  
 
-        _canvasDomElement.addEventListener('mousedown', function (e) {
+        _sheetDomElement.addEventListener('mousedown', function (e) {
             // if we're dragging something, stop propagation
             if(currentGroupTransformationContainerBeingDragged !== null || objectIdBeingDragged !== null || objectIdBeingResized !== null) {
                 e.preventDefault();
@@ -1432,4 +1432,4 @@ function Canvas(_canvasDomElement, _window) {
     self.setTransitionCss(transitionCss);
 };
 
-export { Canvas };
+export { Sheet };

@@ -1,9 +1,9 @@
 const jsdom = require("jsdom");
-import {Canvas} from '../src/Canvas.js';
+import {Sheet} from '../src/Sheet.js';
 import {CanvasObject} from '../src/CanvasObject.js';
 import {ConnectorAnchor} from '../src/ConnectorAnchor.js';
 import {GRID_STYLE,Grid} from '../src/Grid.js';
-import { CanvasEvent } from '../src/CanvasEvent.js';
+import {SheetEvent} from '../src/SheetEvent.js';
 
 const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
@@ -23,7 +23,7 @@ global.URL = {
 
 jasmine.clock().install();
 
-describe("Canvas", function() {
+describe("Sheet", function() {
 
     const makeCanvasObject = function(_id, _x, _y, _width, _height) {
         const domElem = window.document.createElement('div');
@@ -42,9 +42,9 @@ describe("Canvas", function() {
         return o;
     };
 
-    const canvasDomElement = window.document.createElement('div');
-    Object.defineProperty(canvasDomElement, 'offsetWidth', {value: 1000});
-    Object.defineProperty(canvasDomElement, 'offsetHeight', {value: 2000});
+    const sheetDomElement = window.document.createElement('div');
+    Object.defineProperty(sheetDomElement, 'offsetWidth', {value: 1000});
+    Object.defineProperty(sheetDomElement, 'offsetHeight', {value: 2000});
 
     const document = window.document;
 
@@ -53,17 +53,17 @@ describe("Canvas", function() {
     };
 
     it("getWidth returns canvas width", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         expect(canvas.getWidth()).toBe(1000);
     });
 
     it("getHeight returns canvas width", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         expect(canvas.getHeight()).toBe(2000);
     });    
 
     it("calcBoundingBox returns bounding box for entire canvas when empty", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         const bbox = canvas.calcBoundingBox();
 
         expect(bbox.getLeft()).toBe(0);
@@ -73,7 +73,7 @@ describe("Canvas", function() {
     });        
 
     it("calcBoundingBox returns bounding box for area encompassing objects", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         const o1 = makeCanvasObject("obj-1", 100, 200, 10, 20);
         const o2 = makeCanvasObject("obj-2", 400, 200, 10, 20);
@@ -89,13 +89,13 @@ describe("Canvas", function() {
     });            
 
     it("snapToGrid snaps coordinate to grid", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         const snappedValue = canvas.snapToGrid(13);
         expect(snappedValue).toBe(canvas.getGridSize() - 1);
     });
 
     it("getObjectById returns added object", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
 
@@ -104,7 +104,7 @@ describe("Canvas", function() {
     });
 
     it("getObjectById returns null for missing object", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
@@ -114,7 +114,7 @@ describe("Canvas", function() {
     });  
 
     it("getObjectsAroundPoint returns nearby object within box-radius of 1px", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         var mockDomElem = {
             addEventListener: function() { }
@@ -130,7 +130,7 @@ describe("Canvas", function() {
     });    
 
     it("getObjectsAroundPoint returns surrounding object", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         var mockDomElem = {
             addEventListener: function() { }
@@ -146,7 +146,7 @@ describe("Canvas", function() {
     });        
 
     it("getObjectsAroundPoint does not return objects outside box-radius of 1px", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
@@ -156,20 +156,19 @@ describe("Canvas", function() {
     });
 
     it("setGrid sets the repeating tile, grid, background on the Canvas DOM element", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.setGrid(new Grid(12.0, '#424242', GRID_STYLE.DOT));
 
-        expect(canvasDomElement.style.backgroundImage).toBe("url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiI+PHJlY3Qgd2lkdGg9IjEiIGhlaWdodD0iMSIgeD0iMTEiIHk9IjExIiBzdHlsZT0iZmlsbDojNDI0MjQyIiAvPjwvc3ZnPg==)");
-        expect(canvasDomElement.style.backgroundRepeat).toBe("repeat");
-        expect(canvasDomElement.style.backgroundColor).toBe("rgb(255, 255, 255)");
+        expect(sheetDomElement.style.backgroundImage).toBe("url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiI+PHJlY3Qgd2lkdGg9IjEiIGhlaWdodD0iMSIgeD0iMTEiIHk9IjExIiBzdHlsZT0iZmlsbDojNDI0MjQyIiAvPjwvc3ZnPg==)");
+        expect(sheetDomElement.style.backgroundRepeat).toBe("repeat");
+        expect(sheetDomElement.style.backgroundColor).toBe("rgb(255, 255, 255)");
     });
-
 
     it("emits object-added event", function() {
 
         const objAddedCallback = jasmine.createSpy("object-added");
         
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
         canvas.on('object-added', objAddedCallback);
 
@@ -197,7 +196,7 @@ describe("Canvas", function() {
     it("emits dblclick event", function() {
         const dblclickCallback = jasmine.createSpy("dblclick-callback");
         
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
         canvas.on('dblclick', dblclickCallback);
 
@@ -206,7 +205,7 @@ describe("Canvas", function() {
             'bubbles': true,
             'cancelable': true
         });
-        canvasDomElement.dispatchEvent(event);
+        sheetDomElement.dispatchEvent(event);
 
         expect(dblclickCallback).toHaveBeenCalled()
         
@@ -215,7 +214,7 @@ describe("Canvas", function() {
     it("emits click event", function() {
         const clickCallback = jasmine.createSpy("click-callback");
         
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
         canvas.on('click', clickCallback);
 
@@ -224,7 +223,7 @@ describe("Canvas", function() {
             'bubbles': true,
             'cancelable': true
         });
-        canvasDomElement.dispatchEvent(event);
+        sheetDomElement.dispatchEvent(event);
 
         expect(clickCallback).toHaveBeenCalled()
         
@@ -234,8 +233,8 @@ describe("Canvas", function() {
 
         const translateCallback = jasmine.createSpy("translate-callback");
         
-        const canvasElem = window.document.createElement('div');
-        const canvas = new Canvas(canvasElem, window, pvWorkerMock);
+        const sheetElem = window.document.createElement('div');
+        const canvas = new Sheet(sheetElem, window, pvWorkerMock);
         canvas.initTransformationHandlers();
         canvas.on('object-translated', translateCallback);
 
@@ -270,7 +269,7 @@ describe("Canvas", function() {
             'movementX': 111,
             'movementY': 111
         });
-        canvasElem.dispatchEvent(mouseMoveEvent);
+        sheetElem.dispatchEvent(mouseMoveEvent);
 
         expect(translateCallback).toHaveBeenCalled()
         
@@ -279,8 +278,8 @@ describe("Canvas", function() {
     it("emits object-resized event", function() {        
         const resizeCallback = jasmine.createSpy("resize-callback");
         
-        const canvasElem = window.document.createElement('div');
-        const canvas = new Canvas(canvasElem, window, pvWorkerMock);
+        const sheetElem = window.document.createElement('div');
+        const canvas = new Sheet(sheetElem, window, pvWorkerMock);
         canvas.initTransformationHandlers();
         canvas.on('object-resized', resizeCallback);
 
@@ -316,7 +315,7 @@ describe("Canvas", function() {
             'movementX': 111,
             'movementY': 111
         });
-        canvasElem.dispatchEvent(mouseMoveEvent);
+        sheetElem.dispatchEvent(mouseMoveEvent);
 
         expect(resizeCallback).toHaveBeenCalled()
         
@@ -326,7 +325,7 @@ describe("Canvas", function() {
     it("off removes handler", function() {
         const dblclickCallback = jasmine.createSpy("dblclick-callback");
         
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
         canvas.on('dblclick', dblclickCallback);
         canvas.off('dblclick', dblclickCallback);
@@ -336,7 +335,7 @@ describe("Canvas", function() {
             'bubbles': true,
             'cancelable': true
         });
-        canvasDomElement.dispatchEvent(event);
+        sheetDomElement.dispatchEvent(event);
 
         expect(dblclickCallback).not.toHaveBeenCalled()
         
@@ -345,7 +344,6 @@ describe("Canvas", function() {
 });
 
 describe("Canvas connectors", function() {
-
     const makeAnchor = function(_id, _canvas) {
         const anchorElemWidth = 100;
         const anchorElemHeight = 200;
@@ -389,16 +387,15 @@ describe("Canvas connectors", function() {
         return o;
     };
 
-    const canvasDomElement = window.document.createElement('div');
+    const sheetDomElement = window.document.createElement('div');
     const document = window.document;
 
     const pvWorkerMock = {
         postMessage: function() { }
     };
 
-
     it("makeNewConnectorFromAnchors creates new Connector with correct ID", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
@@ -416,7 +413,7 @@ describe("Canvas connectors", function() {
     });
 
     it("getObjectWithConnectorAnchor returns correct CanvasObject", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
@@ -438,7 +435,7 @@ describe("Canvas connectors", function() {
     });    
 
     it("getObjectWithConnectorAnchor return null if CanvasObject doesn't exist", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
@@ -460,7 +457,7 @@ describe("Canvas connectors", function() {
     });        
 
     it("getObjectsConnectedViaConnector returns connected Objects", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
@@ -487,7 +484,7 @@ describe("Canvas connectors", function() {
     });    
 
     it("getConnectorsBetweenObjects returns correct connector", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
@@ -513,7 +510,7 @@ describe("Canvas connectors", function() {
     });        
 
     it("getConnectorsConnectedToObject returns correct connector", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
@@ -546,40 +543,40 @@ describe("Canvas connectors", function() {
 });
 
 describe("Canvas.initMultiObjectSelectionHandler", function() {
-    var canvasDomElement = null;
+    var sheetDomElement = null;
     var pvWorkerMock = null;
 
     beforeEach(function() {
         window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
-        canvasDomElement = window.document.createElement('div');
+        sheetDomElement = window.document.createElement('div');
         pvWorkerMock = {
             postMessage: function() { }
         };    
     });
 
     it("creates selection box DOM element", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initMultiObjectSelectionHandler();
-        expect(canvasDomElement.getElementsByClassName("ia-selection-box").length).toBe(1);
+        expect(sheetDomElement.getElementsByClassName("ia-selection-box").length).toBe(1);
     });
 
     it("creates selection box DOM element with given style classes", function() {
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initMultiObjectSelectionHandler(['style1', 'style2']);
 
-        const elem = canvasDomElement.getElementsByClassName("ia-selection-box")[0];        
+        const elem = sheetDomElement.getElementsByClassName("ia-selection-box")[0];        
         expect(elem.classList.contains('style1')).toBe(true);
         expect(elem.classList.contains('style2')).toBe(true);
     });
 });
 
 describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
-    var canvasDomElement = null;
+    var sheetDomElement = null;
     var pvWorkerMock = null;
 
     beforeEach(function() {
         window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
-        canvasDomElement = window.document.createElement('div');
+        sheetDomElement = window.document.createElement('div');
         pvWorkerMock = {
             postMessage: function() { }
         };    
@@ -588,9 +585,9 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
     it("emits event on mousedown", function() {
         const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
         
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initMultiObjectSelectionHandler();
-        canvas.on(CanvasEvent.MULTIPLE_OBJECT_SELECTION_STARTED, selectionStartedCallback);
+        canvas.on(SheetEvent.MULTIPLE_OBJECT_SELECTION_STARTED, selectionStartedCallback);
 
         const event = new window.MouseEvent('mousedown', {
             'bubbles': true,
@@ -599,7 +596,7 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
         });
 
         // Note that these events need to be dispatched from the SVG overlay element
-        const svgOverlayElem = canvasDomElement.getElementsByTagNameNS("http://www.w3.org/2000/svg", "svg")[0];
+        const svgOverlayElem = sheetDomElement.getElementsByTagNameNS("http://www.w3.org/2000/svg", "svg")[0];
         svgOverlayElem.dispatchEvent(event);
 
         expect(selectionStartedCallback).toHaveBeenCalled()        
@@ -608,9 +605,9 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
     it("emits event on touchstart", function() {
         const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
         
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
+        const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initMultiObjectSelectionHandler();
-        canvas.on(CanvasEvent.MULTIPLE_OBJECT_SELECTION_STARTED, selectionStartedCallback);
+        canvas.on(SheetEvent.MULTIPLE_OBJECT_SELECTION_STARTED, selectionStartedCallback);
 
         const event = new window.TouchEvent('touchstart', {
             'bubbles': true,
@@ -624,7 +621,7 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
         });
 
         // Note that these events need to be dispatched from the SVG overlay element
-        const svgOverlayElem = canvasDomElement.getElementsByTagNameNS("http://www.w3.org/2000/svg", "svg")[0];
+        const svgOverlayElem = sheetDomElement.getElementsByTagNameNS("http://www.w3.org/2000/svg", "svg")[0];
         svgOverlayElem.dispatchEvent(event);
 
         jasmine.clock().tick(1000);

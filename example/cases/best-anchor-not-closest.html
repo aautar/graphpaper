@@ -39,7 +39,7 @@
 
     <script type="text/javascript">
     
-        const canvas = new GraphPaper.Canvas(
+        const canvas = new GraphPaper.Sheet(
             document.getElementById('paper'), 
             window
         );
@@ -120,7 +120,7 @@
             });
         };
 
-        canvas.on(GraphPaper.CanvasEvent.OBJECT_TRANSLATED, function() {
+        canvas.on(GraphPaper.SheetEvent.OBJECT_TRANSLATED, function() {
             recreateConnectors();
         });
 

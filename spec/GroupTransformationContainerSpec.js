@@ -1,5 +1,5 @@
 const jsdom = require("jsdom");
-import {Canvas} from '../src/Canvas.js';
+import {Sheet} from '../src/Sheet.js';
 import {CanvasObject} from '../src/CanvasObject.js';
 import {GroupTransformationContainer} from '../src/GroupTransformationContainer.js';
 import {GRID_STYLE, Grid} from '../src/Grid.js';
@@ -21,39 +21,39 @@ global.URL = {
 };
 
 describe("GroupTransformationContainer", function() {
-    var canvasDomElement = null;
+    var sheetDomElement = null;
     var pvWorkerMock = null;
 
     beforeEach(function() {
-        window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
-        canvasDomElement = window.document.createElement('div');
+        window.document.body.innerHTML = ""; // should have a way to destroy sheet owned DOM elements
+        sheetDomElement = window.document.createElement('div');
         pvWorkerMock = {
             postMessage: function() { }
         };    
     });    
 
     it("creates transformation rect DOM element", function() {        
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
-        const gtc = new GroupTransformationContainer(canvas, []);
-        canvas.attachGroupTransformationContainer(gtc);
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        const gtc = new GroupTransformationContainer(sheet, []);
+        sheet.attachGroupTransformationContainer(gtc);
 
-        expect(canvasDomElement.getElementsByClassName("ia-group-transformation-container").length).toBe(1);
+        expect(sheetDomElement.getElementsByClassName("ia-group-transformation-container").length).toBe(1);
     });
 
     it("creates transformation rect DOM element with given style classes", function() {        
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
-        const gtc = new GroupTransformationContainer(canvas, [], ['style1', 'style2']);
-        canvas.attachGroupTransformationContainer(gtc);
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        const gtc = new GroupTransformationContainer(sheet, [], ['style1', 'style2']);
+        sheet.attachGroupTransformationContainer(gtc);
         
-        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        const gtcDomElem = sheetDomElement.getElementsByClassName("ia-group-transformation-container")[0];
         expect(gtcDomElem.classList.contains('style1')).toBe(true);
         expect(gtcDomElem.classList.contains('style2')).toBe(true);
     });
 
     it("creates transformation rect DOM element with correct size", function() {        
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
-        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        canvas.initMultiObjectSelectionHandler();
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        sheet.initMultiObjectSelectionHandler();
         
         const groupObjects = [
             new CanvasObject(
@@ -69,10 +69,10 @@ describe("GroupTransformationContainer", function() {
             )
         ];
 
-        const gtc = new GroupTransformationContainer(canvas, groupObjects);
-        canvas.attachGroupTransformationContainer(gtc);
+        const gtc = new GroupTransformationContainer(sheet, groupObjects);
+        sheet.attachGroupTransformationContainer(gtc);
 
-        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        const gtcDomElem = sheetDomElement.getElementsByClassName("ia-group-transformation-container")[0];
         expect(gtcDomElem.style.left).toBe('0px');
         expect(gtcDomElem.style.top).toBe('0px');        
         expect(gtcDomElem.style.width).toBe('10px');
@@ -81,9 +81,9 @@ describe("GroupTransformationContainer", function() {
 
 
     it("creates transformation rect DOM element with correct adjusted size", function() {        
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
-        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        canvas.initMultiObjectSelectionHandler();
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        sheet.initMultiObjectSelectionHandler();
         
         const groupObjects = [
             new CanvasObject(
@@ -99,10 +99,10 @@ describe("GroupTransformationContainer", function() {
             )
         ];
 
-        const gtc = new GroupTransformationContainer(canvas, groupObjects, [], 10.0);
-        canvas.attachGroupTransformationContainer(gtc);
+        const gtc = new GroupTransformationContainer(sheet, groupObjects, [], 10.0);
+        sheet.attachGroupTransformationContainer(gtc);
 
-        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        const gtcDomElem = sheetDomElement.getElementsByClassName("ia-group-transformation-container")[0];
         expect(gtcDomElem.style.left).toBe('-10px');
         expect(gtcDomElem.style.top).toBe('-10px');        
         expect(gtcDomElem.style.width).toBe('30px');
@@ -110,9 +110,9 @@ describe("GroupTransformationContainer", function() {
     });
 
     it("displays group transformation rect DOM element when group has 1+ objects", function() {        
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
-        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        canvas.initMultiObjectSelectionHandler();
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        sheet.initMultiObjectSelectionHandler();
         
         const groupObjects = [
             new CanvasObject(
@@ -128,42 +128,42 @@ describe("GroupTransformationContainer", function() {
             )
         ];
 
-        const gtc = new GroupTransformationContainer(canvas, groupObjects, [], 10.0);
-        canvas.attachGroupTransformationContainer(gtc);
+        const gtc = new GroupTransformationContainer(sheet, groupObjects, [], 10.0);
+        sheet.attachGroupTransformationContainer(gtc);
 
-        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        const gtcDomElem = sheetDomElement.getElementsByClassName("ia-group-transformation-container")[0];
         expect(gtcDomElem.style.display).toBe('block');
     });    
 
     it("does not display group transformation rect DOM element when group has 0 objects", function() {        
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
-        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        canvas.initMultiObjectSelectionHandler();
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        sheet.initMultiObjectSelectionHandler();
         
-        const gtc = new GroupTransformationContainer(canvas, [], [], 10.0);
-        canvas.attachGroupTransformationContainer(gtc);
+        const gtc = new GroupTransformationContainer(sheet, [], [], 10.0);
+        sheet.attachGroupTransformationContainer(gtc);
 
-        const gtcDomElem = canvasDomElement.getElementsByClassName("ia-group-transformation-container")[0];
+        const gtcDomElem = sheetDomElement.getElementsByClassName("ia-group-transformation-container")[0];
         expect(gtcDomElem.style.display).toBe('none');
     });        
 });
 
 describe("GroupTransformationContainer.translateByOffset", function() {
-    var canvasDomElement = null;
+    var sheetDomElement = null;
     var pvWorkerMock = null;
 
     beforeEach(function() {
         window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
-        canvasDomElement = window.document.createElement('div');
+        sheetDomElement = window.document.createElement('div');
         pvWorkerMock = {
             postMessage: function() { }
         };    
     });    
 
     it("translates and snaps objects to grid", function() {        
-        const canvas = new Canvas(canvasDomElement, window, pvWorkerMock);
-        canvas.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        canvas.initMultiObjectSelectionHandler();
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
+        sheet.initMultiObjectSelectionHandler();
         
         const groupObjects = [
             new CanvasObject(
@@ -179,7 +179,7 @@ describe("GroupTransformationContainer.translateByOffset", function() {
             )
         ];
 
-        const gtc = new GroupTransformationContainer(canvas, groupObjects);
+        const gtc = new GroupTransformationContainer(sheet, groupObjects);
         gtc.translateByOffset(9, 9);
 
         expect(groupObjects[0].getX()).toBe(7);

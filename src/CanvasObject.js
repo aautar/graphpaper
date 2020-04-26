@@ -1,6 +1,6 @@
 import {Point} from './Point';
 import {Rectangle} from './Rectangle';
-import {Canvas} from './Canvas';
+import {Sheet} from './Sheet';
 import {ConnectorAnchor} from './ConnectorAnchor';
 
 /**
@@ -10,12 +10,12 @@ import {ConnectorAnchor} from './ConnectorAnchor';
  * @param {Number} _y
  * @param {Number} _width
  * @param {Number} _height
- * @param {Canvas} _canvas
+ * @param {Sheet} _sheet
  * @param {Element} _domElement
  * @param {Element[]} _translateHandleDomElements
  * @param {Element[]} _resizeHandleDomElements
  */
-function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
+function CanvasObject(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
 
     const self = this;
 
@@ -60,7 +60,7 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {ConnectorAnchor}
      */    
     this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement) {
-        const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
+        const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet);
         connectorAnchors.push(newAnchor);
         nextConnectorAnchorIdSuffix++;
         return newAnchor;
@@ -71,10 +71,10 @@ function CanvasObject(_id, _x, _y, _width, _height, _canvas, _domElement, _trans
      * @returns {ConnectorAnchor}
      */    
     this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement) {     
-        const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _canvas);
+        const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet);
 
         _connectorAnchorDomElement.addEventListener('click', function(e) {
-            _canvas.addConnectionAnchorToSelectionStack(anchor);
+            _sheet.addConnectionAnchorToSelectionStack(anchor);
         });
 
         connectorAnchors.push(anchor);

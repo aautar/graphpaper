@@ -45,7 +45,7 @@
     
         var currentGroupTransformationContainer = null;
 
-        const canvas = new GraphPaper.Canvas(
+        const canvas = new GraphPaper.Sheet(
             document.getElementById('paper'), 
             window
         );
@@ -130,7 +130,7 @@
         obj3.suspendTranslateInteractions();
         obj3.resumeTranslateInteractions();
 
-        canvas.on(GraphPaper.CanvasEvent.MULTIPLE_OBJECTS_SELECTED, function(e) {
+        canvas.on(GraphPaper.SheetEvent.MULTIPLE_OBJECTS_SELECTED, function(e) {
 
             console.log(e);
 

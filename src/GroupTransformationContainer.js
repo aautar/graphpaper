@@ -2,17 +2,17 @@ import {CanvasObject} from './CanvasObject';
 import {GroupTransformationContainerEvent} from './GroupTransformationContainerEvent';
 
 /**
- * @param {Canvas} _canvas
+ * @param {Sheet} _sheet
  * @param {CanvasObject[]} _objects
  * @param {String[]} _containerStyleCssClasses
  * @param {Number} _sizeAdjustmentPx
  */
-function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClasses, _sizeAdjustmentPx)  {
+function GroupTransformationContainer(_sheet, _objects, _containerStyleCssClasses, _sizeAdjustmentPx)  {
     const self = this;
     const eventNameToHandlerFunc = new Map();
 
     const calculateBoundingRect = function() {
-        var r = _canvas.calcBoundingRectForObjects(_objects);
+        var r = _sheet.calcBoundingRectForObjects(_objects);
         if(_sizeAdjustmentPx) {
             r = r.getUniformlyResizedCopy(_sizeAdjustmentPx);
         }
@@ -85,8 +85,8 @@ function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClass
         accTranslateX += _dx;
         accTranslateY += _dy;
 
-        currentLeft = _canvas.snapToGrid(boundingRect.getLeft() + accTranslateX);
-        currentTop = _canvas.snapToGrid(boundingRect.getTop() + accTranslateY);
+        currentLeft = _sheet.snapToGrid(boundingRect.getLeft() + accTranslateX);
+        currentTop = _sheet.snapToGrid(boundingRect.getTop() + accTranslateY);
         selBox.style.left = `${currentLeft}px`;
         selBox.style.top = `${currentTop}px`;        
 
@@ -95,8 +95,8 @@ function GroupTransformationContainer(_canvas, _objects, _containerStyleCssClass
             const rp = objPositionRelativeToBoundingRect[i];
 
             obj.translate(
-                _canvas.snapToGrid(currentLeft + rp.x), 
-                _canvas.snapToGrid(currentTop + rp.y)
+                _sheet.snapToGrid(currentLeft + rp.x), 
+                _sheet.snapToGrid(currentTop + rp.y)
             );
         }
     };
