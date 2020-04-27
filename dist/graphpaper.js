@@ -611,17 +611,17 @@ var GraphPaper = (function (exports) {
         /**
          * Find routing points that are not occluded by objects
          * 
-         * @param {CanvasObject[]} _subjectObjects
-         * @param {CanvasObject[]} _occludableByObjects
+         * @param {Entity[]} _subjectObjects
+         * @param {Entity[]} _occludableByObjects
          * @param {Number} _gridSize
          * @returns {Object[]}
          */
-        find: function(_subjectObjects, _occludableByObjects, _gridSize) {
+        find: function(_subjectEntities, _occludableByEntities, _gridSize) {
             const connectorAnchorToNumValidRoutingPoints = new Map();
             const allRoutingPoints = [];
             const filteredRoutingPoints = [];
 
-            _subjectObjects.forEach((_o) => {
+            _subjectEntities.forEach((_o) => {
                 const anchors = _o.getConnectorAnchors();
 
                 anchors.forEach((_a) => {
@@ -657,8 +657,8 @@ var GraphPaper = (function (exports) {
                 let isPointWithinObj = false;
 
                 // check if routing point is occluded
-                for(let i=0; i<_occludableByObjects.length; i++) {
-                    const obj = _occludableByObjects[i];
+                for(let i=0; i<_occludableByEntities.length; i++) {
+                    const obj = _occludableByEntities[i];
                     const boundingRect = obj.getBoundingRectange();
 
                     if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
@@ -793,8 +793,8 @@ var GraphPaper = (function (exports) {
     const ClosestPairFinder = {   
         /**
          * 
-         * @param {CanvasObject} _objA 
-         * @param {CanvasObject} _objB
+         * @param {Entity} _objA 
+         * @param {Entity} _objB
          * @param {Map<ConnectorAnchor, Number>} _connectorAnchorToNumValidRoutingPoints
          * @returns {Object}
          */
@@ -2421,7 +2421,7 @@ var GraphPaper = (function (exports) {
          * @param {Number} _x
          * @param {Number} _y
          * @param {Number} _radius
-         * @returns {CanvasObject[]}
+         * @returns {Entity[]}
          */
         this.getObjectsAroundPoint = function(_x, _y, _radius) {
 
@@ -2447,7 +2447,7 @@ var GraphPaper = (function (exports) {
 
         /**
          * @param {Rectangle} _rect
-         * @returns {CanvasObject[]}
+         * @returns {Entity[]}
          */
         this.getObjectsWithinRect = function(_rect) {
             const result = [];
@@ -2462,7 +2462,7 @@ var GraphPaper = (function (exports) {
         };    
           
         /**
-         * @returns {CanvasObject[]}
+         * @returns {Entity[]}
          */
         this.getAllObjects = function() {    
             return sheetEntities;
@@ -2482,7 +2482,7 @@ var GraphPaper = (function (exports) {
 
         /**
          * @param {String} _id
-         * @returns {CanvasObject|null}
+         * @returns {Entity|null}
          */   
         this.getObjectById = function(_id) {
             var foundObject = null;
@@ -2496,7 +2496,7 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * @param {CanvasObject} _obj
+         * @param {Entity} _obj
          */
         this.addObject = function(_obj) {
             _obj.on('obj-resize-start', handleResizeStart);
@@ -2560,8 +2560,8 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {CanvasObject} _objA 
-         * @param {CanvasObject} _objB 
+         * @param {Entity} _objA 
+         * @param {Entity} _objB 
          * @returns {Connector[]}
          */
         this.getConnectorsBetweenObjects = function(_objA, _objB) {
@@ -2616,17 +2616,17 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {CanvasObject} _obj
+         * @param {Entity} _obj
          * @returns {Connector[]} 
          */
-        this.getConnectorsConnectedToObject = function(_obj) {
+        this.getConnectorsConnectedToObject = function(_entity) {
             const foundConnectors = [];
 
             objectConnectors.forEach((_conn) => {
                 const aS = _conn.getAnchorStart();
                 const aE = _conn.getAnchorEnd();
 
-                if(_obj.hasConnectorAnchor(aS) || _obj.hasConnectorAnchor(aE)) {
+                if(_entity.hasConnectorAnchor(aS) || _entity.hasConnectorAnchor(aE)) {
                     foundConnectors.push(_conn);
                 }
 
@@ -3262,8 +3262,7 @@ var GraphPaper = (function (exports) {
      * @param {Element[]} _translateHandleDomElements
      * @param {Element[]} _resizeHandleDomElements
      */
-    function CanvasObject(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
-
+    function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
         const self = this;
 
         const MOUSE_MIDDLE_BUTTON = 1;
@@ -3637,16 +3636,16 @@ var GraphPaper = (function (exports) {
 
     /**
      * @param {Sheet} _sheet
-     * @param {CanvasObject[]} _objects
+     * @param {Entity[]} _entities
      * @param {String[]} _containerStyleCssClasses
      * @param {Number} _sizeAdjustmentPx
      */
-    function GroupTransformationContainer(_sheet, _objects, _containerStyleCssClasses, _sizeAdjustmentPx)  {
+    function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClasses, _sizeAdjustmentPx)  {
         const self = this;
         const eventNameToHandlerFunc = new Map();
 
         const calculateBoundingRect = function() {
-            var r = _sheet.calcBoundingRectForObjects(_objects);
+            var r = _sheet.calcBoundingRectForObjects(_entities);
             if(_sizeAdjustmentPx) {
                 r = r.getUniformlyResizedCopy(_sizeAdjustmentPx);
             }
@@ -3664,7 +3663,7 @@ var GraphPaper = (function (exports) {
 
         const objPositionRelativeToBoundingRect = [];
 
-        _objects.forEach(function(_obj) {
+        _entities.forEach(function(_obj) {
             const rp = {
                 "x": _obj.getX() - currentLeft,
                 "y": _obj.getY() - currentTop
@@ -3683,7 +3682,7 @@ var GraphPaper = (function (exports) {
         selBox.style.height = `${boundingRect.getHeight()}px`;    
 
         // only display the container if we have 1+ object in the group
-        if(_objects.length > 0) {
+        if(_entities.length > 0) {
             selBox.style.display = "block";
         }
 
@@ -3705,10 +3704,10 @@ var GraphPaper = (function (exports) {
         };
         
         /**
-         * @returns {CanvasObject[]}
+         * @returns {Entity[]}
          */
         this.getObjects = function() {
-            return _objects;
+            return _entities;
         };
 
         /**
@@ -3724,8 +3723,8 @@ var GraphPaper = (function (exports) {
             selBox.style.left = `${currentLeft}px`;
             selBox.style.top = `${currentTop}px`;        
 
-            for(let i=0; i<_objects.length; i++) {
-                const obj = _objects[i];
+            for(let i=0; i<_entities.length; i++) {
+                const obj = _entities[i];
                 const rp = objPositionRelativeToBoundingRect[i];
 
                 obj.translate(
@@ -3811,9 +3810,9 @@ var GraphPaper = (function (exports) {
         const self = this;
 
         /**
-         * @type {CanvasObjects[]}
+         * @type {Entity[]}
          */
-        const canvasObjects = [];
+        const entities = [];
 
         /**
          * @returns {String}
@@ -3823,20 +3822,20 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * @param {CanvasObject} _obj
+         * @param {Entity} _obj
          * @returns {Number|null}
          */
-        this.getObjectIndex = function(_obj) {
-            return self.getObjectIndexById(_obj.getId());
+        this.getObjectIndex = function(_entity) {
+            return self.getObjectIndexById(_entity.getId());
         };
 
         /**
          * @param {String} _objId
          * @returns {Number|null}
          */
-        this.getObjectIndexById = function(_objId) {
-            for(let i=0; i<canvasObjects.length; i++) {
-                if(canvasObjects[i].getId() === _objId) {
+        this.getObjectIndexById = function(_entityId) {
+            for(let i=0; i<entities.length; i++) {
+                if(entities[i].getId() === _entityId) {
                     return i;
                 }
             }
@@ -3845,24 +3844,23 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * @param {CanvasObject} _o
+         * @param {Entity} _o
          * @returns {Boolean}
          */
-        this.addObject = function(_o) {
-
-            if(self.getObjectIndex(_o) !== null) {
+        this.addObject = function(_entity) {
+            if(self.getObjectIndex(_entity) !== null) {
                 return false;
             }
 
-            canvasObjects.push(_o);
+            entities.push(_entity);
             return true;
         };
 
         /**
-         * @returns {CanvasObjects[]}
+         * @returns {Entity[]}
          */
         this.getObjects = function() {
-            return canvasObjects;
+            return entities;
         };
 
         /**
@@ -3870,7 +3868,7 @@ var GraphPaper = (function (exports) {
          */
         this.getObjectIds = function() {
             const ids = [];
-            canvasObjects.forEach(function(_o) {
+            entities.forEach(function(_o) {
                 ids.push(_o.getId());
             });
 
@@ -3887,28 +3885,27 @@ var GraphPaper = (function (exports) {
                 return false;
             }
 
-            canvasObjects.splice(idx, 1);
+            entities.splice(idx, 1);
             return true;
         };
 
         this.removeAllObjects = function() {
-            canvasObjects.length = 0;
+            entities.length = 0;
         };
     }
 
     function BoxClusterDetector(_boxExtentOffset) {
-
         const self = this;
 
         /**
          * 
-         * @param {CanvasObject} _obj 
-         * @param {CanvasObject[]} _canvasObjectsArray 
+         * @param {Entity} _obj 
+         * @param {Entity[]} _sheetEntitiesArray 
          * @returns {Number}
          */
-        const getObjectIndexFromArray = function(_obj, _canvasObjectsArray) {
-            for(let i=0; i<_canvasObjectsArray.length; i++) {
-                if(_canvasObjectsArray[i].getId() === _obj.getId()) {
+        const getObjectIndexFromArray = function(_entity, _sheetEntitiesArray) {
+            for(let i=0; i<_sheetEntitiesArray.length; i++) {
+                if(_sheetEntitiesArray[i].getId() === _entity.getId()) {
                     return i;
                 }
             }
@@ -3918,19 +3915,19 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {CanvasObject[]} _objects 
-         * @param {CanvasObject[]} _canvasObjectsArray 
-         * @returns {CanvasObject[]}
+         * @param {Entity[]} _entities 
+         * @param {Entity[]} _sheetEntitiesArray 
+         * @returns {Entity[]}
          */
-        const removeObjectsFromArray = function(_objects, _canvasObjectsArray) {
-            for(let i=0; i<_objects.length; i++) {
-                const idx = getObjectIndexFromArray(_objects[i], _canvasObjectsArray);
+        const removeObjectsFromArray = function(_entities, _sheetEntitiesArray) {
+            for(let i=0; i<_entities.length; i++) {
+                const idx = getObjectIndexFromArray(_entities[i], _sheetEntitiesArray);
                 if(idx !== -1) {
-                    _canvasObjectsArray.splice(idx, 1);
+                    _sheetEntitiesArray.splice(idx, 1);
                 }
             }
 
-            return _canvasObjectsArray;
+            return _sheetEntitiesArray;
         };
 
         /**
@@ -3954,43 +3951,43 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * @param {CanvasObject} _objA
-         * @param {CanvasObject} _objB
+         * @param {Entity} _objA
+         * @param {Entity} _objB
          * @returns {Boolean}
          */
-        this.areObjectsClose = function(_objA, _objB) {
+        this.areObjectsClose = function(_entityA, _entityB) {
 
             const nA = new Rectangle(
-                _objA.getX() - _boxExtentOffset, 
-                _objA.getY() - _boxExtentOffset, 
-                _objA.getX() + _objA.getWidth() + _boxExtentOffset, 
-                _objA.getY() + _objA.getHeight() + _boxExtentOffset
+                _entityA.getX() - _boxExtentOffset, 
+                _entityA.getY() - _boxExtentOffset, 
+                _entityA.getX() + _entityA.getWidth() + _boxExtentOffset, 
+                _entityA.getY() + _entityA.getHeight() + _boxExtentOffset
             );
 
             const nB = new Rectangle(
-                _objB.getX() - _boxExtentOffset, 
-                _objB.getY() - _boxExtentOffset, 
-                _objB.getX() + _objB.getWidth() + _boxExtentOffset, 
-                _objB.getY() + _objB.getHeight() + _boxExtentOffset
+                _entityB.getX() - _boxExtentOffset, 
+                _entityB.getY() - _boxExtentOffset, 
+                _entityB.getX() + _entityB.getWidth() + _boxExtentOffset, 
+                _entityB.getY() + _entityB.getHeight() + _boxExtentOffset
             );
             
             return nA.checkIntersect(nB);
         };
        
         /**
-         * @param {CanvasObject} _obj
-         * @param {CanvasObject[]} _objectsUnderConsideration
-         * @returns {CanvasObject[]}
+         * @param {Entity} _obj
+         * @param {Entity[]} _objectsUnderConsideration
+         * @returns {Entity[]}
          */
-        this.getAllObjectsCloseTo = function(_obj, _objectsUnderConsideration) {
+        this.getAllObjectsCloseTo = function(_entity, _entitiesUnderConsideration) {
             const resultSet = [];
-            for(let i=0; i<_objectsUnderConsideration.length; i++) {
-                if(_obj.getId() === _objectsUnderConsideration[i].getId()) {
+            for(let i=0; i<_entitiesUnderConsideration.length; i++) {
+                if(_entity.getId() === _entitiesUnderConsideration[i].getId()) {
                     continue;
                 }
 
-                if(self.areObjectsClose(_obj, _objectsUnderConsideration[i])) {
-                    resultSet.push(_objectsUnderConsideration[i]);
+                if(self.areObjectsClose(_entity, _entitiesUnderConsideration[i])) {
+                    resultSet.push(_entitiesUnderConsideration[i]);
                 }
             }
 
@@ -3998,27 +3995,27 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * @param {CanvasObject} _seedObj
-         * @param {CanvasObject[]} _objectsUnderConsideration
-         * @param {CanvasObject[]} _resultSet
+         * @param {Entity} _seedObj
+         * @param {Entity[]} _objectsUnderConsideration
+         * @param {Entity[]} _resultSet
          */
-        this.getClusterObjectsFromSeed = function(_seedObj, _objectsUnderConsideration, _resultSet) {
-            const closeByObjects = self.getAllObjectsCloseTo(_seedObj, _objectsUnderConsideration);
+        this.getClusterObjectsFromSeed = function(_seedEntity, _entitiesUnderConsideration, _resultSet) {
+            const closeByObjects = self.getAllObjectsCloseTo(_seedEntity, _entitiesUnderConsideration);
             if(closeByObjects.length === 0) {
                 return [];
             } else {
-                removeObjectsFromArray(closeByObjects.concat([_seedObj]), _objectsUnderConsideration);
+                removeObjectsFromArray(closeByObjects.concat([_seedEntity]), _entitiesUnderConsideration);
 
                 closeByObjects.forEach(function(_o) {
                     _resultSet.push(_o);
-                    self.getClusterObjectsFromSeed(_o, _objectsUnderConsideration, _resultSet);
+                    self.getClusterObjectsFromSeed(_o, _entitiesUnderConsideration, _resultSet);
                 });
             }
         };
 
 
         /**
-         * @param {CanvasObject[]} _objs
+         * @param {Entity[]} _objs
          * @param {Cluster[]} _clusters
          * @returns {Map<Cluster,Number>}
          */
@@ -4052,12 +4049,12 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * @param {CanvasObject} _obj
+         * @param {Entity} _obj
          * @param {Cluster[]} _clusters
          */
-        this.removeObjectFromClusters = function(_obj, _clusters) {
+        this.removeObjectFromClusters = function(_entity, _clusters) {
             _clusters.forEach(function(_c) {
-                _c.removeObjectById(_obj.getId());
+                _c.removeObjectById(_entity.getId());
             });
         };    
 
@@ -4124,12 +4121,12 @@ var GraphPaper = (function (exports) {
     }
 
     exports.BoxClusterDetector = BoxClusterDetector;
-    exports.CanvasObject = CanvasObject;
     exports.Cluster = Cluster;
     exports.Connector = Connector;
     exports.ConnectorAnchor = ConnectorAnchor;
     exports.ConnectorEvent = ConnectorEvent;
     exports.Dimensions = Dimensions;
+    exports.Entity = Entity;
     exports.GRID_STYLE = GRID_STYLE;
     exports.Grid = Grid;
     exports.GroupTransformationContainer = GroupTransformationContainer;

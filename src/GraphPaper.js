@@ -8,7 +8,7 @@ export * from './Line';
 export * from './GroupTransformationContainerEvent';
 export * from './GroupTransformationContainer';
 export * from './SheetEvent';
-export * from './CanvasObject';
+export * from './Entity';
 export * from './Sheet';
 export * from './Cluster';
 export * from './BoxClusterDetector';

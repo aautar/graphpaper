@@ -15,8 +15,7 @@ import {ConnectorAnchor} from './ConnectorAnchor';
  * @param {Element[]} _translateHandleDomElements
  * @param {Element[]} _resizeHandleDomElements
  */
-function CanvasObject(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
-
+function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHandleDomElements, _resizeHandleDomElements) {
     const self = this;
 
     const MOUSE_MIDDLE_BUTTON = 1;
@@ -388,4 +387,4 @@ function CanvasObject(_id, _x, _y, _width, _height, _sheet, _domElement, _transl
     self.resize(_width, _height);
 };
 
-export { CanvasObject };
+export { Entity };

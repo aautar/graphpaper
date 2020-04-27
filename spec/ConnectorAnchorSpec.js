@@ -1,5 +1,5 @@
 const jsdom = require("jsdom");
-import {CanvasObject} from '../src/CanvasObject.js';
+import {Entity} from '../src/Entity.js';
 import {ConnectorAnchor} from '../src/ConnectorAnchor'
 
 const { JSDOM } = jsdom;
@@ -9,8 +9,7 @@ const window = dom.window;
 describe("ConnectorAnchor.getWidth, ConnectorAnchor.getHeight", function() {
 
     it("computes dimensions using getBoundingClientRect", function() {
-
-        const obj = new CanvasObject(
+        const obj = new Entity(
             'obj1',
             0, 
             0, 

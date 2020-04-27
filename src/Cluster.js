@@ -7,9 +7,9 @@ function Cluster(_id) {
     const self = this;
 
     /**
-     * @type {CanvasObjects[]}
+     * @type {Entity[]}
      */
-    const canvasObjects = [];
+    const entities = [];
 
     /**
      * @returns {String}
@@ -19,20 +19,20 @@ function Cluster(_id) {
     };
 
     /**
-     * @param {CanvasObject} _obj
+     * @param {Entity} _obj
      * @returns {Number|null}
      */
-    this.getObjectIndex = function(_obj) {
-        return self.getObjectIndexById(_obj.getId());
+    this.getObjectIndex = function(_entity) {
+        return self.getObjectIndexById(_entity.getId());
     };
 
     /**
      * @param {String} _objId
      * @returns {Number|null}
      */
-    this.getObjectIndexById = function(_objId) {
-        for(let i=0; i<canvasObjects.length; i++) {
-            if(canvasObjects[i].getId() === _objId) {
+    this.getObjectIndexById = function(_entityId) {
+        for(let i=0; i<entities.length; i++) {
+            if(entities[i].getId() === _entityId) {
                 return i;
             }
         }
@@ -41,24 +41,23 @@ function Cluster(_id) {
     };
 
     /**
-     * @param {CanvasObject} _o
+     * @param {Entity} _o
      * @returns {Boolean}
      */
-    this.addObject = function(_o) {
-
-        if(self.getObjectIndex(_o) !== null) {
+    this.addObject = function(_entity) {
+        if(self.getObjectIndex(_entity) !== null) {
             return false;
         }
 
-        canvasObjects.push(_o);
+        entities.push(_entity);
         return true;
     };
 
     /**
-     * @returns {CanvasObjects[]}
+     * @returns {Entity[]}
      */
     this.getObjects = function() {
-        return canvasObjects;
+        return entities;
     };
 
     /**
@@ -66,7 +65,7 @@ function Cluster(_id) {
      */
     this.getObjectIds = function() {
         const ids = [];
-        canvasObjects.forEach(function(_o) {
+        entities.forEach(function(_o) {
             ids.push(_o.getId());
         });
 
@@ -83,12 +82,12 @@ function Cluster(_id) {
             return false;
         }
 
-        canvasObjects.splice(idx, 1);
+        entities.splice(idx, 1);
         return true;
     };
 
     this.removeAllObjects = function() {
-        canvasObjects.length = 0;
+        entities.length = 0;
     };
 };
 

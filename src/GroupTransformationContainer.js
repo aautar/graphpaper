@@ -1,18 +1,18 @@
-import {CanvasObject} from './CanvasObject';
+import {Entity} from './Entity';
 import {GroupTransformationContainerEvent} from './GroupTransformationContainerEvent';
 
 /**
  * @param {Sheet} _sheet
- * @param {CanvasObject[]} _objects
+ * @param {Entity[]} _entities
  * @param {String[]} _containerStyleCssClasses
  * @param {Number} _sizeAdjustmentPx
  */
-function GroupTransformationContainer(_sheet, _objects, _containerStyleCssClasses, _sizeAdjustmentPx)  {
+function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClasses, _sizeAdjustmentPx)  {
     const self = this;
     const eventNameToHandlerFunc = new Map();
 
     const calculateBoundingRect = function() {
-        var r = _sheet.calcBoundingRectForObjects(_objects);
+        var r = _sheet.calcBoundingRectForObjects(_entities);
         if(_sizeAdjustmentPx) {
             r = r.getUniformlyResizedCopy(_sizeAdjustmentPx);
         }
@@ -30,7 +30,7 @@ function GroupTransformationContainer(_sheet, _objects, _containerStyleCssClasse
 
     const objPositionRelativeToBoundingRect = [];
 
-    _objects.forEach(function(_obj) {
+    _entities.forEach(function(_obj) {
         const rp = {
             "x": _obj.getX() - currentLeft,
             "y": _obj.getY() - currentTop
@@ -49,7 +49,7 @@ function GroupTransformationContainer(_sheet, _objects, _containerStyleCssClasse
     selBox.style.height = `${boundingRect.getHeight()}px`;    
 
     // only display the container if we have 1+ object in the group
-    if(_objects.length > 0) {
+    if(_entities.length > 0) {
         selBox.style.display = "block";
     }
 
@@ -71,10 +71,10 @@ function GroupTransformationContainer(_sheet, _objects, _containerStyleCssClasse
     };
     
     /**
-     * @returns {CanvasObject[]}
+     * @returns {Entity[]}
      */
     this.getObjects = function() {
-        return _objects;
+        return _entities;
     };
 
     /**
@@ -90,8 +90,8 @@ function GroupTransformationContainer(_sheet, _objects, _containerStyleCssClasse
         selBox.style.left = `${currentLeft}px`;
         selBox.style.top = `${currentTop}px`;        
 
-        for(let i=0; i<_objects.length; i++) {
-            const obj = _objects[i];
+        for(let i=0; i<_entities.length; i++) {
+            const obj = _entities[i];
             const rp = objPositionRelativeToBoundingRect[i];
 
             obj.translate(

@@ -1,7 +1,7 @@
 import {MatrixMath} from './MatrixMath';
 import {AccessibleRoutingPointsFinder} from './AccessibleRoutingPointsFinder';
 import {SheetEvent} from './SheetEvent';
-import {CanvasObject} from './CanvasObject';
+import {Entity} from './Entity';
 import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
 import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
 import {DoubleTapDetector} from './DoubleTapDetector';
@@ -600,7 +600,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _x
      * @param {Number} _y
      * @param {Number} _radius
-     * @returns {CanvasObject[]}
+     * @returns {Entity[]}
      */
     this.getObjectsAroundPoint = function(_x, _y, _radius) {
 
@@ -626,7 +626,7 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * @param {Rectangle} _rect
-     * @returns {CanvasObject[]}
+     * @returns {Entity[]}
      */
     this.getObjectsWithinRect = function(_rect) {
         const result = [];
@@ -641,7 +641,7 @@ function Sheet(_sheetDomElement, _window) {
     };    
       
     /**
-     * @returns {CanvasObject[]}
+     * @returns {Entity[]}
      */
     this.getAllObjects = function() {    
         return sheetEntities;
@@ -661,7 +661,7 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * @param {String} _id
-     * @returns {CanvasObject|null}
+     * @returns {Entity|null}
      */   
     this.getObjectById = function(_id) {
         var foundObject = null;
@@ -675,7 +675,7 @@ function Sheet(_sheetDomElement, _window) {
     };
 
     /**
-     * @param {CanvasObject} _obj
+     * @param {Entity} _obj
      */
     this.addObject = function(_obj) {
         _obj.on('obj-resize-start', handleResizeStart);
@@ -739,8 +739,8 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
-     * @param {CanvasObject} _objA 
-     * @param {CanvasObject} _objB 
+     * @param {Entity} _objA 
+     * @param {Entity} _objB 
      * @returns {Connector[]}
      */
     this.getConnectorsBetweenObjects = function(_objA, _objB) {
@@ -795,17 +795,17 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
-     * @param {CanvasObject} _obj
+     * @param {Entity} _obj
      * @returns {Connector[]} 
      */
-    this.getConnectorsConnectedToObject = function(_obj) {
+    this.getConnectorsConnectedToObject = function(_entity) {
         const foundConnectors = [];
 
         objectConnectors.forEach((_conn) => {
             const aS = _conn.getAnchorStart();
             const aE = _conn.getAnchorEnd();
 
-            if(_obj.hasConnectorAnchor(aS) || _obj.hasConnectorAnchor(aE)) {
+            if(_entity.hasConnectorAnchor(aS) || _entity.hasConnectorAnchor(aE)) {
                 foundConnectors.push(_conn);
             }
 

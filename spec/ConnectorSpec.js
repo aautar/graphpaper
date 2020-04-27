@@ -1,5 +1,5 @@
 const jsdom = require("jsdom");
-import {CanvasObject} from '../src/CanvasObject.js';
+import {Entity} from '../src/Entity.js';
 import {ConnectorAnchor} from '../src/ConnectorAnchor'
 import {Connector} from '../src/Connector'
 import { Point } from '../src/Point.js';

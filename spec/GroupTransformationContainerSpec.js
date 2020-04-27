@@ -1,6 +1,6 @@
 const jsdom = require("jsdom");
 import {Sheet} from '../src/Sheet.js';
-import {CanvasObject} from '../src/CanvasObject.js';
+import {Entity} from '../src/Entity.js';
 import {GroupTransformationContainer} from '../src/GroupTransformationContainer.js';
 import {GRID_STYLE, Grid} from '../src/Grid.js';
 
@@ -56,7 +56,7 @@ describe("GroupTransformationContainer", function() {
         sheet.initMultiObjectSelectionHandler();
         
         const groupObjects = [
-            new CanvasObject(
+            new Entity(
                 "obj-123",
                 0, 
                 0, 
@@ -86,7 +86,7 @@ describe("GroupTransformationContainer", function() {
         sheet.initMultiObjectSelectionHandler();
         
         const groupObjects = [
-            new CanvasObject(
+            new Entity(
                 "obj-123",
                 0, 
                 0, 
@@ -115,7 +115,7 @@ describe("GroupTransformationContainer", function() {
         sheet.initMultiObjectSelectionHandler();
         
         const groupObjects = [
-            new CanvasObject(
+            new Entity(
                 "obj-123",
                 0, 
                 0, 
@@ -166,7 +166,7 @@ describe("GroupTransformationContainer.translateByOffset", function() {
         sheet.initMultiObjectSelectionHandler();
         
         const groupObjects = [
-            new CanvasObject(
+            new Entity(
                 "obj-123",
                 0, 
                 0, 

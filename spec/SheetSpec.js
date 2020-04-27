@@ -1,6 +1,6 @@
 const jsdom = require("jsdom");
 import {Sheet} from '../src/Sheet.js';
-import {CanvasObject} from '../src/CanvasObject.js';
+import {Entity} from '../src/Entity.js';
 import {ConnectorAnchor} from '../src/ConnectorAnchor.js';
 import {GRID_STYLE,Grid} from '../src/Grid.js';
 import {SheetEvent} from '../src/SheetEvent.js';
@@ -25,9 +25,9 @@ jasmine.clock().install();
 
 describe("Sheet", function() {
 
-    const makeCanvasObject = function(_id, _x, _y, _width, _height) {
+    const makeEntity = function(_id, _x, _y, _width, _height) {
         const domElem = window.document.createElement('div');
-        const o = new CanvasObject(
+        const o = new Entity(
             _id,
             _x, 
             _y, 
@@ -75,8 +75,8 @@ describe("Sheet", function() {
     it("calcBoundingBox returns bounding box for area encompassing objects", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
-        const o1 = makeCanvasObject("obj-1", 100, 200, 10, 20);
-        const o2 = makeCanvasObject("obj-2", 400, 200, 10, 20);
+        const o1 = makeEntity("obj-1", 100, 200, 10, 20);
+        const o2 = makeEntity("obj-2", 400, 200, 10, 20);
         canvas.addObject(o1);
         canvas.addObject(o2);
 
@@ -96,21 +96,21 @@ describe("Sheet", function() {
 
     it("getObjectById returns added object", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
-        var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
+        var o = makeEntity("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
 
-        const retunedCanvasObject = canvas.getObjectById('obj-123');
-        expect(retunedCanvasObject).toBe(o);
+        const retunedEntity = canvas.getObjectById('obj-123');
+        expect(retunedEntity).toBe(o);
     });
 
     it("getObjectById returns null for missing object", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
-        var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
+        var o = makeEntity("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
 
-        const retunedCanvasObject = canvas.getObjectById('id-for-non-existent-object');
-        expect(retunedCanvasObject).toBe(null);
+        const retunedEntity = canvas.getObjectById('id-for-non-existent-object');
+        expect(retunedEntity).toBe(null);
     });  
 
     it("getObjectsAroundPoint returns nearby object within box-radius of 1px", function() {
@@ -120,13 +120,13 @@ describe("Sheet", function() {
             addEventListener: function() { }
         };
 
-        var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
+        var o = makeEntity("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
 
-        const retunedCanvasObjects = canvas.getObjectsAroundPoint(99, 201);
+        const retunedEntities = canvas.getObjectsAroundPoint(99, 201);
 
-        expect(retunedCanvasObjects.length).toBe(1);
-        expect(retunedCanvasObjects[0]).toBe(o);
+        expect(retunedEntities.length).toBe(1);
+        expect(retunedEntities[0]).toBe(o);
     });    
 
     it("getObjectsAroundPoint returns surrounding object", function() {
@@ -136,23 +136,23 @@ describe("Sheet", function() {
             addEventListener: function() { }
         };
 
-        var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
+        var o = makeEntity("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
 
-        const retunedCanvasObjects = canvas.getObjectsAroundPoint(105, 210);
+        const retunedEntities = canvas.getObjectsAroundPoint(105, 210);
 
-        expect(retunedCanvasObjects.length).toBe(1);
-        expect(retunedCanvasObjects[0]).toBe(o);
+        expect(retunedEntities.length).toBe(1);
+        expect(retunedEntities[0]).toBe(o);
     });        
 
     it("getObjectsAroundPoint does not return objects outside box-radius of 1px", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
-        var o = makeCanvasObject("obj-123", 100, 200, 10, 20);
+        var o = makeEntity("obj-123", 100, 200, 10, 20);
         canvas.addObject(o);
 
-        const retunedCanvasObjects = canvas.getObjectsAroundPoint(112, 222);
-        expect(retunedCanvasObjects.length).toBe(0);
+        const retunedEntities = canvas.getObjectsAroundPoint(112, 222);
+        expect(retunedEntities.length).toBe(0);
     });
 
     it("setGrid sets the repeating tile, grid, background on the Canvas DOM element", function() {
@@ -175,7 +175,7 @@ describe("Sheet", function() {
         const objElement = window.document.createElement('div');
         const objTranslateHandleElem = window.document.createElement('div');
         const objResizeHandleElem = window.document.createElement('div');
-        const o = new CanvasObject(
+        const o = new Entity(
             "obj1",
             "100", 
             "100", 
@@ -241,7 +241,7 @@ describe("Sheet", function() {
         const objElement = window.document.createElement('div');
         const objTranslateHandleElem = window.document.createElement('div');
         const objResizeHandleElem = window.document.createElement('div');
-        const o = new CanvasObject(
+        const o = new Entity(
             "obj1",
             "100", 
             "100", 
@@ -286,7 +286,7 @@ describe("Sheet", function() {
         const objElement = window.document.createElement('div');
         const objTranslateHandleElem = window.document.createElement('div');
         const objResizeHandleElem = window.document.createElement('div');
-        const o = new CanvasObject(
+        const o = new Entity(
             "obj1",
             "100", 
             "100", 
@@ -361,7 +361,7 @@ describe("Canvas connectors", function() {
         return new ConnectorAnchor(_id, anchorElem, _canvas);
     };
 
-    const makeCanvasObject = function(_id, _x, _y, _width, _height) {
+    const makeEntity = function(_id, _x, _y, _width, _height) {
         const domElem = window.document.createElement('div');
         domElem.getBoundingClientRect = () => ({
             _width,
@@ -372,7 +372,7 @@ describe("Canvas connectors", function() {
             bottom: _y + _height,
           });
 
-        const o = new CanvasObject(
+        const o = new Entity(
             _id,
             _x, 
             _y, 
@@ -399,11 +399,11 @@ describe("Canvas connectors", function() {
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
-        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        const objA = makeEntity("objA", 100, 100, 100, 100);
         objA.addNonInteractableConnectorAnchor(anchorA);
 
         const anchorB = makeAnchor("objB-anchor", canvas);
-        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        const objB = makeEntity("objB", 500, 500, 100, 100);
         objB.addNonInteractableConnectorAnchor(anchorB);
 
         const connector = canvas.makeNewConnectorFromAnchors(anchorA, anchorB);
@@ -412,18 +412,18 @@ describe("Canvas connectors", function() {
 
     });
 
-    it("getObjectWithConnectorAnchor returns correct CanvasObject", function() {
+    it("getObjectWithConnectorAnchor returns correct Entity", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
-        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        const objA = makeEntity("objA", 100, 100, 100, 100);
         objA.addNonInteractableConnectorAnchor(anchorA);
         const objAAnchors = objA.getConnectorAnchors();
         objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves        
 
         const anchorB = makeAnchor("objB-anchor", canvas);
-        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        const objB = makeEntity("objB", 500, 500, 100, 100);
         objB.addNonInteractableConnectorAnchor(anchorB);
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves        
@@ -434,18 +434,18 @@ describe("Canvas connectors", function() {
         expect(canvas.getObjectWithConnectorAnchor("objB-anchor").getId()).toBe("objB");
     });    
 
-    it("getObjectWithConnectorAnchor return null if CanvasObject doesn't exist", function() {
+    it("getObjectWithConnectorAnchor return null if Entity doesn't exist", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
-        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        const objA = makeEntity("objA", 100, 100, 100, 100);
         objA.addNonInteractableConnectorAnchor(anchorA);
         const objAAnchors = objA.getConnectorAnchors();
         objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves        
 
         const anchorB = makeAnchor("objB-anchor", canvas);
-        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        const objB = makeEntity("objB", 500, 500, 100, 100);
         objB.addNonInteractableConnectorAnchor(anchorB);
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves        
@@ -461,13 +461,13 @@ describe("Canvas connectors", function() {
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
-        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        const objA = makeEntity("objA", 100, 100, 100, 100);
         objA.addNonInteractableConnectorAnchor({});
         const objAAnchors = objA.getConnectorAnchors();
         objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves
 
         const anchorB = makeAnchor("objB-anchor", canvas);
-        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        const objB = makeEntity("objB", 500, 500, 100, 100);
         objB.addNonInteractableConnectorAnchor({});
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
@@ -488,13 +488,13 @@ describe("Canvas connectors", function() {
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
-        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        const objA = makeEntity("objA", 100, 100, 100, 100);
         objA.addNonInteractableConnectorAnchor({});
         const objAAnchors = objA.getConnectorAnchors();
         objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves
 
         const anchorB = makeAnchor("objB-anchor", canvas);
-        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        const objB = makeEntity("objB", 500, 500, 100, 100);
         objB.addNonInteractableConnectorAnchor({});
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
@@ -514,13 +514,13 @@ describe("Canvas connectors", function() {
         canvas.initInteractionHandlers();
 
         const anchorA = makeAnchor("objA-anchor", canvas);
-        const objA = makeCanvasObject("objA", 100, 100, 100, 100);
+        const objA = makeEntity("objA", 100, 100, 100, 100);
         objA.addNonInteractableConnectorAnchor({});
         const objAAnchors = objA.getConnectorAnchors();
         objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves
 
         const anchorB = makeAnchor("objB-anchor", canvas);
-        const objB = makeCanvasObject("objB", 500, 500, 100, 100);
+        const objB = makeEntity("objB", 500, 500, 100, 100);
         objB.addNonInteractableConnectorAnchor({});
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
