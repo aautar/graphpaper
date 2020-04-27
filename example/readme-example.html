@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GraphPaper</title>
+    <script src="../dist/graphpaper.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+    
+    <div 
+        id="sheet" 
+        style="
+            border:0px solid #f00; 
+            width:1000px; 
+            height:1000px; 
+            overflow:hidden; 
+            position:relative; 
+            transform-origin:0 0;">
+
+        <!-- DOM element for our entity -->
+        <div 
+            id="entity1" 
+            style="
+                display:flex; 
+                align-items:center; 
+                justify-content:center; 
+                position:absolute; 
+                width:52px; 
+                height:52px; 
+                background:#fff; 
+                border:1px solid #0094ff; 
+                border-radius:4px;">
+
+            <!-- DOM element for the entity's translation handle -->
+            <div 
+                id="translateHandle"
+                style="
+                    cursor:move; 
+                    display:block; 
+                    width:12px; 
+                    height:12px; 
+                    background:#0094ff; 
+                    border-radius:12px">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script type="text/javascript">
+	
+        const sheet = new GraphPaper.Sheet(
+            document.getElementById('sheet'),                   // div to use
+            window                                              // parent window 
+        );
+
+        //sheet.initInteractionHandlers();
+        sheet.initTransformationHandlers();
+
+
+        const entity = new GraphPaper.Entity(
+            'gp-entity-001',                                    // id
+            0,                                                  // x        
+            0,                                                  // y
+            44,                                                 // width
+            44,                                                 // height
+            sheet,                                              // parent GraphPaper.Canvas
+            document.getElementById('entity1'),                 // object DOM element
+            [document.getElementById('translateHandle')],       // DOM elements for the object's translation handles
+            []                                                  // DOM elements for the object's resize handles
+        );        
+
+        sheet.addEntity(entity);
+
+    </script>
+
+</body>
+
+</html>

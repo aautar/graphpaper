@@ -2,68 +2,139 @@
 
 [![CircleCI](https://circleci.com/gh/aautar/graphpaper.svg?style=svg)](https://circleci.com/gh/aautar/graphpaper)
 
-GraphPaper helps with creating 2D, interactive, workspaces for web applications. It isn't an "out of the box" solution; GraphPaper takes over handling user interactions and transformations of objects, but markup and styling of those objects are left to the caller.
+GraphPaper is a library for creating 2D interactive workspaces in web application. It isn't an out-of-the-box solution, a lot of implementation details are pushed to consumers. Typically, GraphPaper serves as a foundation for handling user interactions and transformation of objects, but markup and styling of those objects are left to the caller whenever possible.
 
-Very much a work-in-progress.
+GraphPaper was an offshoot of [ScratchGraph](https://scratchgraph.com), and is one of its core dependencies.
 
-Used as the basis for sheets in [ScratchGraph](https://scratchgraph.com)
+GraphPaper is still very much a work-in-progress. Major, breaking, changes to the public API are not unsusual. However, releases are semantically versioned, so major releases are tagged appropriately and should not cause issues if consumed appropiately.
 
 ![graphpaper-connector](https://user-images.githubusercontent.com/12861733/33002147-358957a8-cd80-11e7-89ae-1b211c0eb2db.png)
 
-## The Basics
+## Quick Intro: Sheets & Entities
 
-Some DOM elements we'll use for GraphPaper.Canvas (`#paper`) and GraphPaper.CanvasObject (`#obj1`):
+### Create a Sheet
+
+Everything GraphPaper deals with is encapsulated on a Sheet. A sheet is a surface where GraphPaper entities can be added and actions on those entities can be performed.
+
+To create a Sheet, we'll first need a DOM element with some basic styling:
 
 ```html
-<div id="paper">
-    <div id="obj1" class="obj">
-        <div id="translateHandle1" class="translateHandle"></div>
-        <div id="resizeHandle1"  class="resizeHandle"></div>
-        <div id="connectorAnchor1" class="connectorAnchor"></div>
-    </div>
+<div 
+    id="sheet" 
+    style="
+        border:0px solid #f00; 
+        width:1000px; 
+        height:1000px; 
+        overflow:hidden; 
+        position:relative; 
+        transform-origin:0 0;">
 </div>
 ```
 
-We'll assume styling/layout based on the CSS in [this example](https://github.com/aautar/graphpaper/blob/master/example/index.html).
-
-Unless otherwise specified, units for size and positioning are [CSS pixels](https://www.w3.org/TR/CSS2/syndata.html#length-units).
-
-### Create a canvas
+Now we can create the `GraphPaper.Sheet` object:
 
 ```javascript
-const canvas = new GraphPaper.Canvas(
-    document.getElementById('paper'),                    // div to use
+const sheet = new GraphPaper.Sheet(
+    document.getElementById('sheet'),                   // DOM element of the Sheet
     window                                              // parent window 
 );
-
-canvas.initTransformationHandlers();
 ```
 
-The default, 12x12, dotted grid will be applied to the canvas.
+The sheet will be created with the default, 12x12, dotted grid (note that this is one instance where GraphPaper does take control of some styling here, as the grid requires dynamic generation of an SVG image).
 
-###  Create an object
+The sheet will be created and rendered. Now we can add entities to the sheet.
+
+### Create an entity
+
+Entities are things which live on the sheet. GraphPaper can handle interactions with entities, taking responsibility for transformations, computing and rendering connectors between entities, selecting and transforming a set of entities, etc.
+
+For now, let's look at at simple example where we create an entity that we can translate on the sheet. We'll add a `<div>` for the entity and another `<div>` that'll serve as a handle (the thing you click on and drag to move the entity) for translation.
+
+```html
+<div 
+    id="sheet" 
+    style="
+        border:0px solid #f00; 
+        width:1000px; 
+        height:1000px; 
+        overflow:hidden; 
+        position:relative; 
+        transform-origin:0 0;">
+
+    <!-- DOM element for our entity -->
+    <div 
+        id="entity1" 
+        style="
+            display:flex; 
+            align-items:center; 
+            justify-content:center; 
+            position:absolute; 
+            width:52px; 
+            height:52px; 
+            background:#fff; 
+            border:1px solid #0094ff; 
+            border-radius:4px;">
+
+        <!-- DOM element for the entity's translation handle -->
+        <div 
+            id="translateHandle"
+            style="
+                cursor:move; 
+                display:block; 
+                width:12px; 
+                height:12px; 
+                background:#0094ff; 
+                border-radius:12px">
+        </div>
+
+    </div>
+
+</div>
+```
+
+Now let's create the `GraphPaper.Entity` object (note that units for size and positioning are [CSS pixels](https://www.w3.org/TR/CSS2/syndata.html#length-units))
+:
 
 ```javascript
-const obj1 = new GraphPaper.CanvasObject(
-    'obj1',                                             // id
+const entity = new GraphPaper.Entity(
+    'gp-entity-001',                                    // id
     0,                                                  // x        
     0,                                                  // y
     44,                                                 // width
     44,                                                 // height
-    canvas,                                             // parent GraphPaper.Canvas
-    document.getElementById('obj1'),                    // object DOM element
-    [document.getElementById('translateHandle1')],      // DOM elements for the object's translation handles
-    [document.getElementById('resizeHandle1')]          // DOM elements for the object's resize handles
+    sheet,                                              // parent GraphPaper.Sheet
+    document.getElementById('entity1'),                 // DOM element for the entity
+    [document.getElementById('translateHandle')],       // DOM elements for the object's translation handles
+    []                                                  // DOM elements for the object's resize handles
 );
 ```
 
-### Add the object to the canvas
+... and add this entity to our sheet:
 
 ```javascript
-canvas.addObject(obj1);
+sheet.addEntity(entity);
 ```
 
-The object (`obj1`) will be added to the canvas and can now be translated by dragging the translation handle (`#translateHandle1`) or resized with the resize handle (`#resizeHandle1`). GraphPaper will take care of both mouse and touch interactions on the handle elements.
+We've now added the entity to our sheet. However, the translate handle won't do anything yet. There's one final step, we need to tell the sheet that it should listen for and handle transformations, this is done via:
+
+```javascript
+sheet.initTransformationHandlers();
+```
+
+Now you can drag the entity around the canvas by dragging `translateHandle`, either via a mouse or touch interaction. The entity will automatically snap to the grid on the sheet.
+
+## Documentation
+
+- Getting information about a Sheet
+- Modifying the grid
+- [Sheet Events](docs/sheet-events.md)
+- Creating, removing, and querying entities
+- Entity methods
+- Group Entity Selection & Transformation
+
+
+---
+
 
 ### Get object(s)
 
@@ -207,31 +278,3 @@ obj1.resize(newWidth, newHeight);
 ```
 
 
-## Events
-
-### Add event handler
-
-Use the `Canvas.on()` method to add an event handler
-
-```javascript
-canvas.on(GraphPaper.CanvasEvent.CLICK, (eventData) => {
-    // a click on the Canvas
-});
-```
-
-Events emitted:
-- `CanvasEvent.DBLCLICK` ("dblclick")
-- `CanvasEvent.CLICK` ("click")
-- `CanvasEvent.CONNECTOR_UPDATED` ("connector-updated")
-- `CanvasEvent.OBJECT_ADDED` ("object-added")
-- `CanvasEvent.OBJECT_REMOVED` ("object-translated")
-- `CanvasEvent.OBJECT_RESIZED` ("object-resized")
-- `CanvasEvent.MULTIPLE_OBJECTS_SELECTED` ("multiple-objects-selected")
-
-### Remove event handler
-
-Use the `Canvas.off()` method to remove an event handler
-
-```javascript
-canvas.off(GraphPaper.CanvasEvent.CLICK, registeredCallbackFunction);
-```

@@ -2496,6 +2496,7 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * @deprecated
          * @param {Entity} _obj
          */
         this.addObject = function(_obj) {
@@ -2516,6 +2517,28 @@ var GraphPaper = (function (exports) {
 
             emitEvent(SheetEvent.OBJECT_ADDED, { "object":_obj });
         };
+
+        /**
+         * @param {Entity} _obj
+         */
+        this.addEntity = function(_obj) {
+            _obj.on('obj-resize-start', handleResizeStart);
+            _obj.on('obj-resize', function(e) {
+                emitEvent(SheetEvent.OBJECT_RESIZED, { 'object': e.obj });
+                self.refreshAllConnectors();    
+            });
+
+            _obj.on('obj-translate-start', handleMoveStart);
+            _obj.on('obj-translate', function(e) {
+                emitEvent(SheetEvent.OBJECT_TRANSLATED, { 'object': e.obj });
+                self.refreshAllConnectors();    
+            });
+
+            sheetEntities.push(_obj);
+            self.refreshAllConnectors();       
+
+            emitEvent(SheetEvent.OBJECT_ADDED, { "object":_obj });
+        };    
 
         /**
          * Remove object from the sheet
