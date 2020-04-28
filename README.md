@@ -8,6 +8,17 @@ GraphPaper was an offshoot of [ScratchGraph](https://scratchgraph.com), and is o
 
 GraphPaper is still very much a work-in-progress. Major, breaking, changes to the public API are not unsusual. However, releases are semantically versioned, so major releases are tagged appropriately and should not cause issues if consumed appropiately.
 
+## Documentation
+
+- [Getting information about a sheet](docs/sheet-get-info.md)
+- [Adding, removing, and querying entities on a sheet](docs/sheet-query-entities.md)
+- [Modifying a sheet's grid](docs/sheet-modify-grid.md)
+- [Sheet Events](docs/sheet-events.md)
+- [Entity methods](docs/entity-methods.md)
+- Connectors (TDB)
+- [Multi-Entity Selection & Transformation](docs/multi-selection-transformation.md)
+
+
 ## Quick Start: Sheets & Entities
 
 ![graphpaper-connector](https://user-images.githubusercontent.com/12861733/33002147-358957a8-cd80-11e7-89ae-1b211c0eb2db.png)
@@ -22,7 +33,6 @@ To create a Sheet, we'll first need a DOM element with some basic styling:
 ```html
 <!DOCTYPE html>
 <html>
-
     <head>
         <title>GraphPaper Demo</title>
         <script src="../dist/graphpaper.js" type="text/javascript"></script>
@@ -46,7 +56,6 @@ To create a Sheet, we'll first need a DOM element with some basic styling:
     <body>
         <div id="sheet"></div>
     </body>
-
 </html>
 ```
 
@@ -72,7 +81,6 @@ Let's create a simple entity that we can translate on the sheet. We'll update th
 ```html
 <!DOCTYPE html>
 <html>
-
     <head>
         <title>GraphPaper Demo</title>
         <script src="../dist/graphpaper.js" type="text/javascript"></script>
@@ -154,126 +162,4 @@ sheet.initTransformationHandlers();
 ```
 
 Now you can drag the entity around the canvas by dragging `translateHandle`, either via a mouse or touch interaction. The entity will automatically snap to the grid on the sheet.
-
-## Documentation
-
-- [Getting information about a sheet](docs/sheet-get-info.md)
-- [Modifying a sheet's grid](docs/sheet-modify-grid.md)
-- Working with entities on the sheet
-- [Sheet Events](docs/sheet-events.md)
-- Entity methods
-- Connectors
-- Group Entity Selection & Transformation
-
-
----
-
-
-### Get object(s)
-
-To get a specific object by its ID:
-
-```javascript
-canvas.getObjectById(obj1.getId());
-```
-
-To get all objects on the canvas:
-
-```javascript
-canvas.getAllObjects();
-```
-
-To get all objects around a certain point:
-
-```javascript
-canvas.getObjectsAroundPoint(targetX, targetY, radius);
-```
-
-Note that this function tests for surrounding objects based on intersection of a box centered at (targetX, targetY) with the given radius.
-
-### Remove the object from the canvas
-
-```javascript
-canvas.removeObject(obj1.getId());
-```
-
-The object (`obj1`) will "remove" the object from the canvas. Remove in this context means that the object will no longer be managed by the canvas, it won't respond to canvas changes and it won't emit object events.
-
-Note that the caller is responsible for removing the object's DOM elements, due to the caller being responsible for the creation of the DOM elements.
- 
-
-### Enable multi-object selection
-Initialize multi-object selection on a canvas:
-
-```javascript
-canvas.initMultiObjectSelectionHandler()
-```
-
-Clicking and dragging (or touching and dragging) on an empty area of the canvas will now create a selection rectangle, once the user is done (releases mouse button or end touch interaction), the canvas will emit a `CanvasEvent.MULTIPLE_OBJECTS_SELECTED` event.
-
-```javascript
-canvas.on(GraphPaper.CanvasEvent.MULTIPLE_OBJECTS_SELECTED, function(e) {
-    console.log(e);
-});
-```
-
-The event object (e) has 2 fields:
-- `selectedObjects` contains objects within the selection rectangle
-- `boundingRect` is a bounding rectangle around the selected objects
-
-### Group (multi-object) transformation
-TBD
-
-## Canvas Objects
-
-### Get the position of an object
-
-Get `x` (left) position of object:
-
-```javascript
-obj1.getX();
-```
-
-Get `y` (top) position of object:
-
-```javascript
-obj1.getY();
-```
-
-### Move an object
-
-Programmatically move an object:
-
-```javascript
-obj1.translate(targetX, targetY);
-```
-
-### Get the size of an object
-
-Get the width of an object:
-
-```javascript
-obj1.getWidth();
-```
-
-Get the height of an object:
-
-```javascript
-obj1.getHeight();
-```
-
-Get the bounding rectangle of an object:
-
-```javascript
-obj1.getBoundingRectange();
-```
-
-### Resize an object
-
-Programmatically resize an object:
-
-```javascript
-obj1.resize(newWidth, newHeight);
-```
-
 

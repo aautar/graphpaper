@@ -700,12 +700,12 @@ function Sheet(_sheetDomElement, _window) {
      * Remove object from the sheet
      * Note: as caller is responsible for putting object into the DOM, caller is responsible for removing it from the DOM
      * 
-     * @param {String} _objId
+     * @param {String} _entityId
      * @returns {Boolean} 
      */
-    this.removeEntity = function(_objId) {
+    this.removeEntity = function(_entityId) {
         for(let i=0; i<sheetEntities.length; i++) {
-            if(sheetEntities[i].getId() === _objId) {
+            if(sheetEntities[i].getId() === _entityId) {
                 sheetEntities.splice(i, 1);
                 self.refreshAllConnectors();
                 emitEvent(SheetEvent.OBJECT_REMOVED, { "object":sheetEntities[i] });
