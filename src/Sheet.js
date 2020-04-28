@@ -680,20 +680,20 @@ function Sheet(_sheetDomElement, _window) {
     this.addEntity = function(_obj) {
         _obj.on('obj-resize-start', handleResizeStart);
         _obj.on('obj-resize', function(e) {
-            emitEvent(SheetEvent.OBJECT_RESIZED, { 'object': e.obj });
+            emitEvent(SheetEvent.ENTITY_RESIZED, { 'object': e.obj });
             self.refreshAllConnectors();    
         });
 
         _obj.on('obj-translate-start', handleMoveStart);
         _obj.on('obj-translate', function(e) {
-            emitEvent(SheetEvent.OBJECT_TRANSLATED, { 'object': e.obj });
+            emitEvent(SheetEvent.ENTITY_TRANSLATED, { 'object': e.obj });
             self.refreshAllConnectors();    
         });
 
         sheetEntities.push(_obj);
         self.refreshAllConnectors();       
 
-        emitEvent(SheetEvent.OBJECT_ADDED, { "object":_obj });
+        emitEvent(SheetEvent.ENTITY_ADDED, { "object":_obj });
     };    
 
     /**
@@ -708,7 +708,7 @@ function Sheet(_sheetDomElement, _window) {
             if(sheetEntities[i].getId() === _entityId) {
                 sheetEntities.splice(i, 1);
                 self.refreshAllConnectors();
-                emitEvent(SheetEvent.OBJECT_REMOVED, { "object":sheetEntities[i] });
+                emitEvent(SheetEvent.ENTITY_REMOVED, { "object":sheetEntities[i] });
                 return true;
             }
         }
@@ -1133,7 +1133,7 @@ function Sheet(_sheetDomElement, _window) {
         selectionBoxElem.style.display = "block";
 
         emitEvent(
-            SheetEvent.MULTIPLE_OBJECT_SELECTION_STARTED,
+            SheetEvent.MULTIPLE_ENTITY_SELECTION_STARTED,
             { 
                 'x': _x,
                 'y': _y
@@ -1163,7 +1163,7 @@ function Sheet(_sheetDomElement, _window) {
         selectionBoxElem.style.display = "none";
 
         emitEvent(
-            SheetEvent.MULTIPLE_OBJECTS_SELECTED, 
+            SheetEvent.MULTIPLE_ENTITIES_SELECTED, 
             { 
                 'selectedObjects': selectedEntities, // deprecated
                 'selectedEntities': selectedEntities,

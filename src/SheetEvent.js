@@ -2,12 +2,12 @@ const SheetEvent = Object.freeze({
     DBLCLICK: "dblclick",
     CLICK: "click",
     CONNECTOR_UPDATED: "connector-updated",
-    OBJECT_ADDED: "object-added",
-    OBJECT_REMOVED: "object-removed",
-    OBJECT_RESIZED: "object-resized",
-    OBJECT_TRANSLATED: "object-translated",
-    MULTIPLE_OBJECT_SELECTION_STARTED: "multiple-object-selection-started",
-    MULTIPLE_OBJECTS_SELECTED: "multiple-objects-selected",
+    ENTITY_ADDED: "entity-added",
+    ENTITY_REMOVED: "entity-removed",
+    ENTITY_RESIZED: "entity-resized",
+    ENTITY_TRANSLATED: "entity-translated",
+    MULTIPLE_ENTITY_SELECTION_STARTED: "multiple-object-selection-started",
+    MULTIPLE_ENTITIES_SELECTED: "multiple-objects-selected",
 });
 
 
