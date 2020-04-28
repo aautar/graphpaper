@@ -12,7 +12,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
     const eventNameToHandlerFunc = new Map();
 
     const calculateBoundingRect = function() {
-        var r = _sheet.calcBoundingRectForObjects(_entities);
+        var r = _sheet.calcBoundingRectForEntities(_entities);
         if(_sizeAdjustmentPx) {
             r = r.getUniformlyResizedCopy(_sizeAdjustmentPx);
         }
@@ -28,7 +28,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
     var currentLeft = boundingRect.getLeft();
     var currentTop = boundingRect.getTop();
 
-    const objPositionRelativeToBoundingRect = [];
+    const entityPositionRelativeToBoundingRect = [];
 
     _entities.forEach(function(_obj) {
         const rp = {
@@ -36,7 +36,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
             "y": _obj.getY() - currentTop
         };
 
-        objPositionRelativeToBoundingRect.push(rp);
+        entityPositionRelativeToBoundingRect.push(rp);
     });
 
     const selBox = window.document.createElement("div");
@@ -48,7 +48,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
     selBox.style.width = `${boundingRect.getWidth()}px`;
     selBox.style.height = `${boundingRect.getHeight()}px`;    
 
-    // only display the container if we have 1+ object in the group
+    // only display the container if we have 1+ entity in the group
     if(_entities.length > 0) {
         selBox.style.display = "block";
     }
@@ -73,7 +73,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
     /**
      * @returns {Entity[]}
      */
-    this.getObjects = function() {
+    this.getEntities = function() {
         return _entities;
     };
 
@@ -92,7 +92,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
 
         for(let i=0; i<_entities.length; i++) {
             const obj = _entities[i];
-            const rp = objPositionRelativeToBoundingRect[i];
+            const rp = entityPositionRelativeToBoundingRect[i];
 
             obj.translate(
                 _sheet.snapToGrid(currentLeft + rp.x), 

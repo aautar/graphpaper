@@ -72,13 +72,13 @@ describe("Sheet", function() {
         expect(bbox.getRight()).toBe(1000);
     });        
 
-    it("calcBoundingBox returns bounding box for area encompassing objects", function() {
+    it("calcBoundingBox returns bounding box for area encompassing entities", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         const o1 = makeEntity("obj-1", 100, 200, 10, 20);
         const o2 = makeEntity("obj-2", 400, 200, 10, 20);
-        canvas.addObject(o1);
-        canvas.addObject(o2);
+        canvas.addEntity(o1);
+        canvas.addEntity(o2);
 
         const bbox = canvas.calcBoundingBox();
 
@@ -94,26 +94,26 @@ describe("Sheet", function() {
         expect(snappedValue).toBe(canvas.getGridSize() - 1);
     });
 
-    it("getObjectById returns added object", function() {
+    it("getEntityById returns added entity", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         var o = makeEntity("obj-123", 100, 200, 10, 20);
-        canvas.addObject(o);
+        canvas.addEntity(o);
 
-        const retunedEntity = canvas.getObjectById('obj-123');
+        const retunedEntity = canvas.getEntityById('obj-123');
         expect(retunedEntity).toBe(o);
     });
 
-    it("getObjectById returns null for missing object", function() {
+    it("getEntityById returns null for missing entity", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         var o = makeEntity("obj-123", 100, 200, 10, 20);
-        canvas.addObject(o);
+        canvas.addEntity(o);
 
-        const retunedEntity = canvas.getObjectById('id-for-non-existent-object');
+        const retunedEntity = canvas.getEntityById('id-for-non-existent-object');
         expect(retunedEntity).toBe(null);
     });  
 
-    it("getObjectsAroundPoint returns nearby object within box-radius of 1px", function() {
+    it("getEntitiesAroundPoint returns nearby object within box-radius of 1px", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         var mockDomElem = {
@@ -121,15 +121,15 @@ describe("Sheet", function() {
         };
 
         var o = makeEntity("obj-123", 100, 200, 10, 20);
-        canvas.addObject(o);
+        canvas.addEntity(o);
 
-        const retunedEntities = canvas.getObjectsAroundPoint(99, 201);
+        const retunedEntities = canvas.getEntitiesAroundPoint(99, 201);
 
         expect(retunedEntities.length).toBe(1);
         expect(retunedEntities[0]).toBe(o);
     });    
 
-    it("getObjectsAroundPoint returns surrounding object", function() {
+    it("getEntitiesAroundPoint returns surrounding entity", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         var mockDomElem = {
@@ -137,21 +137,21 @@ describe("Sheet", function() {
         };
 
         var o = makeEntity("obj-123", 100, 200, 10, 20);
-        canvas.addObject(o);
+        canvas.addEntity(o);
 
-        const retunedEntities = canvas.getObjectsAroundPoint(105, 210);
+        const retunedEntities = canvas.getEntitiesAroundPoint(105, 210);
 
         expect(retunedEntities.length).toBe(1);
         expect(retunedEntities[0]).toBe(o);
     });        
 
-    it("getObjectsAroundPoint does not return objects outside box-radius of 1px", function() {
+    it("getEntitiesAroundPoint does not return entities outside box-radius of 1px", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
 
         var o = makeEntity("obj-123", 100, 200, 10, 20);
-        canvas.addObject(o);
+        canvas.addEntity(o);
 
-        const retunedEntities = canvas.getObjectsAroundPoint(112, 222);
+        const retunedEntities = canvas.getEntitiesAroundPoint(112, 222);
         expect(retunedEntities.length).toBe(0);
     });
 
@@ -187,7 +187,7 @@ describe("Sheet", function() {
             [objResizeHandleElem]
         );
         
-        canvas.addObject(o);
+        canvas.addEntity(o);
 
         expect(objAddedCallback).toHaveBeenCalled();        
     });
@@ -253,7 +253,7 @@ describe("Sheet", function() {
             [objResizeHandleElem]
         );
         
-        canvas.addObject(o);
+        canvas.addEntity(o);
 
         const mouseDownEvent = new window.MouseEvent('mousedown', {
             'view': window,
@@ -298,7 +298,7 @@ describe("Sheet", function() {
             [objResizeHandleElem]
         );
         
-        canvas.addObject(o);
+        canvas.addEntity(o);
 
         const mouseDownEvent = new window.MouseEvent('mousedown', {
             'view': window,
@@ -412,7 +412,7 @@ describe("Canvas connectors", function() {
 
     });
 
-    it("getObjectWithConnectorAnchor returns correct Entity", function() {
+    it("getEntityWithConnectorAnchor returns correct Entity", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
@@ -428,13 +428,13 @@ describe("Canvas connectors", function() {
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves        
 
-        canvas.addObject(objA);
-        canvas.addObject(objB);        
+        canvas.addEntity(objA);
+        canvas.addEntity(objB);        
 
-        expect(canvas.getObjectWithConnectorAnchor("objB-anchor").getId()).toBe("objB");
+        expect(canvas.getEntityWithConnectorAnchor("objB-anchor").getId()).toBe("objB");
     });    
 
-    it("getObjectWithConnectorAnchor return null if Entity doesn't exist", function() {
+    it("getEntityWithConnectorAnchor return null if Entity doesn't exist", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
@@ -450,13 +450,13 @@ describe("Canvas connectors", function() {
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves        
 
-        canvas.addObject(objA);
-        canvas.addObject(objB);        
+        canvas.addEntity(objA);
+        canvas.addEntity(objB);        
 
-        expect(canvas.getObjectWithConnectorAnchor("objC-anchor")).toBe(null);
+        expect(canvas.getEntityWithConnectorAnchor("objC-anchor")).toBe(null);
     });        
 
-    it("getObjectsConnectedViaConnector returns connected Objects", function() {
+    it("getEntitiesConnectedViaConnector returns connected entities", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
@@ -472,18 +472,18 @@ describe("Canvas connectors", function() {
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
 
-        canvas.addObject(objA);
-        canvas.addObject(objB);
+        canvas.addEntity(objA);
+        canvas.addEntity(objB);
 
         const connector = canvas.makeNewConnectorFromAnchors(anchorA, anchorB);
-        const objects = canvas.getObjectsConnectedViaConnector(connector.getId());
+        const entities = canvas.getEntitiesConnectedViaConnector(connector.getId());
 
-        expect(objects.length).toBe(2);
-        expect(objects[0].getId()).toBe(objA.getId());
-        expect(objects[1].getId()).toBe(objB.getId());
+        expect(entities.length).toBe(2);
+        expect(entities[0].getId()).toBe(objA.getId());
+        expect(entities[1].getId()).toBe(objB.getId());
     });    
 
-    it("getConnectorsBetweenObjects returns correct connector", function() {
+    it("getConnectorsBetweenEntities returns correct connector", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
@@ -499,17 +499,17 @@ describe("Canvas connectors", function() {
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
 
-        canvas.addObject(objA);
-        canvas.addObject(objB);
+        canvas.addEntity(objA);
+        canvas.addEntity(objB);
 
         canvas.makeNewConnectorFromAnchors(anchorA, anchorB);
-        const connectorsBetObjects = canvas.getConnectorsBetweenObjects(objA, objB);
+        const connectorsBetweenEntities = canvas.getConnectorsBetweenEntities(objA, objB);
 
-        expect(connectorsBetObjects.length).toBe(1);
-        expect(connectorsBetObjects[0].getId()).toBe("objA-anchor:objB-anchor");
+        expect(connectorsBetweenEntities.length).toBe(1);
+        expect(connectorsBetweenEntities[0].getId()).toBe("objA-anchor:objB-anchor");
     });        
 
-    it("getConnectorsConnectedToObject returns correct connector", function() {
+    it("getConnectorsConnectedToEntity returns correct connector", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
         canvas.initInteractionHandlers();
 
@@ -525,12 +525,12 @@ describe("Canvas connectors", function() {
         const objBAnchors = objB.getConnectorAnchors();
         objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
 
-        canvas.addObject(objA);
-        canvas.addObject(objB);
+        canvas.addEntity(objA);
+        canvas.addEntity(objB);
 
         canvas.makeNewConnectorFromAnchors(anchorA, anchorB);
-        const connectorsConnectedToA = canvas.getConnectorsConnectedToObject(objA);
-        const connectorsConnectedToB = canvas.getConnectorsConnectedToObject(objB);
+        const connectorsConnectedToA = canvas.getConnectorsConnectedToEntity(objA);
+        const connectorsConnectedToB = canvas.getConnectorsConnectedToEntity(objB);
 
         expect(connectorsConnectedToA.length).toBe(1);
         expect(connectorsConnectedToA[0].getId()).toBe("objA-anchor:objB-anchor");
@@ -542,7 +542,7 @@ describe("Canvas connectors", function() {
 
 });
 
-describe("Canvas.initMultiObjectSelectionHandler", function() {
+describe("Canvas.initMultiEntitySelectionHandler", function() {
     var sheetDomElement = null;
     var pvWorkerMock = null;
 
@@ -556,13 +556,13 @@ describe("Canvas.initMultiObjectSelectionHandler", function() {
 
     it("creates selection box DOM element", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
-        canvas.initMultiObjectSelectionHandler();
+        canvas.initMultiEntitySelectionHandler();
         expect(sheetDomElement.getElementsByClassName("ia-selection-box").length).toBe(1);
     });
 
     it("creates selection box DOM element with given style classes", function() {
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
-        canvas.initMultiObjectSelectionHandler(['style1', 'style2']);
+        canvas.initMultiEntitySelectionHandler(['style1', 'style2']);
 
         const elem = sheetDomElement.getElementsByClassName("ia-selection-box")[0];        
         expect(elem.classList.contains('style1')).toBe(true);
@@ -586,7 +586,7 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
         const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
         
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
-        canvas.initMultiObjectSelectionHandler();
+        canvas.initMultiEntitySelectionHandler();
         canvas.on(SheetEvent.MULTIPLE_OBJECT_SELECTION_STARTED, selectionStartedCallback);
 
         const event = new window.MouseEvent('mousedown', {
@@ -606,7 +606,7 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
         const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
         
         const canvas = new Sheet(sheetDomElement, window, pvWorkerMock);
-        canvas.initMultiObjectSelectionHandler();
+        canvas.initMultiEntitySelectionHandler();
         canvas.on(SheetEvent.MULTIPLE_OBJECT_SELECTION_STARTED, selectionStartedCallback);
 
         const event = new window.TouchEvent('touchstart', {

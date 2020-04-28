@@ -103,12 +103,12 @@
         obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3c'));
         obj3.translate(179, 179);
 
-        canvas.addObject(obj1);
-        canvas.addObject(obj2);
-        canvas.addObject(obj3);
+        canvas.addEntity(obj1);
+        canvas.addEntity(obj2);
+        canvas.addEntity(obj3);
 
         const recreateConnectors = function() {
-            canvas.findBestConnectorAnchorsToConnectObjects(obj1, obj2, function(_bestAnchors) {
+            canvas.findBestConnectorAnchorsToConnectEntities(obj1, obj2, function(_bestAnchors) {
 
             // to optimize, we should only remove existing if it doesn't match the best
             const currentConnectors = canvas.getConnectorsBetweenObjects(obj1, obj2);

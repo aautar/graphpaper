@@ -8,9 +8,10 @@ GraphPaper was an offshoot of [ScratchGraph](https://scratchgraph.com), and is o
 
 GraphPaper is still very much a work-in-progress. Major, breaking, changes to the public API are not unsusual. However, releases are semantically versioned, so major releases are tagged appropriately and should not cause issues if consumed appropiately.
 
+## Quick Start: Sheets & Entities
+
 ![graphpaper-connector](https://user-images.githubusercontent.com/12861733/33002147-358957a8-cd80-11e7-89ae-1b211c0eb2db.png)
 
-## Quick Intro: Sheets & Entities
 
 ### Create a Sheet
 
@@ -19,16 +20,34 @@ Everything GraphPaper deals with is encapsulated on a Sheet. A sheet is a surfac
 To create a Sheet, we'll first need a DOM element with some basic styling:
 
 ```html
-<div 
-    id="sheet" 
-    style="
-        border:0px solid #f00; 
-        width:1000px; 
-        height:1000px; 
-        overflow:hidden; 
-        position:relative; 
-        transform-origin:0 0;">
-</div>
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>GraphPaper Demo</title>
+        <script src="../dist/graphpaper.js" type="text/javascript"></script>
+        <style type="text/css">
+            * { margin:0; padding:0; font-family:LatoRegular; font-size:14px; font-weight:normal; box-sizing:border-box; }
+            html, body { width:100%; height:100%; }
+            body { background:#fff; }
+
+            #sheet {
+                border:0px solid #f00; 
+                width:1000px; 
+                height:1000px; 
+                overflow:hidden; 
+                position:relative; 
+                transform-origin:0 0;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <div id="sheet"></div>
+    </body>
+
+</html>
 ```
 
 Now we can create the `GraphPaper.Sheet` object:
@@ -48,48 +67,61 @@ The sheet will be created and rendered. Now we can add entities to the sheet.
 
 Entities are things which live on the sheet. GraphPaper can handle interactions with entities, taking responsibility for transformations, computing and rendering connectors between entities, selecting and transforming a set of entities, etc.
 
-For now, let's look at at simple example where we create an entity that we can translate on the sheet. We'll add a `<div>` for the entity and another `<div>` that'll serve as a handle (the thing you click on and drag to move the entity) for translation.
+Let's create a simple entity that we can translate on the sheet. We'll update the page to add a `<div>` for the entity, another `<div>` that'll serve as a handle (the thing you click on and drag to move the entity) for translation, and some styles for both.
 
 ```html
-<div 
-    id="sheet" 
-    style="
-        border:0px solid #f00; 
-        width:1000px; 
-        height:1000px; 
-        overflow:hidden; 
-        position:relative; 
-        transform-origin:0 0;">
+<!DOCTYPE html>
+<html>
 
-    <!-- DOM element for our entity -->
-    <div 
-        id="entity1" 
-        style="
-            display:flex; 
-            align-items:center; 
-            justify-content:center; 
-            position:absolute; 
-            width:52px; 
-            height:52px; 
-            background:#fff; 
-            border:1px solid #0094ff; 
-            border-radius:4px;">
+    <head>
+        <title>GraphPaper Demo</title>
+        <script src="../dist/graphpaper.js" type="text/javascript"></script>
+        <style type="text/css">
+            * { margin:0; padding:0; font-family:LatoRegular; font-size:14px; font-weight:normal; box-sizing:border-box; }
+            html, body { width:100%; height:100%; }
+            body { background:#fff; }
 
-        <!-- DOM element for the entity's translation handle -->
-        <div 
-            id="translateHandle"
-            style="
+            #sheet {
+                border:0px solid #f00; 
+                width:1000px; 
+                height:1000px; 
+                overflow:hidden; 
+                position:relative; 
+                transform-origin:0 0;
+            }
+
+            #entity1 { 
+                display:flex; 
+                align-items:center; 
+                justify-content:center; 
+                position:absolute; 
+                width:52px; 
+                height:52px; 
+                background:#fff; 
+                border:1px solid #0094ff; 
+                border-radius:4px; 
+            }
+
+            #translateHandle { 
                 cursor:move; 
                 display:block; 
                 width:12px; 
                 height:12px; 
                 background:#0094ff; 
-                border-radius:12px">
+                border-radius:12px; 
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <div id="sheet">
+            <div id="entity1">
+                <div id="translateHandle"></div>
+            </div>
         </div>
-
-    </div>
-
-</div>
+    </body>
+</html>
 ```
 
 Now let's create the `GraphPaper.Entity` object (note that units for size and positioning are [CSS pixels](https://www.w3.org/TR/CSS2/syndata.html#length-units))
@@ -115,7 +147,7 @@ const entity = new GraphPaper.Entity(
 sheet.addEntity(entity);
 ```
 
-We've now added the entity to our sheet. However, the translate handle won't do anything yet. There's one final step, we need to tell the sheet that it should listen for and handle transformations, this is done via:
+The translate handle won't do anything yet. There's one final step, we need to tell the sheet that it should listen for and handle transformations, this is done via:
 
 ```javascript
 sheet.initTransformationHandlers();
@@ -125,11 +157,12 @@ Now you can drag the entity around the canvas by dragging `translateHandle`, eit
 
 ## Documentation
 
-- Getting information about a Sheet
-- Modifying the grid
+- [Getting information about a sheet](docs/sheet-get-info.md)
+- [Modifying a sheet's grid](docs/sheet-modify-grid.md)
+- Working with entities on the sheet
 - [Sheet Events](docs/sheet-events.md)
-- Creating, removing, and querying entities
 - Entity methods
+- Connectors
 - Group Entity Selection & Transformation
 
 
@@ -168,40 +201,6 @@ The object (`obj1`) will "remove" the object from the canvas. Remove in this con
 
 Note that the caller is responsible for removing the object's DOM elements, due to the caller being responsible for the creation of the DOM elements.
  
-### Get canvas dimensions
-
-Get the width of a canvas:
-
-```javascript
-canvas.getWidth();
-```
-
-Get the height of a canvas:
-
-```javascript
-canvas.getHeight();
-```
-
-### Get canvas bounding box
-
-```javascript
-canvas.calcBoundingBox();
-```
-
-This methods will return a `Graphpaper.Rectangle` representing the "active" area of a canvas. The rectange will be [bounding box](https://en.wikipedia.org/wiki/Minimum_bounding_box) of the region containing objects on the canvas. If there are no objects on the canvas, the rectangle will represent the entire canvas.
-
-### Change the grid
-
-The grid rendered on a Canvas, along with the "snap to grid" behavior a Canvas will impart on objects, is set via the properties of a `Grid` object assigned to the Canvas.
-
-A Grid is assigned/changed on a Canvas via the `Canvas.setGrid(_newGrid)` method.
-
-A new Grid object is created as follows:
- 
- `new Grid(12.0, '#424242', GRID_STYLE.DOT)`
-(this is the default grid created and assigned to a Canvas upon construction)
-
-The `Grid` constructor takes 3 parameters: the size of the grid, the color of the grid, and the style of the grid (GRID_STYLE.DOT or GRID_STYLE.LINE)
 
 ### Enable multi-object selection
 Initialize multi-object selection on a canvas:

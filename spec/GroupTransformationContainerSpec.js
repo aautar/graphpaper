@@ -53,9 +53,9 @@ describe("GroupTransformationContainer", function() {
     it("creates transformation rect DOM element with correct size", function() {        
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
         sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        sheet.initMultiObjectSelectionHandler();
+        sheet.initMultiEntitySelectionHandler();
         
-        const groupObjects = [
+        const groupEntities = [
             new Entity(
                 "obj-123",
                 0, 
@@ -69,7 +69,7 @@ describe("GroupTransformationContainer", function() {
             )
         ];
 
-        const gtc = new GroupTransformationContainer(sheet, groupObjects);
+        const gtc = new GroupTransformationContainer(sheet, groupEntities);
         sheet.attachGroupTransformationContainer(gtc);
 
         const gtcDomElem = sheetDomElement.getElementsByClassName("ia-group-transformation-container")[0];
@@ -83,9 +83,9 @@ describe("GroupTransformationContainer", function() {
     it("creates transformation rect DOM element with correct adjusted size", function() {        
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
         sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        sheet.initMultiObjectSelectionHandler();
+        sheet.initMultiEntitySelectionHandler();
         
-        const groupObjects = [
+        const groupEntities = [
             new Entity(
                 "obj-123",
                 0, 
@@ -99,7 +99,7 @@ describe("GroupTransformationContainer", function() {
             )
         ];
 
-        const gtc = new GroupTransformationContainer(sheet, groupObjects, [], 10.0);
+        const gtc = new GroupTransformationContainer(sheet, groupEntities, [], 10.0);
         sheet.attachGroupTransformationContainer(gtc);
 
         const gtcDomElem = sheetDomElement.getElementsByClassName("ia-group-transformation-container")[0];
@@ -109,12 +109,12 @@ describe("GroupTransformationContainer", function() {
         expect(gtcDomElem.style.height).toBe('40px');
     });
 
-    it("displays group transformation rect DOM element when group has 1+ objects", function() {        
+    it("displays group transformation rect DOM element when group has 1+ entities", function() {        
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
         sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        sheet.initMultiObjectSelectionHandler();
+        sheet.initMultiEntitySelectionHandler();
         
-        const groupObjects = [
+        const groupEntities = [
             new Entity(
                 "obj-123",
                 0, 
@@ -128,17 +128,17 @@ describe("GroupTransformationContainer", function() {
             )
         ];
 
-        const gtc = new GroupTransformationContainer(sheet, groupObjects, [], 10.0);
+        const gtc = new GroupTransformationContainer(sheet, groupEntities, [], 10.0);
         sheet.attachGroupTransformationContainer(gtc);
 
         const gtcDomElem = sheetDomElement.getElementsByClassName("ia-group-transformation-container")[0];
         expect(gtcDomElem.style.display).toBe('block');
     });    
 
-    it("does not display group transformation rect DOM element when group has 0 objects", function() {        
+    it("does not display group transformation rect DOM element when group has 0 entities", function() {        
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
         sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        sheet.initMultiObjectSelectionHandler();
+        sheet.initMultiEntitySelectionHandler();
         
         const gtc = new GroupTransformationContainer(sheet, [], [], 10.0);
         sheet.attachGroupTransformationContainer(gtc);
@@ -160,12 +160,12 @@ describe("GroupTransformationContainer.translateByOffset", function() {
         };    
     });    
 
-    it("translates and snaps objects to grid", function() {        
+    it("translates and snaps entities to grid", function() {        
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
         sheet.setGrid(new Grid(8.0, '#424242', GRID_STYLE.DOT));
-        sheet.initMultiObjectSelectionHandler();
+        sheet.initMultiEntitySelectionHandler();
         
-        const groupObjects = [
+        const groupEntities = [
             new Entity(
                 "obj-123",
                 0, 
@@ -179,10 +179,10 @@ describe("GroupTransformationContainer.translateByOffset", function() {
             )
         ];
 
-        const gtc = new GroupTransformationContainer(sheet, groupObjects);
+        const gtc = new GroupTransformationContainer(sheet, groupEntities);
         gtc.translateByOffset(9, 9);
 
-        expect(groupObjects[0].getX()).toBe(7);
-        expect(groupObjects[0].getY()).toBe(7);
+        expect(groupEntities[0].getX()).toBe(7);
+        expect(groupEntities[0].getY()).toBe(7);
     });
 });

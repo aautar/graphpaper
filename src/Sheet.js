@@ -196,7 +196,7 @@ function Sheet(_sheetDomElement, _window) {
     /**
      * @returns {PointSet}
      */
-    const getObjectExtentRoutingPoints = function() {
+    const getEntityExtentRoutingPoints = function() {
         const pointSet = new PointSet();
         sheetEntities.forEach(function(_obj) {
             const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
@@ -252,11 +252,11 @@ function Sheet(_sheetDomElement, _window) {
         });
 
         const routingPointsAroundAnchor = getConnectorRoutingPointsAroundAnchor();
-        const objectExtentRoutingPoints = getObjectExtentRoutingPoints();
+        const entityExtentRoutingPoints = getEntityExtentRoutingPoints();
 
         const allRoutingPoints = new PointSet();        
         allRoutingPoints.pushPointSet(routingPointsAroundAnchor);
-        allRoutingPoints.pushPointSet(objectExtentRoutingPoints);
+        allRoutingPoints.pushPointSet(entityExtentRoutingPoints);
 
         const routingPointsAroundAnchorFloat64Array = routingPointsAroundAnchor.toFloat64Array();
         const routingPointsFloat64Array = allRoutingPoints.toFloat64Array();
@@ -542,16 +542,16 @@ function Sheet(_sheetDomElement, _window) {
     };
 
     /**
-     * @param {Object[]} _objs 
+     * @param {Entity[]} _objs 
      * @returns {Rectangle}
      */
-    this.calcBoundingRectForObjects = function(_objs) {
+    this.calcBoundingRectForEntities = function(_entities) {
         var minTop = null;
         var minLeft = null;
         var maxBottom = null;
         var maxRight = null;
 
-        _objs.forEach(function(_obj, index, array) {
+        _entities.forEach(function(_obj, index, array) {
             const objRect = _obj.getBoundingRectange();
             const left = objRect.getLeft();
             const top = objRect.getTop();  
@@ -593,7 +593,7 @@ function Sheet(_sheetDomElement, _window) {
             return new Rectangle(0, 0, self.getWidth(), self.getHeight());     
         }
 
-        return self.calcBoundingRectForObjects(sheetEntities);
+        return self.calcBoundingRectForEntities(sheetEntities);
     };
 
     /**
@@ -602,8 +602,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _radius
      * @returns {Entity[]}
      */
-    this.getObjectsAroundPoint = function(_x, _y, _radius) {
-
+    this.getEntitiesAroundPoint = function(_x, _y, _radius) {
         _radius = _radius || 1.0;
 
         const result = [];
@@ -628,7 +627,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Rectangle} _rect
      * @returns {Entity[]}
      */
-    this.getObjectsWithinRect = function(_rect) {
+    this.getEntitiesWithinRect = function(_rect) {
         const result = [];
 
         sheetEntities.forEach(function(_obj) {
@@ -643,11 +642,12 @@ function Sheet(_sheetDomElement, _window) {
     /**
      * @returns {Entity[]}
      */
-    this.getAllObjects = function() {    
+    this.getAllEntities = function() {    
         return sheetEntities;
     };
 
     /**
+     * @deprecated
      * Helper method to publish an object change to all objects
      * 
      * @param {String} _eventName
@@ -663,21 +663,21 @@ function Sheet(_sheetDomElement, _window) {
      * @param {String} _id
      * @returns {Entity|null}
      */   
-    this.getObjectById = function(_id) {
-        var foundObject = null;
+    this.getEntityById = function(_id) {
+        var foundEntity = null;
         sheetEntities.forEach(function(obj, index, array) {
-            if(foundObject === null && obj.getId() === _id) {
-                foundObject = obj;
+            if(foundEntity === null && obj.getId() === _id) {
+                foundEntity = obj;
             }            
         });
         
-        return foundObject;
+        return foundEntity;
     };
 
     /**
      * @param {Entity} _obj
      */
-    this.addObject = function(_obj) {
+    this.addEntity = function(_obj) {
         _obj.on('obj-resize-start', handleResizeStart);
         _obj.on('obj-resize', function(e) {
             emitEvent(SheetEvent.OBJECT_RESIZED, { 'object': e.obj });
@@ -694,7 +694,7 @@ function Sheet(_sheetDomElement, _window) {
         self.refreshAllConnectors();       
 
         emitEvent(SheetEvent.OBJECT_ADDED, { "object":_obj });
-    };
+    };    
 
     /**
      * Remove object from the sheet
@@ -703,7 +703,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {String} _objId
      * @returns {Boolean} 
      */
-    this.removeObject = function(_objId) {
+    this.removeEntity = function(_objId) {
         for(let i=0; i<sheetEntities.length; i++) {
             if(sheetEntities[i].getId() === _objId) {
                 sheetEntities.splice(i, 1);
@@ -743,19 +743,18 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Entity} _objB 
      * @returns {Connector[]}
      */
-    this.getConnectorsBetweenObjects = function(_objA, _objB) {
-
+    this.getConnectorsBetweenEntities = function(_entityA, _entityB) {
         const foundConnectors = [];
 
         objectConnectors.forEach((_conn) => {
             const aS = _conn.getAnchorStart();
             const aE = _conn.getAnchorEnd();
 
-            if(_objA.hasConnectorAnchor(aS) && _objB.hasConnectorAnchor(aE)) {
+            if(_entityA.hasConnectorAnchor(aS) && _entityB.hasConnectorAnchor(aE)) {
                 foundConnectors.push(_conn);
             }
 
-            if(_objA.hasConnectorAnchor(aE) && _objB.hasConnectorAnchor(aS)) {
+            if(_entityA.hasConnectorAnchor(aE) && _entityB.hasConnectorAnchor(aS)) {
                 foundConnectors.push(_conn);
             }            
         });
@@ -766,15 +765,13 @@ function Sheet(_sheetDomElement, _window) {
     /**
      * 
      * @param {String} _connectorId
-     * @returns {Array} 
+     * @returns {Entity[]} 
      */
-    this.getObjectsConnectedViaConnector = function(_connectorId) {
-        const foundObjects = [];
-
-        const allObjs = self.getAllObjects();
+    this.getEntitiesConnectedViaConnector = function(_connectorId) {
+        const foundEntities = [];
+        const allEntities = self.getAllEntities();
 
         objectConnectors.forEach((_conn) => {
-
             if(_conn.getId() !== _connectorId) {
                 return;
             }
@@ -782,15 +779,14 @@ function Sheet(_sheetDomElement, _window) {
             const aS = _conn.getAnchorStart();
             const aE = _conn.getAnchorEnd();
 
-            allObjs.forEach((_o) => {
+            allEntities.forEach((_o) => {
                 if(_o.hasConnectorAnchor(aS) || _o.hasConnectorAnchor(aE)) {
-                    foundObjects.push(_o);
+                    foundEntities.push(_o);
                 }
             });
-
         });
 
-        return foundObjects;        
+        return foundEntities;        
     };
 
     /**
@@ -798,7 +794,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Entity} _obj
      * @returns {Connector[]} 
      */
-    this.getConnectorsConnectedToObject = function(_entity) {
+    this.getConnectorsConnectedToEntity = function(_entity) {
         const foundConnectors = [];
 
         objectConnectors.forEach((_conn) => {
@@ -816,15 +812,15 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * @param {String} _connectorAnchorId
-     * @returns {Object|null} 
+     * @returns {Entity|null} 
      */
-    this.getObjectWithConnectorAnchor = function(_connectorAnchorId) {
-        const allObjects = self.getAllObjects();
-        for(let i=0; i<allObjects.length; i++) {                
-            const anchors = allObjects[i].getConnectorAnchors();
+    this.getEntityWithConnectorAnchor = function(_connectorAnchorId) {
+        const allEntities = self.getAllEntities();
+        for(let i=0; i<allEntities.length; i++) {                
+            const anchors = allEntities[i].getConnectorAnchors();
             for(let j=0; j<anchors.length; j++) {
                 if(anchors[j].getId() === _connectorAnchorId) {
-                    return allObjects[i];
+                    return allEntities[i];
                 }
             }
         }
@@ -879,13 +875,12 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
-     * @param {Object} _objA 
-     * @param {Object} _objB
-     * @returns {Object} 
+     * @param {Entity} _objA 
+     * @param {Entity} _objB
      */
-    this.findBestConnectorAnchorsToConnectObjects = function(_objA, _objB, _onFound) {
+    this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
         const searchFunc = (_searchData) => {
-            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_objA, _objB], sheetEntities, self.getGridSize());
+            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_entityA, _entityB], sheetEntities, self.getGridSize());
             const result = ConnectorAnchorClosestPairFinder.findClosestPairBetweenObjects(
                 _searchData.objectA, 
                 _searchData.objectB, 
@@ -898,8 +893,10 @@ function Sheet(_sheetDomElement, _window) {
         setTimeout(function() {
             searchFunc(
                 {
-                    "objectA": _objA,
-                    "objectB": _objB,
+                    "objectA": _entityA, // deprecated
+                    "objectB": _entityB, // deprecated
+                    "entityA": _entityA,
+                    "entityB": _entityB,                    
                     "cb": _onFound
                 }
             );
@@ -923,11 +920,12 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _posY 
      */
     const dblClickTapHandler = function(_posX, _posY) {
-        const objectsAroundPoint = self.getObjectsAroundPoint(_posX, _posY);
+        const entitiesAroundPoint = self.getEntitiesAroundPoint(_posX, _posY);
 
         const eventData = {
             'targetPoint': new Point(_posX, _posY),
-            'objectsAroundPoint': objectsAroundPoint
+            'objectsAroundPoint': entitiesAroundPoint, // deprecated
+            'entitiesAroundPoint': entitiesAroundPoint
         };
 
         emitEvent(SheetEvent.DBLCLICK, eventData);
@@ -1055,15 +1053,15 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */
     const handleMove = function(_x, _y) {
-        const obj = self.getObjectById(objectIdBeingDragged);
-        const translateOffset = obj.getTranslateHandleOffset();
+        const entity = self.getEntityById(objectIdBeingDragged);
+        const translateOffset = entity.getTranslateHandleOffset();
         const mx = self.snapToGrid(_x + translateOffset.getX());
         const my = self.snapToGrid(_y + translateOffset.getY());
         
         objectDragX = mx;
         objectDragY = my;		
 
-        obj.translate(mx, my);
+        entity.translate(mx, my);
     };
 
     /**
@@ -1072,11 +1070,11 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */
     const handleMoveEnd = function(_x, _y) {
-        const obj = self.getObjectById(objectIdBeingDragged);
-        const translateOffset = obj.getTranslateHandleOffset();
+        const entity = self.getEntityById(objectIdBeingDragged);
+        const translateOffset = entity.getTranslateHandleOffset();
         const mx = self.snapToGrid(_x + translateOffset.getX());
         const my = self.snapToGrid(_y + translateOffset.getY());
-        obj.translate(mx, my);       
+        entity.translate(mx, my);       
     };         
 
     /**
@@ -1085,17 +1083,17 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */    
     const handleResize = function(_x, _y) {
-        const obj = self.getObjectById(objectIdBeingResized);
+        const entity = self.getEntityById(objectIdBeingResized);
 
         const mx = self.snapToGrid(_x);
         const my = self.snapToGrid(_y);
 
-        const top = obj.getY();
-        const left = obj.getX();
+        const top = entity.getY();
+        const left = entity.getX();
         const newWidth = ((mx - left)+1);
         const newHeight = ((my - top)+1);
 
-        obj.resize(newWidth, newHeight);
+        entity.resize(newWidth, newHeight);
     };
 
     /**
@@ -1105,7 +1103,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Element} _targetElem 
      * @returns {Boolean}
      */
-    const handleMultiObjectSelectionStart = function(_x, _y, _targetElem) {
+    const handleMultiEntitySelectionStart = function(_x, _y, _targetElem) {
         if(multiObjectSelectionStarted) {
             return false; // already doing selection
         }
@@ -1145,7 +1143,7 @@ function Sheet(_sheetDomElement, _window) {
         return true;
     };
 
-    const handleMultiObjectSelectionEnd = function() {
+    const handleMultiEntitySelectionEnd = function() {
         multiObjectSelectionStarted = false;
 
         const selectionRect = new Rectangle(
@@ -1155,8 +1153,8 @@ function Sheet(_sheetDomElement, _window) {
             Math.max(multiObjectSelectionStartY, multiObjectSelectionEndY)
         );
 
-        const selectedObjects = self.getObjectsWithinRect(selectionRect);
-        const boundingRect = self.calcBoundingRectForObjects(selectedObjects);
+        const selectedEntities = self.getEntitiesWithinRect(selectionRect);
+        const boundingRect = self.calcBoundingRectForEntities(selectedEntities);
 
         selectionBoxElem.style.left = `${boundingRect.getLeft()}px`;
         selectionBoxElem.style.top = `${boundingRect.getTop()}px`;
@@ -1167,7 +1165,8 @@ function Sheet(_sheetDomElement, _window) {
         emitEvent(
             SheetEvent.MULTIPLE_OBJECTS_SELECTED, 
             { 
-                'selectedObjects': selectedObjects,
+                'selectedObjects': selectedEntities, // deprecated
+                'selectedEntities': selectedEntities,
                 'boundingRect': boundingRect
             }
         );
@@ -1202,7 +1201,7 @@ function Sheet(_sheetDomElement, _window) {
     /**
      * @param {String[]} _selectionRectStyleCssClasses
      */
-    this.initMultiObjectSelectionHandler = function(_selectionRectStyleCssClasses) {
+    this.initMultiEntitySelectionHandler = function(_selectionRectStyleCssClasses) {
         // Create selection box DOM element
         const selBox = _window.document.createElement("div");
         selBox.classList.add("ia-selection-box");
@@ -1225,7 +1224,7 @@ function Sheet(_sheetDomElement, _window) {
         selectionBoxElem = _sheetDomElement.appendChild(selBox);
 
         const handleTouchSelectionStart = function(e) {
-            const hasSelectionStarted = handleMultiObjectSelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
+            const hasSelectionStarted = handleMultiEntitySelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
         };
 
         _sheetDomElement.addEventListener('mousedown', function(e) {
@@ -1233,7 +1232,7 @@ function Sheet(_sheetDomElement, _window) {
                 return;
             }
 
-            const hasSelectionStarted = handleMultiObjectSelectionStart(e.pageX, e.pageY, e.target);
+            const hasSelectionStarted = handleMultiEntitySelectionStart(e.pageX, e.pageY, e.target);
             if(hasSelectionStarted) {
                 e.preventDefault(); // prevents text selection from triggering
             }
@@ -1356,7 +1355,7 @@ function Sheet(_sheetDomElement, _window) {
             }            
 
             if(multiObjectSelectionStarted) {
-                handleMultiObjectSelectionEnd();
+                handleMultiEntitySelectionEnd();
             }
         });
 
@@ -1381,7 +1380,7 @@ function Sheet(_sheetDomElement, _window) {
                 }
 
                 if(multiObjectSelectionStarted) {
-                    handleMultiObjectSelectionEnd();
+                    handleMultiEntitySelectionEnd();
                 }
 
                 objectIdBeingDragged = null;

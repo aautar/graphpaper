@@ -52,7 +52,7 @@
 
         canvas.initInteractionHandlers();
         canvas.initTransformationHandlers();
-        canvas.initMultiObjectSelectionHandler();
+        canvas.initMultiEntitySelectionHandler();
 
         canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
             const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
@@ -122,10 +122,10 @@
         obj4.addInteractableConnectorAnchor(document.getElementById('connectorAnchor4'));        
         obj4.translate(400,200);
 
-        canvas.addObject(obj1);
-        canvas.addObject(obj2);
-        canvas.addObject(obj3);
-        canvas.addObject(obj4);
+        canvas.addEntity(obj1);
+        canvas.addEntity(obj2);
+        canvas.addEntity(obj3);
+        canvas.addEntity(obj4);
 
         obj3.suspendTranslateInteractions();
         obj3.resumeTranslateInteractions();
@@ -137,7 +137,7 @@
             // clear any current group transformation containers
             if(currentGroupTransformationContainer) {
                 canvas.detachGroupTransformationContainer(currentGroupTransformationContainer);
-                currentGroupTransformationContainer.getObjects().forEach(function(_obj) {
+                currentGroupTransformationContainer.getEntities().forEach(function(_obj) {
                     // (we're using raw GraphPaper.Entity objects and keeping selection state in the DOM, in a real app we'd likely encapsulate the state info in an object)
                     _obj.getDomElement().classList.remove('selected');
                 });
@@ -149,7 +149,7 @@
             canvas.attachGroupTransformationContainer(currentGroupTransformationContainer);
 
             // reflect selection state on object DOM elements
-            currentGroupTransformationContainer.getObjects().forEach(function(_obj) {
+            currentGroupTransformationContainer.getEntities().forEach(function(_obj) {
                 _obj.getDomElement().classList.add('selected');
             });
 

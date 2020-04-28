@@ -38,7 +38,7 @@
             `;
             document.getElementById('paper').appendChild(elem);
 
-            const obj = new GraphPaper.CanvasObject(
+            const obj = new GraphPaper.Entity(
                 `obj${i}`, 
                 0, 
                 0, 
@@ -53,7 +53,7 @@
             obj.addInteractableConnectorAnchor(document.getElementById(`connectorAnchor${i}`));
             obj.translate(100 + (i*50), 100);
 
-            canvas.addObject(obj);
+            canvas.addEntity(obj);
         }
 
         canvas.initDebugMetricsPanel();

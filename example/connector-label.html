@@ -63,7 +63,7 @@
             return c;
         });
 
-        const obj1 = new GraphPaper.CanvasObject(
+        const obj1 = new GraphPaper.Entity(
             'obj1', 
             0, 
             0, 
@@ -77,7 +77,7 @@
 
         const obj1Anchor = obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
 
-        const obj2 = new GraphPaper.CanvasObject(
+        const obj2 = new GraphPaper.Entity(
             'obj2', 
             0, 
             0, 
@@ -92,11 +92,11 @@
         const obj2Anchor = obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
         obj2.translate(100, 100);
 
-        canvas.addObject(obj1);
-        canvas.addObject(obj2);
+        canvas.addEntity(obj1);
+        canvas.addEntity(obj2);
         canvas.makeNewConnectorFromAnchors(obj1Anchor, obj2Anchor);
 
-        canvas.on(GraphPaper.CanvasEvent.CONNECTOR_UPDATED, (e) => {
+        canvas.on(GraphPaper.SheetEvent.CONNECTOR_UPDATED, (e) => {
             if(e.connector.getId() === `obj1-1000:obj2-1000`) {
 
                 const labelElem = document.getElementById('label1');                
