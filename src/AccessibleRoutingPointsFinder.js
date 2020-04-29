@@ -1,21 +1,21 @@
-import { CanvasObject } from "./CanvasObject";
+import { Entity } from "./Entity";
 
 const AccessibleRoutingPointsFinder = {
 
     /**
      * Find routing points that are not occluded by objects
      * 
-     * @param {CanvasObject[]} _subjectObjects
-     * @param {CanvasObject[]} _occludableByObjects
+     * @param {Entity[]} _subjectObjects
+     * @param {Entity[]} _occludableByObjects
      * @param {Number} _gridSize
      * @returns {Object[]}
      */
-    find: function(_subjectObjects, _occludableByObjects, _gridSize) {
+    find: function(_subjectEntities, _occludableByEntities, _gridSize) {
         const connectorAnchorToNumValidRoutingPoints = new Map();
         const allRoutingPoints = [];
         const filteredRoutingPoints = [];
 
-        _subjectObjects.forEach((_o) => {
+        _subjectEntities.forEach((_o) => {
             const anchors = _o.getConnectorAnchors();
 
             anchors.forEach((_a) => {
@@ -52,8 +52,8 @@ const AccessibleRoutingPointsFinder = {
             let isPointWithinObj = false;
 
             // check if routing point is occluded
-            for(let i=0; i<_occludableByObjects.length; i++) {
-                const obj = _occludableByObjects[i];
+            for(let i=0; i<_occludableByEntities.length; i++) {
+                const obj = _occludableByEntities[i];
                 const boundingRect = obj.getBoundingRectange();
 
                 if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {

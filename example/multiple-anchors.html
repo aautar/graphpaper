@@ -37,7 +37,7 @@
 
     <script type="text/javascript">
 	
-        const canvas = new GraphPaper.Canvas(
+        const canvas = new GraphPaper.Sheet(
             document.getElementById('paper'), 
             window
         );
@@ -49,7 +49,7 @@
             return new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
         });
 
-        const obj1 = new GraphPaper.CanvasObject(
+        const obj1 = new GraphPaper.Entity(
             'obj1', 
             0, 
             0, 
@@ -65,7 +65,7 @@
         obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1b'));
         obj1.translate(100,100);
 
-        const obj2 = new GraphPaper.CanvasObject(
+        const obj2 = new GraphPaper.Entity(
             'obj2', 
             0, 
             0, 
@@ -80,7 +80,7 @@
         obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2a'));
         obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2b'));
 
-        const obj3 = new GraphPaper.CanvasObject(
+        const obj3 = new GraphPaper.Entity(
             'obj3', 
             0, 
             0, 
@@ -96,9 +96,9 @@
         obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3b'));  
         obj3.translate(200,200);
 
-        canvas.addObject(obj1);
-        canvas.addObject(obj2);
-        canvas.addObject(obj3);
+        canvas.addEntity(obj1);
+        canvas.addEntity(obj2);
+        canvas.addEntity(obj3);
 
     </script>
 

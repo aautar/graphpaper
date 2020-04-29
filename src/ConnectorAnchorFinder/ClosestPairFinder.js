@@ -1,11 +1,11 @@
-import { CanvasObject } from "../CanvasObject";
+import { Entity } from "../Entity";
 import { ConnectorAnchor } from "../ConnectorAnchor";
 
 const ClosestPairFinder = {   
     /**
      * 
-     * @param {CanvasObject} _objA 
-     * @param {CanvasObject} _objB
+     * @param {Entity} _objA 
+     * @param {Entity} _objB
      * @param {Map<ConnectorAnchor, Number>} _connectorAnchorToNumValidRoutingPoints
      * @returns {Object}
      */

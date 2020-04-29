@@ -1,17 +1,17 @@
 const jsdom = require("jsdom");
 import {Rectangle} from '../src/Rectangle.js';
-import {CanvasObject} from '../src/CanvasObject.js';
-import { Point } from "../src/Point.js";
+import {Entity} from '../src/Entity.js';
+import {Point} from "../src/Point.js";
 
 const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 
-describe("CanvasObject constructor", function() {
+describe("Entity constructor", function() {
   it("translates object into initial position", function() { 
 
     const objDomElem = window.document.createElement('div');
-    const o = new CanvasObject(
+    const o = new Entity(
         "obj-123",
         100, 
         200, 
@@ -30,7 +30,7 @@ describe("CanvasObject constructor", function() {
   it("resizer object to initial size", function() { 
 
     const objDomElem = window.document.createElement('div');
-    const o = new CanvasObject(
+    const o = new Entity(
         "obj-123",
         100, 
         200, 
@@ -47,9 +47,9 @@ describe("CanvasObject constructor", function() {
   });   
 });
 
-describe("CanvasObject", function() {
+describe("Entity", function() {
   it("getBoundingRectange returns correct bounding rectangle", function() {
-    const o = new CanvasObject(
+    const o = new Entity(
         "obj-123",
         100, 
         200, 
@@ -88,7 +88,7 @@ describe("CanvasObject", function() {
       }
     });    
 
-    var o = new CanvasObject(
+    var o = new Entity(
         "obj-123",
         100, 
         200, 
@@ -107,8 +107,8 @@ describe("CanvasObject", function() {
     expect(o.getTranslateHandleOffset().getY()).toBe(-95);
   });      
 
-  it("addNonInteractableConnectorAnchor adds ConnectorAnchor to CanvasObject", function() {  
-    const o = new CanvasObject(
+  it("addNonInteractableConnectorAnchor adds ConnectorAnchor to Entity", function() {  
+    const o = new Entity(
         "obj-123",
         100, 
         200, 
@@ -126,8 +126,8 @@ describe("CanvasObject", function() {
     expect(o.getConnectorAnchors().length).toBe(1);
   });  
 
-  it("addInteractableConnectorAnchor adds ConnectorAnchor to CanvasObject", function() {  
-    const o = new CanvasObject(
+  it("addInteractableConnectorAnchor adds ConnectorAnchor to Entity", function() {  
+    const o = new Entity(
         "obj-123",
         100, 
         200, 
@@ -147,9 +147,9 @@ describe("CanvasObject", function() {
 
 });
 
-describe("CanvasObject.hasConnectorAnchor", function() {
-  it("returns true if anchor is assigned to CanvasObject", function() {  
-    const o = new CanvasObject(
+describe("Entity.hasConnectorAnchor", function() {
+  it("returns true if anchor is assigned to Entity", function() {  
+    const o = new Entity(
         "obj-123",
         100, 
         200, 

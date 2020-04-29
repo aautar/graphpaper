@@ -1,20 +1,19 @@
 import {Rectangle} from './Rectangle';
-import  {CanvasObject} from './CanvasObject';
-import  {Cluster} from './Cluster';
+import {Entity} from './Entity';
+import {Cluster} from './Cluster';
 
 function BoxClusterDetector(_boxExtentOffset) {
-
     const self = this;
 
     /**
      * 
-     * @param {CanvasObject} _obj 
-     * @param {CanvasObject[]} _canvasObjectsArray 
+     * @param {Entity} _obj 
+     * @param {Entity[]} _sheetEntitiesArray 
      * @returns {Number}
      */
-    const getObjectIndexFromArray = function(_obj, _canvasObjectsArray) {
-        for(let i=0; i<_canvasObjectsArray.length; i++) {
-            if(_canvasObjectsArray[i].getId() === _obj.getId()) {
+    const getObjectIndexFromArray = function(_entity, _sheetEntitiesArray) {
+        for(let i=0; i<_sheetEntitiesArray.length; i++) {
+            if(_sheetEntitiesArray[i].getId() === _entity.getId()) {
                 return i;
             }
         }
@@ -24,19 +23,19 @@ function BoxClusterDetector(_boxExtentOffset) {
 
     /**
      * 
-     * @param {CanvasObject[]} _objects 
-     * @param {CanvasObject[]} _canvasObjectsArray 
-     * @returns {CanvasObject[]}
+     * @param {Entity[]} _entities 
+     * @param {Entity[]} _sheetEntitiesArray 
+     * @returns {Entity[]}
      */
-    const removeObjectsFromArray = function(_objects, _canvasObjectsArray) {
-        for(let i=0; i<_objects.length; i++) {
-            const idx = getObjectIndexFromArray(_objects[i], _canvasObjectsArray);
+    const removeObjectsFromArray = function(_entities, _sheetEntitiesArray) {
+        for(let i=0; i<_entities.length; i++) {
+            const idx = getObjectIndexFromArray(_entities[i], _sheetEntitiesArray);
             if(idx !== -1) {
-                _canvasObjectsArray.splice(idx, 1);
+                _sheetEntitiesArray.splice(idx, 1);
             }
         }
 
-        return _canvasObjectsArray;
+        return _sheetEntitiesArray;
     };
 
     /**
@@ -73,43 +72,43 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
-     * @param {CanvasObject} _objA
-     * @param {CanvasObject} _objB
+     * @param {Entity} _objA
+     * @param {Entity} _objB
      * @returns {Boolean}
      */
-    this.areObjectsClose = function(_objA, _objB) {
+    this.areObjectsClose = function(_entityA, _entityB) {
 
         const nA = new Rectangle(
-            _objA.getX() - _boxExtentOffset, 
-            _objA.getY() - _boxExtentOffset, 
-            _objA.getX() + _objA.getWidth() + _boxExtentOffset, 
-            _objA.getY() + _objA.getHeight() + _boxExtentOffset
+            _entityA.getX() - _boxExtentOffset, 
+            _entityA.getY() - _boxExtentOffset, 
+            _entityA.getX() + _entityA.getWidth() + _boxExtentOffset, 
+            _entityA.getY() + _entityA.getHeight() + _boxExtentOffset
         );
 
         const nB = new Rectangle(
-            _objB.getX() - _boxExtentOffset, 
-            _objB.getY() - _boxExtentOffset, 
-            _objB.getX() + _objB.getWidth() + _boxExtentOffset, 
-            _objB.getY() + _objB.getHeight() + _boxExtentOffset
+            _entityB.getX() - _boxExtentOffset, 
+            _entityB.getY() - _boxExtentOffset, 
+            _entityB.getX() + _entityB.getWidth() + _boxExtentOffset, 
+            _entityB.getY() + _entityB.getHeight() + _boxExtentOffset
         );
         
         return nA.checkIntersect(nB);
     };
    
     /**
-     * @param {CanvasObject} _obj
-     * @param {CanvasObject[]} _objectsUnderConsideration
-     * @returns {CanvasObject[]}
+     * @param {Entity} _obj
+     * @param {Entity[]} _objectsUnderConsideration
+     * @returns {Entity[]}
      */
-    this.getAllObjectsCloseTo = function(_obj, _objectsUnderConsideration) {
+    this.getAllObjectsCloseTo = function(_entity, _entitiesUnderConsideration) {
         const resultSet = [];
-        for(let i=0; i<_objectsUnderConsideration.length; i++) {
-            if(_obj.getId() === _objectsUnderConsideration[i].getId()) {
+        for(let i=0; i<_entitiesUnderConsideration.length; i++) {
+            if(_entity.getId() === _entitiesUnderConsideration[i].getId()) {
                 continue;
             }
 
-            if(self.areObjectsClose(_obj, _objectsUnderConsideration[i])) {
-                resultSet.push(_objectsUnderConsideration[i]);
+            if(self.areObjectsClose(_entity, _entitiesUnderConsideration[i])) {
+                resultSet.push(_entitiesUnderConsideration[i]);
             }
         }
 
@@ -117,27 +116,27 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
-     * @param {CanvasObject} _seedObj
-     * @param {CanvasObject[]} _objectsUnderConsideration
-     * @param {CanvasObject[]} _resultSet
+     * @param {Entity} _seedObj
+     * @param {Entity[]} _objectsUnderConsideration
+     * @param {Entity[]} _resultSet
      */
-    this.getClusterObjectsFromSeed = function(_seedObj, _objectsUnderConsideration, _resultSet) {
-        const closeByObjects = self.getAllObjectsCloseTo(_seedObj, _objectsUnderConsideration);
+    this.getClusterObjectsFromSeed = function(_seedEntity, _entitiesUnderConsideration, _resultSet) {
+        const closeByObjects = self.getAllObjectsCloseTo(_seedEntity, _entitiesUnderConsideration);
         if(closeByObjects.length === 0) {
             return [];
         } else {
-            removeObjectsFromArray(closeByObjects.concat([_seedObj]), _objectsUnderConsideration);
+            removeObjectsFromArray(closeByObjects.concat([_seedEntity]), _entitiesUnderConsideration);
 
             closeByObjects.forEach(function(_o) {
                 _resultSet.push(_o);
-                self.getClusterObjectsFromSeed(_o, _objectsUnderConsideration, _resultSet);
+                self.getClusterObjectsFromSeed(_o, _entitiesUnderConsideration, _resultSet);
             });
         }
     };
 
 
     /**
-     * @param {CanvasObject[]} _objs
+     * @param {Entity[]} _objs
      * @param {Cluster[]} _clusters
      * @returns {Map<Cluster,Number>}
      */
@@ -171,12 +170,12 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
-     * @param {CanvasObject} _obj
+     * @param {Entity} _obj
      * @param {Cluster[]} _clusters
      */
-    this.removeObjectFromClusters = function(_obj, _clusters) {
+    this.removeObjectFromClusters = function(_entity, _clusters) {
         _clusters.forEach(function(_c) {
-            _c.removeObjectById(_obj.getId());
+            _c.removeObjectById(_entity.getId());
         });
     };    
 
