@@ -687,12 +687,12 @@ var GraphPaper = (function (exports) {
         DBLCLICK: "dblclick",
         CLICK: "click",
         CONNECTOR_UPDATED: "connector-updated",
-        OBJECT_ADDED: "object-added",
-        OBJECT_REMOVED: "object-removed",
-        OBJECT_RESIZED: "object-resized",
-        OBJECT_TRANSLATED: "object-translated",
-        MULTIPLE_OBJECT_SELECTION_STARTED: "multiple-object-selection-started",
-        MULTIPLE_OBJECTS_SELECTED: "multiple-objects-selected",
+        ENTITY_ADDED: "entity-added",
+        ENTITY_REMOVED: "entity-removed",
+        ENTITY_RESIZED: "entity-resized",
+        ENTITY_TRANSLATED: "entity-translated",
+        MULTIPLE_ENTITY_SELECTION_STARTED: "multiple-object-selection-started",
+        MULTIPLE_ENTITIES_SELECTED: "multiple-objects-selected",
     });
 
     /**
@@ -2501,35 +2501,35 @@ var GraphPaper = (function (exports) {
         this.addEntity = function(_obj) {
             _obj.on('obj-resize-start', handleResizeStart);
             _obj.on('obj-resize', function(e) {
-                emitEvent(SheetEvent.OBJECT_RESIZED, { 'object': e.obj });
+                emitEvent(SheetEvent.ENTITY_RESIZED, { 'object': e.obj });
                 self.refreshAllConnectors();    
             });
 
             _obj.on('obj-translate-start', handleMoveStart);
             _obj.on('obj-translate', function(e) {
-                emitEvent(SheetEvent.OBJECT_TRANSLATED, { 'object': e.obj });
+                emitEvent(SheetEvent.ENTITY_TRANSLATED, { 'object': e.obj });
                 self.refreshAllConnectors();    
             });
 
             sheetEntities.push(_obj);
             self.refreshAllConnectors();       
 
-            emitEvent(SheetEvent.OBJECT_ADDED, { "object":_obj });
+            emitEvent(SheetEvent.ENTITY_ADDED, { "object":_obj });
         };    
 
         /**
          * Remove object from the sheet
          * Note: as caller is responsible for putting object into the DOM, caller is responsible for removing it from the DOM
          * 
-         * @param {String} _objId
+         * @param {String} _entityId
          * @returns {Boolean} 
          */
-        this.removeEntity = function(_objId) {
+        this.removeEntity = function(_entityId) {
             for(let i=0; i<sheetEntities.length; i++) {
-                if(sheetEntities[i].getId() === _objId) {
+                if(sheetEntities[i].getId() === _entityId) {
                     sheetEntities.splice(i, 1);
                     self.refreshAllConnectors();
-                    emitEvent(SheetEvent.OBJECT_REMOVED, { "object":sheetEntities[i] });
+                    emitEvent(SheetEvent.ENTITY_REMOVED, { "object":sheetEntities[i] });
                     return true;
                 }
             }
@@ -2954,7 +2954,7 @@ var GraphPaper = (function (exports) {
             selectionBoxElem.style.display = "block";
 
             emitEvent(
-                SheetEvent.MULTIPLE_OBJECT_SELECTION_STARTED,
+                SheetEvent.MULTIPLE_ENTITY_SELECTION_STARTED,
                 { 
                     'x': _x,
                     'y': _y
@@ -2984,7 +2984,7 @@ var GraphPaper = (function (exports) {
             selectionBoxElem.style.display = "none";
 
             emitEvent(
-                SheetEvent.MULTIPLE_OBJECTS_SELECTED, 
+                SheetEvent.MULTIPLE_ENTITIES_SELECTED, 
                 { 
                     'selectedObjects': selectedEntities, // deprecated
                     'selectedEntities': selectedEntities,
@@ -3116,7 +3116,7 @@ var GraphPaper = (function (exports) {
                 }
 
                 if(multiObjectSelectionStarted) {
-                    updateSelectionBoxEndPoint(e.touches[0].pageX, e.e.touches[0].pageY);
+                    updateSelectionBoxEndPoint(e.touches[0].pageX, e.touches[0].pageY);
                     e.preventDefault();
                 }
 

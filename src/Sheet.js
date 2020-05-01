@@ -1295,7 +1295,7 @@ function Sheet(_sheetDomElement, _window) {
             }
 
             if(multiObjectSelectionStarted) {
-                updateSelectionBoxEndPoint(e.touches[0].pageX, e.e.touches[0].pageY);
+                updateSelectionBoxEndPoint(e.touches[0].pageX, e.touches[0].pageY);
                 e.preventDefault();
             }
 
