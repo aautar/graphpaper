@@ -11,7 +11,7 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Entity[]} _sheetEntitiesArray 
      * @returns {Number}
      */
-    const getObjectIndexFromArray = function(_entity, _sheetEntitiesArray) {
+    const getEntityIndexFromArray = function(_entity, _sheetEntitiesArray) {
         for(let i=0; i<_sheetEntitiesArray.length; i++) {
             if(_sheetEntitiesArray[i].getId() === _entity.getId()) {
                 return i;
@@ -27,9 +27,9 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Entity[]} _sheetEntitiesArray 
      * @returns {Entity[]}
      */
-    const removeObjectsFromArray = function(_entities, _sheetEntitiesArray) {
+    const removeEntitiesFromArray = function(_entities, _sheetEntitiesArray) {
         for(let i=0; i<_entities.length; i++) {
-            const idx = getObjectIndexFromArray(_entities[i], _sheetEntitiesArray);
+            const idx = getEntityIndexFromArray(_entities[i], _sheetEntitiesArray);
             if(idx !== -1) {
                 _sheetEntitiesArray.splice(idx, 1);
             }
@@ -43,8 +43,7 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Map<Cluster, Number>} _clusterToObjectCountMap 
      * @returns {Cluster}
      */
-    const getClusterWithMostObjectsFromClusterMap = function(_clusterToObjectCountMap)
-    {
+    const getClusterWithMostEntitiesFromClusterMap = function(_clusterToObjectCountMap) {
         var curMaxObjs = 0;
         var curClusterWithMax = null;
 
@@ -76,8 +75,7 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Entity} _objB
      * @returns {Boolean}
      */
-    this.areObjectsClose = function(_entityA, _entityB) {
-
+    this.areEntitiesClose = function(_entityA, _entityB) {
         const nA = new Rectangle(
             _entityA.getX() - _boxExtentOffset, 
             _entityA.getY() - _boxExtentOffset, 
@@ -100,14 +98,14 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Entity[]} _objectsUnderConsideration
      * @returns {Entity[]}
      */
-    this.getAllObjectsCloseTo = function(_entity, _entitiesUnderConsideration) {
+    this.getAllEntitiesCloseTo = function(_entity, _entitiesUnderConsideration) {
         const resultSet = [];
         for(let i=0; i<_entitiesUnderConsideration.length; i++) {
             if(_entity.getId() === _entitiesUnderConsideration[i].getId()) {
                 continue;
             }
 
-            if(self.areObjectsClose(_entity, _entitiesUnderConsideration[i])) {
+            if(self.areEntitiesClose(_entity, _entitiesUnderConsideration[i])) {
                 resultSet.push(_entitiesUnderConsideration[i]);
             }
         }
@@ -120,39 +118,36 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Entity[]} _objectsUnderConsideration
      * @param {Entity[]} _resultSet
      */
-    this.getClusterObjectsFromSeed = function(_seedEntity, _entitiesUnderConsideration, _resultSet) {
-        const closeByObjects = self.getAllObjectsCloseTo(_seedEntity, _entitiesUnderConsideration);
+    this.getClusterEntitiesFromSeed = function(_seedEntity, _entitiesUnderConsideration, _resultSet) {
+        const closeByObjects = self.getAllEntitiesCloseTo(_seedEntity, _entitiesUnderConsideration);
         if(closeByObjects.length === 0) {
             return [];
         } else {
-            removeObjectsFromArray(closeByObjects.concat([_seedEntity]), _entitiesUnderConsideration);
+            removeEntitiesFromArray(closeByObjects.concat([_seedEntity]), _entitiesUnderConsideration);
 
             closeByObjects.forEach(function(_o) {
                 _resultSet.push(_o);
-                self.getClusterObjectsFromSeed(_o, _entitiesUnderConsideration, _resultSet);
+                self.getClusterEntitiesFromSeed(_o, _entitiesUnderConsideration, _resultSet);
             });
         }
     };
 
-
     /**
-     * @param {Entity[]} _objs
+     * @param {Entity[]} _entities
      * @param {Cluster[]} _clusters
      * @returns {Map<Cluster,Number>}
      */
-    this.findIntersectingClustersForObjects = function(_objs, _clusters) {
-
+    this.findIntersectingClustersForEntities = function(_entities, _clusters) {
         // Map of Cluster that is intersecting to number of objects in _objs that is intersecting the given Cluster
         const intersectingClusterToNumObjectsIntersecting = new Map();
 
         _clusters.forEach(function(_cluster) {
-
             const clusterObjs = _cluster.getObjects();
 
             for(let i=0; i<clusterObjs.length; i++) {
-                for(let j=0; j<_objs.length; j++) {
+                for(let j=0; j<_entities.length; j++) {
 
-                    if(clusterObjs[i].getId() !== _objs[j].getId()) {
+                    if(clusterObjs[i].getId() !== _entities[j].getId()) {
                         continue;
                     }
 
@@ -170,10 +165,10 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
-     * @param {Entity} _obj
+     * @param {Entity} _entity
      * @param {Cluster[]} _clusters
      */
-    this.removeObjectFromClusters = function(_entity, _clusters) {
+    this.removeEntityFromClusters = function(_entity, _clusters) {
         _clusters.forEach(function(_c) {
             _c.removeObjectById(_entity.getId());
         });
@@ -192,11 +187,11 @@ function BoxClusterDetector(_boxExtentOffset) {
             const obj = objectsUnderConsideration.pop();
 
             const objsForCluster = [obj];
-            self.getClusterObjectsFromSeed(obj, objectsUnderConsideration, objsForCluster);
+            self.getClusterEntitiesFromSeed(obj, objectsUnderConsideration, objsForCluster);
 
             if(objsForCluster.length > 1) {
 
-                const intersectingClusterToNumObjectsIntersecting = self.findIntersectingClustersForObjects(objsForCluster, clusters);
+                const intersectingClusterToNumObjectsIntersecting = self.findIntersectingClustersForEntities(objsForCluster, clusters);
 
                 if(intersectingClusterToNumObjectsIntersecting.size === 0) {
                     const newCluster = new Cluster(_getNewIdFunc());
@@ -206,25 +201,24 @@ function BoxClusterDetector(_boxExtentOffset) {
 
                     clusters.push(newCluster);
                 } else {
-                    const clusterToModify = getClusterWithMostObjectsFromClusterMap(intersectingClusterToNumObjectsIntersecting);
+                    const clusterToModify = getClusterWithMostEntitiesFromClusterMap(intersectingClusterToNumObjectsIntersecting);
 
                     // Clear out objects in cluster
                     clusterToModify.removeAllObjects();
 
                     // Remove object from any cluster it's currently in, add it to clusterToModify
                     objsForCluster.forEach(function(_clusterObject) {
-                        self.removeObjectFromClusters(_clusterObject, clusters);                    
+                        self.removeEntityFromClusters(_clusterObject, clusters);                    
                         clusterToModify.addObject(_clusterObject);
                     });
 
                 }
 
-                removeObjectsFromArray(objsForCluster, objectsUnderConsideration);
-
+                removeEntitiesFromArray(objsForCluster, objectsUnderConsideration);
+                
             } else {
-                self.removeObjectFromClusters(obj, clusters);
+                self.removeEntityFromClusters(obj, clusters);
             }
-
         }
 
         // Filter out clusters w/o any objects
@@ -238,7 +232,6 @@ function BoxClusterDetector(_boxExtentOffset) {
 
         return nonEmptyClusters;
     };
-    
 };
 
 export { BoxClusterDetector };

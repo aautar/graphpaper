@@ -4,9 +4,9 @@ import  {Rectangle} from './Rectangle';
 /**
  * @param {String} _id
  * @param {Element} _domElement
- * @param {Canvas} _canvas
+ * @param {Sheet} _sheet
  */
-function ConnectorAnchor(_id, _domElement, _canvas) {
+function ConnectorAnchor(_id, _domElement, _sheet) {
     
     const self = this;
 
@@ -52,7 +52,7 @@ function ConnectorAnchor(_id, _domElement, _canvas) {
      */
     this.getCentroid = function() {
         const viewportRelativeRect = _domElement.getBoundingClientRect();
-        const pageOffset = _canvas.getPageOffset();        
+        const pageOffset = _sheet.getPageOffset();        
         return new Point(
             viewportRelativeRect.left + pageOffset.getX() + (self.getWidth() * 0.5), 
             viewportRelativeRect.top + pageOffset.getY() + (self.getHeight() * 0.5)
