@@ -39,10 +39,10 @@
     /**
      * @returns {Point}
      */
-    Point.prototype.getCartesianPoint = function(_canvasWidth, _canvasHeight) {
+    Point.prototype.getCartesianPoint = function(_sheetWidth, _sheetHeight) {
         return new Point(
-            this.__x - (_canvasWidth * 0.5),
-            -this.__y + (_canvasHeight * 0.5)
+            this.__x - (_sheetWidth * 0.5),
+            -this.__y + (_sheetHeight * 0.5)
         );
     };
 

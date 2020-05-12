@@ -54,8 +54,8 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
         const viewportRelativeRect = _domElement.getBoundingClientRect();
         const pageOffset = _sheet.getPageOffset();        
         return new Point(
-            viewportRelativeRect.left + pageOffset.getX() + (self.getWidth() * 0.5), 
-            viewportRelativeRect.top + pageOffset.getY() + (self.getHeight() * 0.5)
+            (viewportRelativeRect.left + pageOffset.getX() + (self.getWidth() * 0.5)) - _sheet.getOffsetLeft(), 
+            (viewportRelativeRect.top + pageOffset.getY() + (self.getHeight() * 0.5)) - _sheet.getOffsetTop()
         );
     };
 

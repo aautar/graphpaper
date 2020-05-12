@@ -948,7 +948,7 @@ function Sheet(_sheetDomElement, _window) {
         _sheetDomElement.addEventListener('dblclick', function (e) {
 
             const invTransformedPos = MatrixMath.vecMat4Multiply(
-                [e.pageX, e.pageY, 0, 1],
+                [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                 currentInvTransformationMatrix
             );
 
@@ -963,7 +963,7 @@ function Sheet(_sheetDomElement, _window) {
             }
 
             const invTransformedPos = MatrixMath.vecMat4Multiply(
-                [e.pageX, e.pageY, 0, 1],
+                [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                 currentInvTransformationMatrix
             );
 
@@ -1224,7 +1224,7 @@ function Sheet(_sheetDomElement, _window) {
         selectionBoxElem = _sheetDomElement.appendChild(selBox);
 
         const handleTouchSelectionStart = function(e) {
-            const hasSelectionStarted = handleMultiEntitySelectionStart(e.touches[0].pageX, e.touches[0].pageY, e.target);
+            const hasSelectionStarted = handleMultiEntitySelectionStart(e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop(), e.target);
         };
 
         _sheetDomElement.addEventListener('mousedown', function(e) {
@@ -1232,7 +1232,7 @@ function Sheet(_sheetDomElement, _window) {
                 return;
             }
 
-            const hasSelectionStarted = handleMultiEntitySelectionStart(e.pageX, e.pageY, e.target);
+            const hasSelectionStarted = handleMultiEntitySelectionStart(e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), e.target);
             if(hasSelectionStarted) {
                 e.preventDefault(); // prevents text selection from triggering
             }
@@ -1255,14 +1255,14 @@ function Sheet(_sheetDomElement, _window) {
 
     this.initTransformationHandlers = function() {
         _sheetDomElement.addEventListener('touchstart', function(e) {
-            touchMoveLastX = e.touches[0].pageX;
-            touchMoveLastY = e.touches[0].pageY;
+            touchMoveLastX = e.touches[0].pageX - self.getOffsetLeft();
+            touchMoveLastY = e.touches[0].pageY - self.getOffsetTop();
         });
 
         _sheetDomElement.addEventListener('touchmove', function (e) {
             if (objectIdBeingDragged !== null) {
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
-                    [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
+                    [e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop(), 0, 1],
                     currentInvTransformationMatrix
                 );                    
 
@@ -1273,7 +1273,7 @@ function Sheet(_sheetDomElement, _window) {
 
             if(objectIdBeingResized !== null) {
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
-                    [e.touches[0].pageX, e.touches[0].pageY, 0, 1],
+                    [e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop(), 0, 1],
                     currentInvTransformationMatrix
                 );     
 
@@ -1282,8 +1282,8 @@ function Sheet(_sheetDomElement, _window) {
             }
 
             if(currentGroupTransformationContainerBeingDragged !== null) {
-                const dx = e.touches[0].pageX - touchMoveLastX;
-                const dy = e.touches[0].pageY - touchMoveLastY;
+                const dx = (e.touches[0].pageX - self.getOffsetLeft()) - touchMoveLastX;
+                const dy = (e.touches[0].pageY - self.getOffsetTop()) - touchMoveLastY;
 
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [dx, dy, 0, 1],
@@ -1295,18 +1295,18 @@ function Sheet(_sheetDomElement, _window) {
             }
 
             if(multiObjectSelectionStarted) {
-                updateSelectionBoxEndPoint(e.touches[0].pageX, e.touches[0].pageY);
+                updateSelectionBoxEndPoint(e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop());
                 e.preventDefault();
             }
 
-            touchMoveLastX = e.touches[0].pageX;
-            touchMoveLastY = e.touches[0].pageY;
+            touchMoveLastX = e.touches[0].pageX - self.getOffsetLeft();
+            touchMoveLastY = e.touches[0].pageY - self.getOffsetTop();
         });
 
         _sheetDomElement.addEventListener('mousemove', function (e) {
             if (objectIdBeingDragged !== null) {		
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
-                    [e.pageX, e.pageY, 0, 1],
+                    [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                     currentInvTransformationMatrix
                 );                    
 
@@ -1315,7 +1315,7 @@ function Sheet(_sheetDomElement, _window) {
 
             if(objectIdBeingResized !== null) {
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
-                    [e.pageX, e.pageY, 0, 1],
+                    [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                     currentInvTransformationMatrix
                 );     
 
@@ -1332,7 +1332,7 @@ function Sheet(_sheetDomElement, _window) {
             }
 
             if(multiObjectSelectionStarted) {
-                updateSelectionBoxEndPoint(e.pageX, e.pageY);
+                updateSelectionBoxEndPoint(e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop());
             }
         });
 
@@ -1364,7 +1364,7 @@ function Sheet(_sheetDomElement, _window) {
                 if(objectIdBeingDragged !== null) {
 
                     const invTransformedPos = MatrixMath.vecMat4Multiply(
-                        [e.pageX, e.pageY, 0, 1],
+                        [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                         currentInvTransformationMatrix
                     );                      
 
