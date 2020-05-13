@@ -157,6 +157,14 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
+     * @returns {Point}
+     */
+    this.getPositionOnPage = function() {
+        const boundingRect = _domElement.getBoundingClientRect();
+        return new Point(boundingRect.left, boundingRect.top);
+    };
+
+    /**
      * @param {Number} _x
      * @param {Number} _y
      */
