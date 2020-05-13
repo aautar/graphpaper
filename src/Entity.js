@@ -160,8 +160,9 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @returns {Point}
      */
     this.getPositionOnPage = function() {
+        const window = _domElement.ownerDocument.defaultView;
         const boundingRect = _domElement.getBoundingClientRect();
-        return new Point(boundingRect.left, boundingRect.top);
+        return new Point(boundingRect.left + window.scrollX, boundingRect.top + window.scrollY);
     };
 
     /**
