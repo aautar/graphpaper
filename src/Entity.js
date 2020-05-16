@@ -266,6 +266,23 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
+     * 
+     * @param {Rectangle} _rectInPageSpace
+     * @returns {Rectangle}
+     */
+    this.computePageToEntitySpaceTransformedRectangle = function(_rectInPageSpace) {
+        const noteBoundingRect = self.getBoundingRectangeInPageSpace();
+        const rectRelativeToNote = new GraphPaper.Rectangle(
+            _rectInPageSpace.getLeft() - noteBoundingRect.getLeft(),
+            _rectInPageSpace.getTop() - noteBoundingRect.getTop(),
+            _rectInPageSpace.getRight() - noteBoundingRect.getRight(),
+            _rectInPageSpace.getBottom() - noteBoundingRect.getBottom()
+        );
+
+        return rectRelativeToNote;
+    };
+
+    /**
      * @returns {Point[]}
      */
     this.getBoundingPoints = function() {

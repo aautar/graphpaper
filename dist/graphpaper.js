@@ -3403,6 +3403,15 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * @returns {Point}
+         */
+        this.getPositionOnPage = function() {
+            const window = _domElement.ownerDocument.defaultView;
+            const boundingRect = _domElement.getBoundingClientRect();
+            return new Point(boundingRect.left + window.scrollX, boundingRect.top + window.scrollY);
+        };
+
+        /**
          * @param {Number} _x
          * @param {Number} _y
          */
@@ -3487,6 +3496,36 @@ var GraphPaper = (function (exports) {
             const bottom = top + height;
 
             return new Rectangle(left, top, right, bottom);
+        };
+
+        /**
+         * 
+         * @returns {Rectangle}
+         */
+        this.getBoundingRectangeInPageSpace = function() {
+            const pagePos = self.getPositionOnPage();
+            const left = pagePos.getX();
+            const top = pagePos.getY();
+            const right = left + width;
+            const bottom = top + height;
+            return new Rectangle(left, top, right, bottom);
+        };
+
+        /**
+         * 
+         * @param {Rectangle} _rectInPageSpace
+         * @returns {Rectangle}
+         */
+        this.computePageToEntitySpaceTransformedRectangle = function(_rectInPageSpace) {
+            const noteBoundingRect = self.getBoundingRectangeInPageSpace();
+            const rectRelativeToNote = new GraphPaper.Rectangle(
+                _rectInPageSpace.getLeft() - noteBoundingRect.getLeft(),
+                _rectInPageSpace.getTop() - noteBoundingRect.getTop(),
+                _rectInPageSpace.getRight() - noteBoundingRect.getRight(),
+                _rectInPageSpace.getBottom() - noteBoundingRect.getBottom()
+            );
+
+            return rectRelativeToNote;
         };
 
         /**
