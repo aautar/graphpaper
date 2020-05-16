@@ -903,10 +903,11 @@ var GraphPaper = (function (exports) {
         /**
          * 
          * @param {TouchEvent} _touchEndEvent 
+         * @param {Point} _sheetPageOffset 
          * @param {Array} currentInvTransformationMatrix
          * @returns {Object}
          */
-        this.processTap = function(_touchEndEvent, _currentInvTransformationMatrix) {
+        this.processTap = function(_touchEndEvent, _sheetPageOffset, _currentInvTransformationMatrix) {
             if(_touchEndEvent.changedTouches.length === 0) {
                 // we have nothing to work with
                 return {
@@ -917,8 +918,11 @@ var GraphPaper = (function (exports) {
             }
 
             // Position of the touch
+
+            // THIS NEEDS TO BE UPDATED TO ACCOUNT FOR OFFSET OF SHEET RELATIVE TO PAGE
+
             const invTransformedPos = MatrixMath.vecMat4Multiply(
-                [_touchEndEvent.changedTouches[0].pageX, _touchEndEvent.changedTouches[0].pageY, 0, 1],
+                [_touchEndEvent.changedTouches[0].pageX - _sheetPageOffset.getX(), _touchEndEvent.changedTouches[0].pageY - _sheetPageOffset.getY(), 0, 1],
                 _currentInvTransformationMatrix
             );            
 
@@ -2801,6 +2805,7 @@ var GraphPaper = (function (exports) {
             _sheetDomElement.addEventListener('touchend', function(e) {
                 const detectResult = doubleTapDetector.processTap(
                     e,
+                    new Point(self.getOffsetLeft(), self.getOffsetTop()),
                     currentInvTransformationMatrix,
                 );
 

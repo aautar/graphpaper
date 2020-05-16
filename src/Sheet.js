@@ -980,6 +980,7 @@ function Sheet(_sheetDomElement, _window) {
         _sheetDomElement.addEventListener('touchend', function(e) {
             const detectResult = doubleTapDetector.processTap(
                 e,
+                new Point(self.getOffsetLeft(), self.getOffsetTop()),
                 currentInvTransformationMatrix,
             );
 
