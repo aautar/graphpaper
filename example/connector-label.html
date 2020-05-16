@@ -11,7 +11,7 @@
 
 <body>
 
-    <div id="paper">
+    <div id="paper" style="position:absolute; top:100px; left:100px;">
 
         <p id="label1" style="position:absolute; top:0; left:0; background:#000; color:#fff; padding:0px 8px;">test</p>
 
@@ -53,8 +53,8 @@
         canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
             const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
 
-            c.setMarkerStart(`#arrow`, 18.0);
-            c.setMarkerEnd(`#arrow`, 18.0);
+            c.setMarkerStart(`#arrow`, 10.0);
+            c.setMarkerEnd(`#arrow`, 10.0);
             
             c.on(GraphPaper.ConnectorEvent.CLICK, function(e) {
                 console.log(e);
@@ -124,7 +124,6 @@
 
             }            
         });
-
     </script>
 
 </body>
