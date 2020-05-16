@@ -253,6 +253,19 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
+     * 
+     * @returns {Rectangle}
+     */
+    this.getBoundingRectangeInPageSpace = function() {
+        const pagePos = self.getPositionOnPage();
+        const left = pagePos.getX();
+        const top = pagePos.getY();
+        const right = left + width;
+        const bottom = top + height;
+        return new Rectangle(left, top, right, bottom);
+    };
+
+    /**
      * @returns {Point[]}
      */
     this.getBoundingPoints = function() {
