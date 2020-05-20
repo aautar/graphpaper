@@ -9,13 +9,14 @@ import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
  * 
  * @param {PointSet} _freePoints
  * @param {LineSet} _boundaryLines
+ * @param {Array|undefined} _precomputedPointToVisibleSet
  */
-function PointVisibilityMap(_freePoints, _boundaryLines) {
+function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisibleSet) {
     const self = this;
 
     const boundaryLinesArr = _boundaryLines.toArray();
     const freePointsArr = _freePoints.toArray();
-    const pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
+    let pointToVisibleSet = null;
 
     /**
      * @param {Line} _theLine
@@ -236,7 +237,12 @@ function PointVisibilityMap(_freePoints, _boundaryLines) {
 
     };
 
-    computePointsVisibility();
+    if(_precomputedPointToVisibleSet) {
+        pointToVisibleSet = _precomputedPointToVisibleSet;
+    } else {
+        pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
+        computePointsVisibility();        
+    }
 };
-    
+   
 export { PointVisibilityMap };

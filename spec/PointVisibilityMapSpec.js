@@ -4,6 +4,28 @@ import {Line} from '../src/Line'
 import {LineSet} from '../src/LineSet'
 import {PointVisibilityMap} from '../src/PointVisibilityMap'
 
+describe("PointVisibilityMap constructor", function() {
+    it("can construct correct PointVisibilityMap with precomputed data", function() {
+        const freePoints = new PointSet();
+        freePoints.push(new Point(15, 15));
+        freePoints.push(new Point(51, 1));
+
+        const boundaryLines = new LineSet(
+            [
+                new Line(new Point(50,0), new Point(50,100))
+            ]
+        );
+
+        const pointVisibilityMapPre = new PointVisibilityMap(freePoints, boundaryLines);
+        const pvMapData = pointVisibilityMapPre.getPointToVisibleSetData();
+
+        const pointVisibilityMap = new PointVisibilityMap(freePoints, boundaryLines, pvMapData)
+        const closestVisiblePoint = pointVisibilityMap.findVisiblePointClosestTo(new Point(14, 14));
+        expect(closestVisiblePoint.getX()).toBe(15);
+        expect(closestVisiblePoint.getY()).toBe(15);
+    });
+});
+
 describe("PointVisibilityMap.findVisiblePointClosestTo", function() {
 
     it("returns null when there are no points in PointVisibilityMap", function() {
@@ -66,7 +88,6 @@ describe("PointVisibilityMap.findVisiblePointClosestTo", function() {
         expect(closestVisiblePoint.getX()).toBe(15);
         expect(closestVisiblePoint.getY()).toBe(15);
     });
-
 });
 
 describe("PointVisibilityMap.computeRoute", function() {
