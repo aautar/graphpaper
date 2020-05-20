@@ -46,8 +46,15 @@ sudo service nginx restart
 
 SCRIPT
 
+$startScript = <<START_SCRIPT
+
+sudo service nginx restart
+
+START_SCRIPT
+
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
   config.vm.provision :shell, inline: $provisioningScript
+  config.vm.provision "shell", inline: $startScript, run: "always"
   config.vm.network "private_network", type: "dhcp"
 end
