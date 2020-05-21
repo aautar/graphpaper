@@ -110,8 +110,10 @@ const processRequestQueue = function() {
 
     postMessage(
         {
-            "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
+            "routingPoints": lastRequest.routingPoints,
+            "boundaryLines": lastRequest.boundaryLines,
             "connectorDescriptors": connectorDescriptors,
+            "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
             "metrics": metrics
         }
     );

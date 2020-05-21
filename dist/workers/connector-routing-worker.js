@@ -521,13 +521,14 @@
      * 
      * @param {PointSet} _freePoints
      * @param {LineSet} _boundaryLines
+     * @param {Array|undefined} _precomputedPointToVisibleSet
      */
-    function PointVisibilityMap(_freePoints, _boundaryLines) {
+    function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisibleSet) {
         const self = this;
 
         const boundaryLinesArr = _boundaryLines.toArray();
         const freePointsArr = _freePoints.toArray();
-        const pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
+        let pointToVisibleSet = null;
 
         /**
          * @param {Line} _theLine
@@ -581,49 +582,37 @@
 
         /**
          * 
-         * @param {Point} _currentPoint 
-         * @returns {Point[]}
-         */
-        const getVisiblePointsFrom = function(_currentPoint) {
-            for(let i=0; i<freePointsArr.length; i++) {
-
-                if(freePointsArr[i].isEqual(_currentPoint)) {
-                    const visiblePointIndices = pointToVisibleSet[i];
-                    const visiblePoints = [];
-                    visiblePointIndices.forEach((_vpIdx) => {
-                        visiblePoints.push(freePointsArr[_vpIdx]);
-                    });
-
-                    return visiblePoints;
-                }
-            }
-
-            return [];
-        };
-
-        /**
-         * 
          * @param {Number} _currentRouteLength 
          * @param {Point[]} _pointsInRoute 
-         * @param {Point} _currentPoint 
+         * @param {Number} _currentPointIndex 
          * @param {Point} _endPoint 
          * @returns {Object|null}
          */
-        const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPoint, _endPoint) {
-            var visiblePoints = getVisiblePointsFrom(_currentPoint);       
+        const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointIndex, _endPoint) {
+            const visiblePointIndices = pointToVisibleSet[_currentPointIndex] || [];       
+            const currentPoint = freePointsArr[_currentPointIndex];
             var curMinCost = Number.MAX_SAFE_INTEGER;
             var visiblePointWithMinCost = null;
+            var visiblePointWithMinCostIndex = null;
 
-            visiblePoints.forEach(function(_vp) {
+            for(let i=0; i<visiblePointIndices.length; i++) {
+                const _vp = freePointsArr[visiblePointIndices[i]];
+
                 // ignore point if it's already in the route
+                let pointAlreadyInRoute = false;
                 for(let i=0; i<_pointsInRoute.length; i++) {
                     if(_vp.isEqual(_pointsInRoute[i])) {
-                        return; // point already in route, try another
+                        pointAlreadyInRoute = true;
+                        continue; // point already in route, try another
                     }
                 }
 
+                if(pointAlreadyInRoute) {
+                    continue;
+                }
+
                 // g(n) = length/cost of _startPoint to _vp + _currentRouteLength
-                const gn = (new Line(_currentPoint, _vp)).getLength() + _currentRouteLength;
+                const gn = (new Line(currentPoint, _vp)).getLength() + _currentRouteLength;
 
                 // h(n) = length/cost of _vp to _endPoint
                 const hn = (new Line(_vp, _endPoint)).getLength();
@@ -632,8 +621,9 @@
                 if((gn + hn) < curMinCost) {
                     curMinCost = gn + hn;
                     visiblePointWithMinCost = _vp;
+                    visiblePointWithMinCostIndex = visiblePointIndices[i];
                 }
-            });
+            }
 
             if(curMinCost === Number.MAX_SAFE_INTEGER) {
                 return null;
@@ -641,7 +631,8 @@
 
             return {
                 "cost": curMinCost,
-                "point": visiblePointWithMinCost
+                "point": visiblePointWithMinCost,
+                "pointIndex": visiblePointWithMinCostIndex
             };
         };
 
@@ -694,6 +685,29 @@
         };
 
         /**
+         * @param {Point} _point
+         * @returns {Point|null}
+         */
+        this.findVisiblePointIndexClosestTo = function(_point) {
+            var resultPointIndex = null;
+            var currentMaxLength = Number.MAX_SAFE_INTEGER;
+
+            for(let i=0; i<freePointsArr.length; i++) {
+                const freePt = freePointsArr[i];
+
+                const lineOfSight = new Line(_point, freePt);
+                const lineOfSightLength = lineOfSight.getLength();
+
+                if(lineOfSightLength < currentMaxLength && !doesLineIntersectAnyBoundaryLines(lineOfSight)) {
+                    resultPointIndex = i;
+                    currentMaxLength = lineOfSightLength;
+                }
+            }
+            
+            return resultPointIndex;
+        };    
+
+        /**
          * @param {Point} _startPoint
          * @param {Point} _endPoint
          * @param {Boolean} _optimizeRoute
@@ -707,16 +721,17 @@
             }
 
             // find closest visible point 
-            const firstRoutingPoint = self.findVisiblePointClosestTo(_startPoint);
-            if(firstRoutingPoint === null) {
+            const firstRoutingPointIndex = self.findVisiblePointIndexClosestTo(_startPoint);
+            if(firstRoutingPointIndex === null) {
                 return new PointSet();
             }
 
             var currentRouteLen = 0;
+            const firstRoutingPoint = freePointsArr[firstRoutingPointIndex];
             const pointsInRoute = [firstRoutingPoint];
-            var currentPoint = firstRoutingPoint;
+            var currentPointIndex = firstRoutingPointIndex;
             while(true) {
-                const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPoint, _endPoint);
+                const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointIndex, _endPoint);
                 if(routeSegment === null) {
 
                     // Is there unobstructed line to endpoint? 
@@ -729,11 +744,11 @@
                     break;
                 }
 
-                currentRouteLen += (new Line(currentPoint, routeSegment.point)).getLength();
+                currentRouteLen += (new Line(freePointsArr[currentPointIndex], routeSegment.point)).getLength();
                 pointsInRoute.push(routeSegment.point);
-                currentPoint = routeSegment.point;
+                currentPointIndex = routeSegment.pointIndex;
 
-                if((new Line(currentPoint, _endPoint).getLength()) < 1.0) {
+                if((new Line(freePointsArr[currentPointIndex], _endPoint).getLength()) < 1.0) {
                     break;
                 }
             }
@@ -746,7 +761,12 @@
 
         };
 
-        computePointsVisibility();
+        if(_precomputedPointToVisibleSet) {
+            pointToVisibleSet = _precomputedPointToVisibleSet;
+        } else {
+            pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
+            computePointsVisibility();        
+        }
     }
 
     const SvgPathBuilder = {
@@ -950,8 +970,10 @@
 
         postMessage(
             {
-                "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
+                "routingPoints": lastRequest.routingPoints,
+                "boundaryLines": lastRequest.boundaryLines,
                 "connectorDescriptors": connectorDescriptors,
+                "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
                 "metrics": metrics
             }
         );

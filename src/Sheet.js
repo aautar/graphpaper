@@ -3,6 +3,7 @@ import {AccessibleRoutingPointsFinder} from './AccessibleRoutingPointsFinder';
 import {SheetEvent} from './SheetEvent';
 import {Entity} from './Entity';
 import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
+import {ConnectorPathBuilder} from './ConnectorPathBuilder';
 import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
 import {DoubleTapDetector} from './DoubleTapDetector';
 import {Rectangle} from './Rectangle';
@@ -65,7 +66,7 @@ function Sheet(_sheetDomElement, _window) {
     var currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     var currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-    var currentPointVisiblityMap = null;
+    var currentPointVisibilityMap = null;
 
     var connectorRefreshBufferTime = 6.94;
     var useTranslate3d = false; // better performance w/o it
@@ -119,17 +120,24 @@ function Sheet(_sheetDomElement, _window) {
     var connectorRefreshStartTime = null;
     var connectorRefreshTimeout = null;
 
+
     // Setup ConnectorRoutingWorker
     const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
     
-    /*const connectorCompleteComputeWorker = new Worker(workerUrl);
-    connectorCompleteComputeWorker.onmessage = function(_msg) {
-
-    };*/
-
     const connectorRoutingWorker = new Worker(workerUrl);
+
+    const convertArrayBufferToFloat64Array = function(_ab) {
+        return new Float64Array(_ab);
+    };
+
     connectorRoutingWorker.onmessage = function(_msg) {
         const connectorsRefreshTimeT1 = new Date();
+
+        currentPointVisibilityMap = new PointVisibilityMap(
+            new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPoints)),
+            new LineSet(convertArrayBufferToFloat64Array(_msg.data.boundaryLines)),
+            _msg.data.pointVisibilityMapData
+        );
 
         const connectorDescriptors = _msg.data.connectorDescriptors;
         const getConnectorDescriptorById = function(_id) {
@@ -150,6 +158,7 @@ function Sheet(_sheetDomElement, _window) {
                 emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
             }
         });        
+        
 
         metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
 
@@ -161,13 +170,6 @@ function Sheet(_sheetDomElement, _window) {
 
         debugMetricsPanel.refresh(metrics);
     };    
-
-    /**
-     * @returns {PointVisibilityMap}
-     */
-    this.getCurrentPointVisibilityMap = function() {
-        return currentPointVisiblityMap;
-    };
 
     /**
      * @param {Grid} _grid
@@ -243,6 +245,15 @@ function Sheet(_sheetDomElement, _window) {
 
         return new LineSet(boundaryLines);
     };    
+
+    const refreshAllConnectorsFast = function() {
+        if(currentPointVisibilityMap === null) {
+            return;
+        }
+
+        const pathBuilder = new ConnectorPathBuilder(objectConnectors, getConnectorRoutingPointsAroundAnchor(), currentPointVisibilityMap);
+        pathBuilder.refreshPaths();
+    };
 
     const refreshAllConnectorsInternal = function() {
         const executionTimeT1 = new Date();
