@@ -95,6 +95,7 @@ const processRequestQueue = function() {
     );
     metrics.pointVisibilityMapCreationTime = (new Date()) - pointVisibilityMapCreationTimeT1;
 
+    const pathComputationTimeT1 = new Date();
     connectorDescriptors.forEach(function(_cd) {
         const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
 
@@ -103,6 +104,7 @@ const processRequestQueue = function() {
         _cd.svgPath = pathData.svgPath;
         _cd.pointsInPath = pointsInPathPointSet.toFloat64Array().buffer;
     });
+    metrics.allPathsComputationTime = (new Date()) - pathComputationTimeT1;
     
     metrics.numRoutingPoints = routingPointsSet.count();
     metrics.numBoundaryLines = boundaryLinesSet.count();
@@ -110,8 +112,10 @@ const processRequestQueue = function() {
 
     postMessage(
         {
-            "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
+            "routingPoints": lastRequest.routingPoints,
+            "boundaryLines": lastRequest.boundaryLines,
             "connectorDescriptors": connectorDescriptors,
+            "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
             "metrics": metrics
         }
     );

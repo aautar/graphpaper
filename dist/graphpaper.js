@@ -876,6 +876,7 @@ var GraphPaper = (function (exports) {
             <p>connectorRoutingWorker.executionTime = ${_metrics.connectorRoutingWorker.executionTime}</p>            
             <p>-- connectorRoutingWorker.msgDecodeTime = ${_metrics.connectorRoutingWorker.msgDecodeTime}</p>
             <p>-- connectorRoutingWorker.pointVisibilityMapCreationTime = ${_metrics.connectorRoutingWorker.pointVisibilityMapCreationTime}</p>
+            <p>-- connectorRoutingWorker.allPathsComputationTime = ${_metrics.connectorRoutingWorker.allPathsComputationTime}</p>
             <p>-- connectorRoutingWorker.numRoutingPoints = ${_metrics.connectorRoutingWorker.numRoutingPoints}</p>
             <p>-- connectorRoutingWorker.numBoundaryLines = ${_metrics.connectorRoutingWorker.numBoundaryLines}</p>
             <p>connectorsRefreshTime = ${_metrics.connectorsRefreshTime}</p>
@@ -1531,13 +1532,14 @@ var GraphPaper = (function (exports) {
      * 
      * @param {PointSet} _freePoints
      * @param {LineSet} _boundaryLines
+     * @param {Array|undefined} _precomputedPointToVisibleSet
      */
-    function PointVisibilityMap(_freePoints, _boundaryLines) {
+    function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisibleSet) {
         const self = this;
 
         const boundaryLinesArr = _boundaryLines.toArray();
         const freePointsArr = _freePoints.toArray();
-        const pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
+        let pointToVisibleSet = null;
 
         /**
          * @param {Line} _theLine
@@ -1591,59 +1593,64 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {Point} _currentPoint 
+         * @param {Number} _currentPointIndex
          * @returns {Point[]}
          */
-        const getVisiblePointsFrom = function(_currentPoint) {
-            for(let i=0; i<freePointsArr.length; i++) {
+        const getVisiblePointsRelativeTo = function(_pointIndex) {
+            return pointToVisibleSet[_pointIndex] || [];
+        };
 
-                if(freePointsArr[i].isEqual(_currentPoint)) {
-                    const visiblePointIndices = pointToVisibleSet[i];
-                    const visiblePoints = [];
-                    visiblePointIndices.forEach((_vpIdx) => {
-                        visiblePoints.push(freePointsArr[_vpIdx]);
-                    });
-
-                    return visiblePoints;
+        /**
+         * 
+         * @param {Point} _needle 
+         * @param {Point[]} _haystack 
+         */
+        const isPointInArray = function(_needle, _haystack) {
+            for(let i=0; i<_haystack.length; i++) {
+                if(_needle.isEqual(_haystack[i])) {
+                    return true;
                 }
             }
 
-            return [];
+            return false;
         };
 
         /**
          * 
          * @param {Number} _currentRouteLength 
          * @param {Point[]} _pointsInRoute 
-         * @param {Point} _currentPoint 
+         * @param {Number} _currentPointIndex 
          * @param {Point} _endPoint 
          * @returns {Object|null}
          */
-        const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPoint, _endPoint) {
-            var visiblePoints = getVisiblePointsFrom(_currentPoint);       
+        const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointIndex, _endPoint) {
+            const currentPoint = freePointsArr[_currentPointIndex];
+            const visiblePointIndices = getVisiblePointsRelativeTo(_currentPointIndex);
             var curMinCost = Number.MAX_SAFE_INTEGER;
             var visiblePointWithMinCost = null;
+            var visiblePointWithMinCostIndex = null;
 
-            visiblePoints.forEach(function(_vp) {
+            for(let i=0; i<visiblePointIndices.length; i++) {
+                const visiblePt = freePointsArr[visiblePointIndices[i]];
+
                 // ignore point if it's already in the route
-                for(let i=0; i<_pointsInRoute.length; i++) {
-                    if(_vp.isEqual(_pointsInRoute[i])) {
-                        return; // point already in route, try another
-                    }
+                if(isPointInArray(visiblePt, _pointsInRoute)) {
+                    continue;
                 }
 
                 // g(n) = length/cost of _startPoint to _vp + _currentRouteLength
-                const gn = (new Line(_currentPoint, _vp)).getLength() + _currentRouteLength;
+                const gn = (new Line(currentPoint, visiblePt)).getLength() + _currentRouteLength;
 
                 // h(n) = length/cost of _vp to _endPoint
-                const hn = (new Line(_vp, _endPoint)).getLength();
+                const hn = (new Line(visiblePt, _endPoint)).getLength();
 
                 // see if this is the new min
                 if((gn + hn) < curMinCost) {
                     curMinCost = gn + hn;
-                    visiblePointWithMinCost = _vp;
+                    visiblePointWithMinCost = visiblePt;
+                    visiblePointWithMinCostIndex = visiblePointIndices[i];
                 }
-            });
+            }
 
             if(curMinCost === Number.MAX_SAFE_INTEGER) {
                 return null;
@@ -1651,7 +1658,8 @@ var GraphPaper = (function (exports) {
 
             return {
                 "cost": curMinCost,
-                "point": visiblePointWithMinCost
+                "point": visiblePointWithMinCost,
+                "pointIndex": visiblePointWithMinCostIndex
             };
         };
 
@@ -1704,6 +1712,29 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * @param {Point} _point
+         * @returns {Point|null}
+         */
+        this.findVisiblePointIndexClosestTo = function(_point) {
+            var resultPointIndex = null;
+            var currentMaxLength = Number.MAX_SAFE_INTEGER;
+
+            for(let i=0; i<freePointsArr.length; i++) {
+                const freePt = freePointsArr[i];
+
+                const lineOfSight = new Line(_point, freePt);
+                const lineOfSightLength = lineOfSight.getLength();
+
+                if(lineOfSightLength < currentMaxLength && !doesLineIntersectAnyBoundaryLines(lineOfSight)) {
+                    resultPointIndex = i;
+                    currentMaxLength = lineOfSightLength;
+                }
+            }
+            
+            return resultPointIndex;
+        };    
+
+        /**
          * @param {Point} _startPoint
          * @param {Point} _endPoint
          * @param {Boolean} _optimizeRoute
@@ -1717,18 +1748,18 @@ var GraphPaper = (function (exports) {
             }
 
             // find closest visible point 
-            const firstRoutingPoint = self.findVisiblePointClosestTo(_startPoint);
-            if(firstRoutingPoint === null) {
+            const firstRoutingPointIndex = self.findVisiblePointIndexClosestTo(_startPoint);
+            if(firstRoutingPointIndex === null) {
                 return new PointSet();
             }
 
             var currentRouteLen = 0;
+            const firstRoutingPoint = freePointsArr[firstRoutingPointIndex];
             const pointsInRoute = [firstRoutingPoint];
-            var currentPoint = firstRoutingPoint;
+            var currentPointIndex = firstRoutingPointIndex;
             while(true) {
-                const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPoint, _endPoint);
+                const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointIndex, _endPoint);
                 if(routeSegment === null) {
-
                     // Is there unobstructed line to endpoint? 
                     // If not, failed to find route
                     const lastSegmentToEndpoint = new Line(pointsInRoute[pointsInRoute.length-1], _endPoint);
@@ -1739,11 +1770,17 @@ var GraphPaper = (function (exports) {
                     break;
                 }
 
-                currentRouteLen += (new Line(currentPoint, routeSegment.point)).getLength();
-                pointsInRoute.push(routeSegment.point);
-                currentPoint = routeSegment.point;
+                // update cur path length
+                currentRouteLen += (new Line(freePointsArr[currentPointIndex], routeSegment.point)).getLength();
 
-                if((new Line(currentPoint, _endPoint).getLength()) < 1.0) {
+                // add new point to path
+                pointsInRoute.push(routeSegment.point);
+
+                // update current point index
+                currentPointIndex = routeSegment.pointIndex;
+
+                // check if we're done
+                if((new Line(freePointsArr[currentPointIndex], _endPoint).getLength()) < 1.0) {
                     break;
                 }
             }
@@ -1753,10 +1790,14 @@ var GraphPaper = (function (exports) {
             }
 
             return new PointSet(pointsInRoute);
-
         };
 
-        computePointsVisibility();
+        if(_precomputedPointToVisibleSet) {
+            pointToVisibleSet = _precomputedPointToVisibleSet;
+        } else {
+            pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
+            computePointsVisibility();        
+        }
     }
 
     const GRID_STYLE = {
@@ -1834,11 +1875,11 @@ var GraphPaper = (function (exports) {
 
   var PointVisibilityMapRouteOptimizer={optimize:function optimize(a,b){for(var c=0,d=a.length-1;!(1>=d-c&&(c++,d=a.length-1,c>=a.length-2));)b(a[c],a[d])?(a.splice(c+1,d-c-1),d=a.length-1):d--;}};
 
-  function PointVisibilityMap(a,b){var c=this,d=b.toArray(),e=a.toArray(),f=Array(a.count()),g=function doesLineIntersectAnyBoundaryLines(a){for(var c,e=0;e<d.length;e++)if(c=d[e].computeIntersectionType(a),c===LINE_INTERSECTION_TYPE.LINESEG)return !0;return !1},h=function computePointsVisibility(){for(var a=0;a<e.length;a++)f[a]=[];for(var b=0;b<e.length;b++)for(var c,d=b+1;d<e.length;d++)c=new Line(e[b],e[d]),g(c)||(f[b].push(d),f[d].push(b));},i=function arePointsVisibleToEachOther(a,b){for(var g=0;g<e.length;g++)if(e[g].isEqual(a))for(var c=f[g],d=0;d<c.length;d++)if(e[c[d]].isEqual(b))return !0;return !1},j=function getVisiblePointsFrom(a){for(var c=0;c<e.length;c++)if(e[c].isEqual(a)){var b=function(){var a=f[c],b=[];return a.forEach(function(a){b.push(e[a]);}),{v:b}}();if("object"==typeof b)return b.v}return []},k=function routeToEndpoint(a,b,c,d){var e=j(c),f=Number.MAX_SAFE_INTEGER,g=null;return e.forEach(function(e){for(var k=0;k<b.length;k++)if(e.isEqual(b[k]))return;var h=new Line(c,e).getLength()+a,j=new Line(e,d).getLength();h+j<f&&(f=h+j,g=e);}),f===Number.MAX_SAFE_INTEGER?null:{cost:f,point:g}};this.getPointToVisibleSetData=function(){return f},this.findPointClosestTo=function(a){var b=null,c=Number.MAX_SAFE_INTEGER;return e.forEach(function(d){var e=new Line(a,d);e.getLength()<c&&(b=d,c=e.getLength());}),b},this.findVisiblePointClosestTo=function(a){var b=null,c=Number.MAX_SAFE_INTEGER;return e.forEach(function(d){var e=new Line(a,d),f=e.getLength();f<c&&!g(e)&&(b=d,c=f);}),b},this.computeRoute=function(a,b,d){if(null===a||null===b)return new PointSet;var e=c.findVisiblePointClosestTo(a);if(null===e)return new PointSet;for(var f,h=0,j=[e],l=e;!0;){if(f=k(h,j,l,b),null===f){var m=new Line(j[j.length-1],b);if(g(m))return new PointSet;break}if(h+=new Line(l,f.point).getLength(),j.push(f.point),l=f.point,1>new Line(l,b).getLength())break}return d&&PointVisibilityMapRouteOptimizer.optimize(j,i),new PointSet(j)},h();}
+  function PointVisibilityMap(a,b,c){var d=this,e=b.toArray(),f=a.toArray(),g=null,h=function doesLineIntersectAnyBoundaryLines(a){for(var c,d=0;d<e.length;d++)if(c=e[d].computeIntersectionType(a),c===LINE_INTERSECTION_TYPE.LINESEG)return !0;return !1},i=function computePointsVisibility(){for(var a=0;a<f.length;a++)g[a]=[];for(var b=0;b<f.length;b++)for(var c,d=b+1;d<f.length;d++)c=new Line(f[b],f[d]),h(c)||(g[b].push(d),g[d].push(b));},j=function arePointsVisibleToEachOther(a,b){for(var e=0;e<f.length;e++)if(f[e].isEqual(a))for(var c=g[e],d=0;d<c.length;d++)if(f[c[d]].isEqual(b))return !0;return !1},k=function getVisiblePointsRelativeTo(a){return g[a]||[]},l=function isPointInArray(a,b){for(var c=0;c<b.length;c++)if(a.isEqual(b[c]))return !0;return !1},m=function routeToEndpoint(a,b,c,d){for(var e,g=f[c],h=k(c),j=Number.MAX_SAFE_INTEGER,m=null,n=null,o=0;o<h.length;o++)if(e=f[h[o]],!l(e,b)){var p=new Line(g,e).getLength()+a,q=new Line(e,d).getLength();p+q<j&&(j=p+q,m=e,n=h[o]);}return j===Number.MAX_SAFE_INTEGER?null:{cost:j,point:m,pointIndex:n}};this.getPointToVisibleSetData=function(){return g},this.findPointClosestTo=function(a){var b=null,c=Number.MAX_SAFE_INTEGER;return f.forEach(function(d){var e=new Line(a,d);e.getLength()<c&&(b=d,c=e.getLength());}),b},this.findVisiblePointClosestTo=function(a){var b=null,c=Number.MAX_SAFE_INTEGER;return f.forEach(function(d){var e=new Line(a,d),f=e.getLength();f<c&&!h(e)&&(b=d,c=f);}),b},this.findVisiblePointIndexClosestTo=function(a){for(var b=null,c=Number.MAX_SAFE_INTEGER,d=0;d<f.length;d++){var e=f[d],g=new Line(a,e),j=g.getLength();j<c&&!h(g)&&(b=d,c=j);}return b},this.computeRoute=function(a,b,c){if(null===a||null===b)return new PointSet;var e=d.findVisiblePointIndexClosestTo(a);if(null===e)return new PointSet;for(var g,i=0,k=f[e],l=[k],n=e;!0;){if(g=m(i,l,n,b),null===g){var o=new Line(l[l.length-1],b);if(h(o))return new PointSet;break}if(i+=new Line(f[n],g.point).getLength(),l.push(g.point),n=g.pointIndex,1>new Line(f[n],b).getLength())break}return c&&PointVisibilityMapRouteOptimizer.optimize(l,j),new PointSet(l)},c?g=c:(g=Array(a.count()),i());}
 
   var SvgPathBuilder={pointToLineTo:function pointToLineTo(a,b){return 0===b?"M"+a.getX()+" "+a.getY():"L"+a.getX()+" "+a.getY()},pointTripletToTesselatedCurvePoints:function pointTripletToTesselatedCurvePoints(a,b){if(3!==a.length)throw new Error("_points must be array of exactly 3 points");var c=a[1],d=new Line(a[0],a[1]),e=new Line(a[1],a[2]),f=d.createShortenedLine(0,.5*b),g=e.createShortenedLine(.5*b,0);return [f.getStartPoint(),f.getEndPoint(),g.getStartPoint(),g.getEndPoint()]},pointsToPath:function pointsToPath(a,b){b=b||0;var c=[];if(0<b){for(var h=0;3<=a.length;){var d=a.shift(),e=a.shift(),f=a.shift(),g=SvgPathBuilder.pointTripletToTesselatedCurvePoints([d,e,f],b);a.unshift(g[3]),a.unshift(g[2]);for(var k=0;k<g.length-2;k++)c.push(SvgPathBuilder.pointToLineTo(g[k],h++));}for(;0<a.length;){var j=a.shift();c.push(SvgPathBuilder.pointToLineTo(j,ptIdx++));}}else for(var l,m=0;m<a.length;m++)l=a[m],c.push(SvgPathBuilder.pointToLineTo(l,m));return c.join(" ")}};
 
-  var computeConnectorPath=function computeConnectorPath(a,b,c){var d=Point.fromArray(a.anchor_start_centroid_arr),e=Point.fromArray(a.anchor_end_centroid_arr),f=a.marker_start_size,g=a.marker_end_size,h=a.curvature_px,i=a.allow_route_optimization,j=b.findDistanceToPointClosestTo(d),k=b.findPointsCloseTo(d,j).findPointClosestTo(e),l=b.findPointsCloseTo(e,j).findPointClosestTo(d),m=c.computeRoute(k,l,i),n=m.toArray(),o=d,p=e;if(0<f&&1<=n.length){var r=new Line(n[0],d).createShortenedLine(0,f);o=r.getEndPoint();}if(0<g&&1<=n.length){var s=new Line(n[n.length-1],e).createShortenedLine(0,g);p=s.getEndPoint();}var q=[o].concat(_toConsumableArray(n),[p]);return {svgPath:SvgPathBuilder.pointsToPath(q,h),pointsInPath:q}},convertArrayBufferToFloat64Array=function convertArrayBufferToFloat64Array(a){return new Float64Array(a)},requestQueue=[],processRequestQueue=function processRequestQueue(){if(0!==requestQueue.length){var a=requestQueue.pop();requestQueue.length=0;var b={overallTime:null},c=new Date,d=a.gridSize,e=a.connectorDescriptors,f=new Date,g=new PointSet(convertArrayBufferToFloat64Array(a.routingPoints)),h=new LineSet(convertArrayBufferToFloat64Array(a.boundaryLines)),i=new PointSet(convertArrayBufferToFloat64Array(a.routingPointsAroundAnchor));b.msgDecodeTime=new Date-f;var j=new Date,k=new PointVisibilityMap(g,h);b.pointVisibilityMapCreationTime=new Date-j,e.forEach(function(a){var b=computeConnectorPath(a,i,k),c=new PointSet(b.pointsInPath);a.svgPath=b.svgPath,a.pointsInPath=c.toFloat64Array().buffer;}),b.numRoutingPoints=g.count(),b.numBoundaryLines=h.count(),b.overallTime=new Date-c,postMessage({pointVisibilityMapData:k.getPointToVisibleSetData(),connectorDescriptors:e,metrics:b});}};setInterval(processRequestQueue,6),onmessage=function onmessage(a){requestQueue.push(a.data);};
+  var computeConnectorPath=function computeConnectorPath(a,b,c){var d=Point.fromArray(a.anchor_start_centroid_arr),e=Point.fromArray(a.anchor_end_centroid_arr),f=a.marker_start_size,g=a.marker_end_size,h=a.curvature_px,i=a.allow_route_optimization,j=b.findDistanceToPointClosestTo(d),k=b.findPointsCloseTo(d,j).findPointClosestTo(e),l=b.findPointsCloseTo(e,j).findPointClosestTo(d),m=c.computeRoute(k,l,i),n=m.toArray(),o=d,p=e;if(0<f&&1<=n.length){var r=new Line(n[0],d).createShortenedLine(0,f);o=r.getEndPoint();}if(0<g&&1<=n.length){var s=new Line(n[n.length-1],e).createShortenedLine(0,g);p=s.getEndPoint();}var q=[o].concat(_toConsumableArray(n),[p]);return {svgPath:SvgPathBuilder.pointsToPath(q,h),pointsInPath:q}},convertArrayBufferToFloat64Array=function convertArrayBufferToFloat64Array(a){return new Float64Array(a)},requestQueue=[],processRequestQueue=function processRequestQueue(){if(0!==requestQueue.length){var a=requestQueue.pop();requestQueue.length=0;var b={overallTime:null},c=new Date,d=a.gridSize,e=a.connectorDescriptors,f=new Date,g=new PointSet(convertArrayBufferToFloat64Array(a.routingPoints)),h=new LineSet(convertArrayBufferToFloat64Array(a.boundaryLines)),i=new PointSet(convertArrayBufferToFloat64Array(a.routingPointsAroundAnchor));b.msgDecodeTime=new Date-f;var j=new Date,k=new PointVisibilityMap(g,h);b.pointVisibilityMapCreationTime=new Date-j;var l=new Date;e.forEach(function(a){var b=computeConnectorPath(a,i,k),c=new PointSet(b.pointsInPath);a.svgPath=b.svgPath,a.pointsInPath=c.toFloat64Array().buffer;}),b.allPathsComputationTime=new Date-l,b.numRoutingPoints=g.count(),b.numBoundaryLines=h.count(),b.overallTime=new Date-c,postMessage({routingPoints:a.routingPoints,boundaryLines:a.boundaryLines,connectorDescriptors:e,pointVisibilityMapData:k.getPointToVisibleSetData(),metrics:b});}};setInterval(processRequestQueue,6),onmessage=function onmessage(a){requestQueue.push(a.data);};
 
 }());
 `;
@@ -1891,7 +1932,7 @@ var GraphPaper = (function (exports) {
         var currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         var currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-        var currentPointVisiblityMap = null;
+        var currentPointVisibilityMap = null;
 
         var connectorRefreshBufferTime = 6.94;
         const sheetEntities = [];
@@ -1918,7 +1959,8 @@ var GraphPaper = (function (exports) {
                 numRoutingPoints: null,
                 numBoundaryLines: null,
                 msgDecodeTime: null,
-                pointVisibilityMapCreationTime: null
+                pointVisibilityMapCreationTime: null,
+                allPathsComputationTime: null
             },
             refreshAllConnectorsInternal: {
                 executionTime: null
@@ -1944,17 +1986,24 @@ var GraphPaper = (function (exports) {
         var connectorRefreshStartTime = null;
         var connectorRefreshTimeout = null;
 
+
         // Setup ConnectorRoutingWorker
         const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
         
-        /*const connectorCompleteComputeWorker = new Worker(workerUrl);
-        connectorCompleteComputeWorker.onmessage = function(_msg) {
-
-        };*/
-
         const connectorRoutingWorker = new Worker(workerUrl);
+
+        const convertArrayBufferToFloat64Array = function(_ab) {
+            return new Float64Array(_ab);
+        };
+
         connectorRoutingWorker.onmessage = function(_msg) {
             const connectorsRefreshTimeT1 = new Date();
+
+            currentPointVisibilityMap = new PointVisibilityMap(
+                new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPoints)),
+                new LineSet(convertArrayBufferToFloat64Array(_msg.data.boundaryLines)),
+                _msg.data.pointVisibilityMapData
+            );
 
             const connectorDescriptors = _msg.data.connectorDescriptors;
             const getConnectorDescriptorById = function(_id) {
@@ -1975,6 +2024,7 @@ var GraphPaper = (function (exports) {
                     emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
                 }
             });        
+            
 
             metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
 
@@ -1983,16 +2033,10 @@ var GraphPaper = (function (exports) {
             metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
             metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
             metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
+            metrics.connectorRoutingWorker.allPathsComputationTime = _msg.data.metrics.allPathsComputationTime;
 
             debugMetricsPanel.refresh(metrics);
         };    
-
-        /**
-         * @returns {PointVisibilityMap}
-         */
-        this.getCurrentPointVisibilityMap = function() {
-            return currentPointVisiblityMap;
-        };
 
         /**
          * @param {Grid} _grid

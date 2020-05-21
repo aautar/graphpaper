@@ -37,6 +37,7 @@ const DebugMetricsPanel = function(_window) {
             <p>connectorRoutingWorker.executionTime = ${_metrics.connectorRoutingWorker.executionTime}</p>            
             <p>-- connectorRoutingWorker.msgDecodeTime = ${_metrics.connectorRoutingWorker.msgDecodeTime}</p>
             <p>-- connectorRoutingWorker.pointVisibilityMapCreationTime = ${_metrics.connectorRoutingWorker.pointVisibilityMapCreationTime}</p>
+            <p>-- connectorRoutingWorker.allPathsComputationTime = ${_metrics.connectorRoutingWorker.allPathsComputationTime}</p>
             <p>-- connectorRoutingWorker.numRoutingPoints = ${_metrics.connectorRoutingWorker.numRoutingPoints}</p>
             <p>-- connectorRoutingWorker.numBoundaryLines = ${_metrics.connectorRoutingWorker.numBoundaryLines}</p>
             <p>connectorsRefreshTime = ${_metrics.connectorsRefreshTime}</p>

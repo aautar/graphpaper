@@ -65,7 +65,7 @@ function Sheet(_sheetDomElement, _window) {
     var currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     var currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-    var currentPointVisiblityMap = null;
+    var currentPointVisibilityMap = null;
 
     var connectorRefreshBufferTime = 6.94;
     var useTranslate3d = false; // better performance w/o it
@@ -93,7 +93,8 @@ function Sheet(_sheetDomElement, _window) {
             numRoutingPoints: null,
             numBoundaryLines: null,
             msgDecodeTime: null,
-            pointVisibilityMapCreationTime: null
+            pointVisibilityMapCreationTime: null,
+            allPathsComputationTime: null
         },
         refreshAllConnectorsInternal: {
             executionTime: null
@@ -119,17 +120,24 @@ function Sheet(_sheetDomElement, _window) {
     var connectorRefreshStartTime = null;
     var connectorRefreshTimeout = null;
 
+
     // Setup ConnectorRoutingWorker
     const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
     
-    /*const connectorCompleteComputeWorker = new Worker(workerUrl);
-    connectorCompleteComputeWorker.onmessage = function(_msg) {
-
-    };*/
-
     const connectorRoutingWorker = new Worker(workerUrl);
+
+    const convertArrayBufferToFloat64Array = function(_ab) {
+        return new Float64Array(_ab);
+    };
+
     connectorRoutingWorker.onmessage = function(_msg) {
         const connectorsRefreshTimeT1 = new Date();
+
+        currentPointVisibilityMap = new PointVisibilityMap(
+            new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPoints)),
+            new LineSet(convertArrayBufferToFloat64Array(_msg.data.boundaryLines)),
+            _msg.data.pointVisibilityMapData
+        );
 
         const connectorDescriptors = _msg.data.connectorDescriptors;
         const getConnectorDescriptorById = function(_id) {
@@ -150,6 +158,7 @@ function Sheet(_sheetDomElement, _window) {
                 emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
             }
         });        
+        
 
         metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
 
@@ -158,16 +167,10 @@ function Sheet(_sheetDomElement, _window) {
         metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
         metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
         metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
+        metrics.connectorRoutingWorker.allPathsComputationTime = _msg.data.metrics.allPathsComputationTime;
 
         debugMetricsPanel.refresh(metrics);
     };    
-
-    /**
-     * @returns {PointVisibilityMap}
-     */
-    this.getCurrentPointVisibilityMap = function() {
-        return currentPointVisiblityMap;
-    };
 
     /**
      * @param {Grid} _grid

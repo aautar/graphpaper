@@ -17,6 +17,7 @@
     "rollup-plugin-babel": "^4.3.3"
   },
   "scripts": {
+    "perf": "./node_modules/.bin/jasmine --config=spec/support/jasmine.perf.json",
     "test": "./node_modules/.bin/jasmine",
     "build": "rollup -c"
   }
