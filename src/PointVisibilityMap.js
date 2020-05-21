@@ -270,7 +270,6 @@ function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisi
         }
 
         return new PointSet(pointsInRoute);
-
     };
 
     if(_precomputedPointToVisibleSet) {
