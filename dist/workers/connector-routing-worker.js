@@ -586,7 +586,7 @@
          * @returns {Point[]}
          */
         const getVisiblePointsRelativeTo = function(_pointIndex) {
-            return pointToVisibleSet[_pointIndex];
+            return pointToVisibleSet[_pointIndex] || [];
         };
 
         /**
