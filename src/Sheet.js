@@ -3,7 +3,6 @@ import {AccessibleRoutingPointsFinder} from './AccessibleRoutingPointsFinder';
 import {SheetEvent} from './SheetEvent';
 import {Entity} from './Entity';
 import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
-import {ConnectorPathBuilder} from './ConnectorPathBuilder';
 import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
 import {DoubleTapDetector} from './DoubleTapDetector';
 import {Rectangle} from './Rectangle';
@@ -247,15 +246,6 @@ function Sheet(_sheetDomElement, _window) {
 
         return new LineSet(boundaryLines);
     };    
-
-    const refreshAllConnectorsFast = function() {
-        if(currentPointVisibilityMap === null) {
-            return;
-        }
-
-        const pathBuilder = new ConnectorPathBuilder(objectConnectors, getConnectorRoutingPointsAroundAnchor(), currentPointVisibilityMap);
-        pathBuilder.refreshPaths();
-    };
 
     const refreshAllConnectorsInternal = function() {
         const executionTimeT1 = new Date();

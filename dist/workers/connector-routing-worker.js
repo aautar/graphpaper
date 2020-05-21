@@ -779,7 +779,6 @@
             }
 
             return new PointSet(pointsInRoute);
-
         };
 
         if(_precomputedPointToVisibleSet) {

@@ -4,6 +4,8 @@ import {PointSet} from './PointSet';
 import {SvgPathBuilder} from './SvgPathBuilder';
 
 /**
+ * Note sure if this is necessary
+ * 
  * @param {Connector[]} _connectors
  * @param {PointSet} _routingPointsAroundAnchor
  * @param {PointVisibilityMap} _pointVisibilityMap
