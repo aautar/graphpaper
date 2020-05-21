@@ -74,9 +74,23 @@ function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisi
      * @param {Number} _currentPointIndex
      * @returns {Point[]}
      */
-    const getVisiblePointsFrom = function(_currentPointIndex) {
-        const visiblePointIndices = pointToVisibleSet[_currentPointIndex];
-        return visiblePointIndices;
+    const getVisiblePointsRelativeTo = function(_pointIndex) {
+        return pointToVisibleSet[_pointIndex];
+    };
+
+    /**
+     * 
+     * @param {Point} _needle 
+     * @param {Point[]} _haystack 
+     */
+    const isPointInArray = function(_needle, _haystack) {
+        for(let i=0; i<_haystack.length; i++) {
+            if(_needle.isEqual(_haystack[i])) {
+                return true;
+            }
+        }
+
+        return false;
     };
 
     /**
@@ -88,38 +102,30 @@ function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisi
      * @returns {Object|null}
      */
     const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointIndex, _endPoint) {
-        const visiblePointIndices = pointToVisibleSet[_currentPointIndex] || [];       
         const currentPoint = freePointsArr[_currentPointIndex];
+        const visiblePointIndices = getVisiblePointsRelativeTo(_currentPointIndex);
         var curMinCost = Number.MAX_SAFE_INTEGER;
         var visiblePointWithMinCost = null;
         var visiblePointWithMinCostIndex = null;
 
         for(let i=0; i<visiblePointIndices.length; i++) {
-            const _vp = freePointsArr[visiblePointIndices[i]];
+            const visiblePt = freePointsArr[visiblePointIndices[i]];
 
             // ignore point if it's already in the route
-            let pointAlreadyInRoute = false;
-            for(let i=0; i<_pointsInRoute.length; i++) {
-                if(_vp.isEqual(_pointsInRoute[i])) {
-                    pointAlreadyInRoute = true;
-                    continue; // point already in route, try another
-                }
-            }
-
-            if(pointAlreadyInRoute) {
+            if(isPointInArray(visiblePt, _pointsInRoute)) {
                 continue;
             }
 
             // g(n) = length/cost of _startPoint to _vp + _currentRouteLength
-            const gn = (new Line(currentPoint, _vp)).getLength() + _currentRouteLength;
+            const gn = (new Line(currentPoint, visiblePt)).getLength() + _currentRouteLength;
 
             // h(n) = length/cost of _vp to _endPoint
-            const hn = (new Line(_vp, _endPoint)).getLength();
+            const hn = (new Line(visiblePt, _endPoint)).getLength();
 
             // see if this is the new min
             if((gn + hn) < curMinCost) {
                 curMinCost = gn + hn;
-                visiblePointWithMinCost = _vp;
+                visiblePointWithMinCost = visiblePt;
                 visiblePointWithMinCostIndex = visiblePointIndices[i];
             }
         }
@@ -234,7 +240,6 @@ function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisi
         while(true) {
             const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointIndex, _endPoint);
             if(routeSegment === null) {
-
                 // Is there unobstructed line to endpoint? 
                 // If not, failed to find route
                 const lastSegmentToEndpoint = new Line(pointsInRoute[pointsInRoute.length-1], _endPoint);
@@ -245,10 +250,16 @@ function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisi
                 break;
             }
 
+            // update cur path length
             currentRouteLen += (new Line(freePointsArr[currentPointIndex], routeSegment.point)).getLength();
+
+            // add new point to path
             pointsInRoute.push(routeSegment.point);
+
+            // update current point index
             currentPointIndex = routeSegment.pointIndex;
 
+            // check if we're done
             if((new Line(freePointsArr[currentPointIndex], _endPoint).getLength()) < 1.0) {
                 break;
             }
