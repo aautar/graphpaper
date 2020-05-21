@@ -94,7 +94,8 @@ function Sheet(_sheetDomElement, _window) {
             numRoutingPoints: null,
             numBoundaryLines: null,
             msgDecodeTime: null,
-            pointVisibilityMapCreationTime: null
+            pointVisibilityMapCreationTime: null,
+            allPathsComputationTime: null
         },
         refreshAllConnectorsInternal: {
             executionTime: null
@@ -167,6 +168,7 @@ function Sheet(_sheetDomElement, _window) {
         metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
         metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
         metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
+        metrics.connectorRoutingWorker.allPathsComputationTime = _msg.data.metrics.allPathsComputationTime;
 
         debugMetricsPanel.refresh(metrics);
     };    

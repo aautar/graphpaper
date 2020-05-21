@@ -976,6 +976,7 @@
         );
         metrics.pointVisibilityMapCreationTime = (new Date()) - pointVisibilityMapCreationTimeT1;
 
+        const pathComputationTimeT1 = new Date();
         connectorDescriptors.forEach(function(_cd) {
             const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
 
@@ -984,6 +985,7 @@
             _cd.svgPath = pathData.svgPath;
             _cd.pointsInPath = pointsInPathPointSet.toFloat64Array().buffer;
         });
+        metrics.allPathsComputationTime = (new Date()) - pathComputationTimeT1;
         
         metrics.numRoutingPoints = routingPointsSet.count();
         metrics.numBoundaryLines = boundaryLinesSet.count();
