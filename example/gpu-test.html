@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>GraphPaper</title>
+    <script src="../node_modules/gpu.js/dist/gpu-browser.min.js" type="text/javascript"></script>
+    <script src="../dist/graphpaper.js" type="text/javascript"></script>
+    <link href="common.css" rel="stylesheet">
+</head>
+
+<body>
+    
+    <div id="paper"></div>
+
+
+    <script type="text/javascript">
+	
+        const canvas = new GraphPaper.Sheet(
+            document.getElementById('paper'), 
+            window
+        );
+
+        canvas.initInteractionHandlers();
+        canvas.initTransformationHandlers();
+
+        canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
+            return new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
+        });
+
+        for(let i=1; i<=60; i++) {
+
+            const elem = document.createElement('div');
+            elem.innerHTML = `
+                <div id="obj${i}" class="obj">
+                    <div id="translateHandle${i}" class="translateHandle"></div>
+                    <div id="resizeHandle${i}"  class="resizeHandle"></div>
+                    <div id="connectorAnchor${i}" class="connectorAnchor"></div>
+                </div>
+            `;
+            document.getElementById('paper').appendChild(elem);
+
+            const obj = new GraphPaper.Entity(
+                `obj${i}`, 
+                0, 
+                0, 
+                52, 
+                52, 
+                canvas,
+                document.getElementById(`obj${i}`), 
+                [document.getElementById(`translateHandle${i}`)],
+                [document.getElementById(`resizeHandle${i}`)]
+            );
+
+            obj.addInteractableConnectorAnchor(document.getElementById(`connectorAnchor${i}`));
+            obj.translate(100 + (i*50), 100);
+
+            canvas.addEntity(obj);
+        }
+
+        canvas.initDebugMetricsPanel();
+
+    </script>
+
+</body>
+
+</html>

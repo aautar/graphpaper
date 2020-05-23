@@ -5,6 +5,9 @@ import {PointVisibilityMap} from '../PointVisibilityMap';
 import {SvgPathBuilder} from '../SvgPathBuilder';
 import {Line} from '../Line';
 
+importScripts('http://dev.graphpaper.com/node_modules/gpu.js/dist/gpu-browser.min.js');
+const gpu = new GPU();
+
 /**
  * 
  * @param {Object} _connectorDescriptor
@@ -70,6 +73,12 @@ const processRequestQueue = function() {
         return;
     }
 
+    const kernel = gpu.createKernel(function(x) {
+        return x[this.thread.x % 3];
+    }).setOutput([100]);    
+
+    const c = kernel([1, 2, 3]);    
+
     // grab last request, toss the rest
     const lastRequest = requestQueue.pop();
     requestQueue.length = 0;
@@ -116,7 +125,8 @@ const processRequestQueue = function() {
             "boundaryLines": lastRequest.boundaryLines,
             "connectorDescriptors": connectorDescriptors,
             "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
-            "metrics": metrics
+            "metrics": metrics,
+            "c": c
         }
     );
 

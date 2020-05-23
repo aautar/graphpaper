@@ -169,6 +169,8 @@ function Sheet(_sheetDomElement, _window) {
         metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
         metrics.connectorRoutingWorker.allPathsComputationTime = _msg.data.metrics.allPathsComputationTime;
 
+        console.log(_msg.data.c);
+
         debugMetricsPanel.refresh(metrics);
     };    
 

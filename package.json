@@ -20,5 +20,8 @@
     "perf": "./node_modules/.bin/jasmine --config=spec/support/jasmine.perf.json",
     "test": "./node_modules/.bin/jasmine",
     "build": "rollup -c"
+  },
+  "dependencies": {
+    "gpu.js": "^2.9.4"
   }
 }
