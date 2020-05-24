@@ -26,39 +26,39 @@ describe("Cluster", function() {
         expect(c.getId()).toBe("cluster-id");
     });
 
-    it("returns object index when getObjectIndexById is called", function() {
+    it("returns object index when getEntityIndexById is called", function() {
         var c = new Cluster("cluster-id");
-        c.addObject(makeEntity("obj-id-1"));
-        c.addObject(makeEntity("obj-id-2"));
+        c.addEntity(makeEntity("obj-id-1"));
+        c.addEntity(makeEntity("obj-id-2"));
 
-        expect(c.getObjectIndexById("obj-id-2")).toBe(1);
+        expect(c.getEntityIndexById("obj-id-2")).toBe(1);
     });
 
-    it("returns object index when getObjectIndex is called", function() {
+    it("returns object index when getEntityIndex is called", function() {
         var c = new Cluster("cluster-id");
-        c.addObject(makeEntity("obj-id-1"));
+        c.addEntity(makeEntity("obj-id-1"));
 
         var targetObj = makeEntity("obj-id-2");
-        c.addObject(targetObj);
+        c.addEntity(targetObj);
 
-        expect(c.getObjectIndex(targetObj)).toBe(1);
+        expect(c.getEntityIndex(targetObj)).toBe(1);
     });    
 
     it("returns object IDs when getObjectIds is called", function() {
         var c = new Cluster("cluster-id");
-        c.addObject(makeEntity("obj-id-1"));
-        c.addObject(makeEntity("obj-id-2"));
+        c.addEntity(makeEntity("obj-id-1"));
+        c.addEntity(makeEntity("obj-id-2"));
 
-        expect(c.getObjectIds()).toEqual(["obj-id-1", "obj-id-2"]);
+        expect(c.getEntityIds()).toEqual(["obj-id-1", "obj-id-2"]);
     });
 
-    it("removes object when removeObject is called", function() {
+    it("removes entity when removeEntity is called", function() {
         var c = new Cluster("cluster-id");
-        c.addObject(makeEntity("obj-id-1"));
-        c.addObject(makeEntity("obj-id-2"));
+        c.addEntity(makeEntity("obj-id-1"));
+        c.addEntity(makeEntity("obj-id-2"));
 
-        expect(c.removeObjectById("obj-id-1")).toEqual(true);
-        expect(c.getObjectIds()).toEqual(["obj-id-2"]);
+        expect(c.removeEntityById("obj-id-1")).toEqual(true);
+        expect(c.getEntityIds()).toEqual(["obj-id-2"]);
     });    
 
 });

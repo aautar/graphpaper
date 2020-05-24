@@ -22,15 +22,15 @@ function Cluster(_id) {
      * @param {Entity} _obj
      * @returns {Number|null}
      */
-    this.getObjectIndex = function(_entity) {
-        return self.getObjectIndexById(_entity.getId());
+    this.getEntityIndex = function(_entity) {
+        return self.getEntityIndexById(_entity.getId());
     };
 
     /**
      * @param {String} _objId
      * @returns {Number|null}
      */
-    this.getObjectIndexById = function(_entityId) {
+    this.getEntityIndexById = function(_entityId) {
         for(let i=0; i<entities.length; i++) {
             if(entities[i].getId() === _entityId) {
                 return i;
@@ -44,8 +44,8 @@ function Cluster(_id) {
      * @param {Entity} _o
      * @returns {Boolean}
      */
-    this.addObject = function(_entity) {
-        if(self.getObjectIndex(_entity) !== null) {
+    this.addEntity = function(_entity) {
+        if(self.getEntityIndex(_entity) !== null) {
             return false;
         }
 
@@ -56,14 +56,14 @@ function Cluster(_id) {
     /**
      * @returns {Entity[]}
      */
-    this.getObjects = function() {
+    this.getEntities = function() {
         return entities;
     };
 
     /**
      * @returns {String[]}
      */
-    this.getObjectIds = function() {
+    this.getEntityIds = function() {
         const ids = [];
         entities.forEach(function(_o) {
             ids.push(_o.getId());
@@ -76,8 +76,8 @@ function Cluster(_id) {
      * @param {String} _id
      * @returns {Boolean}
      */
-    this.removeObjectById = function(_id) {
-        const idx = self.getObjectIndexById(_id);
+    this.removeEntityById = function(_id) {
+        const idx = self.getEntityIndexById(_id);
         if(idx === null) {
             return false;
         }
@@ -86,7 +86,7 @@ function Cluster(_id) {
         return true;
     };
 
-    this.removeAllObjects = function() {
+    this.removeAllEntities = function() {
         entities.length = 0;
     };
 };

@@ -14,7 +14,7 @@ const createMockDomElem = function() {
     return mockDomElem;
 };
 
-describe("BoxClusterDetector::areObjectsClose", function() {
+describe("BoxClusterDetector::areEntitiesClose", function() {
     it("returns true for 2 entities that are close to each other", function() {
         const e1 = new Entity(
             "obj-123",
@@ -45,7 +45,7 @@ describe("BoxClusterDetector::areObjectsClose", function() {
         expect(isClose).toEqual(true);
     });
 
-    it("returns false for 2 objects not near each other", function() {
+    it("returns false for 2 entities not near each other", function() {
         const e1 = new Entity(
             "obj-123",
             100, 
@@ -77,7 +77,7 @@ describe("BoxClusterDetector::areObjectsClose", function() {
 });
 
 
-describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
+describe("BoxClusterDetector::getAllEntitiesCloseTo", function() {
     it("returns empty array if passed empty array of objects under consideration", function() {
         const entity = new Entity(
             "obj-123",
@@ -96,7 +96,7 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
         expect(nearbyEntities).toEqual([]);
     });
 
-    it("returns an array with close by objects", function() {
+    it("returns an array with close by entities", function() {
         const e1 = new Entity(
             "obj-123",
             100, 
@@ -128,7 +128,7 @@ describe("BoxClusterDetector::getAllObjectsCloseTo", function() {
 });
 
 
-describe("BoxClusterDetector::getClusterObjectsFromSeed", function() {
+describe("BoxClusterDetector::getClusterEntitiesFromSeed", function() {
     it("produces result set with 3 objects aligned in row", function() {
         const e1 = new Entity(
             "obj-123",
@@ -176,13 +176,13 @@ describe("BoxClusterDetector::getClusterObjectsFromSeed", function() {
 });
 
 describe("BoxClusterDetector::computeClusters", function() {
-    it("return empty array of clusters for no objects", function() {  
+    it("return empty array of clusters for no entities", function() {  
         const detector = new BoxClusterDetector(12.0);
         const clusters = detector.computeClusters([], []);
         expect(clusters).toEqual([]);
     });  
 
-    it("return empty array of clusters for single object", function() {  
+    it("return empty array of clusters for single entity", function() {  
         const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
 
         const detector = new BoxClusterDetector(12.0);
@@ -203,8 +203,8 @@ describe("BoxClusterDetector::computeClusters", function() {
 
         expect(clusters.length).toEqual(1);
         expect(clusters[0].getId()).toEqual('new-cluster-id');
-        expect(clusters[0].getObjects().indexOf(e1) >= 0).toEqual(true);
-        expect(clusters[0].getObjects().indexOf(e2) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e1) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e2) >= 0).toEqual(true);
     });
 
     it("adds entity to exiting Cluster and returns that Cluster", function() {  
@@ -213,8 +213,8 @@ describe("BoxClusterDetector::computeClusters", function() {
         const newEntity = new Entity("obj-789", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
 
         const existingCluster = new Cluster("existing-cluster-id");
-        existingCluster.addObject(e1);
-        existingCluster.addObject(e2);
+        existingCluster.addEntity(e1);
+        existingCluster.addEntity(e2);
 
         const idGenerator = function() {
             return "new-cluster-id";
@@ -225,9 +225,9 @@ describe("BoxClusterDetector::computeClusters", function() {
 
         expect(clusters.length).toEqual(1);
         expect(clusters[0].getId()).toEqual('existing-cluster-id');
-        expect(clusters[0].getObjects().indexOf(e1) >= 0).toEqual(true);
-        expect(clusters[0].getObjects().indexOf(e2) >= 0).toEqual(true);
-        expect(clusters[0].getObjects().indexOf(newEntity) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e1) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e2) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(newEntity) >= 0).toEqual(true);
     });  
 
     it("return single Cluster for 3 entities close to each other", function() {  
@@ -244,9 +244,9 @@ describe("BoxClusterDetector::computeClusters", function() {
 
         expect(clusters.length).toEqual(1);
         expect(clusters[0].getId()).toEqual('new-cluster-id');
-        expect(clusters[0].getObjects().indexOf(e1) >= 0).toEqual(true);
-        expect(clusters[0].getObjects().indexOf(e2) >= 0).toEqual(true);
-        expect(clusters[0].getObjects().indexOf(e3) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e1) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e2) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e3) >= 0).toEqual(true);
     });    
 
     it("removes moved entity from an existing cluster", function() {  
@@ -259,9 +259,9 @@ describe("BoxClusterDetector::computeClusters", function() {
         };
 
         const existingCluster = new Cluster("existing-cluster-id");
-        existingCluster.addObject(e1);
-        existingCluster.addObject(e2);    
-        existingCluster.addObject(e3);    
+        existingCluster.addEntity(e1);
+        existingCluster.addEntity(e2);    
+        existingCluster.addEntity(e3);    
 
         e2.translate(1000.0, 1000.0);
 
@@ -270,9 +270,9 @@ describe("BoxClusterDetector::computeClusters", function() {
 
         expect(clusters.length).toEqual(1);
         expect(clusters[0].getId()).toEqual('existing-cluster-id');
-        expect(clusters[0].getObjects().indexOf(e1) >= 0).toEqual(true);
-        expect(clusters[0].getObjects().indexOf(e2) >= 0).toEqual(false);
-        expect(clusters[0].getObjects().indexOf(e3) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e1) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e2) >= 0).toEqual(false);
+        expect(clusters[0].getEntities().indexOf(e3) >= 0).toEqual(true);
     });      
 
     it("removes cluster when all objects have dispersed", function() {  
@@ -285,9 +285,9 @@ describe("BoxClusterDetector::computeClusters", function() {
         };
 
         const existingCluster = new Cluster("existing-cluster-id");
-        existingCluster.addObject(e1);
-        existingCluster.addObject(e2);    
-        existingCluster.addObject(e3);    
+        existingCluster.addEntity(e1);
+        existingCluster.addEntity(e2);    
+        existingCluster.addEntity(e3);    
 
         e1.translate(1000.0, 1000.0);
         e2.translate(2000.0, 2000.0);
