@@ -1124,10 +1124,15 @@ function Sheet(_sheetDomElement, _window) {
             return false;
         }        
 
-        multiObjectSelectionStartX = _x;
-        multiObjectSelectionStartY = _y;
-        multiObjectSelectionEndX = _x;
-        multiObjectSelectionEndY = _y;
+        const invTransformedPos = MatrixMath.vecMat4Multiply(
+            [_x, _y, 0, 1],
+            currentInvTransformationMatrix
+        );
+
+        multiObjectSelectionStartX = invTransformedPos[0];
+        multiObjectSelectionStartY = invTransformedPos[1];
+        multiObjectSelectionEndX = invTransformedPos[0];
+        multiObjectSelectionEndY = invTransformedPos[1];
         multiObjectSelectionStarted = true;
 
         selectionBoxElem.style.left = `${multiObjectSelectionStartX}px`;
@@ -1139,8 +1144,8 @@ function Sheet(_sheetDomElement, _window) {
         emitEvent(
             SheetEvent.MULTIPLE_ENTITY_SELECTION_STARTED,
             { 
-                'x': _x,
-                'y': _y
+                'x': invTransformedPos[0],
+                'y': invTransformedPos[1]
             }
         );
 
@@ -1182,22 +1187,28 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _endY 
      */
     const updateSelectionBoxEndPoint = function(_endX, _endY) {
-        multiObjectSelectionEndX = _endX;
-        multiObjectSelectionEndY = _endY;
+
+        const invTransformedPos = MatrixMath.vecMat4Multiply(
+            [_endX, _endY, 0, 1],
+            currentInvTransformationMatrix
+        );
+
+        multiObjectSelectionEndX = invTransformedPos[0];
+        multiObjectSelectionEndY = invTransformedPos[1];
         const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
         const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
 
         if(width >= 0) {
             selectionBoxElem.style.width = `${width}px`;
         } else {
-            selectionBoxElem.style.left = `${_endX}px`;
+            selectionBoxElem.style.left = `${invTransformedPos[0]}px`;
             selectionBoxElem.style.width = `${Math.abs(width)}px`;
         }
 
         if(height >= 0) {
             selectionBoxElem.style.height = `${height}px`;
         } else {
-            selectionBoxElem.style.top = `${_endY}px`;
+            selectionBoxElem.style.top = `${invTransformedPos[1]}px`;
             selectionBoxElem.style.height = `${Math.abs(height)}px`;
         }
     };
@@ -1370,7 +1381,7 @@ function Sheet(_sheetDomElement, _window) {
                     const invTransformedPos = MatrixMath.vecMat4Multiply(
                         [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                         currentInvTransformationMatrix
-                    );                      
+                    );
 
                     handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
                 }

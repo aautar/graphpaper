@@ -2990,10 +2990,15 @@ var GraphPaper = (function (exports) {
                 return false;
             }        
 
-            multiObjectSelectionStartX = _x;
-            multiObjectSelectionStartY = _y;
-            multiObjectSelectionEndX = _x;
-            multiObjectSelectionEndY = _y;
+            const invTransformedPos = MatrixMath.vecMat4Multiply(
+                [_x, _y, 0, 1],
+                currentInvTransformationMatrix
+            );
+
+            multiObjectSelectionStartX = invTransformedPos[0];
+            multiObjectSelectionStartY = invTransformedPos[1];
+            multiObjectSelectionEndX = invTransformedPos[0];
+            multiObjectSelectionEndY = invTransformedPos[1];
             multiObjectSelectionStarted = true;
 
             selectionBoxElem.style.left = `${multiObjectSelectionStartX}px`;
@@ -3005,8 +3010,8 @@ var GraphPaper = (function (exports) {
             emitEvent(
                 SheetEvent.MULTIPLE_ENTITY_SELECTION_STARTED,
                 { 
-                    'x': _x,
-                    'y': _y
+                    'x': invTransformedPos[0],
+                    'y': invTransformedPos[1]
                 }
             );
 
@@ -3048,22 +3053,28 @@ var GraphPaper = (function (exports) {
          * @param {Number} _endY 
          */
         const updateSelectionBoxEndPoint = function(_endX, _endY) {
-            multiObjectSelectionEndX = _endX;
-            multiObjectSelectionEndY = _endY;
+
+            const invTransformedPos = MatrixMath.vecMat4Multiply(
+                [_endX, _endY, 0, 1],
+                currentInvTransformationMatrix
+            );
+
+            multiObjectSelectionEndX = invTransformedPos[0];
+            multiObjectSelectionEndY = invTransformedPos[1];
             const width = multiObjectSelectionEndX - multiObjectSelectionStartX;
             const height = multiObjectSelectionEndY - multiObjectSelectionStartY;
 
             if(width >= 0) {
                 selectionBoxElem.style.width = `${width}px`;
             } else {
-                selectionBoxElem.style.left = `${_endX}px`;
+                selectionBoxElem.style.left = `${invTransformedPos[0]}px`;
                 selectionBoxElem.style.width = `${Math.abs(width)}px`;
             }
 
             if(height >= 0) {
                 selectionBoxElem.style.height = `${height}px`;
             } else {
-                selectionBoxElem.style.top = `${_endY}px`;
+                selectionBoxElem.style.top = `${invTransformedPos[1]}px`;
                 selectionBoxElem.style.height = `${Math.abs(height)}px`;
             }
         };
@@ -3236,7 +3247,7 @@ var GraphPaper = (function (exports) {
                         const invTransformedPos = MatrixMath.vecMat4Multiply(
                             [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                             currentInvTransformationMatrix
-                        );                      
+                        );
 
                         handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
                     }
@@ -3912,15 +3923,15 @@ var GraphPaper = (function (exports) {
          * @param {Entity} _obj
          * @returns {Number|null}
          */
-        this.getObjectIndex = function(_entity) {
-            return self.getObjectIndexById(_entity.getId());
+        this.getEntityIndex = function(_entity) {
+            return self.getEntityIndexById(_entity.getId());
         };
 
         /**
          * @param {String} _objId
          * @returns {Number|null}
          */
-        this.getObjectIndexById = function(_entityId) {
+        this.getEntityIndexById = function(_entityId) {
             for(let i=0; i<entities.length; i++) {
                 if(entities[i].getId() === _entityId) {
                     return i;
@@ -3934,8 +3945,8 @@ var GraphPaper = (function (exports) {
          * @param {Entity} _o
          * @returns {Boolean}
          */
-        this.addObject = function(_entity) {
-            if(self.getObjectIndex(_entity) !== null) {
+        this.addEntity = function(_entity) {
+            if(self.getEntityIndex(_entity) !== null) {
                 return false;
             }
 
@@ -3946,14 +3957,14 @@ var GraphPaper = (function (exports) {
         /**
          * @returns {Entity[]}
          */
-        this.getObjects = function() {
+        this.getEntities = function() {
             return entities;
         };
 
         /**
          * @returns {String[]}
          */
-        this.getObjectIds = function() {
+        this.getEntityIds = function() {
             const ids = [];
             entities.forEach(function(_o) {
                 ids.push(_o.getId());
@@ -3966,8 +3977,8 @@ var GraphPaper = (function (exports) {
          * @param {String} _id
          * @returns {Boolean}
          */
-        this.removeObjectById = function(_id) {
-            const idx = self.getObjectIndexById(_id);
+        this.removeEntityById = function(_id) {
+            const idx = self.getEntityIndexById(_id);
             if(idx === null) {
                 return false;
             }
@@ -3976,7 +3987,7 @@ var GraphPaper = (function (exports) {
             return true;
         };
 
-        this.removeAllObjects = function() {
+        this.removeAllEntities = function() {
             entities.length = 0;
         };
     }
@@ -3986,7 +3997,7 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {Entity} _obj 
+         * @param {Entity} _entity 
          * @param {Entity[]} _sheetEntitiesArray 
          * @returns {Number}
          */
@@ -4019,14 +4030,14 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {Map<Cluster, Number>} _clusterToObjectCountMap 
+         * @param {Map<Cluster, Number>} _clusterToEntityCountMap 
          * @returns {Cluster}
          */
-        const getClusterWithMostEntitiesFromClusterMap = function(_clusterToObjectCountMap) {
+        const getClusterWithMostEntitiesFromClusterMap = function(_clusterToEntityCountMap) {
             var curMaxObjs = 0;
             var curClusterWithMax = null;
 
-            _clusterToObjectCountMap.forEach(function(_numObjs, _cluster, _map) {
+            _clusterToEntityCountMap.forEach(function(_numObjs, _cluster, _map) {
                 if(_numObjs > curMaxObjs) {
                     curMaxObjs = _numObjs;
                     curClusterWithMax = _cluster;
@@ -4061,7 +4072,7 @@ var GraphPaper = (function (exports) {
        
         /**
          * @param {Entity} _obj
-         * @param {Entity[]} _objectsUnderConsideration
+         * @param {Entity[]} _entitiesUnderConsideration
          * @returns {Entity[]}
          */
         this.getAllEntitiesCloseTo = function(_entity, _entitiesUnderConsideration) {
@@ -4081,17 +4092,17 @@ var GraphPaper = (function (exports) {
 
         /**
          * @param {Entity} _seedObj
-         * @param {Entity[]} _objectsUnderConsideration
+         * @param {Entity[]} _entitiesUnderConsideration
          * @param {Entity[]} _resultSet
          */
         this.getClusterEntitiesFromSeed = function(_seedEntity, _entitiesUnderConsideration, _resultSet) {
-            const closeByObjects = self.getAllEntitiesCloseTo(_seedEntity, _entitiesUnderConsideration);
-            if(closeByObjects.length === 0) {
+            const closeByEntities = self.getAllEntitiesCloseTo(_seedEntity, _entitiesUnderConsideration);
+            if(closeByEntities.length === 0) {
                 return [];
             } else {
-                removeEntitiesFromArray(closeByObjects.concat([_seedEntity]), _entitiesUnderConsideration);
+                removeEntitiesFromArray(closeByEntities.concat([_seedEntity]), _entitiesUnderConsideration);
 
-                closeByObjects.forEach(function(_o) {
+                closeByEntities.forEach(function(_o) {
                     _resultSet.push(_o);
                     self.getClusterEntitiesFromSeed(_o, _entitiesUnderConsideration, _resultSet);
                 });
@@ -4104,30 +4115,30 @@ var GraphPaper = (function (exports) {
          * @returns {Map<Cluster,Number>}
          */
         this.findIntersectingClustersForEntities = function(_entities, _clusters) {
-            // Map of Cluster that is intersecting to number of objects in _objs that is intersecting the given Cluster
-            const intersectingClusterToNumObjectsIntersecting = new Map();
+            // Map of Cluster that is intersecting to number of entities in _objs that is intersecting the given Cluster
+            const intersectingClusterToNumEntitiesIntersecting = new Map();
 
             _clusters.forEach(function(_cluster) {
-                const clusterObjs = _cluster.getObjects();
+                const clusterEntities = _cluster.getEntities();
 
-                for(let i=0; i<clusterObjs.length; i++) {
+                for(let i=0; i<clusterEntities.length; i++) {
                     for(let j=0; j<_entities.length; j++) {
 
-                        if(clusterObjs[i].getId() !== _entities[j].getId()) {
+                        if(clusterEntities[i].getId() !== _entities[j].getId()) {
                             continue;
                         }
 
-                        if(intersectingClusterToNumObjectsIntersecting.has(_cluster)) {
-                            const count = intersectingClusterToNumObjectsIntersecting.get(_cluster);
-                            intersectingClusterToNumObjectsIntersecting.set(_cluster, count+1);
+                        if(intersectingClusterToNumEntitiesIntersecting.has(_cluster)) {
+                            const count = intersectingClusterToNumEntitiesIntersecting.get(_cluster);
+                            intersectingClusterToNumEntitiesIntersecting.set(_cluster, count+1);
                         } else {
-                            intersectingClusterToNumObjectsIntersecting.set(_cluster, 1);
+                            intersectingClusterToNumEntitiesIntersecting.set(_cluster, 1);
                         }
                     }
                 }
             });
 
-            return intersectingClusterToNumObjectsIntersecting;
+            return intersectingClusterToNumEntitiesIntersecting;
         };
 
         /**
@@ -4136,60 +4147,65 @@ var GraphPaper = (function (exports) {
          */
         this.removeEntityFromClusters = function(_entity, _clusters) {
             _clusters.forEach(function(_c) {
-                _c.removeObjectById(_entity.getId());
+                _c.removeEntityById(_entity.getId());
             });
-        };    
+        };
 
-        this.computeClusters = function(_objects, _knownClusters, _getNewIdFunc) {
+        /**
+         * @param {Entity[]} _entities
+         * @param {Cluster[]} _knownClusters
+         * @param {Function} _getNewIdFunc
+         */
+        this.computeClusters = function(_entities, _knownClusters, _getNewIdFunc) {
             const clusters = _knownClusters.map(function(_c) {
                 return _c;
             });
 
-            const objectsUnderConsideration = _objects.map(function(_o) {
+            const entitiesUnderConsideration = _entities.map(function(_o) {
                 return _o;
             });
 
-            while(objectsUnderConsideration.length > 0) {
-                const obj = objectsUnderConsideration.pop();
+            while(entitiesUnderConsideration.length > 0) {
+                const entity = entitiesUnderConsideration.pop();
 
-                const objsForCluster = [obj];
-                self.getClusterEntitiesFromSeed(obj, objectsUnderConsideration, objsForCluster);
+                const entitiesForCluster = [entity];
+                self.getClusterEntitiesFromSeed(entity, entitiesUnderConsideration, entitiesForCluster);
 
-                if(objsForCluster.length > 1) {
+                if(entitiesForCluster.length > 1) {
 
-                    const intersectingClusterToNumObjectsIntersecting = self.findIntersectingClustersForEntities(objsForCluster, clusters);
+                    const intersectingClusterToNumEntitiesIntersecting = self.findIntersectingClustersForEntities(entitiesForCluster, clusters);
 
-                    if(intersectingClusterToNumObjectsIntersecting.size === 0) {
+                    if(intersectingClusterToNumEntitiesIntersecting.size === 0) {
                         const newCluster = new Cluster(_getNewIdFunc());
-                        objsForCluster.forEach(function(_clusterObject) {
-                            newCluster.addObject(_clusterObject);
+                        entitiesForCluster.forEach(function(_clusterEntity) {
+                            newCluster.addEntity(_clusterEntity);
                         });    
 
                         clusters.push(newCluster);
                     } else {
-                        const clusterToModify = getClusterWithMostEntitiesFromClusterMap(intersectingClusterToNumObjectsIntersecting);
+                        const clusterToModify = getClusterWithMostEntitiesFromClusterMap(intersectingClusterToNumEntitiesIntersecting);
 
-                        // Clear out objects in cluster
-                        clusterToModify.removeAllObjects();
+                        // Clear out entities in cluster
+                        clusterToModify.removeAllEntities();
 
-                        // Remove object from any cluster it's currently in, add it to clusterToModify
-                        objsForCluster.forEach(function(_clusterObject) {
-                            self.removeEntityFromClusters(_clusterObject, clusters);                    
-                            clusterToModify.addObject(_clusterObject);
+                        // Remove entity from any cluster it's currently in, add it to clusterToModify
+                        entitiesForCluster.forEach(function(_clusterEntity) {
+                            self.removeEntityFromClusters(_clusterEntity, clusters);                    
+                            clusterToModify.addEntity(_clusterEntity);
                         });
 
                     }
 
-                    removeEntitiesFromArray(objsForCluster, objectsUnderConsideration);
+                    removeEntitiesFromArray(entitiesForCluster, entitiesUnderConsideration);
                     
                 } else {
-                    self.removeEntityFromClusters(obj, clusters);
+                    self.removeEntityFromClusters(entity, clusters);
                 }
             }
 
-            // Filter out clusters w/o any objects
+            // Filter out clusters w/o any entities
             const nonEmptyClusters = clusters.filter(function(_c) {
-                if(_c.getObjects().length >= 2) {
+                if(_c.getEntities().length >= 2) {
                     return true;
                 }
 
