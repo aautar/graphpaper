@@ -749,6 +749,7 @@ var GraphPaper = (function (exports) {
             const halfHeight = self.getHeight() * 0.5;        
             const viewportRelativeRect = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
             const pageOffset = _sheet.getPageOffset();        
+            
             return new Point(
                 (viewportRelativeRect.getLeft() + pageOffset.getX() + halfWidth) - _sheet.getOffsetLeft(), 
                 (viewportRelativeRect.getTop() + pageOffset.getY() + halfHeight) - _sheet.getOffsetTop()
@@ -2361,26 +2362,29 @@ var GraphPaper = (function (exports) {
          * @returns {Rectangle}
          */
         this.transformDomRectToPageSpaceRect = function(_domRect) {
+            const left = _domRect.left - self.getOffsetLeft();
+            const top = _domRect.top - self.getOffsetTop();
+            const right = _domRect.right - self.getOffsetLeft();
+            const bottom = _domRect.bottom - self.getOffsetTop();
+
+
             // inv transform
             const invTransformedPosLeftTop = MatrixMath.vecMat4Multiply(
-                [_domRect.left, _domRect.top, 0, 1],
+                [left, top, 0, 1],
                 currentInvTransformationMatrix
             );
 
             const invTransformedPosRightBottom = MatrixMath.vecMat4Multiply(
-                [_domRect.right, _domRect.bottom, 0, 1],
+                [right, bottom, 0, 1],
                 currentInvTransformationMatrix
             );
 
-            // add pageOffset to "un-scroll"
-            // result puts us into Page space
-            const pageOffset = self.getPageOffset();
-
+            // we have Sheet space coordinates, transform to Page space and return
             return new Rectangle(
-                invTransformedPosLeftTop[0] - self.getOffsetLeft() + pageOffset.getX(), 
-                invTransformedPosLeftTop[1] - self.getOffsetTop() + pageOffset.getY(), 
-                invTransformedPosRightBottom[0] - self.getOffsetLeft() + pageOffset.getX(), 
-                invTransformedPosRightBottom[1] - self.getOffsetTop() + pageOffset.getY()
+                invTransformedPosLeftTop[0] + self.getOffsetLeft(), 
+                invTransformedPosLeftTop[1] + self.getOffsetTop(), 
+                invTransformedPosRightBottom[0] + self.getOffsetLeft(), 
+                invTransformedPosRightBottom[1] + self.getOffsetTop()
             );
         };
 

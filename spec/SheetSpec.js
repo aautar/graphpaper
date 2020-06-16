@@ -657,12 +657,38 @@ describe("Sheet.transformDomRectToPageSpaceRect", function() {
     beforeEach(function() {
         window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
         sheetDomElement = window.document.createElement('div');
+
+        Object.defineProperties(window.HTMLElement.prototype, {
+            offsetLeft: {
+              get () {
+                return this.marginLeft
+              },
+              set (offset) {
+                this.marginLeft = offset
+              }
+            }
+        });
+
+        Object.defineProperties(window.HTMLElement.prototype, {
+            offsetTop: {
+              get () {
+                return this.marginTop
+              },
+              set (offset) {
+                this.marginTop = offset
+              }
+            }
+        });
+
         pvWorkerMock = {
             postMessage: function() { }
         };    
     });
 
     it("returns transformed rectangle", function() {
+        sheetDomElement.offsetLeft = 0;
+        sheetDomElement.offsetTop = 0;
+
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
         sheet.scale(0.5, false);
         sheet.applyTransform();
@@ -680,5 +706,28 @@ describe("Sheet.transformDomRectToPageSpaceRect", function() {
         expect(r.getTop()).toBe(20);
         expect(r.getRight()).toBe(40);
         expect(r.getBottom()).toBe(40);
+    });
+
+    it("returns transformed rectangle for offset sheet", function() {
+        sheetDomElement.offsetLeft = 100;
+        sheetDomElement.offsetTop = 100;
+
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.scale(0.5, false);
+        sheet.applyTransform();
+
+        // DOMRect mock
+        const elemDomRect = {
+            "left": 110,
+            "right": 120,
+            "top": 110,
+            "bottom": 120
+        };
+
+        const r = sheet.transformDomRectToPageSpaceRect(elemDomRect);
+        expect(r.getLeft()).toBe(120);
+        expect(r.getTop()).toBe(120);
+        expect(r.getRight()).toBe(140);
+        expect(r.getBottom()).toBe(140);
     });
 });
