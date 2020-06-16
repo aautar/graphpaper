@@ -467,7 +467,7 @@ function Sheet(_sheetDomElement, _window) {
     };
 
     this.applyTransform = function() {
-        _sheetDomElement.style.transform = self.getTranformMatrixCss();
+        _sheetDomElement.style.transform = self.getTransformMatrixCss();
         currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         for(let i=0; i<invTransformationMatrixStack.length; i++) {
             currentInvTransformationMatrix = MatrixMath.mat4Multiply(currentInvTransformationMatrix, invTransformationMatrixStack[i]);
@@ -484,7 +484,7 @@ function Sheet(_sheetDomElement, _window) {
     /**
      * @returns {String}
      */    
-    this.getTranformMatrixCss = function() {
+    this.getTransformMatrixCss = function() {
         const matElems = currentTransformationMatrix.join(",");
         return `matrix3d(${matElems})`;
     };

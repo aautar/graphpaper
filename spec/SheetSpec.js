@@ -626,3 +626,26 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
         expect(selectionStartedCallback).toHaveBeenCalled();      
     });    
 });
+
+describe("Sheet.getTransformMatrixCss", function() {
+    var sheetDomElement = null;
+    var pvWorkerMock = null;
+
+    beforeEach(function() {
+        window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
+        sheetDomElement = window.document.createElement('div');
+        pvWorkerMock = {
+            postMessage: function() { }
+        };    
+    });
+
+    it("returns string for CSS transform", function() {
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.translate(100, 200);
+        sheet.scale(0.5, false);
+        sheet.applyTransform();
+
+        const cssValue = sheet.getTransformMatrixCss();
+        expect(cssValue).toBe("matrix3d(0.5,0,0,0,0,0.5,0,0,0,0,0.5,1,50,100,0,1)");
+    });
+});
