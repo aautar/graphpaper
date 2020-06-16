@@ -489,6 +489,34 @@ function Sheet(_sheetDomElement, _window) {
         return `matrix3d(${matElems})`;
     };
 
+    /**
+     * @param {DOMRect} _domRect
+     * @returns {Rectangle}
+     */
+    this.transformDomRectToPageSpaceRect = function(_domRect) {
+        // inv transform
+        const invTransformedPosLeftTop = MatrixMath.vecMat4Multiply(
+            [_domRect.left, _domRect.top, 0, 1],
+            currentInvTransformationMatrix
+        );
+
+        const invTransformedPosRightBottom = MatrixMath.vecMat4Multiply(
+            [_domRect.right, _domRect.bottom, 0, 1],
+            currentInvTransformationMatrix
+        );
+
+        // add pageOffset to "un-scroll"
+        // result puts us into Page space
+        const pageOffset = self.getPageOffset();
+
+        return new Rectangle(
+            invTransformedPosLeftTop[0] - self.getOffsetLeft() + pageOffset.getX(), 
+            invTransformedPosLeftTop[1] - self.getOffsetTop() + pageOffset.getY(), 
+            invTransformedPosRightBottom[0] - self.getOffsetLeft() + pageOffset.getX(), 
+            invTransformedPosRightBottom[1] - self.getOffsetTop() + pageOffset.getY()
+        );
+    };
+
     this.resetTransform = function() {
         scaleFactor = 1.0;
         invScaleFactor = 1.0;

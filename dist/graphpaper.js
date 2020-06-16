@@ -729,27 +729,29 @@ var GraphPaper = (function (exports) {
          * @returns {Number}
          */
         this.getWidth = function() {
-            const r = _domElement.getBoundingClientRect();
-            return (r.right - r.left);
+            const r = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
+            return r.getWidth();
         };
 
         /**
          * @returns {Number}
          */
         this.getHeight = function() {
-            const r = _domElement.getBoundingClientRect();
-            return (r.bottom - r.top);
+            const r = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
+            return r.getHeight();
         };
 
         /**
          * @returns {Point}
          */
         this.getCentroid = function() {
-            const viewportRelativeRect = _domElement.getBoundingClientRect();
+            const halfWidth = self.getWidth() * 0.5;
+            const halfHeight = self.getHeight() * 0.5;        
+            const viewportRelativeRect = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
             const pageOffset = _sheet.getPageOffset();        
             return new Point(
-                (viewportRelativeRect.left + pageOffset.getX() + (self.getWidth() * 0.5)) - _sheet.getOffsetLeft(), 
-                (viewportRelativeRect.top + pageOffset.getY() + (self.getHeight() * 0.5)) - _sheet.getOffsetTop()
+                (viewportRelativeRect.getLeft() + pageOffset.getX() + halfWidth) - _sheet.getOffsetLeft(), 
+                (viewportRelativeRect.getTop() + pageOffset.getY() + halfHeight) - _sheet.getOffsetTop()
             );
         };
 
@@ -759,7 +761,6 @@ var GraphPaper = (function (exports) {
          * @returns {Point[]}
          */
         this.getRoutingPoints = function(_gridSize) {
-
             const centroid = self.getCentroid();
             const halfWidth = self.getWidth() * 0.5;
             const halfHeight = self.getHeight() * 0.5;
@@ -2333,7 +2334,7 @@ var GraphPaper = (function (exports) {
         };
 
         this.applyTransform = function() {
-            _sheetDomElement.style.transform = self.getTranformMatrixCss();
+            _sheetDomElement.style.transform = self.getTransformMatrixCss();
             currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
             for(let i=0; i<invTransformationMatrixStack.length; i++) {
                 currentInvTransformationMatrix = MatrixMath.mat4Multiply(currentInvTransformationMatrix, invTransformationMatrixStack[i]);
@@ -2350,9 +2351,37 @@ var GraphPaper = (function (exports) {
         /**
          * @returns {String}
          */    
-        this.getTranformMatrixCss = function() {
+        this.getTransformMatrixCss = function() {
             const matElems = currentTransformationMatrix.join(",");
             return `matrix3d(${matElems})`;
+        };
+
+        /**
+         * @param {DOMRect} _domRect
+         * @returns {Rectangle}
+         */
+        this.transformDomRectToPageSpaceRect = function(_domRect) {
+            // inv transform
+            const invTransformedPosLeftTop = MatrixMath.vecMat4Multiply(
+                [_domRect.left, _domRect.top, 0, 1],
+                currentInvTransformationMatrix
+            );
+
+            const invTransformedPosRightBottom = MatrixMath.vecMat4Multiply(
+                [_domRect.right, _domRect.bottom, 0, 1],
+                currentInvTransformationMatrix
+            );
+
+            // add pageOffset to "un-scroll"
+            // result puts us into Page space
+            const pageOffset = self.getPageOffset();
+
+            return new Rectangle(
+                invTransformedPosLeftTop[0] - self.getOffsetLeft() + pageOffset.getX(), 
+                invTransformedPosLeftTop[1] - self.getOffsetTop() + pageOffset.getY(), 
+                invTransformedPosRightBottom[0] - self.getOffsetLeft() + pageOffset.getX(), 
+                invTransformedPosRightBottom[1] - self.getOffsetTop() + pageOffset.getY()
+            );
         };
 
         this.resetTransform = function() {

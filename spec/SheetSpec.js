@@ -649,3 +649,36 @@ describe("Sheet.getTransformMatrixCss", function() {
         expect(cssValue).toBe("matrix3d(0.5,0,0,0,0,0.5,0,0,0,0,0.5,1,50,100,0,1)");
     });
 });
+
+describe("Sheet.transformDomRectToPageSpaceRect", function() {
+    var sheetDomElement = null;
+    var pvWorkerMock = null;
+
+    beforeEach(function() {
+        window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
+        sheetDomElement = window.document.createElement('div');
+        pvWorkerMock = {
+            postMessage: function() { }
+        };    
+    });
+
+    it("returns transformed rectangle", function() {
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.scale(0.5, false);
+        sheet.applyTransform();
+
+        // DOMRect mock
+        const elemDomRect = {
+            "left": 10,
+            "right": 20,
+            "top": 10,
+            "bottom": 20
+        };
+
+        const r = sheet.transformDomRectToPageSpaceRect(elemDomRect);
+        expect(r.getLeft()).toBe(20);
+        expect(r.getTop()).toBe(20);
+        expect(r.getRight()).toBe(40);
+        expect(r.getBottom()).toBe(40);
+    });
+});

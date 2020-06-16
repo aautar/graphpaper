@@ -35,27 +35,29 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
      * @returns {Number}
      */
     this.getWidth = function() {
-        const r = _domElement.getBoundingClientRect();
-        return (r.right - r.left);
+        const r = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
+        return r.getWidth();
     };
 
     /**
      * @returns {Number}
      */
     this.getHeight = function() {
-        const r = _domElement.getBoundingClientRect();
-        return (r.bottom - r.top);
+        const r = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
+        return r.getHeight();
     };
 
     /**
      * @returns {Point}
      */
     this.getCentroid = function() {
-        const viewportRelativeRect = _domElement.getBoundingClientRect();
+        const halfWidth = self.getWidth() * 0.5;
+        const halfHeight = self.getHeight() * 0.5;        
+        const viewportRelativeRect = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
         const pageOffset = _sheet.getPageOffset();        
         return new Point(
-            (viewportRelativeRect.left + pageOffset.getX() + (self.getWidth() * 0.5)) - _sheet.getOffsetLeft(), 
-            (viewportRelativeRect.top + pageOffset.getY() + (self.getHeight() * 0.5)) - _sheet.getOffsetTop()
+            (viewportRelativeRect.getLeft() + pageOffset.getX() + halfWidth) - _sheet.getOffsetLeft(), 
+            (viewportRelativeRect.getTop() + pageOffset.getY() + halfHeight) - _sheet.getOffsetTop()
         );
     };
 
@@ -65,7 +67,6 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
      * @returns {Point[]}
      */
     this.getRoutingPoints = function(_gridSize) {
-
         const centroid = self.getCentroid();
         const halfWidth = self.getWidth() * 0.5;
         const halfHeight = self.getHeight() * 0.5;

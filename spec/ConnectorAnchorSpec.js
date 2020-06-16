@@ -1,6 +1,7 @@
 const jsdom = require("jsdom");
 import {Entity} from '../src/Entity.js';
 import {ConnectorAnchor} from '../src/ConnectorAnchor'
+import {Rectangle} from '../src/Rectangle.js';
 
 const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
@@ -24,6 +25,13 @@ describe("ConnectorAnchor.getWidth, ConnectorAnchor.getHeight", function() {
         const anchorElemWidth = 100;
         const anchorElemHeight = 200;
         const anchorElem = window.document.createElement('div');
+
+        const sheet = {
+            transformDomRectToPageSpaceRect: function(_domRect) {
+                return new Rectangle(0, 0, anchorElemWidth, anchorElemHeight);
+            }
+        };
+
         anchorElem.getBoundingClientRect = () => ({
             anchorElemWidth,
             anchorElemHeight,
@@ -33,7 +41,7 @@ describe("ConnectorAnchor.getWidth, ConnectorAnchor.getHeight", function() {
             bottom: anchorElemHeight,
           });
 
-        const anchor = new ConnectorAnchor('connector-anchor-id-123', anchorElem, {});
+        const anchor = new ConnectorAnchor('connector-anchor-id-123', anchorElem, sheet);
 
         expect(anchor.getWidth()).toBe(100);
         expect(anchor.getHeight()).toBe(200);
