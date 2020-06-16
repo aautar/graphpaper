@@ -730,4 +730,30 @@ describe("Sheet.transformDomRectToPageSpaceRect", function() {
         expect(r.getRight()).toBe(140);
         expect(r.getBottom()).toBe(140);
     });
+
+    it("returns transformed rectangle for scrolled page", function() {
+        window.pageXOffset = 100;
+        window.pageYOffset = 0;
+        sheetDomElement.offsetLeft = 0;
+        sheetDomElement.offsetTop = 0;
+
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.scale(0.5, false);
+        sheet.applyTransform(); 
+
+        // DOMRect mock
+        const elemDomRect = {
+            "left": 10,
+            "right": 20,
+            "top": 10,
+            "bottom": 20
+        };
+
+        const r = sheet.transformDomRectToPageSpaceRect(elemDomRect);
+        expect(r.getLeft()).toBe(220);
+        expect(r.getTop()).toBe(20);
+        expect(r.getRight()).toBe(240);
+        expect(r.getBottom()).toBe(40);
+    });    
+    
 });

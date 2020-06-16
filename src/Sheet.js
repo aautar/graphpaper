@@ -536,7 +536,7 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {Point}
      */
     this.getPageOffset = function() {
-        return new Point(window.pageXOffset, window.pageYOffset);
+        return new Point(_window.pageXOffset, _window.pageYOffset);
     };
 
     /**
