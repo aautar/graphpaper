@@ -494,11 +494,12 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {Rectangle}
      */
     this.transformDomRectToPageSpaceRect = function(_domRect) {
-        const left = _domRect.left - self.getOffsetLeft();
-        const top = _domRect.top - self.getOffsetTop();
-        const right = _domRect.right - self.getOffsetLeft();
-        const bottom = _domRect.bottom - self.getOffsetTop();
+        const pageOffset = self.getPageOffset();
 
+        const left = _domRect.left - self.getOffsetLeft() + pageOffset.getX();
+        const top = _domRect.top - self.getOffsetTop() + pageOffset.getY();
+        const right = _domRect.right - self.getOffsetLeft() + pageOffset.getX();
+        const bottom = _domRect.bottom - self.getOffsetTop() + pageOffset.getY();
 
         // inv transform
         const invTransformedPosLeftTop = MatrixMath.vecMat4Multiply(

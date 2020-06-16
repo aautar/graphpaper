@@ -748,11 +748,10 @@ var GraphPaper = (function (exports) {
             const halfWidth = self.getWidth() * 0.5;
             const halfHeight = self.getHeight() * 0.5;        
             const viewportRelativeRect = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
-            const pageOffset = _sheet.getPageOffset();        
             
             return new Point(
-                (viewportRelativeRect.getLeft() + pageOffset.getX() + halfWidth) - _sheet.getOffsetLeft(), 
-                (viewportRelativeRect.getTop() + pageOffset.getY() + halfHeight) - _sheet.getOffsetTop()
+                (viewportRelativeRect.getLeft() + halfWidth) - _sheet.getOffsetLeft(), 
+                (viewportRelativeRect.getTop() + halfHeight) - _sheet.getOffsetTop()
             );
         };
 
@@ -2362,11 +2361,12 @@ var GraphPaper = (function (exports) {
          * @returns {Rectangle}
          */
         this.transformDomRectToPageSpaceRect = function(_domRect) {
-            const left = _domRect.left - self.getOffsetLeft();
-            const top = _domRect.top - self.getOffsetTop();
-            const right = _domRect.right - self.getOffsetLeft();
-            const bottom = _domRect.bottom - self.getOffsetTop();
+            const pageOffset = self.getPageOffset();
 
+            const left = _domRect.left - self.getOffsetLeft() + pageOffset.getX();
+            const top = _domRect.top - self.getOffsetTop() + pageOffset.getY();
+            const right = _domRect.right - self.getOffsetLeft() + pageOffset.getX();
+            const bottom = _domRect.bottom - self.getOffsetTop() + pageOffset.getY();
 
             // inv transform
             const invTransformedPosLeftTop = MatrixMath.vecMat4Multiply(
