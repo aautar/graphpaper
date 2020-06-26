@@ -1,3 +1,4 @@
+import {EntityEvent} from './EntityEvent';
 import {Point} from './Point';
 import {Rectangle} from './Rectangle';
 import {Sheet} from './Sheet';
@@ -39,13 +40,6 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @type {Element}
      */
     var currentResizeHandleElementActivated = null;
-
-    const Event = {
-        TRANSLATE_START: 'obj-translate-start',
-        TRANSLATE: 'obj-translate',
-        RESIZE_START: 'obj-resize-start',
-        RESIZE: 'obj-resize'
-    };
 
     const eventNameToHandlerFunc = new Map();
 
@@ -181,7 +175,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
         _domElement.style.left = x + 'px';
         _domElement.style.top = y + 'px';
 
-        const observers = eventNameToHandlerFunc.get(Event.TRANSLATE) || [];
+        const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE) || [];
         observers.forEach(function(handler) {
             handler({"obj":self, "x": _x, "y": _y});
         });
@@ -217,7 +211,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             _domElement.style.height = height + 'px';
         }
 
-        const observers = eventNameToHandlerFunc.get(Event.RESIZE) || [];
+        const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE) || [];
         observers.forEach(function(handler) {
             handler({"obj":self, "width": _width, "height": _height});
         });
@@ -339,7 +333,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     const translateTouchStartHandler = function(e) {
         currentTranslateHandleElementActivated = e.target;
 
-        const observers = eventNameToHandlerFunc.get(Event.TRANSLATE_START) || [];
+        const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE_START) || [];
         observers.forEach(function(handler) {
             handler({
                 "obj": self,
@@ -354,7 +348,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     const translateMouseDownHandler = function(e) {
         currentTranslateHandleElementActivated = e.target;
         
-        const observers = eventNameToHandlerFunc.get(Event.TRANSLATE_START) || [];
+        const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE_START) || [];
         observers.forEach(function(handler) {
             handler({
                 "obj": self,
@@ -380,42 +374,51 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
         });
     };
 
-    const resizeMouseDownHandler = function(e) {
-        if (e.which !== MOUSE_MIDDLE_BUTTON) {
+    const resizeMouseDownHandler = function(_e, _triggeredByElement, _resizeCursor) {
+        if (_e.which !== MOUSE_MIDDLE_BUTTON) {
             return;
         }
 
-        currentResizeHandleElementActivated = e.target;
+        currentResizeHandleElementActivated = _triggeredByElement;
         
-        const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+        const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE_START) || [];
         observers.forEach(function(handler) {
             handler({
                 "obj": self,
-                "x": e.pageX, 
-                "y": e.pageY,
+                "x": _e.pageX, 
+                "y": _e.pageY,
+                "resizeCursor": _resizeCursor,
                 "isTouch": false
             });
         });    
     };
 
-    const resizeTouchStartHandler = function(e) {
-        currentResizeHandleElementActivated = e.target;
+    const resizeTouchStartHandler = function(_e, _triggeredByElement, _resizeCursor) {
+        currentResizeHandleElementActivated =_triggeredByElement;
         
-        const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+        const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE_START) || [];
         observers.forEach(function(handler) {
             handler({
                 "obj": self,
-                "x": e.touches[0].pageX,  
-                "y": e.touches[0].pageY, 
+                "x": _e.touches[0].pageX,  
+                "y": _e.touches[0].pageY,
+                "resizeCursor": _resizeCursor,
                 "isTouch": true
             });
-        });    
-    };    
+        });
+    };
 
     const bindResizeHandleElements = function() {
         _resizeHandleDomElements.forEach((_el) => {
-            _el.addEventListener('touchstart', resizeTouchStartHandler);  
-            _el.addEventListener('mousedown', resizeMouseDownHandler);  
+            const cursor = window.getComputedStyle(_el)['cursor'];
+
+            _el.addEventListener('touchstart', (e) => {
+                resizeTouchStartHandler(e, _el, cursor);
+            });
+
+            _el.addEventListener('mousedown', (e) => {
+                resizeMouseDownHandler(e, _el, cursor);
+            });  
         });
     };
 

@@ -2,6 +2,7 @@ import {MatrixMath} from './MatrixMath';
 import {AccessibleRoutingPointsFinder} from './AccessibleRoutingPointsFinder';
 import {SheetEvent} from './SheetEvent';
 import {Entity} from './Entity';
+import {EntityEvent} from './EntityEvent';
 import {ClosestPairFinder as ConnectorAnchorClosestPairFinder} from './ConnectorAnchorFinder/ClosestPairFinder';
 import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
 import {DoubleTapDetector} from './DoubleTapDetector';
@@ -78,6 +79,7 @@ function Sheet(_sheetDomElement, _window) {
 
     var objectIdBeingDragged = null;
     var objectIdBeingResized = null;
+    var objectResizeCursor = "default";
     
     var objectDragX = 0.0;
     var objectDragY = 0.0;
@@ -713,14 +715,16 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Entity} _obj
      */
     this.addEntity = function(_obj) {
-        _obj.on('obj-resize-start', handleResizeStart);
-        _obj.on('obj-resize', function(e) {
+        _obj.on(EntityEvent.RESIZE_START, handleResizeStart);
+
+        _obj.on(EntityEvent.RESIZE, function(e) {
             emitEvent(SheetEvent.ENTITY_RESIZED, { 'object': e.obj });
             self.refreshAllConnectors();    
         });
 
-        _obj.on('obj-translate-start', handleMoveStart);
-        _obj.on('obj-translate', function(e) {
+        _obj.on(EntityEvent.TRANSLATE_START, handleMoveStart);
+
+        _obj.on(EntityEvent.TRANSLATE, function(e) {
             emitEvent(SheetEvent.ENTITY_TRANSLATED, { 'object': e.obj });
             self.refreshAllConnectors();    
         });
@@ -1065,14 +1069,6 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
-     * @param {Object} _e 
-     */
-    const handleResizeStart = function(_e) {       
-        objectIdBeingResized = _e.obj.getId();
-    };    
-
-    /**
-     * 
      * @param {Object} _e
      */
     const handleMoveStart = function(_e) {     
@@ -1115,6 +1111,17 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
+     * @param {Object} _e 
+     */
+    const handleResizeStart = function(_e) {       
+        objectIdBeingResized = _e.obj.getId();
+        objectResizeCursor = _e.resizeCursor;
+
+        _sheetDomElement.style.cursor = objectResizeCursor;
+    };
+
+    /**
+     * 
      * @param {Number} _x 
      * @param {Number} _y 
      */    
@@ -1131,6 +1138,11 @@ function Sheet(_sheetDomElement, _window) {
 
         entity.resize(newWidth, newHeight);
     };
+
+    const handleResizeEnd = function() {
+        objectIdBeingResized = null;
+        _sheetDomElement.style.cursor = "";
+    };    
 
     /**
      * 
@@ -1393,7 +1405,7 @@ function Sheet(_sheetDomElement, _window) {
             }           
             
             if(objectIdBeingResized !== null) {
-                objectIdBeingResized = null;  
+                handleResizeEnd();
             }
 
             if(currentGroupTransformationContainerBeingDragged !== null) {
@@ -1419,6 +1431,7 @@ function Sheet(_sheetDomElement, _window) {
                 }
 
                 if(objectIdBeingResized !== null) {
+                    handleResizeEnd();
                 }
 
                 if(currentGroupTransformationContainerBeingDragged !== null) {
@@ -1433,7 +1446,7 @@ function Sheet(_sheetDomElement, _window) {
                 objectIdBeingDragged = null;
                 objectIdBeingResized = null;
             }
-        });  
+        });
 
         _sheetDomElement.addEventListener('mousedown', function (e) {
             // if we're dragging something, stop propagation

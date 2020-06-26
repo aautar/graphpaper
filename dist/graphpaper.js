@@ -606,6 +606,13 @@ var GraphPaper = (function (exports) {
         TRANSLATE_START: 'group-transformation-container-translate-start'
     });
 
+    const EntityEvent = Object.freeze({
+        TRANSLATE_START: 'obj-translate-start',
+        TRANSLATE: 'obj-translate',
+        RESIZE_START: 'obj-resize-start',
+        RESIZE: 'obj-resize'
+    });
+
     const AccessibleRoutingPointsFinder = {
 
         /**
@@ -1945,6 +1952,7 @@ var GraphPaper = (function (exports) {
 
         var objectIdBeingDragged = null;
         var objectIdBeingResized = null;
+        var objectResizeCursor = "default";
         
         var objectDragX = 0.0;
         var objectDragY = 0.0;
@@ -2580,14 +2588,16 @@ var GraphPaper = (function (exports) {
          * @param {Entity} _obj
          */
         this.addEntity = function(_obj) {
-            _obj.on('obj-resize-start', handleResizeStart);
-            _obj.on('obj-resize', function(e) {
+            _obj.on(EntityEvent.RESIZE_START, handleResizeStart);
+
+            _obj.on(EntityEvent.RESIZE, function(e) {
                 emitEvent(SheetEvent.ENTITY_RESIZED, { 'object': e.obj });
                 self.refreshAllConnectors();    
             });
 
-            _obj.on('obj-translate-start', handleMoveStart);
-            _obj.on('obj-translate', function(e) {
+            _obj.on(EntityEvent.TRANSLATE_START, handleMoveStart);
+
+            _obj.on(EntityEvent.TRANSLATE, function(e) {
                 emitEvent(SheetEvent.ENTITY_TRANSLATED, { 'object': e.obj });
                 self.refreshAllConnectors();    
             });
@@ -2932,14 +2942,6 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {Object} _e 
-         */
-        const handleResizeStart = function(_e) {       
-            objectIdBeingResized = _e.obj.getId();
-        };    
-
-        /**
-         * 
          * @param {Object} _e
          */
         const handleMoveStart = function(_e) {     
@@ -2982,6 +2984,17 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
+         * @param {Object} _e 
+         */
+        const handleResizeStart = function(_e) {       
+            objectIdBeingResized = _e.obj.getId();
+            objectResizeCursor = _e.resizeCursor;
+
+            _sheetDomElement.style.cursor = objectResizeCursor;
+        };
+
+        /**
+         * 
          * @param {Number} _x 
          * @param {Number} _y 
          */    
@@ -2998,6 +3011,11 @@ var GraphPaper = (function (exports) {
 
             entity.resize(newWidth, newHeight);
         };
+
+        const handleResizeEnd = function() {
+            objectIdBeingResized = null;
+            _sheetDomElement.style.cursor = "";
+        };    
 
         /**
          * 
@@ -3260,7 +3278,7 @@ var GraphPaper = (function (exports) {
                 }           
                 
                 if(objectIdBeingResized !== null) {
-                    objectIdBeingResized = null;  
+                    handleResizeEnd();
                 }
 
                 if(currentGroupTransformationContainerBeingDragged !== null) {
@@ -3285,6 +3303,10 @@ var GraphPaper = (function (exports) {
                         handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
                     }
 
+                    if(objectIdBeingResized !== null) {
+                        handleResizeEnd();
+                    }
+
                     if(currentGroupTransformationContainerBeingDragged !== null) {
                         currentGroupTransformationContainerBeingDragged.endTranslate();
                         currentGroupTransformationContainerBeingDragged = null;
@@ -3297,7 +3319,7 @@ var GraphPaper = (function (exports) {
                     objectIdBeingDragged = null;
                     objectIdBeingResized = null;
                 }
-            });  
+            });
 
             _sheetDomElement.addEventListener('mousedown', function (e) {
                 // if we're dragging something, stop propagation
@@ -3373,18 +3395,6 @@ var GraphPaper = (function (exports) {
          * @type {Element}
          */
         var currentTranslateHandleElementActivated = null;
-
-        /**
-         * @type {Element}
-         */
-        var currentResizeHandleElementActivated = null;
-
-        const Event = {
-            TRANSLATE_START: 'obj-translate-start',
-            TRANSLATE: 'obj-translate',
-            RESIZE_START: 'obj-resize-start',
-            RESIZE: 'obj-resize'
-        };
 
         const eventNameToHandlerFunc = new Map();
 
@@ -3520,7 +3530,7 @@ var GraphPaper = (function (exports) {
             _domElement.style.left = x + 'px';
             _domElement.style.top = y + 'px';
 
-            const observers = eventNameToHandlerFunc.get(Event.TRANSLATE) || [];
+            const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE) || [];
             observers.forEach(function(handler) {
                 handler({"obj":self, "x": _x, "y": _y});
             });
@@ -3556,7 +3566,7 @@ var GraphPaper = (function (exports) {
                 _domElement.style.height = height + 'px';
             }
 
-            const observers = eventNameToHandlerFunc.get(Event.RESIZE) || [];
+            const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE) || [];
             observers.forEach(function(handler) {
                 handler({"obj":self, "width": _width, "height": _height});
             });
@@ -3678,7 +3688,7 @@ var GraphPaper = (function (exports) {
         const translateTouchStartHandler = function(e) {
             currentTranslateHandleElementActivated = e.target;
 
-            const observers = eventNameToHandlerFunc.get(Event.TRANSLATE_START) || [];
+            const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE_START) || [];
             observers.forEach(function(handler) {
                 handler({
                     "obj": self,
@@ -3693,7 +3703,7 @@ var GraphPaper = (function (exports) {
         const translateMouseDownHandler = function(e) {
             currentTranslateHandleElementActivated = e.target;
             
-            const observers = eventNameToHandlerFunc.get(Event.TRANSLATE_START) || [];
+            const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE_START) || [];
             observers.forEach(function(handler) {
                 handler({
                     "obj": self,
@@ -3719,42 +3729,48 @@ var GraphPaper = (function (exports) {
             });
         };
 
-        const resizeMouseDownHandler = function(e) {
-            if (e.which !== MOUSE_MIDDLE_BUTTON) {
+        const resizeMouseDownHandler = function(_e, _triggeredByElement, _resizeCursor) {
+            if (_e.which !== MOUSE_MIDDLE_BUTTON) {
                 return;
             }
-
-            currentResizeHandleElementActivated = e.target;
             
-            const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+            const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE_START) || [];
             observers.forEach(function(handler) {
                 handler({
                     "obj": self,
-                    "x": e.pageX, 
-                    "y": e.pageY,
+                    "x": _e.pageX, 
+                    "y": _e.pageY,
+                    "resizeCursor": _resizeCursor,
                     "isTouch": false
                 });
             });    
         };
 
-        const resizeTouchStartHandler = function(e) {
-            currentResizeHandleElementActivated = e.target;
+        const resizeTouchStartHandler = function(_e, _triggeredByElement, _resizeCursor) {
             
-            const observers = eventNameToHandlerFunc.get(Event.RESIZE_START) || [];
+            const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE_START) || [];
             observers.forEach(function(handler) {
                 handler({
                     "obj": self,
-                    "x": e.touches[0].pageX,  
-                    "y": e.touches[0].pageY, 
+                    "x": _e.touches[0].pageX,  
+                    "y": _e.touches[0].pageY,
+                    "resizeCursor": _resizeCursor,
                     "isTouch": true
                 });
-            });    
-        };    
+            });
+        };
 
         const bindResizeHandleElements = function() {
             _resizeHandleDomElements.forEach((_el) => {
-                _el.addEventListener('touchstart', resizeTouchStartHandler);  
-                _el.addEventListener('mousedown', resizeMouseDownHandler);  
+                const cursor = window.getComputedStyle(_el)['cursor'];
+
+                _el.addEventListener('touchstart', (e) => {
+                    resizeTouchStartHandler(e, _el, cursor);
+                });
+
+                _el.addEventListener('mousedown', (e) => {
+                    resizeMouseDownHandler(e, _el, cursor);
+                });  
             });
         };
 
@@ -4256,6 +4272,7 @@ var GraphPaper = (function (exports) {
     exports.ConnectorEvent = ConnectorEvent;
     exports.Dimensions = Dimensions;
     exports.Entity = Entity;
+    exports.EntityEvent = EntityEvent;
     exports.GRID_STYLE = GRID_STYLE;
     exports.Grid = Grid;
     exports.GroupTransformationContainer = GroupTransformationContainer;
