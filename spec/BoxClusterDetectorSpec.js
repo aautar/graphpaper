@@ -1,17 +1,14 @@
+const jsdom = require("jsdom");
 import {BoxClusterDetector} from '../src/BoxClusterDetector.js';
 import {Entity} from '../src/Entity.js';
 import {Cluster} from '../src/Cluster.js';
 
-const createMockDomElem = function() {
-    const mockDomElem = {
-        addEventListener: function() { },
-        style: {
-            top: 0,
-            left: 0
-        }      
-    };
+const { JSDOM, Event } = jsdom;
+const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
+const window = dom.window;
 
-    return mockDomElem;
+const createMockDomElem = function() {
+    return window.document.createElement('div');
 };
 
 describe("BoxClusterDetector::areEntitiesClose", function() {
