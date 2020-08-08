@@ -106,11 +106,11 @@
         canvas.addEntity(obj2);
         canvas.addEntity(obj3);
 
-        canvas.on(GraphPaper.SheetEvent.OBJECT_TRANSLATED, function() {
-            canvas.findBestConnectorAnchorsToConnectObjects(obj1, obj2, function(_bestAnchors) {
+        canvas.on(GraphPaper.SheetEvent.ENTITY_TRANSLATED, function() {
+            canvas.findBestConnectorAnchorsToConnectEntities(obj1, obj2, function(_bestAnchors) {
 
                 // to optimize, we should only remove existing if it doesn't match the best
-                const currentConnectors = canvas.getConnectorsBetweenObjects(obj1, obj2);
+                const currentConnectors = canvas.getConnectorsBetweenEntities(obj1, obj2);
                 for(let i=0; i<currentConnectors.length; i++) {
                     canvas.removeConnector(currentConnectors[i]);      
                 }
