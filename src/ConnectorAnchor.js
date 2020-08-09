@@ -51,13 +51,13 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
      * @returns {Point}
      */
     this.getCentroid = function() {
-        const halfWidth = self.getWidth() * 0.5;
-        const halfHeight = self.getHeight() * 0.5;        
-        const viewportRelativeRect = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
+        const pageSpaceRect = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
+        const halfWidth = pageSpaceRect.getWidth() * 0.5;
+        const halfHeight = pageSpaceRect.getHeight() * 0.5;        
         
         return new Point(
-            (viewportRelativeRect.getLeft() + halfWidth) - _sheet.getOffsetLeft(), 
-            (viewportRelativeRect.getTop() + halfHeight) - _sheet.getOffsetTop()
+            (pageSpaceRect.getLeft() + halfWidth) - _sheet.getOffsetLeft(), 
+            (pageSpaceRect.getTop() + halfHeight) - _sheet.getOffsetTop()
         );
     };
 

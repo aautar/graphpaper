@@ -497,11 +497,12 @@ function Sheet(_sheetDomElement, _window) {
      */
     this.transformDomRectToPageSpaceRect = function(_domRect) {
         const pageOffset = self.getPageOffset();
+        const sheetOffset = self.getSheetOffset();
 
-        const left = _domRect.left - self.getOffsetLeft() + pageOffset.getX();
-        const top = _domRect.top - self.getOffsetTop() + pageOffset.getY();
-        const right = _domRect.right - self.getOffsetLeft() + pageOffset.getX();
-        const bottom = _domRect.bottom - self.getOffsetTop() + pageOffset.getY();
+        const left = _domRect.left - sheetOffset.getX() + pageOffset.getX();
+        const top = _domRect.top - sheetOffset.getY() + pageOffset.getY();
+        const right = _domRect.right - sheetOffset.getX() + pageOffset.getX();
+        const bottom = _domRect.bottom - sheetOffset.getY() + pageOffset.getY();
 
         // inv transform
         const invTransformedPosLeftTop = MatrixMath.vecMat4Multiply(
@@ -516,10 +517,10 @@ function Sheet(_sheetDomElement, _window) {
 
         // we have Sheet space coordinates, transform to Page space and return
         return new Rectangle(
-            invTransformedPosLeftTop[0] + self.getOffsetLeft(), 
-            invTransformedPosLeftTop[1] + self.getOffsetTop(), 
-            invTransformedPosRightBottom[0] + self.getOffsetLeft(), 
-            invTransformedPosRightBottom[1] + self.getOffsetTop()
+            invTransformedPosLeftTop[0] + sheetOffset.getX(), 
+            invTransformedPosLeftTop[1] + sheetOffset.getY(), 
+            invTransformedPosRightBottom[0] + sheetOffset.getX(), 
+            invTransformedPosRightBottom[1] + sheetOffset.getY()
         );
     };
 
@@ -548,6 +549,13 @@ function Sheet(_sheetDomElement, _window) {
     this.snapToGrid = function(_p) {
         var ret = Math.round(_p/self.getGridSize()) * self.getGridSize();
         return Math.max(0, ret - 1);
+    };
+
+    /**
+     * @returns {Point}
+     */
+    this.getSheetOffset = function() {
+        return new Point(_sheetDomElement.offsetLeft, _sheetDomElement.offsetTop);
     };
 
     /**
