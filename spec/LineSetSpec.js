@@ -34,3 +34,30 @@ describe("LineSet constructor", function() {
         expect(lineSetArray[1].isEqual(new Line(new Point(5, 6), new Point(7, 8)))).toBe(true);
     });  
 });
+
+describe("LineSet.push", function() {  
+    it("pushes new line into set", function() {
+        const expectedLinesInSet = [
+            new Line(new Point(1, 2), new Point(3, 4))
+        ];
+
+        const ls = new LineSet([]);
+        ls.push(new Line(new Point(1, 2), new Point(3, 4)));
+
+        expect(ls.count()).toBe(1);
+        expect(ls.toArray()[0].isEqual(expectedLinesInSet[0])).toBe(true);
+    });
+
+    it("does not push line if it already exists in set", function() {
+        const expectedLinesInSet = [
+            new Line(new Point(1, 2), new Point(3, 4))
+        ];
+
+        const ls = new LineSet([]);
+        ls.push(new Line(new Point(1, 2), new Point(3, 4)));
+        ls.push(new Line(new Point(1, 2), new Point(3, 4)));
+
+        expect(ls.count()).toBe(1);
+        expect(ls.toArray()[0].isEqual(expectedLinesInSet[0])).toBe(true);
+    });    
+});
