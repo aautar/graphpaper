@@ -10,6 +10,11 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
     
     const self = this;
 
+    const getDimensions = function() {
+        const r = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
+        return new Point(r.getWidth(), r.getHeight());
+    };
+
     /**
      * @returns {String}
      */
@@ -51,13 +56,14 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
      * @returns {Point}
      */
     this.getCentroid = function() {
+        const sheetOffset = _sheet.getSheetOffset();
         const pageSpaceRect = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
         const halfWidth = pageSpaceRect.getWidth() * 0.5;
         const halfHeight = pageSpaceRect.getHeight() * 0.5;        
         
         return new Point(
-            (pageSpaceRect.getLeft() + halfWidth) - _sheet.getOffsetLeft(), 
-            (pageSpaceRect.getTop() + halfHeight) - _sheet.getOffsetTop()
+            (pageSpaceRect.getLeft() + halfWidth) - sheetOffset.getX(), 
+            (pageSpaceRect.getTop() + halfHeight) - sheetOffset.getY()
         );
     };
 
@@ -67,9 +73,10 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
      * @returns {Point[]}
      */
     this.getRoutingPoints = function(_gridSize) {
+        const dimensions = getDimensions();
         const centroid = self.getCentroid();
-        const halfWidth = self.getWidth() * 0.5;
-        const halfHeight = self.getHeight() * 0.5;
+        const halfWidth = dimensions.getX() * 0.5;
+        const halfHeight = dimensions.getY() * 0.5;
 
         return [
             new Point(centroid.getX() + halfWidth + _gridSize, centroid.getY()),
@@ -84,9 +91,10 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
      * @returns {Rectangle}
      */
     this.getBoundingRectange = function() {
+        const dimensions = getDimensions();
         const centroid = self.getCentroid();
-        const halfWidth = self.getWidth() * 0.5;
-        const halfHeight = self.getHeight() * 0.5;
+        const halfWidth = dimensions.getX() * 0.5;
+        const halfHeight = dimensions.getY() * 0.5;
 
         return new Rectangle(
             centroid.getX() - halfWidth, 
