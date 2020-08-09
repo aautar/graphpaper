@@ -17,17 +17,14 @@ function LineSet(_linesInput) {
 
     /**
      * @param {Line} _newLine
+     * @returns {Boolean}
      */
     this.push = function(_newLine) {
-        var alreadyInLinesArray = false;
-        lines.forEach(function(_existingLine) {
-            if(_newLine.isEqual(_existingLine)) {
-                alreadyInLinesArray = true;
+        for(let i=0; i<lines.length; i++) {
+            if(_newLine.isEqual(lines[i])) {
+                // line already in set
+                return false;
             }
-        });        
-
-        if(alreadyInLinesArray) {
-            return false;
         }
 
         lines.push(_newLine);
