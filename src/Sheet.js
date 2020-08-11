@@ -115,6 +115,13 @@ function Sheet(_sheetDomElement, _window) {
 
     const connectorAnchorsSelected = [];
 
+    // DOM attribute cache to prevent reflow
+    let isDomMetricsLockActive = false;
+    let sheetOffsetLeft = null;
+    let sheetOffsetTop = null;
+    let sheetPageScrollXOffset = null;
+    let sheetPageScrollYOffset = null;
+
     /**
      * Event name -> Callback map
      */
@@ -198,6 +205,23 @@ function Sheet(_sheetDomElement, _window) {
         return grid.getSize();
     };
 
+    const lockDomMetrics = function() {
+        sheetOffsetLeft = _sheetDomElement.offsetLeft;
+        sheetOffsetTop = _sheetDomElement.offsetTop;
+        sheetPageScrollXOffset = _window.pageXOffset;
+        sheetPageScrollYOffset = _window.pageYOffset;
+
+        isDomMetricsLockActive = true;
+    };
+
+    const unlockDomMetrics = function() {
+        isDomMetricsLockActive = false;
+    };
+
+    this.hasDomMetricsLock = function() {
+        return isDomMetricsLockActive;
+    };
+
     /**
      * @returns {PointSet}
      */
@@ -250,6 +274,8 @@ function Sheet(_sheetDomElement, _window) {
     };    
 
     const refreshAllConnectorsInternal = function() {
+        lockDomMetrics();
+
         const executionTimeT1 = new Date();
         const connectorDescriptors = [];
         objectConnectors.forEach(function(_c) {
@@ -282,6 +308,8 @@ function Sheet(_sheetDomElement, _window) {
         );
 
         metrics.refreshAllConnectorsInternal.executionTime = (new Date()) - executionTimeT1;
+
+        unlockDomMetrics();
     };
 
     /**
@@ -539,6 +567,10 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {Point}
      */
     this.getPageOffset = function() {
+        if(self.hasDomMetricsLock()) {
+            return new Point(sheetPageScrollXOffset, sheetPageScrollYOffset);
+        }
+
         return new Point(_window.pageXOffset, _window.pageYOffset);
     };
 
@@ -555,6 +587,10 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {Point}
      */
     this.getSheetOffset = function() {
+        if(self.hasDomMetricsLock()) {
+            return new Point(sheetOffsetLeft, sheetOffsetTop);
+        }
+        
         return new Point(_sheetDomElement.offsetLeft, _sheetDomElement.offsetTop);
     };
 
@@ -562,14 +598,14 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {Number}
      */
     this.getOffsetLeft = function() {
-        return _sheetDomElement.offsetLeft;
+        return sheetOffsetLeft;
     };
 
     /**
      * @returns {Number}
      */
     this.getOffsetTop = function() {
-        return _sheetDomElement.offsetTop;
+        return sheetOffsetTop;
     };
 
     /**
