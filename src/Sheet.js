@@ -255,7 +255,7 @@ function Sheet(_sheetDomElement, _window) {
      */    
     const getConnectorBoundaryLines = function() {
         const boundaryLines = new LineSet();
-        
+
         sheetEntities.forEach(function(_obj) {
             const lines = _obj.getBoundingRectange().getLines();
             lines.forEach((_l) => {
@@ -599,14 +599,14 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {Number}
      */
     this.getOffsetLeft = function() {
-        return sheetOffsetLeft;
+        return _sheetDomElement.offsetLeft;
     };
 
     /**
      * @returns {Number}
      */
     this.getOffsetTop = function() {
-        return sheetOffsetTop;
+        return _sheetDomElement.offsetTop;
     };
 
     /**

@@ -2133,7 +2133,7 @@ var GraphPaper = (function (exports) {
          */    
         const getConnectorBoundaryLines = function() {
             const boundaryLines = new LineSet();
-            
+
             sheetEntities.forEach(function(_obj) {
                 const lines = _obj.getBoundingRectange().getLines();
                 lines.forEach((_l) => {
@@ -2477,14 +2477,14 @@ var GraphPaper = (function (exports) {
          * @returns {Number}
          */
         this.getOffsetLeft = function() {
-            return sheetOffsetLeft;
+            return _sheetDomElement.offsetLeft;
         };
 
         /**
          * @returns {Number}
          */
         this.getOffsetTop = function() {
-            return sheetOffsetTop;
+            return _sheetDomElement.offsetTop;
         };
 
         /**
