@@ -254,7 +254,8 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {Line[]}
      */    
     const getConnectorBoundaryLines = function() {
-        const boundaryLines = [];
+        const boundaryLines = new LineSet();
+        
         sheetEntities.forEach(function(_obj) {
             const lines = _obj.getBoundingRectange().getLines();
             lines.forEach((_l) => {
@@ -270,7 +271,7 @@ function Sheet(_sheetDomElement, _window) {
             });
         });
 
-        return new LineSet(boundaryLines);
+        return boundaryLines;
     };    
 
     const refreshAllConnectorsInternal = function() {

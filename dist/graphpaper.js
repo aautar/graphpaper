@@ -1993,6 +1993,13 @@ var GraphPaper = (function (exports) {
 
         const connectorAnchorsSelected = [];
 
+        // DOM attribute cache to prevent reflow
+        let isDomMetricsLockActive = false;
+        let sheetOffsetLeft = null;
+        let sheetOffsetTop = null;
+        let sheetPageScrollXOffset = null;
+        let sheetPageScrollYOffset = null;
+
         /**
          * Event name -> Callback map
          */
@@ -2076,6 +2083,23 @@ var GraphPaper = (function (exports) {
             return grid.getSize();
         };
 
+        const lockDomMetrics = function() {
+            sheetOffsetLeft = _sheetDomElement.offsetLeft;
+            sheetOffsetTop = _sheetDomElement.offsetTop;
+            sheetPageScrollXOffset = _window.pageXOffset;
+            sheetPageScrollYOffset = _window.pageYOffset;
+
+            isDomMetricsLockActive = true;
+        };
+
+        const unlockDomMetrics = function() {
+            isDomMetricsLockActive = false;
+        };
+
+        this.hasDomMetricsLock = function() {
+            return isDomMetricsLockActive;
+        };
+
         /**
          * @returns {PointSet}
          */
@@ -2108,7 +2132,8 @@ var GraphPaper = (function (exports) {
          * @returns {Line[]}
          */    
         const getConnectorBoundaryLines = function() {
-            const boundaryLines = [];
+            const boundaryLines = new LineSet();
+            
             sheetEntities.forEach(function(_obj) {
                 const lines = _obj.getBoundingRectange().getLines();
                 lines.forEach((_l) => {
@@ -2124,10 +2149,12 @@ var GraphPaper = (function (exports) {
                 });
             });
 
-            return new LineSet(boundaryLines);
+            return boundaryLines;
         };    
 
         const refreshAllConnectorsInternal = function() {
+            lockDomMetrics();
+
             const executionTimeT1 = new Date();
             const connectorDescriptors = [];
             objectConnectors.forEach(function(_c) {
@@ -2160,6 +2187,8 @@ var GraphPaper = (function (exports) {
             );
 
             metrics.refreshAllConnectorsInternal.executionTime = (new Date()) - executionTimeT1;
+
+            unlockDomMetrics();
         };
 
         /**
@@ -2417,6 +2446,10 @@ var GraphPaper = (function (exports) {
          * @returns {Point}
          */
         this.getPageOffset = function() {
+            if(self.hasDomMetricsLock()) {
+                return new Point(sheetPageScrollXOffset, sheetPageScrollYOffset);
+            }
+
             return new Point(_window.pageXOffset, _window.pageYOffset);
         };
 
@@ -2433,6 +2466,10 @@ var GraphPaper = (function (exports) {
          * @returns {Point}
          */
         this.getSheetOffset = function() {
+            if(self.hasDomMetricsLock()) {
+                return new Point(sheetOffsetLeft, sheetOffsetTop);
+            }
+            
             return new Point(_sheetDomElement.offsetLeft, _sheetDomElement.offsetTop);
         };
 
@@ -2440,14 +2477,14 @@ var GraphPaper = (function (exports) {
          * @returns {Number}
          */
         this.getOffsetLeft = function() {
-            return _sheetDomElement.offsetLeft;
+            return sheetOffsetLeft;
         };
 
         /**
          * @returns {Number}
          */
         this.getOffsetTop = function() {
-            return _sheetDomElement.offsetTop;
+            return sheetOffsetTop;
         };
 
         /**
