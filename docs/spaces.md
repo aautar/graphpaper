@@ -7,6 +7,9 @@ There are generally 4 sets of coordinate spaces that you should be aware of when
 - Sheet space
 - Entity space
 
+![GraphPaper Spaces](graphpaper-coordinate-spaces-2.svg?raw=true "GraphPaper Spaces")
+
+
 Screen space is the coordinate space of the window/viewport. 
 
 Page space is the coordinate space of the [DOM page](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction). Coordinates you get from a Sheet are in Page space.
