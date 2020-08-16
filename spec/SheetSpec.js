@@ -480,7 +480,7 @@ describe("Canvas connectors", function() {
         expect(entities[1].getId()).toBe(objB.getId());
     });    
 
-    it("getConnectorsBetweenEntities returns correct connector", function() {
+    it("getConnectorsBetweenEntities returns correct array of connectors", function() {
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
         sheet.initInteractionHandlers();
 
@@ -504,7 +504,40 @@ describe("Canvas connectors", function() {
 
         expect(connectorsBetweenEntities.length).toBe(1);
         expect(connectorsBetweenEntities[0].getId()).toBe("objA-anchor:objB-anchor");
-    });        
+    });
+
+    it("getConnectorsInEntitySet returns correct array of connectors", function() {
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        sheet.initInteractionHandlers();
+
+        const anchorA = makeAnchor("objA-anchor", sheet);
+        const objA = makeEntity("objA", 100, 100, 100, 100);
+        objA.addNonInteractableConnectorAnchor({});
+        const objAAnchors = objA.getConnectorAnchors();
+        objAAnchors[0] = anchorA; // overwrite, as typically objects create the anchors themselves
+
+        const anchorB = makeAnchor("objB-anchor", sheet);
+        const objB = makeEntity("objB", 500, 500, 100, 100);
+        objB.addNonInteractableConnectorAnchor({});
+        const objBAnchors = objB.getConnectorAnchors();
+        objBAnchors[0] = anchorB; // overwrite, as typically objects create the anchors themselves
+
+        const anchorC = makeAnchor("objC-anchor", sheet);
+        const objC = makeEntity("objC", -500, -500, 100, 100);
+        objC.addNonInteractableConnectorAnchor({});
+        const objCAnchors = objC.getConnectorAnchors();
+        objCAnchors[0] = anchorC; // overwrite, as typically objects create the anchors themselves        
+
+        sheet.addEntity(objA);
+        sheet.addEntity(objB);
+        sheet.addEntity(objC);
+
+        sheet.makeNewConnectorFromAnchors(anchorA, anchorB);
+        const connectorsBetweenEntities = sheet.getConnectorsInEntitySet([objA, objB, objC]);
+
+        expect(connectorsBetweenEntities.length).toBe(1);
+        expect(connectorsBetweenEntities[0].getId()).toBe("objA-anchor:objB-anchor");
+    });    
 
     it("getConnectorsConnectedToEntity returns correct connector", function() {
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);

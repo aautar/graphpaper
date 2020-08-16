@@ -848,6 +848,24 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
+     * @param {Entity[]} _entitySet
+     * @returns {Connector[]}
+     */
+    this.getConnectorsInEntitySet = function(_entitySet) {
+        const foundConnectors = [];
+
+        for(let i=0; i<_entitySet.length; i++) {
+            for(let j=i+1; j<_entitySet.length; j++) {
+                const connectorsBetween = self.getConnectorsBetweenEntities(_entitySet[i], _entitySet[j]);
+                foundConnectors.push(...connectorsBetween);
+            }
+        }
+
+        return foundConnectors;
+    };
+
+    /**
+     * 
      * @param {String} _connectorId
      * @returns {Entity[]} 
      */
