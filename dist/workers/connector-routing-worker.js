@@ -884,8 +884,9 @@
 
     const ConnectorRoutingAlgorithm = Object.freeze({
         STRAIGHT_LINE: 0,
-        ASTAR: 1,
-        ASTAR_WITH_ROUTE_OPTIMIZATION: 2
+        STRAIGHT_LINE_BETWEEN_ANCHORS: 1,
+        ASTAR: 2,
+        ASTAR_WITH_ROUTE_OPTIMIZATION: 3
     });
 
     /**
@@ -917,9 +918,14 @@
             .findPointClosestTo(anchorStartCentroid);
 
         let routingPoints = new PointSet();
-        if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR || routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) {
+
+        if(routingAlgorithm == ConnectorRoutingAlgorithm.STRAIGHT_LINE_BETWEEN_ANCHORS) {
+            routingPoints = new PointSet([adjustedStart, adjustedEnd]);
+        } else if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR || routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) {
             const optimizeRoute = (routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) ? true: false;
             routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
+        } else {
+            throw "Invalid routing algorithm";
         }
 
         const routingPointsArray = routingPoints.toArray();
