@@ -883,8 +883,9 @@
     };
 
     const ConnectorRoutingAlgorithm = Object.freeze({
-        NONE: 'connector-routing-none',
-        ASTAR: 'connector-routing-astar',
+        STRAIGHT_LINE: 0,
+        ASTAR: 1,
+        ASTAR_WITH_ROUTE_OPTIMIZATION: 2
     });
 
     /**
@@ -901,7 +902,6 @@
         const markerStartSize = _connectorDescriptor.marker_start_size;
         const markerEndSize = _connectorDescriptor.marker_end_size;
         const curvaturePx = _connectorDescriptor.curvature_px;
-        const optimizeRoute = _connectorDescriptor.allow_route_optimization;
         const routingAlgorithm = _connectorDescriptor.routing_algorithm;
 
         const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
@@ -917,7 +917,8 @@
             .findPointClosestTo(anchorStartCentroid);
 
         let routingPoints = new PointSet();
-        if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR) {
+        if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR || routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) {
+            const optimizeRoute = (routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) ? true: false;
             routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
         }
 

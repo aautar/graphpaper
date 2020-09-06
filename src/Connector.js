@@ -12,9 +12,9 @@ import {Point} from './Point';
  * @param {String} _strokeColor
  * @param {String} _strokeWidth
  * @param {Number} _curvaturePx
- * @param {Boolean} _allowRouteOptimization
+ * @param {ConnectorRoutingAlgorithm} _routingAlgorithm
  */
-function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _allowRouteOptimization, _routingAlgorithm) {
+function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _routingAlgorithm) {
     const self = this;
 
     const eventNameToHandlerFunc = new Map();
@@ -33,12 +33,8 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         _curvaturePx = 0;
     }
 
-    if(typeof _allowRouteOptimization === 'undefined') {
-        _allowRouteOptimization = true;
-    }
-
     if(typeof _routingAlgorithm === 'undefined') {
-        _routingAlgorithm = ConnectorRoutingAlgorithm.ASTAR;
+        _routingAlgorithm = ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION;
     }
 
     /**
@@ -261,7 +257,6 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
             "marker_start_size": markerStartSize,
             "marker_end_size": markerEndSize,
             "curvature_px": _curvaturePx,
-            "allow_route_optimization": _allowRouteOptimization,
             "routing_algorithm": _routingAlgorithm
         };
     };

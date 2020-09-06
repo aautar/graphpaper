@@ -248,8 +248,7 @@ describe("Connector.getDescriptor", function() {
             marker_start_size: 0,
             marker_end_size: 0,
             curvature_px: 0,
-            allow_route_optimization: true,
-            routing_algorithm: 'connector-routing-astar'
+            routing_algorithm: ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION
         };
 
         const anchorStart = {
