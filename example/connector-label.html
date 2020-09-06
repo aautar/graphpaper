@@ -41,20 +41,18 @@
 
         
     <script type="text/javascript">
-	
-        const canvas = new GraphPaper.Sheet(
+        const sheet = new GraphPaper.Sheet(
             document.getElementById('paper'), 
             window
         );
 
-        canvas.initInteractionHandlers();
-        canvas.initTransformationHandlers();
+        sheet.initInteractionHandlers();
+        sheet.initTransformationHandlers();
 
-        canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
+        sheet.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
             const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
-
-            c.setMarkerStart(`#arrow`, 10.0);
-            c.setMarkerEnd(`#arrow`, 10.0);
+            c.setMarkerStart(`#arrow`, 15.0);
+            c.setMarkerEnd(`#arrow`, 15.0);
             
             c.on(GraphPaper.ConnectorEvent.CLICK, function(e) {
                 console.log(e);
@@ -69,7 +67,7 @@
             0, 
             44, 
             44, 
-            canvas,
+            sheet,
             document.getElementById('obj1'), 
             [document.getElementById('translateHandle1')],
             [document.getElementById('resizeHandle1')]
@@ -83,7 +81,7 @@
             0, 
             44, 
             44, 
-            canvas,
+            sheet,
             document.getElementById('obj2'), 
             [document.getElementById('translateHandle2')],
             [document.getElementById('resizeHandle2')]
@@ -92,13 +90,12 @@
         const obj2Anchor = obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
         obj2.translate(100, 100);
 
-        canvas.addEntity(obj1);
-        canvas.addEntity(obj2);
-        canvas.makeNewConnectorFromAnchors(obj1Anchor, obj2Anchor);
+        sheet.addEntity(obj1);
+        sheet.addEntity(obj2);
+        sheet.makeNewConnectorFromAnchors(obj1Anchor, obj2Anchor);
 
-        canvas.on(GraphPaper.SheetEvent.CONNECTOR_UPDATED, (e) => {
+        sheet.on(GraphPaper.SheetEvent.CONNECTOR_UPDATED, (e) => {
             if(e.connector.getId() === `obj1-1000:obj2-1000`) {
-
                 const labelElem = document.getElementById('label1');                
                 const labelHalfWidth = labelElem.offsetWidth * 0.5;
                 const labelHalfHeight = labelElem.offsetHeight * 0.5;
@@ -121,8 +118,7 @@
                 labelElem.style.left = `calc(${mp.getX()}px - ${labelHalfWidth}px)`;
                 labelElem.style.top = `calc(${mp.getY()}px - ${labelHalfHeight}px)`;          
                 labelElem.style.transform = `rotate(${mpAngle}rad)`;
-
-            }            
+            }
         });
     </script>
 
