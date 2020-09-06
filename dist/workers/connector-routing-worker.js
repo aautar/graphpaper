@@ -882,6 +882,11 @@
 
     };
 
+    const ConnectorRoutingAlgorithm = Object.freeze({
+        NONE: 'connector-routing-none',
+        ASTAR: 'connector-routing-astar',
+    });
+
     /**
      * 
      * @param {Object} _connectorDescriptor
@@ -911,7 +916,11 @@
             .findPointsCloseTo(anchorEndCentroid, anchorPointMinDist)
             .findPointClosestTo(anchorStartCentroid);
 
-        const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
+        let routingPoints = new PointSet();
+        if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR) {
+            routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
+        }
+
         const routingPointsArray = routingPoints.toArray();
         let pathStartPoint = anchorStartCentroid;
         let pathEndPoint = anchorEndCentroid;

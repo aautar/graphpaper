@@ -4,6 +4,7 @@ import {LineSet} from '../LineSet';
 import {PointVisibilityMap} from '../PointVisibilityMap';
 import {SvgPathBuilder} from '../SvgPathBuilder';
 import {Line} from '../Line';
+import {ConnectorRoutingAlgorithm} from '../ConnectorRoutingAlgorithm';
 
 /**
  * 
@@ -34,7 +35,11 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
         .findPointsCloseTo(anchorEndCentroid, anchorPointMinDist)
         .findPointClosestTo(anchorStartCentroid);
 
-    const routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
+    let routingPoints = new PointSet();
+    if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR) {
+        routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
+    }
+
     const routingPointsArray = routingPoints.toArray();
     let pathStartPoint = anchorStartCentroid;
     let pathEndPoint = anchorEndCentroid;
