@@ -1211,6 +1211,11 @@ var GraphPaper = (function (exports) {
         MOUSE_LEAVE: 'connector-mouse-leave'
     });
 
+    const ConnectorRoutingAlgorithm = Object.freeze({
+        NONE: 'connector-routing-none',
+        ASTAR: 'connector-routing-astar',
+    });
+
     /**
      * 
      * @param {ConnectorAnchor} _anchorStart 
@@ -1221,7 +1226,7 @@ var GraphPaper = (function (exports) {
      * @param {Number} _curvaturePx
      * @param {Boolean} _allowRouteOptimization
      */
-    function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _allowRouteOptimization) {
+    function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _allowRouteOptimization, _routingAlgorithm) {
         const self = this;
 
         const eventNameToHandlerFunc = new Map();
@@ -1242,6 +1247,10 @@ var GraphPaper = (function (exports) {
 
         if(typeof _allowRouteOptimization === 'undefined') {
             _allowRouteOptimization = true;
+        }
+
+        if(typeof _routingAlgorithm === 'undefined') {
+            _routingAlgorithm = ConnectorRoutingAlgorithm.ASTAR;
         }
 
         /**
@@ -1465,6 +1474,7 @@ var GraphPaper = (function (exports) {
                 "marker_end_size": markerEndSize,
                 "curvature_px": _curvaturePx,
                 "allow_route_optimization": _allowRouteOptimization,
+                "routing_algorithm": _routingAlgorithm
             };
         };
 
@@ -1892,7 +1902,7 @@ var GraphPaper = (function (exports) {
 
   var SvgPathBuilder={pointToLineTo:function pointToLineTo(a,b){return 0===b?"M"+a.getX()+" "+a.getY():"L"+a.getX()+" "+a.getY()},pointTripletToTesselatedCurvePoints:function pointTripletToTesselatedCurvePoints(a,b){if(3!==a.length)throw new Error("_points must be array of exactly 3 points");var c=a[1],d=new Line(a[0],a[1]),e=new Line(a[1],a[2]),f=d.createShortenedLine(0,.5*b),g=e.createShortenedLine(.5*b,0);return [f.getStartPoint(),f.getEndPoint(),g.getStartPoint(),g.getEndPoint()]},pointsToPath:function pointsToPath(a,b){b=b||0;var c=[];if(0<b){for(var h=0;3<=a.length;){var d=a.shift(),e=a.shift(),f=a.shift(),g=SvgPathBuilder.pointTripletToTesselatedCurvePoints([d,e,f],b);a.unshift(g[3]),a.unshift(g[2]);for(var k=0;k<g.length-2;k++)c.push(SvgPathBuilder.pointToLineTo(g[k],h++));}for(;0<a.length;){var j=a.shift();c.push(SvgPathBuilder.pointToLineTo(j,ptIdx++));}}else for(var l,m=0;m<a.length;m++)l=a[m],c.push(SvgPathBuilder.pointToLineTo(l,m));return c.join(" ")}};
 
-  var computeConnectorPath=function computeConnectorPath(a,b,c){var d=Point.fromArray(a.anchor_start_centroid_arr),e=Point.fromArray(a.anchor_end_centroid_arr),f=a.marker_start_size,g=a.marker_end_size,h=a.curvature_px,i=a.allow_route_optimization,j=b.findDistanceToPointClosestTo(d),k=b.findPointsCloseTo(d,j).findPointClosestTo(e),l=b.findPointsCloseTo(e,j).findPointClosestTo(d),m=c.computeRoute(k,l,i),n=m.toArray(),o=d,p=e;if(0<f&&1<=n.length){var r=new Line(n[0],d).createShortenedLine(0,f);o=r.getEndPoint();}if(0<g&&1<=n.length){var s=new Line(n[n.length-1],e).createShortenedLine(0,g);p=s.getEndPoint();}var q=[o].concat(_toConsumableArray(n),[p]);return {svgPath:SvgPathBuilder.pointsToPath(q,h),pointsInPath:q}},convertArrayBufferToFloat64Array=function convertArrayBufferToFloat64Array(a){return new Float64Array(a)},requestQueue=[],processRequestQueue=function processRequestQueue(){if(0!==requestQueue.length){var a=requestQueue.pop();requestQueue.length=0;var b={overallTime:null},c=new Date,d=a.gridSize,e=a.connectorDescriptors,f=new Date,g=new PointSet(convertArrayBufferToFloat64Array(a.routingPoints)),h=new LineSet(convertArrayBufferToFloat64Array(a.boundaryLines)),i=new PointSet(convertArrayBufferToFloat64Array(a.routingPointsAroundAnchor));b.msgDecodeTime=new Date-f;var j=new Date,k=new PointVisibilityMap(g,h);b.pointVisibilityMapCreationTime=new Date-j;var l=new Date;e.forEach(function(a){var b=computeConnectorPath(a,i,k),c=new PointSet(b.pointsInPath);a.svgPath=b.svgPath,a.pointsInPath=c.toFloat64Array().buffer;}),b.allPathsComputationTime=new Date-l,b.numRoutingPoints=g.count(),b.numBoundaryLines=h.count(),b.overallTime=new Date-c,postMessage({routingPoints:a.routingPoints,boundaryLines:a.boundaryLines,connectorDescriptors:e,pointVisibilityMapData:k.getPointToVisibleSetData(),metrics:b});}};setInterval(processRequestQueue,6),onmessage=function onmessage(a){requestQueue.push(a.data);};
+  var computeConnectorPath=function computeConnectorPath(a,b,c){var d=Point.fromArray(a.anchor_start_centroid_arr),e=Point.fromArray(a.anchor_end_centroid_arr),f=a.marker_start_size,g=a.marker_end_size,h=a.curvature_px,i=a.allow_route_optimization,j=a.routing_algorithm,k=b.findDistanceToPointClosestTo(d),l=b.findPointsCloseTo(d,k).findPointClosestTo(e),m=b.findPointsCloseTo(e,k).findPointClosestTo(d),n=c.computeRoute(l,m,i),o=n.toArray(),p=d,q=e;if(0<f&&1<=o.length){var s=new Line(o[0],d).createShortenedLine(0,f);p=s.getEndPoint();}if(0<g&&1<=o.length){var t=new Line(o[o.length-1],e).createShortenedLine(0,g);q=t.getEndPoint();}var r=[p].concat(_toConsumableArray(o),[q]);return {svgPath:SvgPathBuilder.pointsToPath(r,h),pointsInPath:r}},convertArrayBufferToFloat64Array=function convertArrayBufferToFloat64Array(a){return new Float64Array(a)},requestQueue=[],processRequestQueue=function processRequestQueue(){if(0!==requestQueue.length){var a=requestQueue.pop();requestQueue.length=0;var b={overallTime:null},c=new Date,d=a.gridSize,e=a.connectorDescriptors,f=new Date,g=new PointSet(convertArrayBufferToFloat64Array(a.routingPoints)),h=new LineSet(convertArrayBufferToFloat64Array(a.boundaryLines)),i=new PointSet(convertArrayBufferToFloat64Array(a.routingPointsAroundAnchor));b.msgDecodeTime=new Date-f;var j=new Date,k=new PointVisibilityMap(g,h);b.pointVisibilityMapCreationTime=new Date-j;var l=new Date;e.forEach(function(a){var b=computeConnectorPath(a,i,k),c=new PointSet(b.pointsInPath);a.svgPath=b.svgPath,a.pointsInPath=c.toFloat64Array().buffer;}),b.allPathsComputationTime=new Date-l,b.numRoutingPoints=g.count(),b.numBoundaryLines=h.count(),b.overallTime=new Date-c,postMessage({routingPoints:a.routingPoints,boundaryLines:a.boundaryLines,connectorDescriptors:e,pointVisibilityMapData:k.getPointToVisibleSetData(),metrics:b});}};setInterval(processRequestQueue,6),onmessage=function onmessage(a){requestQueue.push(a.data);};
 
 }());
 `;
@@ -2720,6 +2730,24 @@ var GraphPaper = (function (exports) {
                     foundConnectors.push(_conn);
                 }            
             });
+
+            return foundConnectors;
+        };
+
+        /**
+         * 
+         * @param {Entity[]} _entitySet
+         * @returns {Connector[]}
+         */
+        this.getConnectorsInEntitySet = function(_entitySet) {
+            const foundConnectors = [];
+
+            for(let i=0; i<_entitySet.length; i++) {
+                for(let j=i+1; j<_entitySet.length; j++) {
+                    const connectorsBetween = self.getConnectorsBetweenEntities(_entitySet[i], _entitySet[j]);
+                    foundConnectors.push(...connectorsBetween);
+                }
+            }
 
             return foundConnectors;
         };
@@ -4320,6 +4348,7 @@ var GraphPaper = (function (exports) {
     exports.Connector = Connector;
     exports.ConnectorAnchor = ConnectorAnchor;
     exports.ConnectorEvent = ConnectorEvent;
+    exports.ConnectorRoutingAlgorithm = ConnectorRoutingAlgorithm;
     exports.Dimensions = Dimensions;
     exports.Entity = Entity;
     exports.EntityEvent = EntityEvent;

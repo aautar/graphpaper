@@ -16,5 +16,6 @@ export * from './BoxClusterDetector';
 export * from './ConnectorEvent';
 export * from './Connector';
 export * from './ConnectorAnchor';
+export * from './ConnectorRoutingAlgorithm';
 export * from './PointVisibilityMap';
 export * from './Grid';

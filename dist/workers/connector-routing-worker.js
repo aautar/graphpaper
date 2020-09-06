@@ -897,6 +897,7 @@
         const markerEndSize = _connectorDescriptor.marker_end_size;
         const curvaturePx = _connectorDescriptor.curvature_px;
         const optimizeRoute = _connectorDescriptor.allow_route_optimization;
+        const routingAlgorithm = _connectorDescriptor.routing_algorithm;
 
         const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
 

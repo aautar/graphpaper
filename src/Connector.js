@@ -1,5 +1,6 @@
 import {ConnectorAnchor} from './ConnectorAnchor';
 import {ConnectorEvent} from './ConnectorEvent';
+import {ConnectorRoutingAlgorithm} from './ConnectorRoutingAlgorithm';
 import {Line} from './Line';
 import {Point} from './Point';
 
@@ -13,7 +14,7 @@ import {Point} from './Point';
  * @param {Number} _curvaturePx
  * @param {Boolean} _allowRouteOptimization
  */
-function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _allowRouteOptimization) {
+function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _allowRouteOptimization, _routingAlgorithm) {
     const self = this;
 
     const eventNameToHandlerFunc = new Map();
@@ -34,6 +35,10 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
     if(typeof _allowRouteOptimization === 'undefined') {
         _allowRouteOptimization = true;
+    }
+
+    if(typeof _routingAlgorithm === 'undefined') {
+        _routingAlgorithm = ConnectorRoutingAlgorithm.ASTAR;
     }
 
     /**
@@ -257,6 +262,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
             "marker_end_size": markerEndSize,
             "curvature_px": _curvaturePx,
             "allow_route_optimization": _allowRouteOptimization,
+            "routing_algorithm": _routingAlgorithm
         };
     };
 

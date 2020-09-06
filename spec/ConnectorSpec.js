@@ -3,16 +3,15 @@ import {Entity} from '../src/Entity.js';
 import {ConnectorAnchor} from '../src/ConnectorAnchor'
 import {Connector} from '../src/Connector'
 import { Point } from '../src/Point.js';
+import { ConnectorRoutingAlgorithm } from '../src/ConnectorRoutingAlgorithm.js';
 
 const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 global.window = window;
 
-describe("ConnectorAnchor.getId", function() {
-
+describe("Connector.getId", function() {
     it("creates an id = sorted ids of anchors", function() {
-
         const anchorStartElem = window.document.createElement('div');
         const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
 
@@ -25,11 +24,9 @@ describe("ConnectorAnchor.getId", function() {
 
         expect(connector.getId()).toBe(`connector-anchor-end-987:connector-anchor-start-123`);
     });
-
 });
 
-describe("ConnectorAnchor.getAnchorStart", function() {
-
+describe("Connector.getAnchorStart", function() {
     it("returns starting ConnectorAnchor object", function() {
         const anchorStartElem = window.document.createElement('div');
         const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
@@ -43,11 +40,9 @@ describe("ConnectorAnchor.getAnchorStart", function() {
         
         expect(connector.getAnchorStart()).toBe(anchorStart);
     });
-
 });
 
-describe("ConnectorAnchor.getAnchorEnd", function() {
-
+describe("Connector.getAnchorEnd", function() {
     it("returns ending ConnectorAnchor object", function() {
         const anchorStartElem = window.document.createElement('div');
         const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
@@ -61,11 +56,9 @@ describe("ConnectorAnchor.getAnchorEnd", function() {
         
         expect(connector.getAnchorEnd()).toBe(anchorEnd);
     });
-
 });
 
-describe("ConnectorAnchor.removePathElement", function() {
-
+describe("Connector.removePathElement", function() {
     it("remove SVG path element from DOM", function() {
         const anchorStartElem = window.document.createElement('div');
         const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
@@ -84,10 +77,9 @@ describe("ConnectorAnchor.removePathElement", function() {
 
         expect(containerDomElem.getElementsByTagName('path').length).toBe(0);
     });
-
 });
 
-describe("ConnectorAnchor.getLength", function() {
+describe("Connector.getLength", function() {
     it("returns euclidean length of all path lines", function() {
         const anchorStartElem = window.document.createElement('div');
         const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
@@ -113,12 +105,10 @@ describe("ConnectorAnchor.getLength", function() {
         const connectorLength = connector.getLength();
 
         expect(connectorLength).toBe(1094.4523335381552);
-
     });
 });
 
-describe("ConnectorAnchor.getMidpoint", function() {
-
+describe("Connector.getMidpoint", function() {
     it("returns midpoint of path consisting of single segment", function() {
         const anchorStartElem = window.document.createElement('div');
         const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
@@ -167,7 +157,7 @@ describe("ConnectorAnchor.getMidpoint", function() {
 });
 
 
-describe("ConnectorAnchor.getMidpointDirection", function() {
+describe("Connector.getMidpointDirection", function() {
     it("returns direction of midpoint segment", function() {
         const anchorStartElem = window.document.createElement('div');
         const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
@@ -247,4 +237,44 @@ describe("Connector.off", function() {
 
         expect(clickCallback).not.toHaveBeenCalled();        
     }); 
+});
+
+describe("Connector.getDescriptor", function() {
+    it("returns correct descriptor", function() {
+        const expectedDescriptor = {
+            id: "anchor-end-id:anchor-start-id",
+            anchor_start_centroid_arr: [0,0],
+            anchor_end_centroid_arr: [100,100],
+            marker_start_size: 0,
+            marker_end_size: 0,
+            curvature_px: 0,
+            allow_route_optimization: true,
+            routing_algorithm: 'connector-routing-astar'
+        };
+
+        const anchorStart = {
+            getId: function() {
+                return "anchor-start-id";
+            },
+
+            getCentroid: function() {
+                return new Point(0,0);
+            }
+        };
+
+        const anchorEnd = {
+            getId: function() {
+                return "anchor-end-id";
+            },
+
+            getCentroid: function() {
+                return new Point(100,100);
+            }
+        };
+
+        const containerDomElem = window.document.createElement('div');
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');
+
+        expect(connector.getDescriptor()).toEqual(expectedDescriptor);
+    });
 });
