@@ -541,11 +541,13 @@
             return false;
         };
 
-        const computePointsVisibility = function() {
+        const initPointsVisibility = function() {
             for(let i=0; i<freePointsArr.length; i++) {
-                pointToVisibleSet[i] = [];   
+                pointToVisibleSet[i] = null;   
             }
 
+            // We can do the following to compute the entire PV map on init
+            /*
             for(let i=0; i<freePointsArr.length; i++) {            
                 for(let j=i+1; j<freePointsArr.length; j++) {
 
@@ -559,13 +561,36 @@
                     }
                 }
             }
+            */
         };
 
+        const computePointsVisibilityForIndex = function(_idx) {
+            pointToVisibleSet[_idx] = [];
+            for(let j=0; j<freePointsArr.length; j++) {
+                if(_idx === j) {
+                    continue;
+                }
+
+                // line representing line-of-sight between the 2 points
+                const ijLine = new Line(freePointsArr[_idx], freePointsArr[j]);
+
+                if(!doesLineIntersectAnyBoundaryLines(ijLine)) {
+                    // record indices into freePointsArr
+                    pointToVisibleSet[_idx].push(j);
+                }
+            }
+
+            return pointToVisibleSet[_idx];
+        };
 
         const arePointsVisibleToEachOther = function(_ptA, _ptB) {
             for(let i=0; i<freePointsArr.length; i++) {
                 if(freePointsArr[i].isEqual(_ptA)) {
-                    const visiblePointIndices = pointToVisibleSet[i];
+                    let visiblePointIndices = pointToVisibleSet[i];
+                    if(visiblePointIndices === null) {
+                        visiblePointIndices = computePointsVisibilityForIndex(i);
+                    }
+
                     for(let j=0; j<visiblePointIndices.length; j++) {
                         if(freePointsArr[visiblePointIndices[j]].isEqual(_ptB)) {
                             return true;
@@ -583,7 +608,11 @@
          * @returns {Point[]}
          */
         const getVisiblePointsRelativeTo = function(_pointIndex) {
-            return pointToVisibleSet[_pointIndex] || [];
+            if(pointToVisibleSet[_pointIndex] === null) {
+                computePointsVisibilityForIndex(_pointIndex);
+            }
+            
+            return pointToVisibleSet[_pointIndex];
         };
 
         /**
@@ -782,7 +811,7 @@
             pointToVisibleSet = _precomputedPointToVisibleSet;
         } else {
             pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
-            computePointsVisibility();        
+            initPointsVisibility();        
         }
     }
 
@@ -885,8 +914,9 @@
     const ConnectorRoutingAlgorithm = Object.freeze({
         STRAIGHT_LINE: 0,
         STRAIGHT_LINE_BETWEEN_ANCHORS: 1,
-        ASTAR: 2,
-        ASTAR_WITH_ROUTE_OPTIMIZATION: 3
+        STRAIGHT_LINE_BETWEEN_ANCHORS_AVOID_SELF_INTERSECTION: 2, // unsupported
+        ASTAR: 3,
+        ASTAR_WITH_ROUTE_OPTIMIZATION: 4
     });
 
     /**
