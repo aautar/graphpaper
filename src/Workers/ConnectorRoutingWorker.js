@@ -20,7 +20,6 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
     const markerStartSize = _connectorDescriptor.marker_start_size;
     const markerEndSize = _connectorDescriptor.marker_end_size;
     const curvaturePx = _connectorDescriptor.curvature_px;
-    const optimizeRoute = _connectorDescriptor.allow_route_optimization;
     const routingAlgorithm = _connectorDescriptor.routing_algorithm;
 
     const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
@@ -36,8 +35,14 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
         .findPointClosestTo(anchorStartCentroid);
 
     let routingPoints = new PointSet();
-    if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR) {
+
+    if(routingAlgorithm == ConnectorRoutingAlgorithm.STRAIGHT_LINE_BETWEEN_ANCHORS) {
+        routingPoints = new PointSet([adjustedStart, adjustedEnd]);
+    } else if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR || routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) {
+        const optimizeRoute = (routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) ? true: false;
         routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
+    } else {
+        throw "Invalid routing algorithm";
     }
 
     const routingPointsArray = routingPoints.toArray();
