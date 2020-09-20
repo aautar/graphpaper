@@ -14,10 +14,12 @@ const babelConfig = {
         useBuiltIns: "usage"     
       }
     ],          
-    ['minify', {
-      builtIns: false,
-      deadcode: false,
-    }], 
+    [
+      'minify', {
+        builtIns: false,
+        deadcode: false,
+      }
+    ], 
   ],
   comments: false,
   exclude: 'node_modules/**',

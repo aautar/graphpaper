@@ -867,11 +867,9 @@
             _curvaturePx = _curvaturePx || 0.0;
 
             const svgPathParts = [];
+            let ptIdx = 0; // minify bug if this is put within the if(_curvaturePx... block
 
             if(_curvaturePx > 0.0) {
-
-                let ptIdx = 0;
-
                 while(_points.length >= 3) {
                     const ptA = _points.shift();
                     const ptB = _points.shift();
