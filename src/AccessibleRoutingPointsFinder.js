@@ -1,4 +1,5 @@
 import { Entity } from "./Entity";
+import { PointSet } from "./PointSet";
 
 const AccessibleRoutingPointsFinder = {
 
@@ -8,15 +9,15 @@ const AccessibleRoutingPointsFinder = {
      * @param {Entity[]} _subjectObjects
      * @param {Entity[]} _occludableByObjects
      * @param {Number} _gridSize
-     * @returns {Object[]}
+     * @returns {Object}
      */
     find: function(_subjectEntities, _occludableByEntities, _gridSize) {
         const connectorAnchorToNumValidRoutingPoints = new Map();
         const allRoutingPoints = [];
-        const filteredRoutingPoints = [];
+        const filteredRoutingPoints = new PointSet();
 
-        _subjectEntities.forEach((_o) => {
-            const anchors = _o.getConnectorAnchors();
+        _subjectEntities.forEach((_entity) => {
+            const anchors = _entity.getConnectorAnchors();
 
             anchors.forEach((_a) => {
                 let isAnchorOccluded = false;
@@ -38,7 +39,8 @@ const AccessibleRoutingPointsFinder = {
                         allRoutingPoints.push(
                             {
                                 "routingPoint": _rp,
-                                "parentAnchor": _a
+                                "parentAnchor": _a,
+                                "parentEntity": _entity
                             }
                         );
                     });
@@ -53,12 +55,10 @@ const AccessibleRoutingPointsFinder = {
 
             // check if routing point is occluded
             for(let i=0; i<_occludableByEntities.length; i++) {
-                const obj = _occludableByEntities[i];
-                const boundingRect = obj.getBoundingRectange();
-
+                const occluder = _occludableByEntities[i];
+                const boundingRect = occluder.getBoundingRectange();
                 if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                     isPointWithinObj = true;
-
                     const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchor.getId()) || 0;
                     connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchor.getId(), currentNumRoutingPoints - 1);
                 }

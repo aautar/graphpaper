@@ -7,7 +7,7 @@ describe("AccessibleRoutingPointsFinder.find", function() {
         expect(result.connectorAnchorToNumValidRoutingPoints.constructor.name).toBe(Map.name);
         expect(result.connectorAnchorToNumValidRoutingPoints.size).toBe(0);
 
-        expect(result.accessibleRoutingPoints.constructor.name).toBe('Array');
-        expect(result.accessibleRoutingPoints.length).toBe(0);
+        expect(result.accessibleRoutingPoints.constructor.name).toBe('PointSet');
+        expect(result.accessibleRoutingPoints.count()).toBe(0);
     });
 });

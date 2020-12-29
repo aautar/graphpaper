@@ -243,16 +243,10 @@ function Sheet(_sheetDomElement, _window) {
      */    
     const getConnectorRoutingPointsAroundAnchor = function() {
         const executionTimeT1 = new Date();
-
-        const pointSet = new PointSet();
         const routingPointsResult = AccessibleRoutingPointsFinder.find(sheetEntities, sheetEntities, self.getGridSize());
-        routingPointsResult.accessibleRoutingPoints.forEach((_rp) => {
-            pointSet.push(_rp);
-        });
-
         metrics.refreshAllConnectorsInternal.accessibleRoutingPointsFinder = (new Date()) - executionTimeT1;
 
-        return pointSet;
+        return routingPointsResult.accessibleRoutingPoints;
     };
 
     /**
