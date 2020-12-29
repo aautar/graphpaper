@@ -34,6 +34,7 @@ const DebugMetricsPanel = function(_window) {
 
         debugPanelElem.innerHTML = `
             <p>refreshAllConnectorsInternal.executionTime = ${_metrics.refreshAllConnectorsInternal.executionTime}</p>
+            <p>-- refreshAllConnectorsInternal.accessibleRoutingPointsFinder = ${_metrics.refreshAllConnectorsInternal.accessibleRoutingPointsFinder}</p>
             <p>connectorRoutingWorker.executionTime = ${_metrics.connectorRoutingWorker.executionTime}</p>            
             <p>-- connectorRoutingWorker.msgDecodeTime = ${_metrics.connectorRoutingWorker.msgDecodeTime}</p>
             <p>-- connectorRoutingWorker.pointVisibilityMapCreationTime = ${_metrics.connectorRoutingWorker.pointVisibilityMapCreationTime}</p>

@@ -26,8 +26,9 @@
             return new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px', 0, GraphPaper.ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION);
         });
 
-        for(let i=1; i<=60; i++) {
-
+        // Note that we're dealing with entities with a single anchor here
+        // More anchors = more computations time for routing
+        for(let i=0; i<200; i++) {
             const elem = document.createElement('div');
             elem.innerHTML = `
                 <div id="obj${i}" class="obj">
@@ -36,14 +37,15 @@
                     <div id="connectorAnchor${i}" class="connectorAnchor"></div>
                 </div>
             `;
+
             document.getElementById('paper').appendChild(elem);
 
             const obj = new GraphPaper.Entity(
                 `obj${i}`, 
                 0, 
                 0, 
-                52, 
-                52, 
+                50, 
+                50, 
                 canvas,
                 document.getElementById(`obj${i}`), 
                 [document.getElementById(`translateHandle${i}`)],
@@ -51,7 +53,11 @@
             );
 
             obj.addInteractableConnectorAnchor(document.getElementById(`connectorAnchor${i}`));
-            obj.translate(100 + (i*50), 100);
+
+            const x = 50 + ((i%12)*75);
+            const y = 100 * (1 + parseInt(i/12));
+
+            obj.translate(x, y);
 
             canvas.addEntity(obj);
         }

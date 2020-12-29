@@ -887,6 +887,7 @@ var GraphPaper = (function (exports) {
 
             debugPanelElem.innerHTML = `
             <p>refreshAllConnectorsInternal.executionTime = ${_metrics.refreshAllConnectorsInternal.executionTime}</p>
+            <p>-- refreshAllConnectorsInternal.accessibleRoutingPointsFinder = ${_metrics.refreshAllConnectorsInternal.accessibleRoutingPointsFinder}</p>
             <p>connectorRoutingWorker.executionTime = ${_metrics.connectorRoutingWorker.executionTime}</p>            
             <p>-- connectorRoutingWorker.msgDecodeTime = ${_metrics.connectorRoutingWorker.msgDecodeTime}</p>
             <p>-- connectorRoutingWorker.pointVisibilityMapCreationTime = ${_metrics.connectorRoutingWorker.pointVisibilityMapCreationTime}</p>
@@ -2014,6 +2015,7 @@ var GraphPaper = (function (exports) {
                 allPathsComputationTime: null
             },
             refreshAllConnectorsInternal: {
+                accessibleRoutingPointsFinder: null,
                 executionTime: null
             },
             connectorsRefreshTime: null
@@ -2156,11 +2158,15 @@ var GraphPaper = (function (exports) {
          * @returns {PointSet}
          */    
         const getConnectorRoutingPointsAroundAnchor = function() {
+            const executionTimeT1 = new Date();
+
             const pointSet = new PointSet();
             const routingPointsResult = AccessibleRoutingPointsFinder.find(sheetEntities, sheetEntities, self.getGridSize());
             routingPointsResult.accessibleRoutingPoints.forEach((_rp) => {
                 pointSet.push(_rp);
             });
+
+            metrics.refreshAllConnectorsInternal.accessibleRoutingPointsFinder = (new Date()) - executionTimeT1;
 
             return pointSet;
         };

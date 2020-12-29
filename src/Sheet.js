@@ -99,6 +99,7 @@ function Sheet(_sheetDomElement, _window) {
             allPathsComputationTime: null
         },
         refreshAllConnectorsInternal: {
+            accessibleRoutingPointsFinder: null,
             executionTime: null
         },
         connectorsRefreshTime: null
@@ -241,11 +242,15 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {PointSet}
      */    
     const getConnectorRoutingPointsAroundAnchor = function() {
+        const executionTimeT1 = new Date();
+
         const pointSet = new PointSet();
         const routingPointsResult = AccessibleRoutingPointsFinder.find(sheetEntities, sheetEntities, self.getGridSize());
         routingPointsResult.accessibleRoutingPoints.forEach((_rp) => {
             pointSet.push(_rp);
         });
+
+        metrics.refreshAllConnectorsInternal.accessibleRoutingPointsFinder = (new Date()) - executionTimeT1;
 
         return pointSet;
     };
