@@ -3,6 +3,7 @@ import {Point} from './Point';
 import {Rectangle} from './Rectangle';
 import {Sheet} from './Sheet';
 import {ConnectorAnchor} from './ConnectorAnchor';
+import { PointSet } from './PointSet';
 
 /**
  * 
@@ -291,6 +292,32 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             bottomLeft,
             bottomRight
         ];
+    };
+
+    /**
+     * @param {Number} _gridSize
+     * @returns {Object}
+     */
+    this.getDescriptor = function(_gridSize) {
+        const anchors = [];
+        for(let i=0; i<connectorAnchors.length; i++) {
+            let routingPoints = new PointSet(self.getConnectorAnchorRoutingPoints(_gridSize));
+            anchors.push(
+                {
+                    "id": connectorAnchors[i].getId(),
+                    "routingPointsFloat64Arr": routingPoints.toFloat64Array()
+                }
+            );
+        }
+
+        return {
+            "id": self.getId(),
+            "x": self.getX(),
+            "y": self.getY(),
+            "width": self.getWidth(),
+            "height": self.getHeight(),
+            "connectorAnchors": anchors
+        }
     };
 
     /**

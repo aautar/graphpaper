@@ -92,6 +92,7 @@ const processRequestQueue = function() {
 
     const gridSize = lastRequest.gridSize;
     const connectorDescriptors = lastRequest.connectorDescriptors;
+    const entityDescriptors = lastRequest.entityDescriptors;
 
     const msgDecodeTimeT1 = new Date();
     const routingPointsSet = new PointSet(convertArrayBufferToFloat64Array(lastRequest.routingPoints));

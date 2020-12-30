@@ -282,6 +282,11 @@ function Sheet(_sheetDomElement, _window) {
             connectorDescriptors.push(_c.getDescriptor());
         });
 
+        const entityDescriptors = [];
+        sheetEntities.forEach(function(_e) {
+            entityDescriptors.push(_e.getDescriptor(self.getGridSize()));
+        });
+
         const routingPointsAroundAnchor = getConnectorRoutingPointsAroundAnchor();
         const entityExtentRoutingPoints = getEntityExtentRoutingPoints();
 
@@ -296,6 +301,7 @@ function Sheet(_sheetDomElement, _window) {
             {
                 "gridSize": self.getGridSize(),
                 "connectorDescriptors": connectorDescriptors,
+                "entityDescriptors": entityDescriptors,
                 "routingPoints": routingPointsFloat64Array.buffer,
                 "boundaryLines": boundaryLinesFloat64Array.buffer,
                 "routingPointsAroundAnchor": routingPointsAroundAnchorFloat64Array.buffer
