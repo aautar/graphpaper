@@ -10,184 +10,188 @@ import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
  * @param {Number} _bottom
  */
 function Rectangle(_left, _top, _right, _bottom)  {
+    this.__left = _left;
+    this.__top = _top;
+    this.__right = _right;
+    this.__bottom = _bottom;    
+};
+
+
+/**
+ * @returns {Number}
+ */
+Rectangle.prototype.getLeft = function() {
+    return this.__left;
+};
+
+/**
+ * @returns {Number}
+ */
+Rectangle.prototype.getTop = function() {
+    return this.__top;
+};
+
+/**
+ * @returns {Number}
+ */
+Rectangle.prototype.getRight = function() {
+    return this.__right;
+};
+
+/**
+ * @returns {Number}
+ */
+Rectangle.prototype.getBottom = function() {
+    return this.__bottom;
+};
+
+/**
+ * @returns {Number}
+ */    
+Rectangle.prototype.getWidth = function() {
+    return this.__right - this.__left;
+};
+
+/**
+ * @returns {Number}
+ */    
+Rectangle.prototype.getHeight = function() {
+    return this.__bottom - this.__top;
+};
+
+/**
+ * @returns {Point[]}
+ */
+Rectangle.prototype.getPoints = function() {
+    return [
+        new Point(this.__left, this.__top),
+        new Point(this.__right, this.__top),
+        new Point(this.__right, this.__bottom),
+        new Point(this.__left, this.__bottom)
+    ];
+};
+
+/**
+ * @returns {Line[]}
+ */
+Rectangle.prototype.getLines = function() {
+    return [
+        new Line(new Point(this.__left, this.__top), new Point(this.__right, this.__top)),
+        new Line(new Point(this.__right, this.__top), new Point(this.__right, this.__bottom)),
+        new Line(new Point(this.__right, this.__bottom), new Point(this.__left, this.__bottom)),
+        new Line(new Point(this.__left, this.__bottom), new Point(this.__left, this.__top))
+    ];
+};
+
+/**
+ * @param {Number} _resizeByPx
+ * @returns {Rectangle}
+ */
+Rectangle.prototype.getUniformlyResizedCopy = function(_resizeByPx) {
+    return new Rectangle(
+        this.__left - _resizeByPx, 
+        this.__top - _resizeByPx, 
+        this.__right + _resizeByPx, 
+        this.__bottom + _resizeByPx
+    );
+};
+
+/**
+ * Scale the bounding box by _gridSize, and return the points comprising the box
+ * 
+ * @param {Number} _gridSize
+ * @returns {Point[]}
+ */
+Rectangle.prototype.getPointsScaledToGrid = function(_gridSize) {
+
+    const centroid = new Point(
+        this.__left + ((this.__right-this.__left)*0.5),
+        this.__top + ((this.__bottom-this.__top)*0.5)
+    );
+
+    const scaleDx = ((this.__right - centroid.getX()) + _gridSize) / (this.__right - centroid.getX());
+    const scaleDy = ((this.__bottom - centroid.getY()) + _gridSize) / (this.__bottom - centroid.getY());        
     
-    const self=this;
+    const scaledPoints = [
+        new Point(
+            ((this.__left - centroid.getX())*scaleDx) + centroid.getX(), 
+            ((this.__top - centroid.getY())*scaleDy) + centroid.getY()
+        ),
 
-    /**
-     * @returns {Number}
-     */
-    this.getLeft = function() {
-        return _left;
-    };
+        new Point(
+            ((this.__right - centroid.getX())*scaleDx) + centroid.getX(), 
+            ((this.__top - centroid.getY())*scaleDy) + centroid.getY()
+        ),
 
-    /**
-     * @returns {Number}
-     */
-    this.getTop = function() {
-        return _top;
-    };
+        new Point(
+            ((this.__right - centroid.getX())*scaleDx) + centroid.getX(), 
+            ((this.__bottom - centroid.getY())*scaleDy) + centroid.getY()
+        ),
 
-    /**
-     * @returns {Number}
-     */
-    this.getRight = function() {
-        return _right;
-    };
+        new Point(
+            ((this.__left - centroid.getX())*scaleDx) + centroid.getX(), 
+            ((this.__bottom - centroid.getY())*scaleDy) + centroid.getY()
+        )
+    ];
 
-    /**
-     * @returns {Number}
-     */
-    this.getBottom = function() {
-        return _bottom;
-    };
+    return scaledPoints;
+};    
 
-    /**
-     * @returns {Number}
-     */    
-    this.getWidth = function() {
-        return _right - _left;
-    };
+/**
+ * 
+ * @param {Rectangle} _otherRectangle
+ * @returns {Boolean}
+ */
+Rectangle.prototype.checkIntersect = function(_otherRectangle) {
+    if(this.__bottom < _otherRectangle.getTop()) {
+        return false;
+    }
 
-    /**
-     * @returns {Number}
-     */    
-    this.getHeight = function() {
-        return _bottom - _top;
-    };
+    if(this.__top > _otherRectangle.getBottom()) {
+        return false;
+    }
 
-    /**
-     * @returns {Point[]}
-     */
-    this.getPoints = function() {
-        return [
-            new Point(_left, _top),
-            new Point(_right, _top),
-            new Point(_right, _bottom),
-            new Point(_left, _bottom)
-        ];
-    };
+    if(this.__right < _otherRectangle.getLeft()) {
+        return false;
+    }
 
-    /**
-     * @returns {Line[]}
-     */
-    this.getLines = function() {
-        return [
-            new Line(new Point(_left, _top), new Point(_right, _top)),
-            new Line(new Point(_right, _top), new Point(_right, _bottom)),
-            new Line(new Point(_right, _bottom), new Point(_left, _bottom)),
-            new Line(new Point(_left, _bottom), new Point(_left, _top))
-        ];
-    };
+    if(this.__left > _otherRectangle.getRight()) {
+        return false;
+    }
 
-    /**
-     * @param {Number} _resizeByPx
-     * @returns {Rectangle}
-     */
-    this.getUniformlyResizedCopy = function(_resizeByPx) {
-        return new Rectangle(
-            _left - _resizeByPx, 
-            _top - _resizeByPx, 
-            _right + _resizeByPx, 
-            _bottom + _resizeByPx
-        );
-    };
+    return true;
+};
 
-    /**
-     * Scale the bounding box by _gridSize, and return the points comprising the box
-     * 
-     * @param {Number} _gridSize
-     * @returns {Point[]}
-     */
-    this.getPointsScaledToGrid = function(_gridSize) {
 
-        const centroid = new Point(
-            _left + ((_right-_left)*0.5),
-            _top + ((_bottom-_top)*0.5)
-        );
+/**
+ * 
+ * @param {Point} _point 
+ */
+Rectangle.prototype.checkIsPointWithin = function(_point) {
+    if(_point.getX() >= this.__left && _point.getX() <= this.__right && _point.getY() >= this.__top && _point.getY() <= this.__bottom) {
+        return true;
+    }
 
-        const scaleDx = ((_right - centroid.getX()) + _gridSize) / (_right - centroid.getX());
-        const scaleDy = ((_bottom - centroid.getY()) + _gridSize) / (_bottom - centroid.getY());        
-       
-        const scaledPoints = [
-            new Point(
-                ((_left - centroid.getX())*scaleDx) + centroid.getX(), 
-                ((_top - centroid.getY())*scaleDy) + centroid.getY()
-            ),
+    return false;
+};
 
-            new Point(
-                ((_right - centroid.getX())*scaleDx) + centroid.getX(), 
-                ((_top - centroid.getY())*scaleDy) + centroid.getY()
-            ),
-
-            new Point(
-                ((_right - centroid.getX())*scaleDx) + centroid.getX(), 
-                ((_bottom - centroid.getY())*scaleDy) + centroid.getY()
-            ),
-
-            new Point(
-                ((_left - centroid.getX())*scaleDx) + centroid.getX(), 
-                ((_bottom - centroid.getY())*scaleDy) + centroid.getY()
-            )
-        ];
-
-        return scaledPoints;
-    };    
-
-    /**
-     * 
-     * @param {Rectangle} _otherRectangle
-     * @returns {Boolean}
-     */
-    this.checkIntersect = function(_otherRectangle) {
-        if(_bottom < _otherRectangle.getTop()) {
-            return false;
-        }
-
-        if(_top > _otherRectangle.getBottom()) {
-            return false;
-        }
-
-        if(_right < _otherRectangle.getLeft()) {
-            return false;
-        }
-
-        if(_left > _otherRectangle.getRight()) {
-            return false;
-        }
+/**
+ * 
+ * @param {Rectangle} _otherRectangle
+ * @returns {Boolean}
+ */
+Rectangle.prototype.checkIsWithin = function(_otherRectangle) {
+    if( this.__bottom <= _otherRectangle.getBottom() &&
+        this.__top >= _otherRectangle.getTop() &&
+        this.__right <= _otherRectangle.getRight() &&
+        this.__left >= _otherRectangle.getLeft()
+    ) {
 
         return true;
-    };
+    }
 
-
-    /**
-     * 
-     * @param {Point} _point 
-     */
-    this.checkIsPointWithin = function(_point) {
-        if(_point.getX() >= _left && _point.getX() <= _right && _point.getY() >= _top && _point.getY() <= _bottom) {
-            return true;
-        }
-
-        return false;
-    };
-
-    /**
-     * 
-     * @param {Rectangle} _otherRectangle
-     * @returns {Boolean}
-     */
-    this.checkIsWithin = function(_otherRectangle) {
-        if( _bottom <= _otherRectangle.getBottom() &&
-            _top >= _otherRectangle.getTop() &&
-            _right <= _otherRectangle.getRight() &&
-            _left >= _otherRectangle.getLeft()
-        ) {
-
-            return true;
-        }
-
-        return false;
-    };
+    return false;
 };
+
 
 export { Rectangle }
