@@ -8,6 +8,11 @@ import {Line} from '../Line';
 import {ConnectorRoutingAlgorithm} from '../ConnectorRoutingAlgorithm';
 import {Rectangle} from '../Rectangle';
 
+const workerData = {
+    pointVisibilityMap: null,
+    requestQueue: []
+};
+
 /**
  * 
  * @param {Object} _connectorDescriptor
@@ -130,15 +135,14 @@ const getConnectorRoutingPointsAroundAnchor = function(_entityDescriptors, _grid
     return routingPointsResult.accessibleRoutingPoints;
 };
 
-const requestQueue = [];
 const processRequestQueue = function() {
-    if(requestQueue.length === 0) {
+    if(workerData.requestQueue.length === 0) {
         return;
     }
 
     // grab last request, toss the rest
-    const lastRequest = requestQueue.pop();
-    requestQueue.length = 0;
+    const lastRequest = workerData.requestQueue.pop();
+    workerData.requestQueue.length = 0;
 
     // process request
     const metrics = {};
@@ -194,5 +198,5 @@ const processRequestQueue = function() {
 setInterval(processRequestQueue, 6);
 
 onmessage = function(_req) {
-    requestQueue.push(_req.data);
+    workerData.requestQueue.push(_req.data);
 };

@@ -13,20 +13,23 @@ const LINE_INTERSECTION_TYPE = Object.freeze({
  * @param {Point} _intersectionPoint 
  */
 function LineIntersection(_type, _intersectionPoint) {
+    this.__type = _type;
+    this.__intersectionPoint = _intersectionPoint;
+};
 
-    /**
-     * @returns {LINE_INTERSECTION_TYPE}
-     */
-    this.getType = function() {
-        return _type;
-    };
 
-    /**
-     * @returns {Point|null}
-     */
-    this.getIntersectionPoint = function() {
-        return _intersectionPoint;
-    };
+/**
+ * @returns {LINE_INTERSECTION_TYPE}
+ */
+LineIntersection.prototype.getType = function() {
+    return this.__type;
+};
+
+/**
+ * @returns {Point|null}
+ */
+LineIntersection.prototype.getIntersectionPoint = function() {
+    return this.__intersectionPoint;
 };
 
 export {LINE_INTERSECTION_TYPE, LineIntersection};

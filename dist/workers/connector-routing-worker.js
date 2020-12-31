@@ -88,21 +88,23 @@
      * @param {Point} _intersectionPoint 
      */
     function LineIntersection(_type, _intersectionPoint) {
-
-        /**
-         * @returns {LINE_INTERSECTION_TYPE}
-         */
-        this.getType = function() {
-            return _type;
-        };
-
-        /**
-         * @returns {Point|null}
-         */
-        this.getIntersectionPoint = function() {
-            return _intersectionPoint;
-        };
+        this.__type = _type;
+        this.__intersectionPoint = _intersectionPoint;
     }
+
+    /**
+     * @returns {LINE_INTERSECTION_TYPE}
+     */
+    LineIntersection.prototype.getType = function() {
+        return this.__type;
+    };
+
+    /**
+     * @returns {Point|null}
+     */
+    LineIntersection.prototype.getIntersectionPoint = function() {
+        return this.__intersectionPoint;
+    };
 
     /**
      * 
@@ -1210,6 +1212,11 @@
 
     };
 
+    const workerData = {
+        pointVisibilityMap: null,
+        requestQueue: []
+    };
+
     /**
      * 
      * @param {Object} _connectorDescriptor
@@ -1328,15 +1335,14 @@
         return routingPointsResult.accessibleRoutingPoints;
     };
 
-    const requestQueue = [];
     const processRequestQueue = function() {
-        if(requestQueue.length === 0) {
+        if(workerData.requestQueue.length === 0) {
             return;
         }
 
         // grab last request, toss the rest
-        const lastRequest = requestQueue.pop();
-        requestQueue.length = 0;
+        const lastRequest = workerData.requestQueue.pop();
+        workerData.requestQueue.length = 0;
 
         // process request
         const metrics = {};
@@ -1392,7 +1398,7 @@
     setInterval(processRequestQueue, 6);
 
     onmessage = function(_req) {
-        requestQueue.push(_req.data);
+        workerData.requestQueue.push(_req.data);
     };
 
 }());
