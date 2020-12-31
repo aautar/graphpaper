@@ -66,8 +66,6 @@ function Sheet(_sheetDomElement, _window) {
     var currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     var currentTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-    var currentPointVisibilityMap = null;
-
     var connectorRefreshBufferTime = 6.94;
     var useTranslate3d = false; // better performance w/o it
     const sheetEntities = [];
@@ -99,7 +97,6 @@ function Sheet(_sheetDomElement, _window) {
             allPathsComputationTime: null
         },
         refreshAllConnectorsInternal: {
-            accessibleRoutingPointsFinder: null,
             executionTime: null
         },
         connectorsRefreshTime: null
@@ -142,12 +139,6 @@ function Sheet(_sheetDomElement, _window) {
 
     connectorRoutingWorker.onmessage = function(_msg) {
         const connectorsRefreshTimeT1 = new Date();
-
-        currentPointVisibilityMap = new PointVisibilityMap(
-            new PointSet(convertArrayBufferToFloat64Array(_msg.data.routingPoints)),
-            new LineSet(convertArrayBufferToFloat64Array(_msg.data.boundaryLines)),
-            _msg.data.pointVisibilityMapData
-        );
 
         const connectorDescriptors = _msg.data.connectorDescriptors;
         const getConnectorDescriptorById = function(_id) {
@@ -242,9 +233,12 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {PointSet}
      */    
     const getConnectorRoutingPointsAroundAnchor = function() {
-        const executionTimeT1 = new Date();
-        const routingPointsResult = AccessibleRoutingPointsFinder.find(sheetEntities, sheetEntities, self.getGridSize());
-        metrics.refreshAllConnectorsInternal.accessibleRoutingPointsFinder = (new Date()) - executionTimeT1;
+        const entityDescriptors = [];
+        sheetEntities.forEach((_e) => {
+            entityDescriptors.push(_e.getDescriptor(self.getGridSize()));
+        });
+
+        const routingPointsResult = AccessibleRoutingPointsFinder.find(entityDescriptors, entityDescriptors, self.getGridSize());
 
         return routingPointsResult.accessibleRoutingPoints;
     };
@@ -271,7 +265,7 @@ function Sheet(_sheetDomElement, _window) {
         });
 
         return boundaryLines;
-    };    
+    };
 
     const refreshAllConnectorsInternal = function() {
         lockDomMetrics();
@@ -287,34 +281,19 @@ function Sheet(_sheetDomElement, _window) {
             entityDescriptors.push(_e.getDescriptor(self.getGridSize()));
         });
 
-        const routingPointsAroundAnchor = getConnectorRoutingPointsAroundAnchor();
-        const entityExtentRoutingPoints = getEntityExtentRoutingPoints();
-
-        const allRoutingPoints = new PointSet();        
-        allRoutingPoints.pushPointSet(routingPointsAroundAnchor);
-        allRoutingPoints.pushPointSet(entityExtentRoutingPoints);
-
-        const routingPointsAroundAnchorFloat64Array = routingPointsAroundAnchor.toFloat64Array();
-        const routingPointsFloat64Array = allRoutingPoints.toFloat64Array();
-        const boundaryLinesFloat64Array = (getConnectorBoundaryLines()).toFloat64Array();
         connectorRoutingWorker.postMessage(
             {
                 "gridSize": self.getGridSize(),
                 "connectorDescriptors": connectorDescriptors,
-                "entityDescriptors": entityDescriptors,
-                "routingPoints": routingPointsFloat64Array.buffer,
-                "boundaryLines": boundaryLinesFloat64Array.buffer,
-                "routingPointsAroundAnchor": routingPointsAroundAnchorFloat64Array.buffer
+                "entityDescriptors": entityDescriptors
             },
             [
-                routingPointsFloat64Array.buffer,
-                boundaryLinesFloat64Array.buffer,
-                routingPointsAroundAnchorFloat64Array.buffer
+
             ]
         );
 
         metrics.refreshAllConnectorsInternal.executionTime = (new Date()) - executionTimeT1;
-
+        
         unlockDomMetrics();
     };
 
@@ -987,7 +966,7 @@ function Sheet(_sheetDomElement, _window) {
      */
     this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
         const searchFunc = (_searchData) => {
-            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_entityA, _entityB], sheetEntities, self.getGridSize());
+            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_entityA.getDescriptor(self.getGridSize()), _entityB.getDescriptor(self.getGridSize())], sheetEntities, self.getGridSize());
             const result = ConnectorAnchorClosestPairFinder.findClosestPairBetweenObjects(
                 _searchData.objectA, 
                 _searchData.objectB, 

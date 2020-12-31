@@ -1,23 +1,24 @@
 import { Entity } from "./Entity";
 import { PointSet } from "./PointSet";
+import { Rectangle } from "./Rectangle";
 
 const AccessibleRoutingPointsFinder = {
 
     /**
      * Find routing points that are not occluded by objects
      * 
-     * @param {Entity[]} _subjectObjects
-     * @param {Entity[]} _occludableByObjects
+     * @param {Object[]} _subjectEntityDescriptors
+     * @param {Object[]} _occluderEntityDescriptors
      * @param {Number} _gridSize
      * @returns {Object}
      */
-    find: function(_subjectEntities, _occludableByEntities, _gridSize) {
+    find: function(_subjectEntityDescriptors, _occluderEntityDescriptors, _gridSize) {
         const connectorAnchorToNumValidRoutingPoints = new Map();
         const allRoutingPoints = [];
         const filteredRoutingPoints = new PointSet();
 
-        _subjectEntities.forEach((_entity) => {
-            const anchors = _entity.getConnectorAnchors();
+        _subjectEntityDescriptors.forEach((_entityDescriptor) => {
+            const anchors = _entityDescriptor.connectorAnchors;
 
             anchors.forEach((_a) => {
                 let isAnchorOccluded = false;
@@ -34,18 +35,17 @@ const AccessibleRoutingPointsFinder = {
                 }*/
 
                 if(!isAnchorOccluded) {
-                    const routingPoints = _a.getRoutingPoints(_gridSize);
+                    const routingPoints = (new PointSet(_a.routingPointsFloat64Arr)).toArray();
                     routingPoints.forEach((_rp) => {
                         allRoutingPoints.push(
                             {
                                 "routingPoint": _rp,
-                                "parentAnchor": _a,
-                                "parentEntity": _entity
+                                "parentAnchorId": _a.id
                             }
                         );
                     });
 
-                    connectorAnchorToNumValidRoutingPoints.set(_a.getId(), routingPoints.length);
+                    connectorAnchorToNumValidRoutingPoints.set(_a.id, routingPoints.length);
                 }
             });
         });
@@ -54,13 +54,13 @@ const AccessibleRoutingPointsFinder = {
             let isPointWithinObj = false;
 
             // check if routing point is occluded
-            for(let i=0; i<_occludableByEntities.length; i++) {
-                const occluder = _occludableByEntities[i];
-                const boundingRect = occluder.getBoundingRectange();
+            for(let i=0; i<_occluderEntityDescriptors.length; i++) {
+                const occluder = _occluderEntityDescriptors[i];
+                const boundingRect = new Rectangle(occluder.x, occluder.y, occluder.x + occluder.width, occluder.y + occluder.height);
                 if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                     isPointWithinObj = true;
-                    const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchor.getId()) || 0;
-                    connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchor.getId(), currentNumRoutingPoints - 1);
+                    const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchorId) || 0;
+                    connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchorId, currentNumRoutingPoints - 1);
                 }
             }
 
@@ -75,7 +75,6 @@ const AccessibleRoutingPointsFinder = {
             "accessibleRoutingPoints": filteredRoutingPoints,
         };
     }
-
 };
 
 export { AccessibleRoutingPointsFinder };

@@ -1,6 +1,13 @@
 (function () {
     'use strict';
 
+    const EntityEvent = Object.freeze({
+        TRANSLATE_START: 'obj-translate-start',
+        TRANSLATE: 'obj-translate',
+        RESIZE_START: 'obj-resize-start',
+        RESIZE: 'obj-resize'
+    });
+
     /**
      * 
      * @param {Number} _x
@@ -265,6 +272,208 @@
     };
 
     /**
+     * 
+     * @param {Number} _left
+     * @param {Number} _top
+     * @param {Number} _right
+     * @param {Number} _bottom
+     */
+    function Rectangle(_left, _top, _right, _bottom)  {
+        this.__left = _left;
+        this.__top = _top;
+        this.__right = _right;
+        this.__bottom = _bottom;    
+    }
+
+    /**
+     * @returns {Number}
+     */
+    Rectangle.prototype.getLeft = function() {
+        return this.__left;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Rectangle.prototype.getTop = function() {
+        return this.__top;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Rectangle.prototype.getRight = function() {
+        return this.__right;
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Rectangle.prototype.getBottom = function() {
+        return this.__bottom;
+    };
+
+    /**
+     * @returns {Number}
+     */    
+    Rectangle.prototype.getWidth = function() {
+        return this.__right - this.__left;
+    };
+
+    /**
+     * @returns {Number}
+     */    
+    Rectangle.prototype.getHeight = function() {
+        return this.__bottom - this.__top;
+    };
+
+    /**
+     * @returns {Point[]}
+     */
+    Rectangle.prototype.getPoints = function() {
+        return [
+            new Point(this.__left, this.__top),
+            new Point(this.__right, this.__top),
+            new Point(this.__right, this.__bottom),
+            new Point(this.__left, this.__bottom)
+        ];
+    };
+
+    /**
+     * @returns {Line[]}
+     */
+    Rectangle.prototype.getLines = function() {
+        return [
+            new Line(new Point(this.__left, this.__top), new Point(this.__right, this.__top)),
+            new Line(new Point(this.__right, this.__top), new Point(this.__right, this.__bottom)),
+            new Line(new Point(this.__right, this.__bottom), new Point(this.__left, this.__bottom)),
+            new Line(new Point(this.__left, this.__bottom), new Point(this.__left, this.__top))
+        ];
+    };
+
+    /**
+     * @param {Number} _resizeByPx
+     * @returns {Rectangle}
+     */
+    Rectangle.prototype.getUniformlyResizedCopy = function(_resizeByPx) {
+        return new Rectangle(
+            this.__left - _resizeByPx, 
+            this.__top - _resizeByPx, 
+            this.__right + _resizeByPx, 
+            this.__bottom + _resizeByPx
+        );
+    };
+
+    /**
+     * Scale the bounding box by _gridSize, and return the points comprising the box
+     * 
+     * @param {Number} _gridSize
+     * @returns {Point[]}
+     */
+    Rectangle.prototype.getPointsScaledToGrid = function(_gridSize) {
+
+        const centroid = new Point(
+            this.__left + ((this.__right-this.__left)*0.5),
+            this.__top + ((this.__bottom-this.__top)*0.5)
+        );
+
+        const scaleDx = ((this.__right - centroid.getX()) + _gridSize) / (this.__right - centroid.getX());
+        const scaleDy = ((this.__bottom - centroid.getY()) + _gridSize) / (this.__bottom - centroid.getY());        
+        
+        const scaledPoints = [
+            new Point(
+                ((this.__left - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((this.__top - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((this.__right - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((this.__top - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((this.__right - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((this.__bottom - centroid.getY())*scaleDy) + centroid.getY()
+            ),
+
+            new Point(
+                ((this.__left - centroid.getX())*scaleDx) + centroid.getX(), 
+                ((this.__bottom - centroid.getY())*scaleDy) + centroid.getY()
+            )
+        ];
+
+        return scaledPoints;
+    };    
+
+    /**
+     * 
+     * @param {Rectangle} _otherRectangle
+     * @returns {Boolean}
+     */
+    Rectangle.prototype.checkIntersect = function(_otherRectangle) {
+        if(this.__bottom < _otherRectangle.getTop()) {
+            return false;
+        }
+
+        if(this.__top > _otherRectangle.getBottom()) {
+            return false;
+        }
+
+        if(this.__right < _otherRectangle.getLeft()) {
+            return false;
+        }
+
+        if(this.__left > _otherRectangle.getRight()) {
+            return false;
+        }
+
+        return true;
+    };
+
+
+    /**
+     * 
+     * @param {Point} _point 
+     */
+    Rectangle.prototype.checkIsPointWithin = function(_point) {
+        if(_point.getX() >= this.__left && _point.getX() <= this.__right && _point.getY() >= this.__top && _point.getY() <= this.__bottom) {
+            return true;
+        }
+
+        return false;
+    };
+
+    /**
+     * 
+     * @param {Rectangle} _otherRectangle
+     * @returns {Boolean}
+     */
+    Rectangle.prototype.checkIsWithin = function(_otherRectangle) {
+        if( this.__bottom <= _otherRectangle.getBottom() &&
+            this.__top >= _otherRectangle.getTop() &&
+            this.__right <= _otherRectangle.getRight() &&
+            this.__left >= _otherRectangle.getLeft()
+        ) {
+
+            return true;
+        }
+
+        return false;
+    };
+
+    const SheetEvent = Object.freeze({
+        DBLCLICK: "dblclick",
+        CLICK: "click",
+        CONNECTOR_UPDATED: "connector-updated",
+        ENTITY_ADDED: "entity-added",
+        ENTITY_REMOVED: "entity-removed",
+        ENTITY_RESIZED: "entity-resized",
+        ENTITY_TRANSLATED: "entity-translated",
+        MULTIPLE_ENTITY_SELECTION_STARTED: "multiple-object-selection-started",
+        MULTIPLE_ENTITIES_SELECTED: "multiple-objects-selected",
+    });
+
+    /**
      * Unique collection of Point objects
      * 
      * @param {Point[]|Float64Array|undefined} _pointsInput
@@ -481,6 +690,24 @@
             fromFloat64Array(_linesInput);
         }    
     }
+
+    const GroupTransformationContainerEvent = Object.freeze({
+        TRANSLATE_START: 'group-transformation-container-translate-start'
+    });
+
+    const ConnectorEvent = Object.freeze({
+        CLICK: 'connector-click',
+        MOUSE_ENTER: 'connector-mouse-enter',
+        MOUSE_LEAVE: 'connector-mouse-leave'
+    });
+
+    const ConnectorRoutingAlgorithm = Object.freeze({
+        STRAIGHT_LINE: 0,
+        STRAIGHT_LINE_BETWEEN_ANCHORS: 1,
+        STRAIGHT_LINE_BETWEEN_ANCHORS_AVOID_SELF_INTERSECTION: 2, // unsupported
+        ASTAR: 3,
+        ASTAR_WITH_ROUTE_OPTIMIZATION: 4
+    });
 
     const PointVisibilityMapRouteOptimizer = {
 
@@ -815,6 +1042,80 @@
         }
     }
 
+    const AccessibleRoutingPointsFinder = {
+
+        /**
+         * Find routing points that are not occluded by objects
+         * 
+         * @param {Object[]} _subjectEntityDescriptors
+         * @param {Object[]} _occluderEntityDescriptors
+         * @param {Number} _gridSize
+         * @returns {Object}
+         */
+        find: function(_subjectEntityDescriptors, _occluderEntityDescriptors, _gridSize) {
+            const connectorAnchorToNumValidRoutingPoints = new Map();
+            const allRoutingPoints = [];
+            const filteredRoutingPoints = new PointSet();
+
+            _subjectEntityDescriptors.forEach((_entityDescriptor) => {
+                const anchors = _entityDescriptor.connectorAnchors;
+
+                anchors.forEach((_a) => {
+
+                    // check if anchor is occluded
+                    // @todo Commented out for now, need a decision on how to handle anchors where centroid is on the occluder bounding rect
+                    /*for(let i=0; i<_occludableByObjects.length; i++) {
+                        const possibleOccluderBoundingRect = _occludableByObjects[i].getBoundingRectange();
+                        if(possibleOccluderBoundingRect.checkIsPointWithin(_a.getCentroid())) {
+                            connectorAnchorToNumValidRoutingPoints.set(_a.getId(), 0);
+                            isAnchorOccluded = true;
+                            break;
+                        }
+                    }*/
+
+                    {
+                        const routingPoints = (new PointSet(_a.routingPointsFloat64Arr)).toArray();
+                        routingPoints.forEach((_rp) => {
+                            allRoutingPoints.push(
+                                {
+                                    "routingPoint": _rp,
+                                    "parentAnchorId": _a.id
+                                }
+                            );
+                        });
+
+                        connectorAnchorToNumValidRoutingPoints.set(_a.id, routingPoints.length);
+                    }
+                });
+            });
+
+            allRoutingPoints.forEach((_rp) => {
+                let isPointWithinObj = false;
+
+                // check if routing point is occluded
+                for(let i=0; i<_occluderEntityDescriptors.length; i++) {
+                    const occluder = _occluderEntityDescriptors[i];
+                    const boundingRect = new Rectangle(occluder.x, occluder.y, occluder.x + occluder.width, occluder.y + occluder.height);
+                    if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
+                        isPointWithinObj = true;
+                        const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchorId) || 0;
+                        connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchorId, currentNumRoutingPoints - 1);
+                    }
+                }
+
+                if(!isPointWithinObj) {
+                    filteredRoutingPoints.push(_rp.routingPoint);
+                }
+                
+            });
+
+            return {
+                "connectorAnchorToNumValidRoutingPoints": connectorAnchorToNumValidRoutingPoints,
+                "accessibleRoutingPoints": filteredRoutingPoints,
+            };
+        }
+    };
+
     const SvgPathBuilder = {
 
         /**
@@ -909,14 +1210,6 @@
 
     };
 
-    const ConnectorRoutingAlgorithm = Object.freeze({
-        STRAIGHT_LINE: 0,
-        STRAIGHT_LINE_BETWEEN_ANCHORS: 1,
-        STRAIGHT_LINE_BETWEEN_ANCHORS_AVOID_SELF_INTERSECTION: 2, // unsupported
-        ASTAR: 3,
-        ASTAR_WITH_ROUTE_OPTIMIZATION: 4
-    });
-
     /**
      * 
      * @param {Object} _connectorDescriptor
@@ -981,10 +1274,59 @@
         }
     };
 
-    const convertArrayBufferToFloat64Array = function(_ab) {
-        return new Float64Array(_ab);
+    /**
+     * @param {Object[]} _entityDescriptors
+     * @returns {LineSet}
+     */    
+    const getBoundaryLinesFromEntityDescriptors = function(_entityDescriptors) {
+        const boundaryLines = new LineSet();
+
+        _entityDescriptors.forEach(function(_ed) {
+            const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
+            const lines = entityBoundingRect.getLines();
+            lines.forEach((_l) => {
+                boundaryLines.push(_l);
+            });
+
+            const anchors = _ed.connectorAnchors;
+            anchors.forEach(function(_anchor) {
+                const anchorBoundingRect = new Rectangle(_anchor.x, _anchor.y, _anchor.x + _anchor.width, _anchor.y + _anchor.height);
+                const lines = anchorBoundingRect.getLines();
+                lines.forEach((_l) => {
+                    boundaryLines.push(_l);
+                });                
+            });
+        });
+
+        return boundaryLines;
     };
 
+    /**
+     * @param {Object[]} _entityDescriptors
+     * @param {Number} _gridSize
+     * @returns {PointSet}
+     */
+    const getEntityExtentRoutingPointsFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
+        const pointSet = new PointSet();
+        _entityDescriptors.forEach(function(_ed) {
+            const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
+            const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
+            scaledPoints.forEach((_sp) => {
+                pointSet.push(_sp);
+            });
+        });
+
+        return pointSet;
+    };
+
+    /**
+     * @param {Object[]} _entityDescriptors
+     * @returns {PointSet}
+     */    
+    const getConnectorRoutingPointsAroundAnchor = function(_entityDescriptors, _gridSize) {
+        const routingPointsResult = AccessibleRoutingPointsFinder.find(_entityDescriptors, _entityDescriptors, _gridSize);
+        return routingPointsResult.accessibleRoutingPoints;
+    };
 
     const requestQueue = [];
     const processRequestQueue = function() {
@@ -1006,9 +1348,14 @@
         const entityDescriptors = lastRequest.entityDescriptors;
 
         const msgDecodeTimeT1 = new Date();
-        const routingPointsSet = new PointSet(convertArrayBufferToFloat64Array(lastRequest.routingPoints));
-        const boundaryLinesSet = new LineSet(convertArrayBufferToFloat64Array(lastRequest.boundaryLines));    
-        const routingPointsAroundAnchorSet = new PointSet(convertArrayBufferToFloat64Array(lastRequest.routingPointsAroundAnchor));    
+        const boundaryLinesSet = getBoundaryLinesFromEntityDescriptors(entityDescriptors);    
+
+        const routingPointsSet = new PointSet();
+        const routingPointsAroundAnchorSet = getConnectorRoutingPointsAroundAnchor(entityDescriptors, gridSize);
+        routingPointsSet.pushPointSet(routingPointsAroundAnchorSet);
+        routingPointsSet.pushPointSet(getEntityExtentRoutingPointsFromEntityDescriptors(entityDescriptors, gridSize));
+
+        // end decode
         metrics.msgDecodeTime = (new Date()) - msgDecodeTimeT1;
         
         const pointVisibilityMapCreationTimeT1 = new Date();
@@ -1035,10 +1382,7 @@
 
         postMessage(
             {
-                "routingPoints": lastRequest.routingPoints,
-                "boundaryLines": lastRequest.boundaryLines,
                 "connectorDescriptors": connectorDescriptors,
-                "pointVisibilityMapData": currentPointVisiblityMap.getPointToVisibleSetData(),
                 "metrics": metrics
             }
         );

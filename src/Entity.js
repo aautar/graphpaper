@@ -305,6 +305,10 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             anchors.push(
                 {
                     "id": connectorAnchors[i].getId(),
+                    "x": connectorAnchors[i].getX(),
+                    "y": connectorAnchors[i].getY(),
+                    "width": connectorAnchors[i].getWidth(),
+                    "height": connectorAnchors[i].getHeight(),
                     "routingPointsFloat64Arr": routingPoints.toFloat64Array()
                 }
             );
