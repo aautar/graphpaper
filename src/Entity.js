@@ -301,14 +301,15 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     this.getDescriptor = function(_gridSize) {
         const anchors = [];
         for(let i=0; i<connectorAnchors.length; i++) {
+            const boundingRect = connectorAnchors[i].getBoundingRectange();
             let routingPoints = new PointSet(self.getConnectorAnchorRoutingPoints(_gridSize));
             anchors.push(
                 {
                     "id": connectorAnchors[i].getId(),
-                    "x": connectorAnchors[i].getX(),
-                    "y": connectorAnchors[i].getY(),
-                    "width": connectorAnchors[i].getWidth(),
-                    "height": connectorAnchors[i].getHeight(),
+                    "x": boundingRect.getLeft(),
+                    "y": boundingRect.getTop(),
+                    "width": boundingRect.getWidth(),
+                    "height": boundingRect.getHeight(),
                     "routingPointsFloat64Arr": routingPoints.toFloat64Array()
                 }
             );

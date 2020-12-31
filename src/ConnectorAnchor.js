@@ -26,6 +26,7 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
      * @returns {Number}
      */     
     this.getX = function() {
+        // Might want to return left edge coordinate instead
         return self.getCentroid().getX();
     };
 
@@ -33,6 +34,7 @@ function ConnectorAnchor(_id, _domElement, _sheet) {
      * @returns {Number}
      */     
     this.getY = function() {
+        // Might want to return top edge coordinate instead
         return self.getCentroid().getY();
     };
 

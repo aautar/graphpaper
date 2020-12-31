@@ -863,6 +863,7 @@ var GraphPaper = (function (exports) {
          * @returns {Number}
          */     
         this.getX = function() {
+            // Might want to return left edge coordinate instead
             return self.getCentroid().getX();
         };
 
@@ -870,6 +871,7 @@ var GraphPaper = (function (exports) {
          * @returns {Number}
          */     
         this.getY = function() {
+            // Might want to return top edge coordinate instead
             return self.getCentroid().getY();
         };
 
@@ -2083,7 +2085,7 @@ var GraphPaper = (function (exports) {
             );
 
             metrics.refreshAllConnectorsInternal.executionTime = (new Date()) - executionTimeT1;
-
+            
             unlockDomMetrics();
         };
 
@@ -3619,14 +3621,15 @@ var GraphPaper = (function (exports) {
         this.getDescriptor = function(_gridSize) {
             const anchors = [];
             for(let i=0; i<connectorAnchors.length; i++) {
+                const boundingRect = connectorAnchors[i].getBoundingRectange();
                 let routingPoints = new PointSet(self.getConnectorAnchorRoutingPoints(_gridSize));
                 anchors.push(
                     {
                         "id": connectorAnchors[i].getId(),
-                        "x": connectorAnchors[i].getX(),
-                        "y": connectorAnchors[i].getY(),
-                        "width": connectorAnchors[i].getWidth(),
-                        "height": connectorAnchors[i].getHeight(),
+                        "x": boundingRect.getLeft(),
+                        "y": boundingRect.getTop(),
+                        "width": boundingRect.getWidth(),
+                        "height": boundingRect.getHeight(),
                         "routingPointsFloat64Arr": routingPoints.toFloat64Array()
                     }
                 );
