@@ -9,7 +9,7 @@ import {ConnectorRoutingAlgorithm} from '../ConnectorRoutingAlgorithm';
 import {Rectangle} from '../Rectangle';
 
 const workerData = {
-    pointVisibilityMap: null,
+    pointVisibilityMap: new PointVisibilityMap(),
     requestQueue: []
 };
 
@@ -85,7 +85,7 @@ const convertArrayBufferToFloat64Array = function(_ab) {
  * @param {Object[]} _entityDescriptors
  * @returns {LineSet}
  */    
-const getBoundaryLinesFromEntityDescriptors = function(_entityDescriptors) {
+/*const getBoundaryLinesFromEntityDescriptors = function(_entityDescriptors) {
     const boundaryLines = new LineSet();
 
     _entityDescriptors.forEach(function(_ed) {
@@ -106,7 +106,7 @@ const getBoundaryLinesFromEntityDescriptors = function(_entityDescriptors) {
     });
 
     return boundaryLines;
-};
+};*/
 
 /**
  * @param {Object[]} _entityDescriptors
@@ -154,26 +154,25 @@ const processRequestQueue = function() {
     const entityDescriptors = lastRequest.entityDescriptors;
 
     const msgDecodeTimeT1 = new Date();
-    const boundaryLinesSet = getBoundaryLinesFromEntityDescriptors(entityDescriptors);    
 
-    const routingPointsSet = new PointSet();
+    //const routingPointsSet = new PointSet();
     const routingPointsAroundAnchorSet = getConnectorRoutingPointsAroundAnchor(entityDescriptors, gridSize);
-    routingPointsSet.pushPointSet(routingPointsAroundAnchorSet);
-    routingPointsSet.pushPointSet(getEntityExtentRoutingPointsFromEntityDescriptors(entityDescriptors, gridSize));
+    //routingPointsSet.pushPointSet(routingPointsAroundAnchorSet);
+    //routingPointsSet.pushPointSet(getEntityExtentRoutingPointsFromEntityDescriptors(entityDescriptors, gridSize));
 
     // end decode
     metrics.msgDecodeTime = (new Date()) - msgDecodeTimeT1;
     
     const pointVisibilityMapCreationTimeT1 = new Date();
-    const currentPointVisiblityMap = new PointVisibilityMap(
-        routingPointsSet,
-        boundaryLinesSet
-    );
+
+    // Update PV map
+    workerData.pointVisibilityMap.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors(entityDescriptors, gridSize);
+
     metrics.pointVisibilityMapCreationTime = (new Date()) - pointVisibilityMapCreationTimeT1;
 
     const pathComputationTimeT1 = new Date();
     connectorDescriptors.forEach(function(_cd) {
-        const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
+        const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, workerData.pointVisibilityMap);
 
         const pointsInPathPointSet = new PointSet(pathData.pointsInPath);
 
@@ -182,9 +181,12 @@ const processRequestQueue = function() {
     });
     metrics.allPathsComputationTime = (new Date()) - pathComputationTimeT1;
     
-    metrics.numRoutingPoints = routingPointsSet.count();
-    metrics.numBoundaryLines = boundaryLinesSet.count();
+    metrics.numRoutingPoints = -1; //routingPointsSet.count();
+    metrics.numBoundaryLines = -1;//boundaryLinesSet.count();
     metrics.overallTime = (new Date()) - overallTimeT1;
+
+    // we want to avoid this and no re-create every time
+    //workerData.pointVisibilityMap = null;
 
     postMessage(
         {
