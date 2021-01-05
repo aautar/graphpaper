@@ -13,4 +13,4 @@ The diagram below show the relationship between these spaces. Note that the orig
 
 All spaces may be tranformed in some way via CSS transform or CSS positioning. In addition, spaces may be cutoff and scrolling offsets may come into play. Be concious of what coordinate system you're working in and note where you may need to do a transformation.
 
-Method names that don't specific a space, will return coordinates or dimensions relative to the space they're embedded in. For example, `Entity.getX()` and `Entity.getY()` will return X, Y coordinates in Sheet space. In contrast, `Entity.getPositionOnPage()` will return an object giving coordinates transformed to Page space, even though the Entity lives in Sheet page.
+Method names that don't specify a space will return coordinates or dimensions relative to the space they're embedded in. For example, `Entity.getX()` and `Entity.getY()` will return X, Y coordinates in Sheet space. In contrast, `Entity.getPositionOnPage()` will return an object giving coordinates transformed to Page space, even though the Entity lives in Sheet page.
