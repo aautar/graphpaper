@@ -780,11 +780,6 @@
 
     };
 
-    const VisiblePoints = {
-        isValid: false,
-        points: []
-    };
-
     const PointInfo = {
         point: null,
         visiblePoints: null
@@ -822,14 +817,11 @@
             for (let [_eid, _pvMap] of entityIdToPointVisibility) {
                 for (let [_routingPoint, _visiblePoints] of _pvMap) {
 
-                    if(_pointInfo.point.isEqual(_routingPoint)) {
-                        continue;
-                    }
-
                     const ijLine = new Line(_pointInfo.point, _routingPoint);
-                    if(!doesLineIntersectAnyBoundaryLines(ijLine)) {
+                    if(ijLine.getLength() > 0 && !doesLineIntersectAnyBoundaryLines(ijLine)) {
                         _pointInfo.visiblePoints.points.push(_routingPoint);
                     }
+
                 }
             }
 
@@ -844,7 +836,6 @@
          */
         const arePointsVisibleToEachOther = function(_ptA, _ptB) {
             const ptAInfo = fetchPointInfoForPoint(_ptA);
-            ptAInfo.visiblePoints.isValid = false;
             const visiblePts = getVisiblePointsRelativeTo(ptAInfo);
 
             for(let i=0; i<visiblePts.length; i++) {
@@ -976,7 +967,8 @@
                 const existingDescriptor = entityIdToDescriptor.get(entityId);
                 if(existingEntry && !hasEntityMutated(existingDescriptor, _entityDescriptors[i])) {
                     continue;
-                } 
+                }
+
                 entityIdToBoundaryLineSet.set(entityId, getBoundaryLinesFromEntityDescriptor(_entityDescriptors[i]));
                 entityIdToDescriptor.set(entityId, _entityDescriptors[i]);
                 numMutations++;
@@ -987,22 +979,22 @@
                 const entityId = _entityDescriptors[i].id;
                 const entityBoundingRect = new Rectangle(_entityDescriptors[i].x, _entityDescriptors[i].y, _entityDescriptors[i].x + _entityDescriptors[i].width, _entityDescriptors[i].y + _entityDescriptors[i].height);
                 const existingEntity = entityIdToPointVisibility.get(entityId);
-                if(existingEntity && !hasEntityMutated(existingEntity, _entityDescriptors[i])) {
-                    continue;
-                }
+                if(existingEntity && !hasEntityMutated(existingEntity, _entityDescriptors[i])) ;
+
+                // we need to find sibling entities that have mutated, such that their mutation affects visibility on this entity
 
                 const foundPoints = AccessibleRoutingPointsFinder.find([_entityDescriptors[i]], _entityDescriptors, _gridSize);
                 const routingPoints = foundPoints.accessibleRoutingPoints.toArray();
                 const routingPointToVisibleSet = new Map();
 
                 for(let j=0; j<routingPoints.length; j++) {
-                    routingPointToVisibleSet.set(routingPoints[j], Object.create(VisiblePoints));
+                    routingPointToVisibleSet.set(routingPoints[j], { isValid:false, points:[] });
                 }
 
                 // bounding extent routing points
                 const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
                 scaledPoints.forEach((_sp) => {
-                    routingPointToVisibleSet.set(_sp, Object.create(VisiblePoints));
+                    routingPointToVisibleSet.set(_sp, { isValid:false, points:[] });
                 });            
 
                 entityIdToPointVisibility.set(entityId, routingPointToVisibleSet);
