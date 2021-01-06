@@ -23,8 +23,8 @@ function PointVisibilityMap() {
     const entityIdToPointVisibility = new Map();
     const entityIdToBoundaryLineSet = new Map();
     const entityIdToDescriptor = new Map();
-    let freePointsArr = [];
-    let pointToVisibleSet = null;
+    let currentNumRoutingPoints = 0;
+    let currentNumOfBoundaryLines = 0;
 
     /**
      * @param {Line} _theLine
@@ -174,7 +174,7 @@ function PointVisibilityMap() {
             const lines = anchorBoundingRect.getLines();
             lines.forEach((_l) => {
                 boundaryLines.push(_l);
-            });                
+            });
         });
 
         return boundaryLines;
@@ -188,7 +188,39 @@ function PointVisibilityMap() {
         return false;
     };
 
+    /**
+     * 
+     * @param {Point} _point 
+     * @returns {PointInfo|null}
+     */
+    const fetchPointInfoForPoint = function(_point) {
+        for (let [_eid, _pvMap] of entityIdToPointVisibility) {
+            for (let [_routingPoint, _visiblePoints] of _pvMap) {
+                if(_routingPoint === _point) {
+                    return buildPointInfo(_routingPoint, _visiblePoints);
+                }
+            }
+        }
+
+        return null;
+    };
+
+    /**
+     * 
+     * @param {Point} _pt 
+     * @param {VisiblePoints} _visiblePoints
+     * @returns {PointInfo}
+     */
+    const buildPointInfo = function(_pt, _visiblePoints) {
+        const result = Object.create(PointInfo);
+        result.point = _pt;
+        result.visiblePoints = _visiblePoints;
+        return result;
+    };    
+
     this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
+        currentNumRoutingPoints = 0;
+        currentNumOfBoundaryLines = 0;
         let numMutations = 0;
 
         const aliveEntityIds = [];
@@ -201,12 +233,16 @@ function PointVisibilityMap() {
             const existingEntry = entityIdToBoundaryLineSet.get(entityId);
             const existingDescriptor = entityIdToDescriptor.get(entityId);
             if(existingEntry && !hasEntityMutated(existingDescriptor, _entityDescriptors[i])) {
+                currentNumOfBoundaryLines += existingEntry.count();
                 continue;
             }
 
-            entityIdToBoundaryLineSet.set(entityId, getBoundaryLinesFromEntityDescriptor(_entityDescriptors[i]));
+            const boundaryLinesForEntity = getBoundaryLinesFromEntityDescriptor(_entityDescriptors[i]);
+            entityIdToBoundaryLineSet.set(entityId, boundaryLinesForEntity);
             entityIdToDescriptor.set(entityId, _entityDescriptors[i]);
+
             numMutations++;
+            currentNumOfBoundaryLines += boundaryLinesForEntity.count();
         }
 
         // update routing points
@@ -220,7 +256,6 @@ function PointVisibilityMap() {
             }
 
             // we need to find sibling entities that have mutated, such that their mutation affects visibility on this entity
-
             const foundPoints = AccessibleRoutingPointsFinder.find([_entityDescriptors[i]], _entityDescriptors, _gridSize);
             const routingPoints = foundPoints.accessibleRoutingPoints.toArray();
             const routingPointToVisibleSet = new Map();
@@ -236,6 +271,7 @@ function PointVisibilityMap() {
             });            
 
             entityIdToPointVisibility.set(entityId, routingPointToVisibleSet);
+            currentNumRoutingPoints += routingPointToVisibleSet.size;
         }
 
         // deal with dead entities
@@ -258,18 +294,18 @@ function PointVisibilityMap() {
         return numMutations;
     };
 
+    /**
+     * @returns {Number}
+     */
+    this.getCurrentNumRoutingPoints = function() {
+        return currentNumRoutingPoints;
+    };
 
     /**
-     * 
-     * @param {Point} _pt 
-     * @param {VisiblePoints} _visiblePoints
-     * @returns {PointInfo}
-     */
-    const buildPointInfo = function(_pt, _visiblePoints) {
-        const result = Object.create(PointInfo);
-        result.point = _pt;
-        result.visiblePoints = _visiblePoints;
-        return result;
+     * @returns {Number}
+     */    
+    this.getCurrentNumBoundaryLines = function() {
+        return currentNumOfBoundaryLines;
     };
 
     /**
@@ -293,23 +329,6 @@ function PointVisibilityMap() {
         }
 
         return result;
-    };
-
-    /**
-     * 
-     * @param {Point} _point 
-     * @returns {PointInfo|null}
-     */
-    const fetchPointInfoForPoint = function(_point) {
-        for (let [_eid, _pvMap] of entityIdToPointVisibility) {
-            for (let [_routingPoint, _visiblePoints] of _pvMap) {
-                if(_routingPoint === _point) {
-                    return buildPointInfo(_routingPoint, _visiblePoints);
-                }
-            }
-        }
-
-        return null;
     };
 
     /**

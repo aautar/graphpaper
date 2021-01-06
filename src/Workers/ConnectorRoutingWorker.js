@@ -83,51 +83,6 @@ const convertArrayBufferToFloat64Array = function(_ab) {
 
 /**
  * @param {Object[]} _entityDescriptors
- * @returns {LineSet}
- */    
-/*const getBoundaryLinesFromEntityDescriptors = function(_entityDescriptors) {
-    const boundaryLines = new LineSet();
-
-    _entityDescriptors.forEach(function(_ed) {
-        const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
-        const lines = entityBoundingRect.getLines();
-        lines.forEach((_l) => {
-            boundaryLines.push(_l);
-        });
-
-        const anchors = _ed.connectorAnchors;
-        anchors.forEach(function(_anchor) {
-            const anchorBoundingRect = new Rectangle(_anchor.x, _anchor.y, _anchor.x + _anchor.width, _anchor.y + _anchor.height);
-            const lines = anchorBoundingRect.getLines();
-            lines.forEach((_l) => {
-                boundaryLines.push(_l);
-            });                
-        });
-    });
-
-    return boundaryLines;
-};*/
-
-/**
- * @param {Object[]} _entityDescriptors
- * @param {Number} _gridSize
- * @returns {PointSet}
- */
-const getEntityExtentRoutingPointsFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
-    const pointSet = new PointSet();
-    _entityDescriptors.forEach(function(_ed) {
-        const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
-        const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
-        scaledPoints.forEach((_sp) => {
-            pointSet.push(_sp);
-        });
-    });
-
-    return pointSet;
-};
-
-/**
- * @param {Object[]} _entityDescriptors
  * @returns {PointSet}
  */    
 const getConnectorRoutingPointsAroundAnchor = function(_entityDescriptors, _gridSize) {
@@ -155,10 +110,7 @@ const processRequestQueue = function() {
 
     const msgDecodeTimeT1 = new Date();
 
-    //const routingPointsSet = new PointSet();
     const routingPointsAroundAnchorSet = getConnectorRoutingPointsAroundAnchor(entityDescriptors, gridSize);
-    //routingPointsSet.pushPointSet(routingPointsAroundAnchorSet);
-    //routingPointsSet.pushPointSet(getEntityExtentRoutingPointsFromEntityDescriptors(entityDescriptors, gridSize));
 
     // end decode
     metrics.msgDecodeTime = (new Date()) - msgDecodeTimeT1;
@@ -181,8 +133,8 @@ const processRequestQueue = function() {
     });
     metrics.allPathsComputationTime = (new Date()) - pathComputationTimeT1;
     
-    metrics.numRoutingPoints = -1; //routingPointsSet.count();
-    metrics.numBoundaryLines = -1;//boundaryLinesSet.count();
+    metrics.numRoutingPoints = workerData.pointVisibilityMap.getCurrentNumRoutingPoints();
+    metrics.numBoundaryLines = workerData.pointVisibilityMap.getCurrentNumBoundaryLines();
     metrics.overallTime = (new Date()) - overallTimeT1;
 
     // we want to avoid this and no re-create every time
