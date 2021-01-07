@@ -137,9 +137,6 @@ const processRequestQueue = function() {
     metrics.numBoundaryLines = workerData.pointVisibilityMap.getCurrentNumBoundaryLines();
     metrics.overallTime = (new Date()) - overallTimeT1;
 
-    // we want to avoid this and no re-create every time
-    //workerData.pointVisibilityMap = null;
-
     postMessage(
         {
             "connectorDescriptors": connectorDescriptors,

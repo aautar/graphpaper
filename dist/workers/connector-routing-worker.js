@@ -154,6 +154,34 @@
     };
 
     /**
+     * @returns {Number}
+     */
+    Line.prototype.getMinX = function() {
+        return Math.min(this.getStartPoint().getX(), this.getEndPoint().getX());
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Line.prototype.getMaxX = function() {
+        return Math.max(this.getStartPoint().getX(), this.getEndPoint().getX());
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Line.prototype.getMinY = function() {
+        return Math.min(this.getStartPoint().getY(), this.getEndPoint().getY());
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Line.prototype.getMaxY = function() {
+        return Math.max(this.getStartPoint().getY(), this.getEndPoint().getY());
+    };
+
+    /**
      * Calculate unit length direction vector
      * 
      * @returns {Point}
@@ -800,8 +828,25 @@
          */
         const doesLineIntersectAnyBoundaryLines = function(_theLine) {
             for (let [_eid, _boundaryLineSet] of entityIdToBoundaryLineSet) {
-                const boundaryLinesArr = _boundaryLineSet.toArray();
+                const descriptor = entityIdToDescriptor.get(_eid);
 
+                if(_theLine.getMinX() > descriptor.outerBoundingRect.maxX) {
+                    continue;
+                }
+                
+                if(_theLine.getMaxX() < descriptor.outerBoundingRect.minX) {
+                    continue;
+                }
+
+                if(_theLine.getMinY() > descriptor.outerBoundingRect.maxY) {
+                    continue;
+                }
+
+                if(_theLine.getMaxY() < descriptor.outerBoundingRect.minY) {
+                    continue;
+                }
+
+                const boundaryLinesArr = _boundaryLineSet.toArray();
                 for(let i=0; i<boundaryLinesArr.length; i++) {
                     const intersectionType = boundaryLinesArr[i].computeIntersectionType(_theLine);
                     if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
@@ -1379,9 +1424,6 @@
         metrics.numRoutingPoints = workerData.pointVisibilityMap.getCurrentNumRoutingPoints();
         metrics.numBoundaryLines = workerData.pointVisibilityMap.getCurrentNumBoundaryLines();
         metrics.overallTime = (new Date()) - overallTimeT1;
-
-        // we want to avoid this and no re-create every time
-        //workerData.pointVisibilityMap = null;
 
         postMessage(
             {

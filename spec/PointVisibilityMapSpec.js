@@ -5,7 +5,6 @@ import {LineSet} from '../src/LineSet'
 import {PointVisibilityMap} from '../src/PointVisibilityMap'
 
 describe("PointVisibilityMap.findVisiblePointInfoClosestTo", function() {
-
     it("returns null when there are no points in PointVisibilityMap", function() {
         const pointVisibilityMap = new PointVisibilityMap();
         expect(pointVisibilityMap.findVisiblePointInfoClosestTo(new Point(-100, 200))).toBe(null);
@@ -17,7 +16,13 @@ describe("PointVisibilityMap.findVisiblePointInfoClosestTo", function() {
             y: 25,
             width: 100,
             height: 100,
-            connectorAnchors: []
+            connectorAnchors: [],
+            outerBoundingRect: {
+                minX: 25,
+                minY: 25,
+                maxX: 100,
+                maxY: 100
+            }            
         };
 
         const pointVisibilityMap = new PointVisibilityMap();
@@ -37,7 +42,13 @@ describe("PointVisibilityMap.computeRoute", function() {
             y: 25,
             width: 100,
             height: 100,
-            connectorAnchors: []
+            connectorAnchors: [],
+            outerBoundingRect: {
+                minX: 25,
+                minY: 25,
+                maxX: 100,
+                maxY: 100
+            }
         };
 
         const pointVisibilityMap = new PointVisibilityMap();
@@ -64,6 +75,4 @@ describe("PointVisibilityMap.computeRoute", function() {
         expect(routePointsArray[3].getX()).toBe(13);
         expect(routePointsArray[3].getY()).toBe(137);        
     });
-
-
 });

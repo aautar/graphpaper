@@ -4,7 +4,7 @@ import {Line} from './Line';
 import {PointSet} from './PointSet';
 import {PointVisibilityMapRouteOptimizer} from './PointVisibilityMapRouteOptimizer';
 import {LineSet} from './LineSet';
-import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
+import {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
 import {Rectangle} from './Rectangle';
 
 const VisiblePoints = {
@@ -32,8 +32,25 @@ function PointVisibilityMap() {
      */
     const doesLineIntersectAnyBoundaryLines = function(_theLine) {
         for (let [_eid, _boundaryLineSet] of entityIdToBoundaryLineSet) {
-            const boundaryLinesArr = _boundaryLineSet.toArray();
+            const descriptor = entityIdToDescriptor.get(_eid);
 
+            if(_theLine.getMinX() > descriptor.outerBoundingRect.maxX) {
+                continue;
+            }
+            
+            if(_theLine.getMaxX() < descriptor.outerBoundingRect.minX) {
+                continue;
+            }
+
+            if(_theLine.getMinY() > descriptor.outerBoundingRect.maxY) {
+                continue;
+            }
+
+            if(_theLine.getMaxY() < descriptor.outerBoundingRect.minY) {
+                continue;
+            }
+
+            const boundaryLinesArr = _boundaryLineSet.toArray();
             for(let i=0; i<boundaryLinesArr.length; i++) {
                 const intersectionType = boundaryLinesArr[i].computeIntersectionType(_theLine);
                 if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
