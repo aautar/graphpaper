@@ -62,7 +62,6 @@ describe("Line.createShortenedLine", function() {
 });
 
 describe("Line.computeIntersection", function() {
- 
   it("returns LINE_INTERSECTION_TYPE.LINESEG intersection type for intersection on line", function() {
     const line1 = new Line(new Point(0,0), new Point(100,100));
     const line2 = new Line(new Point(0,100), new Point(100,0));
@@ -91,5 +90,32 @@ describe("Line.computeIntersection", function() {
 
     expect(intersection.getType()).toBe(LINE_INTERSECTION_TYPE.LINE);
   });
-  
+});
+
+describe("Line.getMinX", function() {
+  it("returns minimum x-coordinate", function() {
+    const line = new Line(new Point(75, 100), new Point(100,200));
+    expect(line.getMinX()).toBe(75);
+  });
+});
+
+describe("Line.getMinY", function() {
+  it("returns minimum y-coordinate", function() {
+    const line = new Line(new Point(75, 100), new Point(100,200));
+    expect(line.getMinY()).toBe(100);
+  });
+});
+
+describe("Line.getMaxX", function() {
+  it("returns maximum x-coordinate", function() {
+    const line = new Line(new Point(75, 100), new Point(120,200));
+    expect(line.getMaxX()).toBe(120);
+  });
+});
+
+describe("Line.getMaxY", function() {
+  it("returns maximum y-coordinate", function() {
+    const line = new Line(new Point(75, 100), new Point(120,200));
+    expect(line.getMaxY()).toBe(200);
+  });
 });
