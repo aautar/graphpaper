@@ -1029,14 +1029,34 @@
             result.point = _pt;
             result.visiblePoints = _visiblePoints;
             return result;
-        };    
+        };
+
+        const buildEmptyRoutingPointToVisibleSetMap = function(_entityDescriptor, _allSiblingDescriptors, _gridSize) {
+            const entityBoundingRect = new Rectangle(_entityDescriptor.x, _entityDescriptor.y, _entityDescriptor.x + _entityDescriptor.width, _entityDescriptor.y + _entityDescriptor.height);
+            const foundPoints = AccessibleRoutingPointsFinder.find([_entityDescriptor], _allSiblingDescriptors, _gridSize);
+            const routingPoints = foundPoints.accessibleRoutingPoints.toArray();
+            const routingPointToVisibleSet = new Map();
+
+            for(let j=0; j<routingPoints.length; j++) {
+                routingPointToVisibleSet.set(routingPoints[j], { isValid:false, points:[] });
+            }
+
+            // bounding extent routing points
+            const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
+            scaledPoints.forEach((_sp) => {
+                routingPointToVisibleSet.set(_sp, { isValid:false, points:[] });
+            }); 
+
+            return routingPointToVisibleSet;
+        };
 
         this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
             currentNumRoutingPoints = 0;
             currentNumOfBoundaryLines = 0;
-            let numMutations = 0;
 
             const aliveEntityIds = [];
+            const mutatedEntityIds = []; // a mutation is considered any addition, removal, or change
+            const deletedEntityIds = [];
 
             // update boundary lines
             for(let i=0; i<_entityDescriptors.length; i++) {
@@ -1052,35 +1072,24 @@
 
                 const boundaryLinesForEntity = getBoundaryLinesFromEntityDescriptor(_entityDescriptors[i]);
                 entityIdToBoundaryLineSet.set(entityId, boundaryLinesForEntity);
-                entityIdToDescriptor.set(entityId, _entityDescriptors[i]);
 
-                numMutations++;
                 currentNumOfBoundaryLines += boundaryLinesForEntity.count();
             }
 
             // update routing points
             for(let i=0; i<_entityDescriptors.length; i++) {
                 const entityId = _entityDescriptors[i].id;
-                const entityBoundingRect = new Rectangle(_entityDescriptors[i].x, _entityDescriptors[i].y, _entityDescriptors[i].x + _entityDescriptors[i].width, _entityDescriptors[i].y + _entityDescriptors[i].height);
-                const existingEntity = entityIdToPointVisibility.get(entityId);
-                if(existingEntity && !hasEntityMutated(existingEntity, _entityDescriptors[i])) ;
+                const existingDescriptor = entityIdToDescriptor.get(entityId);
+                if(existingDescriptor && !hasEntityMutated(existingDescriptor, _entityDescriptors[i])) ;
 
-                // we need to find sibling entities that have mutated, such that their mutation affects visibility on this entity
-                const foundPoints = AccessibleRoutingPointsFinder.find([_entityDescriptors[i]], _entityDescriptors, _gridSize);
-                const routingPoints = foundPoints.accessibleRoutingPoints.toArray();
-                const routingPointToVisibleSet = new Map();
-
-                for(let j=0; j<routingPoints.length; j++) {
-                    routingPointToVisibleSet.set(routingPoints[j], { isValid:false, points:[] });
-                }
-
-                // bounding extent routing points
-                const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
-                scaledPoints.forEach((_sp) => {
-                    routingPointToVisibleSet.set(_sp, { isValid:false, points:[] });
-                });            
-
+                // Entity has been mutated, all routing points for the entity are invalid
+                // .. also the inverse relationship (sibling routing points that point to this entity) are also invalid
+                const routingPointToVisibleSet = buildEmptyRoutingPointToVisibleSetMap(_entityDescriptors[i], _entityDescriptors, _gridSize);
                 entityIdToPointVisibility.set(entityId, routingPointToVisibleSet);
+
+                entityIdToDescriptor.set(entityId, _entityDescriptors[i]); // take advantage of this loop to also, finally, update descriptors as we're done with mutation checks
+
+                mutatedEntityIds.push(entityId);
                 currentNumRoutingPoints += routingPointToVisibleSet.size;
             }
 
@@ -1095,13 +1104,20 @@
                 // .. else, need to figure out which computations are to be invalidated (overlapping rects tell if relationship between 2 entities is affected)
                 // .... this applies to additions and mutations as well
 
+                mutatedEntityIds.push(_eid);
+                deletedEntityIds.push(_eid);
+            }
+
+            // for future optimization..
+            //invalidateSiblingPointVisibilityForMutatedEntities(mutatedEntityIds, _gridSize);
+
+            deletedEntityIds.forEach((_deletedEntity) => {
                 entityIdToDescriptor.delete(_eid);
                 entityIdToBoundaryLineSet.delete(_eid);
                 entityIdToPointVisibility.delete(_eid);
-                numMutations++;
-            }
+            });
 
-            return numMutations;
+            return mutatedEntityIds.length;
         };
 
         /**
