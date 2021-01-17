@@ -8,9 +8,7 @@ import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
 import {DoubleTapDetector} from './DoubleTapDetector';
 import {Rectangle} from './Rectangle';
 import {Point} from './Point';
-import {Line} from './Line';
 import {PointSet} from './PointSet';
-import {LineSet} from './LineSet';
 import {GroupTransformationContainer} from './GroupTransformationContainer';
 import {Connector} from './Connector';
 import {GRID_STYLE, Grid} from './Grid';
@@ -164,6 +162,7 @@ function Sheet(_sheetDomElement, _window) {
                     _c.refresh(descriptor.svgPath, ps.toArray());
                 });
 
+                // May want defer this, rendering affected if consumer has a long-running handler
                 emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
             }
         });
