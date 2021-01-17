@@ -89,18 +89,18 @@ describe("Connector.getLength", function() {
 
         const containerDomElem = window.document.createElement('div');
 
-        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
-        connector.refresh(
-            "M1607 757L1629 757 L2003 925 L2494 925 L2534 781 L2556 781", 
-            [
-                new Point(1607, 757),
-                new Point(1629, 757),
-                new Point(2003, 925),
-                new Point(2494, 925),
-                new Point(2534, 781),
-                new Point(2556, 781)
-            ]
-        );
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');
+
+        connector.updatePathPoints([
+            new Point(1607, 757),
+            new Point(1629, 757),
+            new Point(2003, 925),
+            new Point(2494, 925),
+            new Point(2534, 781),
+            new Point(2556, 781)
+        ]);
+
+        connector.refresh("M1607 757L1629 757 L2003 925 L2494 925 L2534 781 L2556 781");
 
         const connectorLength = connector.getLength();
 
@@ -118,13 +118,17 @@ describe("Connector.getMidpoint", function() {
 
         const containerDomElem = window.document.createElement('div');
 
-        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
-        connector.refresh(
-            "M100 100L500 500", 
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');
+
+        connector.updatePathPoints(
             [
                 new Point(100, 100),
                 new Point(500, 500),
             ]
+        );
+
+        connector.refresh(
+            "M100 100L500 500"
         );
 
         const midpoint = connector.getMidpoint();
@@ -140,15 +144,19 @@ describe("Connector.getMidpoint", function() {
 
         const containerDomElem = window.document.createElement('div');
 
-        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
-        connector.refresh(
-            "M100 100L100 90 L180 90 L180 100", 
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');
+
+        connector.updatePathPoints(
             [
                 new Point(100, 100),
                 new Point(100, 90),
                 new Point(180, 90),
                 new Point(180, 100),
             ]
+        );
+
+        connector.refresh(
+            "M100 100L100 90 L180 90 L180 100"
         );
 
         const midpoint = connector.getMidpoint();
@@ -167,15 +175,19 @@ describe("Connector.getMidpointDirection", function() {
 
         const containerDomElem = window.document.createElement('div');
 
-        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
-        connector.refresh(
-            "M100 100L100 90 L180 90 L180 100", 
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');
+
+        connector.updatePathPoints(
             [
                 new Point(100, 100),
                 new Point(100, 90),
                 new Point(180, 90),
                 new Point(180, 100),
             ]
+        );
+        
+        connector.refresh(
+            "M100 100L100 90 L180 90 L180 100"
         );
 
         const mpDir = connector.getMidpointDirection();
