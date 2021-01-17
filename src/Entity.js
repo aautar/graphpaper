@@ -49,6 +49,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     let width = null;
     let height = null;
     let hasPendingFrame = false;
+    let overwrittenRenderStyles = {};
 
     /**
      * @param {Element} _connectorAnchorDomElement
@@ -162,10 +163,30 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     const renderInternal = function() {
-        _domElement.style.left = x + 'px';
-        _domElement.style.top = y + 'px';
-        _domElement.style.width = width + 'px';
-        _domElement.style.height = height + 'px';        
+        if(overwrittenRenderStyles.left) {
+            _domElement.style.left = overwrittenRenderStyles.left;
+        } else {
+            _domElement.style.left = x + 'px';
+        }
+
+        if(overwrittenRenderStyles.top) {
+            _domElement.style.top = overwrittenRenderStyles.top;
+        } else {
+            _domElement.style.top = y + 'px';
+        }
+
+        if(overwrittenRenderStyles.width) {
+            _domElement.style.width = overwrittenRenderStyles.width;
+        } else {
+            _domElement.style.width = width + 'px';
+        }
+
+        if(overwrittenRenderStyles.height) {
+            _domElement.style.height = overwrittenRenderStyles.height;
+        } else {
+            _domElement.style.height = height + 'px';
+        }
+        
         hasPendingFrame = false;
     };
 
@@ -179,11 +200,19 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
+     * 
+     * @param {String} _style 
+     * @param {String} _value 
+     */
+    this.overwriteRenderStyle = function(_style, _value) {
+        overwrittenRenderStyles[_style] = _value;
+    };
+
+    /**
      * @param {Number} _x
      * @param {Number} _y
      */
     this.translate = function(_x, _y) {
-
         if(_x === x && _y === y) {
             return;
         }
@@ -218,15 +247,11 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @param {Number} _height
      * @param {Function} _domElementStyleUpdateOverrideFunc
      */
-    this.resize = function(_width, _height, _domElementStyleUpdateOverrideFunc) {            
+    this.resize = function(_width, _height) {            
         width = _width;
         height = _height;
 
-        if(_domElementStyleUpdateOverrideFunc) {
-            _domElementStyleUpdateOverrideFunc(_domElement);
-        } else {
-            self.render();
-        }
+        self.render();
 
         const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE) || [];
         observers.forEach(function(handler) {

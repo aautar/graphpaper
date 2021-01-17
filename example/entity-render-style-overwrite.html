@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GraphPaper</title>
+    <link href="common.css" rel="stylesheet">
+    <script src="../dist/graphpaper.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+    <div id="paper">
+        <div id="obj1" class="obj">
+            <div id="translateHandle1" class="translateHandle"></div>
+            <div id="resizeHandle1"  class="resizeHandle"></div>
+            <div id="connectorAnchor1" class="connectorAnchor"></div>
+        </div>
+
+        <div id="obj2" class="obj">
+            <div id="translateHandle2" class="translateHandle"></div>
+            <div id="resizeHandle2" class="resizeHandle"></div>
+            <div id="connectorAnchor2" class="connectorAnchor"></div>
+        </div>        
+
+
+        <div id="obj3" class="obj">
+            <div id="translateHandle3" class="translateHandle"></div>
+            <div id="resizeHandle3" class="resizeHandle"></div>
+            <div id="connectorAnchor3" class="connectorAnchor"></div>
+        </div>        
+
+        <div id="obj4" class="obj">
+            <div id="translateHandle4" class="translateHandle"></div>
+            <div id="resizeHandle4" class="resizeHandle"></div>
+            <div id="connectorAnchor4" class="connectorAnchor"></div>
+        </div>            
+
+    </div>
+
+
+    <script type="text/javascript">
+        const canvas = new GraphPaper.Sheet(
+            document.getElementById('paper'), 
+            window
+        );
+
+        canvas.initInteractionHandlers();
+        canvas.initTransformationHandlers();
+
+        canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
+            const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px', 0, GraphPaper.ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION);
+            return c;
+        });
+
+        const obj1 = new GraphPaper.Entity(
+            'obj1', 
+            0, 
+            0, 
+            52, 
+            52, 
+            canvas,
+            document.getElementById('obj1'), 
+            [document.getElementById('translateHandle1')],
+            [document.getElementById('resizeHandle1')]
+        );
+
+        obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
+
+        const obj2 = new GraphPaper.Entity(
+            'obj2', 
+            0, 
+            0, 
+            52, 
+            52, 
+            canvas,
+            document.getElementById('obj2'), 
+            [document.getElementById('translateHandle2')],
+            [document.getElementById('resizeHandle2')]
+        );
+
+        obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
+        obj2.translate(100, 100);
+
+        const obj3 = new GraphPaper.Entity(
+            'obj3', 
+            0, 
+            0, 
+            52, 
+            52, 
+            canvas,
+            document.getElementById('obj3'), 
+            [document.getElementById('translateHandle3')],
+            [document.getElementById('resizeHandle3')]
+        );
+
+        obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3'));        
+        obj3.translate(200,200);
+
+        const obj4 = new GraphPaper.Entity(
+            'obj4', 
+            0, 
+            0, 
+            52, 
+            52, 
+            canvas,
+            document.getElementById('obj4'), 
+            [document.getElementById('translateHandle4')],
+            [document.getElementById('resizeHandle4')]
+        );
+
+        obj4.addInteractableConnectorAnchor(document.getElementById('connectorAnchor4'));        
+        obj4.translate(400,200);
+
+        canvas.addEntity(obj1);
+        canvas.addEntity(obj2);
+        canvas.addEntity(obj3);
+        canvas.addEntity(obj4);
+
+
+        // set as auto height entities
+        obj1.overwriteRenderStyle('height', '100px');
+        obj2.overwriteRenderStyle('height', 'auto');
+        obj3.overwriteRenderStyle('height', 'auto');
+        obj4.overwriteRenderStyle('height', 'auto');
+
+        canvas.initDebugMetricsPanel();
+        canvas.setConnectorRefreshBufferTime(0);
+
+    </script>
+
+</body>
+
+</html>
