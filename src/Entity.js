@@ -48,6 +48,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     let y = null;
     let width = null;
     let height = null;
+    let hasPendingFrame = false;
 
     /**
      * @param {Element} _connectorAnchorDomElement
@@ -160,6 +161,23 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
         return new Point(boundingRect.left + window.scrollX, boundingRect.top + window.scrollY);
     };
 
+    const renderInternal = function() {
+        _domElement.style.left = x + 'px';
+        _domElement.style.top = y + 'px';
+        _domElement.style.width = width + 'px';
+        _domElement.style.height = height + 'px';        
+        hasPendingFrame = false;
+    };
+
+    this.render = function() {
+        if(hasPendingFrame) {
+            cancelAnimationFrame(renderInternal);
+        }
+
+        hasPendingFrame = true;
+        requestAnimationFrame(renderInternal);
+    };
+
     /**
      * @param {Number} _x
      * @param {Number} _y
@@ -173,8 +191,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
         x = _x;
         y = _y;
 
-        _domElement.style.left = x + 'px';
-        _domElement.style.top = y + 'px';
+        self.render();       
 
         const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE) || [];
         observers.forEach(function(handler) {
@@ -208,8 +225,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
         if(_domElementStyleUpdateOverrideFunc) {
             _domElementStyleUpdateOverrideFunc(_domElement);
         } else {
-            _domElement.style.width = width + 'px';
-            _domElement.style.height = height + 'px';
+            self.render();
         }
 
         const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE) || [];

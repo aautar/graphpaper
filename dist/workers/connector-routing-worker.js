@@ -1111,7 +1111,7 @@
             // for future optimization..
             //invalidateSiblingPointVisibilityForMutatedEntities(mutatedEntityIds, _gridSize);
 
-            deletedEntityIds.forEach((_deletedEntity) => {
+            deletedEntityIds.forEach((_eid) => {
                 entityIdToDescriptor.delete(_eid);
                 entityIdToBoundaryLineSet.delete(_eid);
                 entityIdToPointVisibility.delete(_eid);

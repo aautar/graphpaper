@@ -13,7 +13,6 @@ import {PointSet} from './PointSet';
 import {LineSet} from './LineSet';
 import {GroupTransformationContainer} from './GroupTransformationContainer';
 import {Connector} from './Connector';
-import {PointVisibilityMap} from './PointVisibilityMap';
 import {GRID_STYLE, Grid} from './Grid';
 import {GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
 import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
@@ -126,6 +125,7 @@ function Sheet(_sheetDomElement, _window) {
     const eventHandlers = new Map();
     var connectorRefreshStartTime = null;
     var connectorRefreshTimeout = null;
+    let pendingConnectorRefresh = false;
 
 
     // Setup ConnectorRoutingWorker
@@ -139,8 +139,9 @@ function Sheet(_sheetDomElement, _window) {
 
     connectorRoutingWorker.onmessage = function(_msg) {
         const connectorsRefreshTimeT1 = new Date();
-
         const connectorDescriptors = _msg.data.connectorDescriptors;
+        const refreshCalls = [];
+
         const getConnectorDescriptorById = function(_id) {
             for(let i=0; i<connectorDescriptors.length; i++) {
                 if(connectorDescriptors[i].id === _id) {
@@ -151,15 +152,32 @@ function Sheet(_sheetDomElement, _window) {
             return null;
         };
 
+        const renderInternal = function() {
+            refreshCalls.forEach((_rc) => {
+                _rc();
+            });
+            pendingConnectorRefresh = false;
+        };
+
+
         objectConnectors.forEach(function(_c) {
             const descriptor = getConnectorDescriptorById(_c.getId());
             if(descriptor) {
-                const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
-                _c.refresh(descriptor.svgPath, ps.toArray());
+                refreshCalls.push(() => {
+                    const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
+                    _c.refresh(descriptor.svgPath, ps.toArray());
+                });
+
                 emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
             }
-        });        
+        });
         
+        if(pendingConnectorRefresh) {
+            cancelAnimationFrame(renderInternal);
+        }
+
+        pendingConnectorRefresh = true;
+        requestAnimationFrame(renderInternal);
 
         metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
 
