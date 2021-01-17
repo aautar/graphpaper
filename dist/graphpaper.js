@@ -1787,6 +1787,7 @@ var GraphPaper = (function (exports) {
         const eventHandlers = new Map();
         var connectorRefreshStartTime = null;
         var connectorRefreshTimeout = null;
+        let pendingConnectorRedraw = false;
 
 
         // Setup ConnectorRoutingWorker
@@ -1813,6 +1814,7 @@ var GraphPaper = (function (exports) {
                 refreshCalls.forEach((_rc) => {
                     _rc();
                 });
+                pendingConnectorRedraw = false;
             };
 
 
@@ -1827,6 +1829,12 @@ var GraphPaper = (function (exports) {
                     emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
                 }
             });
+            
+            if(pendingConnectorRedraw) {
+                cancelAnimationFrame(renderInternal);
+            }
+
+            pendingConnectorRedraw = true;
             requestAnimationFrame(renderInternal);
 
             metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
@@ -2369,8 +2377,8 @@ var GraphPaper = (function (exports) {
             _obj.on(EntityEvent.TRANSLATE_START, handleMoveStart);
 
             _obj.on(EntityEvent.TRANSLATE, function(e) {
-                refreshAllConnectorsInternal();
                 emitEvent(SheetEvent.ENTITY_TRANSLATED, { 'object': e.obj });
+                self.refreshAllConnectors();    
             });
 
             sheetEntities.push(_obj);
