@@ -6,6 +6,8 @@ import {Point} from "../src/Point.js";
 const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
+global.requestAnimationFrame = (_render) => { _render(); };
+global.cancelAnimationFrame = () => { };
 
 describe("Entity constructor", function() {
   it("translates object into initial position", function() { 

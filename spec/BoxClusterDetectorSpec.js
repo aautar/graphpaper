@@ -6,6 +6,7 @@ import {Cluster} from '../src/Cluster.js';
 const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
+const requestAnimationFrame = () => { };
 
 const createMockDomElem = function() {
     return window.document.createElement('div');

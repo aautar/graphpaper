@@ -8,12 +8,9 @@ import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
 import {DoubleTapDetector} from './DoubleTapDetector';
 import {Rectangle} from './Rectangle';
 import {Point} from './Point';
-import {Line} from './Line';
 import {PointSet} from './PointSet';
-import {LineSet} from './LineSet';
 import {GroupTransformationContainer} from './GroupTransformationContainer';
 import {Connector} from './Connector';
-import {PointVisibilityMap} from './PointVisibilityMap';
 import {GRID_STYLE, Grid} from './Grid';
 import {GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
 import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
@@ -126,6 +123,7 @@ function Sheet(_sheetDomElement, _window) {
     const eventHandlers = new Map();
     var connectorRefreshStartTime = null;
     var connectorRefreshTimeout = null;
+    let pendingConnectorRedraw = false;
 
 
     // Setup ConnectorRoutingWorker
@@ -133,14 +131,11 @@ function Sheet(_sheetDomElement, _window) {
     
     const connectorRoutingWorker = new Worker(workerUrl);
 
-    const convertArrayBufferToFloat64Array = function(_ab) {
-        return new Float64Array(_ab);
-    };
-
     connectorRoutingWorker.onmessage = function(_msg) {
         const connectorsRefreshTimeT1 = new Date();
-
         const connectorDescriptors = _msg.data.connectorDescriptors;
+        const refreshCalls = [];
+
         const getConnectorDescriptorById = function(_id) {
             for(let i=0; i<connectorDescriptors.length; i++) {
                 if(connectorDescriptors[i].id === _id) {
@@ -151,15 +146,33 @@ function Sheet(_sheetDomElement, _window) {
             return null;
         };
 
+        const renderInternal = function() {
+            refreshCalls.forEach((_rc) => {
+                _rc();
+            });
+            pendingConnectorRedraw = false;
+        };
+
+
         objectConnectors.forEach(function(_c) {
             const descriptor = getConnectorDescriptorById(_c.getId());
             if(descriptor) {
-                const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
-                _c.refresh(descriptor.svgPath, ps.toArray());
+                refreshCalls.push(() => {
+                    const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
+                    _c.refresh(descriptor.svgPath, ps.toArray());
+                });
+
+                // May want defer this, rendering affected if consumer has a long-running handler
                 emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
             }
-        });        
+        });
         
+        if(pendingConnectorRedraw) {
+            cancelAnimationFrame(renderInternal);
+        }
+
+        pendingConnectorRedraw = true;
+        requestAnimationFrame(renderInternal);
 
         metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
 
@@ -212,59 +225,6 @@ function Sheet(_sheetDomElement, _window) {
 
     this.hasDomMetricsLock = function() {
         return isDomMetricsLockActive;
-    };
-
-    /**
-     * @returns {PointSet}
-     */
-    const getEntityExtentRoutingPoints = function() {
-        const pointSet = new PointSet();
-        sheetEntities.forEach(function(_obj) {
-            const scaledPoints = _obj.getBoundingRectange().getPointsScaledToGrid(self.getGridSize());
-            scaledPoints.forEach((_sp) => {
-                pointSet.push(_sp);
-            });
-        });
-
-        return pointSet;
-    };
-
-    /**
-     * @returns {PointSet}
-     */    
-    const getConnectorRoutingPointsAroundAnchor = function() {
-        const entityDescriptors = [];
-        sheetEntities.forEach((_e) => {
-            entityDescriptors.push(_e.getDescriptor(self.getGridSize()));
-        });
-
-        const routingPointsResult = AccessibleRoutingPointsFinder.find(entityDescriptors, entityDescriptors, self.getGridSize());
-
-        return routingPointsResult.accessibleRoutingPoints;
-    };
-
-    /**
-     * @returns {Line[]}
-     */    
-    const getConnectorBoundaryLines = function() {
-        const boundaryLines = new LineSet();
-
-        sheetEntities.forEach(function(_obj) {
-            const lines = _obj.getBoundingRectange().getLines();
-            lines.forEach((_l) => {
-                boundaryLines.push(_l);
-            });
-
-            const anchors = _obj.getConnectorAnchors();
-            anchors.forEach(function(_anchor) {
-                const lines = _anchor.getBoundingRectange().getLines();
-                lines.forEach((_l) => {
-                    boundaryLines.push(_l);
-                });                
-            });
-        });
-
-        return boundaryLines;
     };
 
     const refreshAllConnectorsInternal = function() {
