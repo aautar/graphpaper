@@ -30,9 +30,9 @@ function Grid(_size, _color, _style) {
      */
     this.getSvgImageTile = function() {
         if(_style === GRID_STYLE.LINE) {
-            return '<svg xmlns="http://www.w3.org/2000/svg" width="' + _size + '" height="' + _size + '"><rect width="' + _size + '" height="1" x="0" y="' + (_size-1.0) + '" style="fill:' + _color + '" /><rect width="1" height="' + _size + '" x="' + (_size-1.0) + '" y="0" style="fill:' + _color + '" /></svg>';
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="${_size}" height="${_size}"><rect width="${_size}" height="1" x="0" y="${(_size-1.0)}" style="fill:${_color}" /><rect width="1" height="${_size}" x="${(_size-1.0)}" y="0" style="fill:${_color}" /></svg>`;
         } else {
-            return '<svg xmlns="http://www.w3.org/2000/svg" width="' + _size + '" height="' + _size + '"><rect width="1" height="1" x="' + (_size-1.0) + '" y="' + (_size-1.0) + '" style="fill:' + _color + '" /></svg>';
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="${_size}" height="${_size}"><rect width="1" height="1" x="${(_size-1.0)}" y="${(_size-1.0)}" style="fill:${_color}" /></svg>`;
         }
     };
 

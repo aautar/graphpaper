@@ -299,6 +299,11 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @returns {Object}
      */
     this.getDescriptor = function(_gridSize) {
+        let outerBoundMinX = self.getX();
+        let outerBoundMinY = self.getY();
+        let outerBoundMaxX = self.getX() + self.getWidth();
+        let outerBoundMaxY = self.getY() + self.getHeight();
+
         const anchors = [];
         for(let i=0; i<connectorAnchors.length; i++) {
             const boundingRect = connectorAnchors[i].getBoundingRectange();
@@ -313,6 +318,22 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                     "routingPointsFloat64Arr": routingPoints.toFloat64Array()
                 }
             );
+
+            if(boundingRect.getLeft() < outerBoundMinX) {
+                outerBoundMinX = boundingRect.getLeft();
+            }
+
+            if(boundingRect.getTop() < outerBoundMinY) {
+                outerBoundMinY = boundingRect.getTop();
+            }
+
+            if((boundingRect.getLeft() + boundingRect.getWidth()) > outerBoundMaxX) {
+                outerBoundMaxX = (boundingRect.getLeft() + boundingRect.getWidth());
+            }
+
+            if((boundingRect.getTop() + boundingRect.getHeight()) > outerBoundMaxY) {
+                outerBoundMaxY = (boundingRect.getTop() + boundingRect.getHeight());
+            }
         }
 
         return {
@@ -321,7 +342,13 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             "y": self.getY(),
             "width": self.getWidth(),
             "height": self.getHeight(),
-            "connectorAnchors": anchors
+            "connectorAnchors": anchors,
+            "outerBoundingRect": {
+                "minX": outerBoundMinX,
+                "minY": outerBoundMinY,
+                "maxX": outerBoundMaxX,
+                "maxY": outerBoundMaxY
+            }
         }
     };
 

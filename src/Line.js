@@ -57,6 +57,34 @@ Line.prototype.getLength = function() {
 };
 
 /**
+ * @returns {Number}
+ */
+Line.prototype.getMinX = function() {
+    return Math.min(this.getStartPoint().getX(), this.getEndPoint().getX());
+};
+
+/**
+ * @returns {Number}
+ */
+Line.prototype.getMaxX = function() {
+    return Math.max(this.getStartPoint().getX(), this.getEndPoint().getX());
+};
+
+/**
+ * @returns {Number}
+ */
+Line.prototype.getMinY = function() {
+    return Math.min(this.getStartPoint().getY(), this.getEndPoint().getY());
+};
+
+/**
+ * @returns {Number}
+ */
+Line.prototype.getMaxY = function() {
+    return Math.max(this.getStartPoint().getY(), this.getEndPoint().getY());
+};
+
+/**
  * Calculate unit length direction vector
  * 
  * @returns {Point}

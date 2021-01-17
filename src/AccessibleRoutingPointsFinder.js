@@ -1,4 +1,3 @@
-import { Entity } from "./Entity";
 import { PointSet } from "./PointSet";
 import { Rectangle } from "./Rectangle";
 

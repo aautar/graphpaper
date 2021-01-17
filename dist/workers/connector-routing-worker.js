@@ -1,13 +1,6 @@
 (function () {
     'use strict';
 
-    const EntityEvent = Object.freeze({
-        TRANSLATE_START: 'obj-translate-start',
-        TRANSLATE: 'obj-translate',
-        RESIZE_START: 'obj-resize-start',
-        RESIZE: 'obj-resize'
-    });
-
     /**
      * 
      * @param {Number} _x
@@ -161,6 +154,34 @@
     };
 
     /**
+     * @returns {Number}
+     */
+    Line.prototype.getMinX = function() {
+        return Math.min(this.getStartPoint().getX(), this.getEndPoint().getX());
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Line.prototype.getMaxX = function() {
+        return Math.max(this.getStartPoint().getX(), this.getEndPoint().getX());
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Line.prototype.getMinY = function() {
+        return Math.min(this.getStartPoint().getY(), this.getEndPoint().getY());
+    };
+
+    /**
+     * @returns {Number}
+     */
+    Line.prototype.getMaxY = function() {
+        return Math.max(this.getStartPoint().getY(), this.getEndPoint().getY());
+    };
+
+    /**
      * Calculate unit length direction vector
      * 
      * @returns {Point}
@@ -272,6 +293,143 @@
             return new LineIntersection(LINE_INTERSECTION_TYPE.LINESEG, new Point(xIntersect, yIntersect));
         }
     };
+
+    /**
+     * Unique collection of Point objects
+     * 
+     * @param {Point[]|Float64Array|undefined} _pointsInput
+     */
+    function PointSet(_pointsInput) {
+
+        const self = this;
+
+        /**
+         * @type {Point[]}
+         */
+        const points = [];
+
+        /**
+         * @param {Point} _newPoint
+         */
+        this.push = function(_newPoint) {
+            for(let i=0; i<points.length; i++) {
+                if(_newPoint.isEqual(points[i])) {
+                    return false;
+                }
+            }
+
+            points.push(_newPoint);
+            return true;
+        };
+
+        /**
+         * @param {PointSet} _ps
+         */
+        this.pushPointSet = function(_ps) {
+            const possibleNewPoints = _ps.toArray();
+            for(let i=0; i<possibleNewPoints.length; i++) {
+                self.push(possibleNewPoints[i]);
+            }
+        };
+
+        /**
+         * 
+         * @param {Point} _point 
+         * @returns {Point}
+         */
+        this.findPointClosestTo = function(_point) {
+            var resultPoint = null;
+            var currentMinLength = Number.MAX_SAFE_INTEGER;
+
+            points.forEach(function(_pt) {
+                const lineToPt = new Line(_point, _pt);
+                if(lineToPt.getLength() < currentMinLength) {
+                    resultPoint = _pt;
+                    currentMinLength = lineToPt.getLength();
+                }
+            });
+            
+            return resultPoint;        
+        };
+
+        this.findDistanceToPointClosestTo = function(_point) {
+            var currentMinLength = Number.MAX_SAFE_INTEGER;
+
+            points.forEach(function(_pt) {
+                const lineToPt = new Line(_point, _pt);
+                if(lineToPt.getLength() < currentMinLength) {
+                    currentMinLength = lineToPt.getLength();
+                }
+            });
+            
+            return currentMinLength;        
+        };    
+
+        /**
+         * 
+         * @param {Point} _point 
+         * @returns {PointSet}
+         */
+        this.findPointsCloseTo = function(_point, _radius) {
+            const resultSet = new PointSet();
+
+            points.forEach(function(_pt) {
+                const lineToPt = new Line(_point, _pt);
+                if(lineToPt.getLength() <= _radius) {
+                    resultSet.push(_pt);
+                }
+            });
+            
+            return resultSet;        
+        };    
+
+        /**
+         * @returns {Point[]}
+         */
+        this.toArray = function() {
+            return points;
+        };
+
+        /**
+         * @returns {Float64Array}
+         */
+        this.toFloat64Array = function() {
+
+            const result = new Float64Array(points.length * 2);
+            for(let i=0; i<points.length; i++) {
+                result[0 + (i*2)] = points[i].getX();
+                result[1 + (i*2)] = points[i].getY();
+            }
+
+            return result;
+        };
+        
+        /**
+         * @param {Float64Array} _float64Array
+         */
+        const fromFloat64Array = function(_float64Array) {
+            points.length = 0;
+            for(let i=0; i<_float64Array.length; i+=2) {
+                points.push(
+                    new Point(_float64Array[i], _float64Array[i+1])
+                );
+            }
+        };    
+
+        /**
+         * @returns {Number}
+         */
+        this.count = function() {
+            return points.length;
+        };
+
+        if(_pointsInput && Array.isArray(_pointsInput)) {
+            _pointsInput.forEach(self.push);
+        } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
+            fromFloat64Array(_pointsInput);
+        }    
+
+    }
 
     /**
      * 
@@ -463,154 +621,79 @@
         return false;
     };
 
-    const SheetEvent = Object.freeze({
-        DBLCLICK: "dblclick",
-        CLICK: "click",
-        CONNECTOR_UPDATED: "connector-updated",
-        ENTITY_ADDED: "entity-added",
-        ENTITY_REMOVED: "entity-removed",
-        ENTITY_RESIZED: "entity-resized",
-        ENTITY_TRANSLATED: "entity-translated",
-        MULTIPLE_ENTITY_SELECTION_STARTED: "multiple-object-selection-started",
-        MULTIPLE_ENTITIES_SELECTED: "multiple-objects-selected",
-    });
-
-    /**
-     * Unique collection of Point objects
-     * 
-     * @param {Point[]|Float64Array|undefined} _pointsInput
-     */
-    function PointSet(_pointsInput) {
-
-        const self = this;
+    const AccessibleRoutingPointsFinder = {
 
         /**
-         * @type {Point[]}
-         */
-        const points = [];
-
-        /**
-         * @param {Point} _newPoint
-         */
-        this.push = function(_newPoint) {
-            for(let i=0; i<points.length; i++) {
-                if(_newPoint.isEqual(points[i])) {
-                    return false;
-                }
-            }
-
-            points.push(_newPoint);
-            return true;
-        };
-
-        /**
-         * @param {PointSet} _ps
-         */
-        this.pushPointSet = function(_ps) {
-            const possibleNewPoints = _ps.toArray();
-            for(let i=0; i<possibleNewPoints.length; i++) {
-                self.push(possibleNewPoints[i]);
-            }
-        };
-
-        /**
+         * Find routing points that are not occluded by objects
          * 
-         * @param {Point} _point 
-         * @returns {Point}
+         * @param {Object[]} _subjectEntityDescriptors
+         * @param {Object[]} _occluderEntityDescriptors
+         * @param {Number} _gridSize
+         * @returns {Object}
          */
-        this.findPointClosestTo = function(_point) {
-            var resultPoint = null;
-            var currentMinLength = Number.MAX_SAFE_INTEGER;
+        find: function(_subjectEntityDescriptors, _occluderEntityDescriptors, _gridSize) {
+            const connectorAnchorToNumValidRoutingPoints = new Map();
+            const allRoutingPoints = [];
+            const filteredRoutingPoints = new PointSet();
 
-            points.forEach(function(_pt) {
-                const lineToPt = new Line(_point, _pt);
-                if(lineToPt.getLength() < currentMinLength) {
-                    resultPoint = _pt;
-                    currentMinLength = lineToPt.getLength();
-                }
+            _subjectEntityDescriptors.forEach((_entityDescriptor) => {
+                const anchors = _entityDescriptor.connectorAnchors;
+
+                anchors.forEach((_a) => {
+
+                    // check if anchor is occluded
+                    // @todo Commented out for now, need a decision on how to handle anchors where centroid is on the occluder bounding rect
+                    /*for(let i=0; i<_occludableByObjects.length; i++) {
+                        const possibleOccluderBoundingRect = _occludableByObjects[i].getBoundingRectange();
+                        if(possibleOccluderBoundingRect.checkIsPointWithin(_a.getCentroid())) {
+                            connectorAnchorToNumValidRoutingPoints.set(_a.getId(), 0);
+                            isAnchorOccluded = true;
+                            break;
+                        }
+                    }*/
+
+                    {
+                        const routingPoints = (new PointSet(_a.routingPointsFloat64Arr)).toArray();
+                        routingPoints.forEach((_rp) => {
+                            allRoutingPoints.push(
+                                {
+                                    "routingPoint": _rp,
+                                    "parentAnchorId": _a.id
+                                }
+                            );
+                        });
+
+                        connectorAnchorToNumValidRoutingPoints.set(_a.id, routingPoints.length);
+                    }
+                });
             });
-            
-            return resultPoint;        
-        };
 
-        this.findDistanceToPointClosestTo = function(_point) {
-            var currentMinLength = Number.MAX_SAFE_INTEGER;
+            allRoutingPoints.forEach((_rp) => {
+                let isPointWithinObj = false;
 
-            points.forEach(function(_pt) {
-                const lineToPt = new Line(_point, _pt);
-                if(lineToPt.getLength() < currentMinLength) {
-                    currentMinLength = lineToPt.getLength();
+                // check if routing point is occluded
+                for(let i=0; i<_occluderEntityDescriptors.length; i++) {
+                    const occluder = _occluderEntityDescriptors[i];
+                    const boundingRect = new Rectangle(occluder.x, occluder.y, occluder.x + occluder.width, occluder.y + occluder.height);
+                    if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
+                        isPointWithinObj = true;
+                        const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchorId) || 0;
+                        connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchorId, currentNumRoutingPoints - 1);
+                    }
                 }
-            });
-            
-            return currentMinLength;        
-        };    
 
-        /**
-         * 
-         * @param {Point} _point 
-         * @returns {PointSet}
-         */
-        this.findPointsCloseTo = function(_point, _radius) {
-            const resultSet = new PointSet();
-
-            points.forEach(function(_pt) {
-                const lineToPt = new Line(_point, _pt);
-                if(lineToPt.getLength() <= _radius) {
-                    resultSet.push(_pt);
+                if(!isPointWithinObj) {
+                    filteredRoutingPoints.push(_rp.routingPoint);
                 }
+                
             });
-            
-            return resultSet;        
-        };    
 
-        /**
-         * @returns {Point[]}
-         */
-        this.toArray = function() {
-            return points;
-        };
-
-        /**
-         * @returns {Float64Array}
-         */
-        this.toFloat64Array = function() {
-
-            const result = new Float64Array(points.length * 2);
-            for(let i=0; i<points.length; i++) {
-                result[0 + (i*2)] = points[i].getX();
-                result[1 + (i*2)] = points[i].getY();
-            }
-
-            return result;
-        };
-        
-        /**
-         * @param {Float64Array} _float64Array
-         */
-        const fromFloat64Array = function(_float64Array) {
-            points.length = 0;
-            for(let i=0; i<_float64Array.length; i+=2) {
-                points.push(
-                    new Point(_float64Array[i], _float64Array[i+1])
-                );
-            }
-        };    
-
-        /**
-         * @returns {Number}
-         */
-        this.count = function() {
-            return points.length;
-        };
-
-        if(_pointsInput && Array.isArray(_pointsInput)) {
-            _pointsInput.forEach(self.push);
-        } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
-            fromFloat64Array(_pointsInput);
-        }    
-
-    }
+            return {
+                "connectorAnchorToNumValidRoutingPoints": connectorAnchorToNumValidRoutingPoints,
+                "accessibleRoutingPoints": filteredRoutingPoints,
+            };
+        }
+    };
 
     /**
      * Unique collection of Line objects
@@ -693,24 +776,6 @@
         }    
     }
 
-    const GroupTransformationContainerEvent = Object.freeze({
-        TRANSLATE_START: 'group-transformation-container-translate-start'
-    });
-
-    const ConnectorEvent = Object.freeze({
-        CLICK: 'connector-click',
-        MOUSE_ENTER: 'connector-mouse-enter',
-        MOUSE_LEAVE: 'connector-mouse-leave'
-    });
-
-    const ConnectorRoutingAlgorithm = Object.freeze({
-        STRAIGHT_LINE: 0,
-        STRAIGHT_LINE_BETWEEN_ANCHORS: 1,
-        STRAIGHT_LINE_BETWEEN_ANCHORS_AVOID_SELF_INTERSECTION: 2, // unsupported
-        ASTAR: 3,
-        ASTAR_WITH_ROUTE_OPTIMIZATION: 4
-    });
-
     const PointVisibilityMapRouteOptimizer = {
 
         /**
@@ -743,88 +808,87 @@
 
     };
 
-    /**
-     * 
-     * @param {PointSet} _freePoints
-     * @param {LineSet} _boundaryLines
-     * @param {Array|undefined} _precomputedPointToVisibleSet
-     */
-    function PointVisibilityMap(_freePoints, _boundaryLines, _precomputedPointToVisibleSet) {
+    const PointInfo = {
+        point: null,
+        visiblePoints: null
+    };
+
+    function PointVisibilityMap() {
         const self = this;
 
-        const boundaryLinesArr = _boundaryLines.toArray();
-        const freePointsArr = _freePoints.toArray();
-        let pointToVisibleSet = null;
+        const entityIdToPointVisibility = new Map();
+        const entityIdToBoundaryLineSet = new Map();
+        const entityIdToDescriptor = new Map();
+        let currentNumRoutingPoints = 0;
+        let currentNumOfBoundaryLines = 0;
 
         /**
          * @param {Line} _theLine
          * @returns {Boolean}
          */
         const doesLineIntersectAnyBoundaryLines = function(_theLine) {
-            for(let b=0; b<boundaryLinesArr.length; b++) {
-                const intersectionType = boundaryLinesArr[b].computeIntersectionType(_theLine);
-                if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
-                    return true;
+            for (let [_eid, _boundaryLineSet] of entityIdToBoundaryLineSet) {
+                const descriptor = entityIdToDescriptor.get(_eid);
+
+                if(_theLine.getMinX() > descriptor.outerBoundingRect.maxX) {
+                    continue;
                 }
-            }
-            return false;
-        };
-
-        const initPointsVisibility = function() {
-            for(let i=0; i<freePointsArr.length; i++) {
-                pointToVisibleSet[i] = null;   
-            }
-
-            // We can do the following to compute the entire PV map on init
-            /*
-            for(let i=0; i<freePointsArr.length; i++) {            
-                for(let j=i+1; j<freePointsArr.length; j++) {
-
-                    // line representing line-of-sight between the 2 points
-                    const ijLine = new Line(freePointsArr[i], freePointsArr[j]);
-
-                    if(!doesLineIntersectAnyBoundaryLines(ijLine)) {
-                        // record indices into freePointsArr
-                        pointToVisibleSet[i].push(j);
-                        pointToVisibleSet[j].push(i);
-                    }
-                }
-            }
-            */
-        };
-
-        const computePointsVisibilityForIndex = function(_idx) {
-            pointToVisibleSet[_idx] = [];
-            for(let j=0; j<freePointsArr.length; j++) {
-                if(_idx === j) {
+                
+                if(_theLine.getMaxX() < descriptor.outerBoundingRect.minX) {
                     continue;
                 }
 
-                // line representing line-of-sight between the 2 points
-                const ijLine = new Line(freePointsArr[_idx], freePointsArr[j]);
+                if(_theLine.getMinY() > descriptor.outerBoundingRect.maxY) {
+                    continue;
+                }
 
-                if(!doesLineIntersectAnyBoundaryLines(ijLine)) {
-                    // record indices into freePointsArr
-                    pointToVisibleSet[_idx].push(j);
+                if(_theLine.getMaxY() < descriptor.outerBoundingRect.minY) {
+                    continue;
+                }
+
+                const boundaryLinesArr = _boundaryLineSet.toArray();
+                for(let i=0; i<boundaryLinesArr.length; i++) {
+                    const intersectionType = boundaryLinesArr[i].computeIntersectionType(_theLine);
+                    if(intersectionType === LINE_INTERSECTION_TYPE.LINESEG) {
+                        return true;
+                    }
                 }
             }
 
-            return pointToVisibleSet[_idx];
+            return false;
         };
 
-        const arePointsVisibleToEachOther = function(_ptA, _ptB) {
-            for(let i=0; i<freePointsArr.length; i++) {
-                if(freePointsArr[i].isEqual(_ptA)) {
-                    let visiblePointIndices = pointToVisibleSet[i];
-                    if(visiblePointIndices === null) {
-                        visiblePointIndices = computePointsVisibilityForIndex(i);
+        const computePointsVisibilityForPoint = function(_pointInfo) {
+            _pointInfo.visiblePoints.points.length = 0;
+
+            for (let [_eid, _pvMap] of entityIdToPointVisibility) {
+                for (let [_routingPoint, _visiblePoints] of _pvMap) {
+
+                    const ijLine = new Line(_pointInfo.point, _routingPoint);
+                    // Note: length check is to avoid adding point being tested to visiblePoints array
+                    if(ijLine.getLength() > 0 && !doesLineIntersectAnyBoundaryLines(ijLine)) {
+                        _pointInfo.visiblePoints.points.push(_routingPoint);
                     }
 
-                    for(let j=0; j<visiblePointIndices.length; j++) {
-                        if(freePointsArr[visiblePointIndices[j]].isEqual(_ptB)) {
-                            return true;
-                        }
-                    }
+                }
+            }
+
+            _pointInfo.visiblePoints.isValid = true;
+        };
+
+        /**
+         * 
+         * @param {Point} _ptA 
+         * @param {Point} _ptB
+         * @returns {Boolean} 
+         */
+        const arePointsVisibleToEachOther = function(_ptA, _ptB) {
+            const ptAInfo = fetchPointInfoForPoint(_ptA);
+            const visiblePts = getVisiblePointsRelativeTo(ptAInfo);
+
+            for(let i=0; i<visiblePts.length; i++) {
+                if(visiblePts[i].isEqual(_ptB)) {
+                    return true;
                 }
             }
 
@@ -833,15 +897,15 @@
 
         /**
          * 
-         * @param {Number} _currentPointIndex
+         * @param {Object} _pointInfo
          * @returns {Point[]}
          */
-        const getVisiblePointsRelativeTo = function(_pointIndex) {
-            if(pointToVisibleSet[_pointIndex] === null) {
-                computePointsVisibilityForIndex(_pointIndex);
+        const getVisiblePointsRelativeTo = function(_pointInfo) {
+            if(!_pointInfo.visiblePoints.isValid) {
+                computePointsVisibilityForPoint(_pointInfo);
             }
             
-            return pointToVisibleSet[_pointIndex];
+            return _pointInfo.visiblePoints.points;
         };
 
         /**
@@ -863,19 +927,18 @@
          * 
          * @param {Number} _currentRouteLength 
          * @param {Point[]} _pointsInRoute 
-         * @param {Number} _currentPointIndex 
+         * @param {Object} _currentPointIndex 
          * @param {Point} _endPoint 
          * @returns {Object|null}
          */
-        const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointIndex, _endPoint) {
-            const currentPoint = freePointsArr[_currentPointIndex];
-            const visiblePointIndices = getVisiblePointsRelativeTo(_currentPointIndex);
-            var curMinCost = Number.MAX_SAFE_INTEGER;
-            var visiblePointWithMinCost = null;
-            var visiblePointWithMinCostIndex = null;
+        const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointInfo, _endPoint) {
+            const currentPoint = _currentPointInfo.point;
+            const visiblePoints = getVisiblePointsRelativeTo(_currentPointInfo);
+            let curMinCost = Number.MAX_SAFE_INTEGER;
+            let visiblePointWithMinCost = null;
 
-            for(let i=0; i<visiblePointIndices.length; i++) {
-                const visiblePt = freePointsArr[visiblePointIndices[i]];
+            for(let i=0; i<visiblePoints.length; i++) {
+                const visiblePt = visiblePoints[i];
 
                 // ignore point if it's already in the route
                 if(isPointInArray(visiblePt, _pointsInRoute)) {
@@ -892,7 +955,6 @@
                 if((gn + hn) < curMinCost) {
                     curMinCost = gn + hn;
                     visiblePointWithMinCost = visiblePt;
-                    visiblePointWithMinCostIndex = visiblePointIndices[i];
                 }
             }
 
@@ -902,81 +964,197 @@
 
             return {
                 "cost": curMinCost,
-                "point": visiblePointWithMinCost,
-                "pointIndex": visiblePointWithMinCostIndex
+                "point": visiblePointWithMinCost
             };
         };
 
         /**
-         * @returns {Array}
-         */
-        this.getPointToVisibleSetData = function() {
-            return pointToVisibleSet;
-        };
+         * @param {Object} _ed
+         * @returns {LineSet}
+         */    
+        const getBoundaryLinesFromEntityDescriptor = function(_ed) {
+            const boundaryLines = new LineSet();
 
-        /**
-         * @param {Point} _point
-         * @returns {Point|null}
-         */
-        this.findPointClosestTo = function(_point) {
-            var resultPoint = null;
-            var currentMaxLength = Number.MAX_SAFE_INTEGER;
-
-            freePointsArr.forEach(function(_ptKey) {
-                const lineOfSight = new Line(_point, _ptKey);
-                if(lineOfSight.getLength() < currentMaxLength) {
-                    resultPoint = _ptKey;
-                    currentMaxLength = lineOfSight.getLength();
-                }
+            const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
+            const lines = entityBoundingRect.getLines();
+            lines.forEach((_l) => {
+                boundaryLines.push(_l);
             });
-            
-            return resultPoint;
-        };
 
-        /**
-         * @param {Point} _point
-         * @returns {Point|null}
-         */
-        this.findVisiblePointClosestTo = function(_point) {
-            var resultPoint = null;
-            var currentMaxLength = Number.MAX_SAFE_INTEGER;
-
-            freePointsArr.forEach(function(_freePt) {
-
-                const lineOfSight = new Line(_point, _freePt);
-                const lineOfSightLength = lineOfSight.getLength();
-
-                if(lineOfSightLength < currentMaxLength && !doesLineIntersectAnyBoundaryLines(lineOfSight)) {
-                    resultPoint = _freePt;
-                    currentMaxLength = lineOfSightLength;
-                }
+            const anchors = _ed.connectorAnchors;
+            anchors.forEach(function(_anchor) {
+                const anchorBoundingRect = new Rectangle(_anchor.x, _anchor.y, _anchor.x + _anchor.width, _anchor.y + _anchor.height);
+                const lines = anchorBoundingRect.getLines();
+                lines.forEach((_l) => {
+                    boundaryLines.push(_l);
+                });
             });
-            
-            return resultPoint;
+
+            return boundaryLines;
+        };    
+
+        const hasEntityMutated = function(_old, _new) {
+            if(_old.x !== _new.x || _old.y !== _new.y || _old.width !== _new.width || _old.height !== _new.height) {
+                return true;
+            }
+
+            return false;
         };
 
         /**
-         * @param {Point} _point
-         * @returns {Point|null}
+         * 
+         * @param {Point} _point 
+         * @returns {PointInfo|null}
          */
-        this.findVisiblePointIndexClosestTo = function(_point) {
-            var resultPointIndex = null;
-            var currentMaxLength = Number.MAX_SAFE_INTEGER;
-
-            for(let i=0; i<freePointsArr.length; i++) {
-                const freePt = freePointsArr[i];
-
-                const lineOfSight = new Line(_point, freePt);
-                const lineOfSightLength = lineOfSight.getLength();
-
-                if(lineOfSightLength < currentMaxLength && !doesLineIntersectAnyBoundaryLines(lineOfSight)) {
-                    resultPointIndex = i;
-                    currentMaxLength = lineOfSightLength;
+        const fetchPointInfoForPoint = function(_point) {
+            for (let [_eid, _pvMap] of entityIdToPointVisibility) {
+                for (let [_routingPoint, _visiblePoints] of _pvMap) {
+                    if(_routingPoint === _point) {
+                        return buildPointInfo(_routingPoint, _visiblePoints);
+                    }
                 }
             }
-            
-            return resultPointIndex;
-        };    
+
+            return null;
+        };
+
+        /**
+         * 
+         * @param {Point} _pt 
+         * @param {VisiblePoints} _visiblePoints
+         * @returns {PointInfo}
+         */
+        const buildPointInfo = function(_pt, _visiblePoints) {
+            const result = Object.create(PointInfo);
+            result.point = _pt;
+            result.visiblePoints = _visiblePoints;
+            return result;
+        };
+
+        const buildEmptyRoutingPointToVisibleSetMap = function(_entityDescriptor, _allSiblingDescriptors, _gridSize) {
+            const entityBoundingRect = new Rectangle(_entityDescriptor.x, _entityDescriptor.y, _entityDescriptor.x + _entityDescriptor.width, _entityDescriptor.y + _entityDescriptor.height);
+            const foundPoints = AccessibleRoutingPointsFinder.find([_entityDescriptor], _allSiblingDescriptors, _gridSize);
+            const routingPoints = foundPoints.accessibleRoutingPoints.toArray();
+            const routingPointToVisibleSet = new Map();
+
+            for(let j=0; j<routingPoints.length; j++) {
+                routingPointToVisibleSet.set(routingPoints[j], { isValid:false, points:[] });
+            }
+
+            // bounding extent routing points
+            const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
+            scaledPoints.forEach((_sp) => {
+                routingPointToVisibleSet.set(_sp, { isValid:false, points:[] });
+            }); 
+
+            return routingPointToVisibleSet;
+        };
+
+        this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
+            currentNumRoutingPoints = 0;
+            currentNumOfBoundaryLines = 0;
+
+            const aliveEntityIds = [];
+            const mutatedEntityIds = []; // a mutation is considered any addition, removal, or change
+            const deletedEntityIds = [];
+
+            // update boundary lines
+            for(let i=0; i<_entityDescriptors.length; i++) {
+                const entityId = _entityDescriptors[i].id;
+                aliveEntityIds.push(entityId);
+
+                const existingEntry = entityIdToBoundaryLineSet.get(entityId);
+                const existingDescriptor = entityIdToDescriptor.get(entityId);
+                if(existingEntry && !hasEntityMutated(existingDescriptor, _entityDescriptors[i])) {
+                    currentNumOfBoundaryLines += existingEntry.count();
+                    continue;
+                }
+
+                const boundaryLinesForEntity = getBoundaryLinesFromEntityDescriptor(_entityDescriptors[i]);
+                entityIdToBoundaryLineSet.set(entityId, boundaryLinesForEntity);
+
+                currentNumOfBoundaryLines += boundaryLinesForEntity.count();
+            }
+
+            // update routing points
+            for(let i=0; i<_entityDescriptors.length; i++) {
+                const entityId = _entityDescriptors[i].id;
+                const existingDescriptor = entityIdToDescriptor.get(entityId);
+                if(existingDescriptor && !hasEntityMutated(existingDescriptor, _entityDescriptors[i])) ;
+
+                // Entity has been mutated, all routing points for the entity are invalid
+                // .. also the inverse relationship (sibling routing points that point to this entity) are also invalid
+                const routingPointToVisibleSet = buildEmptyRoutingPointToVisibleSetMap(_entityDescriptors[i], _entityDescriptors, _gridSize);
+                entityIdToPointVisibility.set(entityId, routingPointToVisibleSet);
+
+                entityIdToDescriptor.set(entityId, _entityDescriptors[i]); // take advantage of this loop to also, finally, update descriptors as we're done with mutation checks
+
+                mutatedEntityIds.push(entityId);
+                currentNumRoutingPoints += routingPointToVisibleSet.size;
+            }
+
+            // deal with dead entities
+            for (let [_eid, _descriptor] of entityIdToDescriptor) {
+                if(aliveEntityIds.includes(_eid)) {
+                    continue;
+                }
+
+                // something has been remove, what gets invalidated?
+                // .. if visibility computations are alway nulled/reset, nothing else necessary
+                // .. else, need to figure out which computations are to be invalidated (overlapping rects tell if relationship between 2 entities is affected)
+                // .... this applies to additions and mutations as well
+
+                mutatedEntityIds.push(_eid);
+                deletedEntityIds.push(_eid);
+            }
+
+            // for future optimization..
+            //invalidateSiblingPointVisibilityForMutatedEntities(mutatedEntityIds, _gridSize);
+
+            deletedEntityIds.forEach((_deletedEntity) => {
+                entityIdToDescriptor.delete(_eid);
+                entityIdToBoundaryLineSet.delete(_eid);
+                entityIdToPointVisibility.delete(_eid);
+            });
+
+            return mutatedEntityIds.length;
+        };
+
+        /**
+         * @returns {Number}
+         */
+        this.getCurrentNumRoutingPoints = function() {
+            return currentNumRoutingPoints;
+        };
+
+        /**
+         * @returns {Number}
+         */    
+        this.getCurrentNumBoundaryLines = function() {
+            return currentNumOfBoundaryLines;
+        };
+
+        /**
+         * @param {Point} _point
+         * @returns {Point|null}
+         */
+        this.findVisiblePointInfoClosestTo = function(_point) {
+            var result = null;
+            var currentMaxLength = Number.MAX_SAFE_INTEGER;
+
+            for (let [_eid, _pvMap] of entityIdToPointVisibility) {
+                for (let [_routingPoint, _visiblePoints] of _pvMap) {
+                    const lineOfSight = new Line(_point, _routingPoint);
+                    const lineOfSightLength = lineOfSight.getLength();
+        
+                    if(lineOfSightLength < currentMaxLength && !doesLineIntersectAnyBoundaryLines(lineOfSight)) {
+                        result = buildPointInfo(_routingPoint, _visiblePoints);
+                        currentMaxLength = lineOfSightLength;
+                    }            }
+            }
+
+            return result;
+        };
 
         /**
          * @param {Point} _startPoint
@@ -992,17 +1170,16 @@
             }
 
             // find closest visible point 
-            const firstRoutingPointIndex = self.findVisiblePointIndexClosestTo(_startPoint);
-            if(firstRoutingPointIndex === null) {
+            const firstPointInfo = self.findVisiblePointInfoClosestTo(_startPoint);
+            if(firstPointInfo === null) {
                 return new PointSet();
             }
 
-            var currentRouteLen = 0;
-            const firstRoutingPoint = freePointsArr[firstRoutingPointIndex];
-            const pointsInRoute = [firstRoutingPoint];
-            var currentPointIndex = firstRoutingPointIndex;
+            let currentRouteLen = 0;
+            const pointsInRoute = [firstPointInfo.point];
+            let currentPointInfo = firstPointInfo;
             while(true) {
-                const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointIndex, _endPoint);
+                const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointInfo, _endPoint);
                 if(routeSegment === null) {
                     // Is there unobstructed line to endpoint? 
                     // If not, failed to find route
@@ -1015,16 +1192,16 @@
                 }
 
                 // update cur path length
-                currentRouteLen += (new Line(freePointsArr[currentPointIndex], routeSegment.point)).getLength();
+                currentRouteLen += (new Line(currentPointInfo.point, routeSegment.point)).getLength();
 
                 // add new point to path
                 pointsInRoute.push(routeSegment.point);
 
                 // update current point index
-                currentPointIndex = routeSegment.pointIndex;
+                currentPointInfo = fetchPointInfoForPoint(routeSegment.point);
 
                 // check if we're done
-                if((new Line(freePointsArr[currentPointIndex], _endPoint).getLength()) < 1.0) {
+                if((new Line(currentPointInfo.point, _endPoint).getLength()) < 1.0) {
                     break;
                 }
             }
@@ -1035,88 +1212,7 @@
 
             return new PointSet(pointsInRoute);
         };
-
-        if(_precomputedPointToVisibleSet) {
-            pointToVisibleSet = _precomputedPointToVisibleSet;
-        } else {
-            pointToVisibleSet = new Array(_freePoints.count()); // index represents entry in freePointsArr
-            initPointsVisibility();        
-        }
     }
-
-    const AccessibleRoutingPointsFinder = {
-
-        /**
-         * Find routing points that are not occluded by objects
-         * 
-         * @param {Object[]} _subjectEntityDescriptors
-         * @param {Object[]} _occluderEntityDescriptors
-         * @param {Number} _gridSize
-         * @returns {Object}
-         */
-        find: function(_subjectEntityDescriptors, _occluderEntityDescriptors, _gridSize) {
-            const connectorAnchorToNumValidRoutingPoints = new Map();
-            const allRoutingPoints = [];
-            const filteredRoutingPoints = new PointSet();
-
-            _subjectEntityDescriptors.forEach((_entityDescriptor) => {
-                const anchors = _entityDescriptor.connectorAnchors;
-
-                anchors.forEach((_a) => {
-
-                    // check if anchor is occluded
-                    // @todo Commented out for now, need a decision on how to handle anchors where centroid is on the occluder bounding rect
-                    /*for(let i=0; i<_occludableByObjects.length; i++) {
-                        const possibleOccluderBoundingRect = _occludableByObjects[i].getBoundingRectange();
-                        if(possibleOccluderBoundingRect.checkIsPointWithin(_a.getCentroid())) {
-                            connectorAnchorToNumValidRoutingPoints.set(_a.getId(), 0);
-                            isAnchorOccluded = true;
-                            break;
-                        }
-                    }*/
-
-                    {
-                        const routingPoints = (new PointSet(_a.routingPointsFloat64Arr)).toArray();
-                        routingPoints.forEach((_rp) => {
-                            allRoutingPoints.push(
-                                {
-                                    "routingPoint": _rp,
-                                    "parentAnchorId": _a.id
-                                }
-                            );
-                        });
-
-                        connectorAnchorToNumValidRoutingPoints.set(_a.id, routingPoints.length);
-                    }
-                });
-            });
-
-            allRoutingPoints.forEach((_rp) => {
-                let isPointWithinObj = false;
-
-                // check if routing point is occluded
-                for(let i=0; i<_occluderEntityDescriptors.length; i++) {
-                    const occluder = _occluderEntityDescriptors[i];
-                    const boundingRect = new Rectangle(occluder.x, occluder.y, occluder.x + occluder.width, occluder.y + occluder.height);
-                    if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
-                        isPointWithinObj = true;
-                        const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchorId) || 0;
-                        connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchorId, currentNumRoutingPoints - 1);
-                    }
-                }
-
-                if(!isPointWithinObj) {
-                    filteredRoutingPoints.push(_rp.routingPoint);
-                }
-                
-            });
-
-            return {
-                "connectorAnchorToNumValidRoutingPoints": connectorAnchorToNumValidRoutingPoints,
-                "accessibleRoutingPoints": filteredRoutingPoints,
-            };
-        }
-    };
 
     const SvgPathBuilder = {
 
@@ -1212,8 +1308,16 @@
 
     };
 
+    const ConnectorRoutingAlgorithm = Object.freeze({
+        STRAIGHT_LINE: 0,
+        STRAIGHT_LINE_BETWEEN_ANCHORS: 1,
+        STRAIGHT_LINE_BETWEEN_ANCHORS_AVOID_SELF_INTERSECTION: 2, // unsupported
+        ASTAR: 3,
+        ASTAR_WITH_ROUTE_OPTIMIZATION: 4
+    });
+
     const workerData = {
-        pointVisibilityMap: null,
+        pointVisibilityMap: new PointVisibilityMap(),
         requestQueue: []
     };
 
@@ -1283,51 +1387,6 @@
 
     /**
      * @param {Object[]} _entityDescriptors
-     * @returns {LineSet}
-     */    
-    const getBoundaryLinesFromEntityDescriptors = function(_entityDescriptors) {
-        const boundaryLines = new LineSet();
-
-        _entityDescriptors.forEach(function(_ed) {
-            const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
-            const lines = entityBoundingRect.getLines();
-            lines.forEach((_l) => {
-                boundaryLines.push(_l);
-            });
-
-            const anchors = _ed.connectorAnchors;
-            anchors.forEach(function(_anchor) {
-                const anchorBoundingRect = new Rectangle(_anchor.x, _anchor.y, _anchor.x + _anchor.width, _anchor.y + _anchor.height);
-                const lines = anchorBoundingRect.getLines();
-                lines.forEach((_l) => {
-                    boundaryLines.push(_l);
-                });                
-            });
-        });
-
-        return boundaryLines;
-    };
-
-    /**
-     * @param {Object[]} _entityDescriptors
-     * @param {Number} _gridSize
-     * @returns {PointSet}
-     */
-    const getEntityExtentRoutingPointsFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
-        const pointSet = new PointSet();
-        _entityDescriptors.forEach(function(_ed) {
-            const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
-            const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
-            scaledPoints.forEach((_sp) => {
-                pointSet.push(_sp);
-            });
-        });
-
-        return pointSet;
-    };
-
-    /**
-     * @param {Object[]} _entityDescriptors
      * @returns {PointSet}
      */    
     const getConnectorRoutingPointsAroundAnchor = function(_entityDescriptors, _gridSize) {
@@ -1354,26 +1413,22 @@
         const entityDescriptors = lastRequest.entityDescriptors;
 
         const msgDecodeTimeT1 = new Date();
-        const boundaryLinesSet = getBoundaryLinesFromEntityDescriptors(entityDescriptors);    
 
-        const routingPointsSet = new PointSet();
         const routingPointsAroundAnchorSet = getConnectorRoutingPointsAroundAnchor(entityDescriptors, gridSize);
-        routingPointsSet.pushPointSet(routingPointsAroundAnchorSet);
-        routingPointsSet.pushPointSet(getEntityExtentRoutingPointsFromEntityDescriptors(entityDescriptors, gridSize));
 
         // end decode
         metrics.msgDecodeTime = (new Date()) - msgDecodeTimeT1;
         
         const pointVisibilityMapCreationTimeT1 = new Date();
-        const currentPointVisiblityMap = new PointVisibilityMap(
-            routingPointsSet,
-            boundaryLinesSet
-        );
+
+        // Update PV map
+        workerData.pointVisibilityMap.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors(entityDescriptors, gridSize);
+
         metrics.pointVisibilityMapCreationTime = (new Date()) - pointVisibilityMapCreationTimeT1;
 
         const pathComputationTimeT1 = new Date();
         connectorDescriptors.forEach(function(_cd) {
-            const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, currentPointVisiblityMap);
+            const pathData = computeConnectorPath(_cd, routingPointsAroundAnchorSet, workerData.pointVisibilityMap);
 
             const pointsInPathPointSet = new PointSet(pathData.pointsInPath);
 
@@ -1382,8 +1437,8 @@
         });
         metrics.allPathsComputationTime = (new Date()) - pathComputationTimeT1;
         
-        metrics.numRoutingPoints = routingPointsSet.count();
-        metrics.numBoundaryLines = boundaryLinesSet.count();
+        metrics.numRoutingPoints = workerData.pointVisibilityMap.getCurrentNumRoutingPoints();
+        metrics.numBoundaryLines = workerData.pointVisibilityMap.getCurrentNumBoundaryLines();
         metrics.overallTime = (new Date()) - overallTimeT1;
 
         postMessage(
