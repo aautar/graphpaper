@@ -1362,11 +1362,17 @@ var GraphPaper = (function (exports) {
 
         /**
          * @param {String} _svgPath
+         */
+        this.refresh = function(_svgPath) {
+            pathElem.setAttribute("d", _svgPath);
+        };
+
+        /**
+         * 
          * @param {Point[]} _pathPoints
          */
-        this.refresh = function(_svgPath, _pathPoints) {
+        this.updatePathPoints = function(_pathPoints) {
             pathPoints = _pathPoints;
-            pathElem.setAttribute("d", _svgPath);
         };
 
         /**
@@ -1740,9 +1746,11 @@ var GraphPaper = (function (exports) {
             objectConnectors.forEach(function(_c) {
                 const descriptor = getConnectorDescriptorById(_c.getId());
                 if(descriptor) {
+                    const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
+                    _c.updatePathPoints(ps.toArray());
+
                     refreshCalls.push(() => {
-                        const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
-                        _c.refresh(descriptor.svgPath, ps.toArray());
+                        _c.refresh(descriptor.svgPath);
                     });
 
                     // May want defer this, rendering affected if consumer has a long-running handler

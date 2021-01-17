@@ -197,11 +197,17 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
     /**
      * @param {String} _svgPath
+     */
+    this.refresh = function(_svgPath) {
+        pathElem.setAttribute("d", _svgPath);
+    };
+
+    /**
+     * 
      * @param {Point[]} _pathPoints
      */
-    this.refresh = function(_svgPath, _pathPoints) {
+    this.updatePathPoints = function(_pathPoints) {
         pathPoints = _pathPoints;
-        pathElem.setAttribute("d", _svgPath);
     };
 
     /**
