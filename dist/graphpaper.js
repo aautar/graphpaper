@@ -874,12 +874,41 @@ var GraphPaper = (function (exports) {
      * @param {Sheet} _sheet
      */
     function ConnectorAnchor(_id, _domElement, _sheet) {
-        
         const self = this;
+
+        let routingPointDirections = ["top", "left", "bottom", "right"];
 
         const getDimensions = function() {
             const r = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
             return new Point(r.getWidth(), r.getHeight());
+        };
+
+        const routingPointDirectionToPoint = function(_direction, _centroid, _halfWidth, _halfHeight, _gridSize) {
+            if(_direction === 'top') {
+                return new Point(_centroid.getX(), _centroid.getY() - _halfHeight - _gridSize);
+            }
+
+            if(_direction === 'bottom') {
+                return new Point(_centroid.getX(), _centroid.getY() + _halfHeight + _gridSize);
+            }
+
+            if(_direction === 'left') {
+                return new Point(_centroid.getX() - _halfWidth - _gridSize, _centroid.getY());
+            }
+
+            if(_direction === 'right') {
+                return new Point(_centroid.getX() + _halfWidth + _gridSize, _centroid.getY());
+            }
+
+            return null;
+        };
+
+        /**
+         * 
+         * @param {String[]} _directions 
+         */
+        this.setPossibleRoutingPointDirections = function(_directions) {
+            routingPointDirections = _directions;
         };
 
         /**
@@ -947,12 +976,12 @@ var GraphPaper = (function (exports) {
             const halfWidth = dimensions.getX() * 0.5;
             const halfHeight = dimensions.getY() * 0.5;
 
-            return [
-                new Point(centroid.getX() + halfWidth + _gridSize, centroid.getY()),
-                new Point(centroid.getX() - halfWidth - _gridSize, centroid.getY()),
-                new Point(centroid.getX(), centroid.getY() + halfHeight + _gridSize),
-                new Point(centroid.getX(), centroid.getY() - halfHeight - _gridSize),
-            ];
+            const result = [];
+            routingPointDirections.forEach((_dir) => {
+                result.push(routingPointDirectionToPoint(_dir, centroid, halfWidth, halfHeight, _gridSize));
+            });
+
+            return result;
         };
 
         /**

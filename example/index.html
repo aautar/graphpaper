@@ -80,7 +80,8 @@
             [document.getElementById('resizeHandle1')]
         );
 
-        obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
+        const anchor1 = obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
+        anchor1.setPossibleRoutingPointDirections(["top"]);
 
         const obj2 = new GraphPaper.Entity(
             'obj2', 
@@ -94,7 +95,9 @@
             [document.getElementById('resizeHandle2')]
         );
 
-        obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
+        const anchor2 = obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
+        anchor2.setPossibleRoutingPointDirections(["top"]);
+
         obj2.translate(100, 100);
 
         const obj3 = new GraphPaper.Entity(
@@ -109,7 +112,9 @@
             [document.getElementById('resizeHandle3')]
         );
 
-        obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3'));        
+        const anchor3 = obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3'));
+        anchor3.setPossibleRoutingPointDirections(["top"]);
+
         obj3.translate(200,200);
 
         const obj4 = new GraphPaper.Entity(
@@ -124,7 +129,9 @@
             [document.getElementById('resizeHandle4')]
         );
 
-        obj4.addInteractableConnectorAnchor(document.getElementById('connectorAnchor4'));        
+        const anchor4 = obj4.addInteractableConnectorAnchor(document.getElementById('connectorAnchor4'));
+        anchor4.setPossibleRoutingPointDirections(["top"]);
+
         obj4.translate(400,200);
 
         canvas.addEntity(obj1);
