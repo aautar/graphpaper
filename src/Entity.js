@@ -211,8 +211,9 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     /**
      * @param {Number} _x
      * @param {Number} _y
+     * @param {Boolean} [_withinGroupTransformation=false]
      */
-    this.translate = function(_x, _y) {
+    this.translate = function(_x, _y, _withinGroupTransformation) {
         if(_x === x && _y === y) {
             return;
         }
@@ -224,7 +225,14 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
         const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE) || [];
         observers.forEach(function(handler) {
-            handler({"obj":self, "x": _x, "y": _y});
+            handler(
+                {
+                    "obj": self, 
+                    "x": _x, 
+                    "y": _y,
+                    "withinGroupTransformation": _withinGroupTransformation ? true : false
+                }
+            );
         });
     };
 
