@@ -1,6 +1,7 @@
 const jsdom = require("jsdom");
 import {Rectangle} from '../src/Rectangle.js';
 import {Entity} from '../src/Entity.js';
+import {EntityEvent} from '../src/EntityEvent.js';
 import {Point} from "../src/Point.js";
 
 const { JSDOM, Event } = jsdom;
@@ -11,7 +12,6 @@ global.cancelAnimationFrame = () => { };
 
 describe("Entity constructor", function() {
   it("translates object into initial position", function() { 
-
     const objDomElem = window.document.createElement('div');
     const o = new Entity(
         "obj-123",
@@ -30,7 +30,6 @@ describe("Entity constructor", function() {
   }); 
 
   it("resizer object to initial size", function() { 
-
     const objDomElem = window.document.createElement('div');
     const o = new Entity(
         "obj-123",
@@ -70,7 +69,6 @@ describe("Entity", function() {
   });
   
   it("getTranslateHandleOffset returns Point with x-offset and y-offset", function() {
-  
     const expectedOffset = new Point(-60, -95);
 
     var translateHandleElement = window.document.createElement('div');
@@ -168,4 +166,49 @@ describe("Entity.hasConnectorAnchor", function() {
 
     expect(o.hasConnectorAnchor(newAnchor)).toBe(true);
   }); 
+});
+
+describe("Entity.translate", function() {
+  it("translates entity", function() {
+    const entityDomElem = window.document.createElement('div');    
+    const entity = new Entity(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        {}, 
+        entityDomElem, 
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
+    );
+
+    entity.translate(250, 300);
+
+    expect(entityDomElem.style.left).toBe('250px');
+    expect(entityDomElem.style.top).toBe('300px');
+  });
+
+  it("emits EntityEvent.TRANSLATE event", function() {
+    const translateCallback = jasmine.createSpy(EntityEvent.TRANSLATE);
+        
+    const entityDomElem = window.document.createElement('div');    
+    const entity = new Entity(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        {}, 
+        entityDomElem, 
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
+    );
+
+    entity.on(EntityEvent.TRANSLATE, translateCallback);
+
+    entity.translate(250, 300);
+
+    expect(translateCallback).toHaveBeenCalled();
+  });
 });
