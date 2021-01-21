@@ -85,8 +85,17 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
         accTranslateX += _dx;
         accTranslateY += _dy;
 
-        currentLeft = _sheet.snapToGrid(boundingRect.getLeft() + accTranslateX);
-        currentTop = _sheet.snapToGrid(boundingRect.getTop() + accTranslateY);
+        const newLeft = _sheet.snapToGrid(boundingRect.getLeft() + accTranslateX);
+        const newTop = _sheet.snapToGrid(boundingRect.getTop() + accTranslateY);
+
+        if(currentLeft === newLeft && currentTop === newTop) {
+            // no translation
+            return;
+        }
+
+        currentLeft = newLeft;
+        currentTop = newTop;
+
         selBox.style.left = `${currentLeft}px`;
         selBox.style.top = `${currentTop}px`;        
 
@@ -96,9 +105,19 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
 
             obj.translate(
                 _sheet.snapToGrid(currentLeft + rp.x), 
-                _sheet.snapToGrid(currentTop + rp.y)
+                _sheet.snapToGrid(currentTop + rp.y),
+                true
             );
         }
+
+        const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE) || [];
+        observers.forEach(function(handler) {
+            handler({
+                "container": self,
+                "x": currentLeft, 
+                "y": currentTop
+            });
+        });
     };
 
     this.endTranslate = function() {
@@ -150,8 +169,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
                 "y": e.touches[0].pageY,
                 "isTouch": true
             });
-        });        
-
+        });
     };
 
     const translateMouseDownHandler = function(e) {       
@@ -163,9 +181,8 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
                 "y": e.pageY,
                 "isTouch": false
             });
-        });        
-        
-    };    
+        });
+    };
 };
 
 export {GroupTransformationContainer}
