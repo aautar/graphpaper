@@ -717,7 +717,10 @@ function Sheet(_sheetDomElement, _window) {
 
         _obj.on(EntityEvent.TRANSLATE, function(e) {
             emitEvent(SheetEvent.ENTITY_TRANSLATED, { 'object': e.obj });
-            self.refreshAllConnectors();    
+
+            if(!e.withinGroupTransformation) {
+                self.refreshAllConnectors();
+            }
         });
 
         sheetEntities.push(_obj);
@@ -1038,6 +1041,10 @@ function Sheet(_sheetDomElement, _window) {
         });
     };
 
+    const setCurrentGroupTransformationContainerBeingDragged = function(e) {
+        currentGroupTransformationContainerBeingDragged = e.container;
+    };
+
     /**
      * @param {GroupTransformationContainer} _groupTransformationContainer
      */
@@ -1045,9 +1052,8 @@ function Sheet(_sheetDomElement, _window) {
         _sheetDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
         groupTransformationContainers.push(_groupTransformationContainer);
 
-        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, function(e) {
-            currentGroupTransformationContainerBeingDragged = e.container;
-        });
+        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
+        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
     };
 
     /**
@@ -1057,6 +1063,8 @@ function Sheet(_sheetDomElement, _window) {
     this.detachGroupTransformationContainer = function(_groupTransformationContainer) {
         for(let i=0; i<groupTransformationContainers.length; i++) {
             if(groupTransformationContainers[i] === _groupTransformationContainer) {
+                _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
+                _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
                 _sheetDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
                 groupTransformationContainers.splice(i, 1);
                 return true;

@@ -635,7 +635,8 @@ var GraphPaper = (function (exports) {
     };
 
     const GroupTransformationContainerEvent = Object.freeze({
-        TRANSLATE_START: 'group-transformation-container-translate-start'
+        TRANSLATE_START: 'group-transformation-container-translate-start',
+        TRANSLATE: 'group-transformation-container-translate',
     });
 
     const EntityEvent = Object.freeze({
@@ -2335,7 +2336,10 @@ var GraphPaper = (function (exports) {
 
             _obj.on(EntityEvent.TRANSLATE, function(e) {
                 emitEvent(SheetEvent.ENTITY_TRANSLATED, { 'object': e.obj });
-                self.refreshAllConnectors();    
+
+                if(!e.withinGroupTransformation) {
+                    self.refreshAllConnectors();
+                }
             });
 
             sheetEntities.push(_obj);
@@ -2656,6 +2660,10 @@ var GraphPaper = (function (exports) {
             });
         };
 
+        const setCurrentGroupTransformationContainerBeingDragged = function(e) {
+            currentGroupTransformationContainerBeingDragged = e.container;
+        };
+
         /**
          * @param {GroupTransformationContainer} _groupTransformationContainer
          */
@@ -2663,9 +2671,8 @@ var GraphPaper = (function (exports) {
             _sheetDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
             groupTransformationContainers.push(_groupTransformationContainer);
 
-            _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, function(e) {
-                currentGroupTransformationContainerBeingDragged = e.container;
-            });
+            _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
+            _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
         };
 
         /**
@@ -2675,6 +2682,8 @@ var GraphPaper = (function (exports) {
         this.detachGroupTransformationContainer = function(_groupTransformationContainer) {
             for(let i=0; i<groupTransformationContainers.length; i++) {
                 if(groupTransformationContainers[i] === _groupTransformationContainer) {
+                    _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
+                    _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
                     _sheetDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
                     groupTransformationContainers.splice(i, 1);
                     return true;
@@ -3319,8 +3328,9 @@ var GraphPaper = (function (exports) {
         /**
          * @param {Number} _x
          * @param {Number} _y
+         * @param {Boolean} [_withinGroupTransformation=false]
          */
-        this.translate = function(_x, _y) {
+        this.translate = function(_x, _y, _withinGroupTransformation) {
             if(_x === x && _y === y) {
                 return;
             }
@@ -3332,7 +3342,14 @@ var GraphPaper = (function (exports) {
 
             const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE) || [];
             observers.forEach(function(handler) {
-                handler({"obj":self, "x": _x, "y": _y});
+                handler(
+                    {
+                        "obj": self, 
+                        "x": _x, 
+                        "y": _y,
+                        "withinGroupTransformation": _withinGroupTransformation ? true : false
+                    }
+                );
             });
         };
 
@@ -3718,8 +3735,17 @@ var GraphPaper = (function (exports) {
             accTranslateX += _dx;
             accTranslateY += _dy;
 
-            currentLeft = _sheet.snapToGrid(boundingRect.getLeft() + accTranslateX);
-            currentTop = _sheet.snapToGrid(boundingRect.getTop() + accTranslateY);
+            const newLeft = _sheet.snapToGrid(boundingRect.getLeft() + accTranslateX);
+            const newTop = _sheet.snapToGrid(boundingRect.getTop() + accTranslateY);
+
+            if(currentLeft === newLeft && currentTop === newTop) {
+                // no translation
+                return;
+            }
+
+            currentLeft = newLeft;
+            currentTop = newTop;
+
             selBox.style.left = `${currentLeft}px`;
             selBox.style.top = `${currentTop}px`;        
 
@@ -3729,9 +3755,19 @@ var GraphPaper = (function (exports) {
 
                 obj.translate(
                     _sheet.snapToGrid(currentLeft + rp.x), 
-                    _sheet.snapToGrid(currentTop + rp.y)
+                    _sheet.snapToGrid(currentTop + rp.y),
+                    true
                 );
             }
+
+            const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE) || [];
+            observers.forEach(function(handler) {
+                handler({
+                    "container": self,
+                    "x": currentLeft, 
+                    "y": currentTop
+                });
+            });
         };
 
         this.endTranslate = function() {
@@ -3783,8 +3819,7 @@ var GraphPaper = (function (exports) {
                     "y": e.touches[0].pageY,
                     "isTouch": true
                 });
-            });        
-
+            });
         };
 
         const translateMouseDownHandler = function(e) {       
@@ -3796,9 +3831,8 @@ var GraphPaper = (function (exports) {
                     "y": e.pageY,
                     "isTouch": false
                 });
-            });        
-            
-        };    
+            });
+        };
     }
 
     /**
