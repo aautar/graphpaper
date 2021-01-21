@@ -716,7 +716,13 @@ function Sheet(_sheetDomElement, _window) {
         _obj.on(EntityEvent.TRANSLATE_START, handleMoveStart);
 
         _obj.on(EntityEvent.TRANSLATE, function(e) {
-            emitEvent(SheetEvent.ENTITY_TRANSLATED, { 'object': e.obj });
+            emitEvent(
+                SheetEvent.ENTITY_TRANSLATED, 
+                { 
+                    "object": e.obj,
+                    "withinGroupTransformation": e.withinGroupTransformation
+                }
+            );
 
             if(!e.withinGroupTransformation) {
                 self.refreshAllConnectors();
