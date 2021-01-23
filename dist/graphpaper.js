@@ -3285,7 +3285,7 @@ var GraphPaper = (function (exports) {
             return new Point(boundingRect.left + window.scrollX, boundingRect.top + window.scrollY);
         };
 
-        const renderInternal = function() {
+        this.renderImmediate = function() {
             if(overwrittenRenderStyles.left) {
                 _domElement.style.left = overwrittenRenderStyles.left;
             } else {
@@ -3315,11 +3315,11 @@ var GraphPaper = (function (exports) {
 
         this.render = function() {
             if(hasPendingFrame) {
-                cancelAnimationFrame(renderInternal);
+                cancelAnimationFrame(self.renderImmediate);
             }
 
             hasPendingFrame = true;
-            requestAnimationFrame(renderInternal);
+            requestAnimationFrame(self.renderImmediate);
         };
 
         /**
