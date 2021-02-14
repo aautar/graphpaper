@@ -2556,7 +2556,15 @@ var GraphPaper = (function (exports) {
          */
         this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
             const searchFunc = (_searchData) => {
-                const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_entityA.getDescriptor(self.getGridSize()), _entityB.getDescriptor(self.getGridSize())], sheetEntities, self.getGridSize());
+                const entityDescriptors = [];
+                sheetEntities.forEach(function(_e) {
+                    entityDescriptors.push(_e.getDescriptor(self.getGridSize()));
+                });
+
+                const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_entityA.getDescriptor(self.getGridSize()), _entityB.getDescriptor(self.getGridSize())], entityDescriptors, self.getGridSize());
+
+                console.log(accessibleRoutingPointsResult);
+
                 const result = ClosestPairFinder.findClosestPairBetweenObjects(
                     _searchData.objectA, 
                     _searchData.objectB, 
@@ -3479,7 +3487,7 @@ var GraphPaper = (function (exports) {
             const anchors = [];
             for(let i=0; i<connectorAnchors.length; i++) {
                 const boundingRect = connectorAnchors[i].getBoundingRectange();
-                let routingPoints = new PointSet(self.getConnectorAnchorRoutingPoints(_gridSize));
+                let routingPoints = new PointSet(connectorAnchors[i].getRoutingPoints(_gridSize));
                 anchors.push(
                     {
                         "id": connectorAnchors[i].getId(),

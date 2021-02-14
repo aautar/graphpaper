@@ -937,7 +937,13 @@ function Sheet(_sheetDomElement, _window) {
      */
     this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
         const searchFunc = (_searchData) => {
-            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_entityA.getDescriptor(self.getGridSize()), _entityB.getDescriptor(self.getGridSize())], sheetEntities, self.getGridSize());
+            const entityDescriptors = [];
+            sheetEntities.forEach(function(_e) {
+                entityDescriptors.push(_e.getDescriptor(self.getGridSize()));
+            });
+
+            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_entityA.getDescriptor(self.getGridSize()), _entityB.getDescriptor(self.getGridSize())], entityDescriptors, self.getGridSize());
+
             const result = ConnectorAnchorClosestPairFinder.findClosestPairBetweenObjects(
                 _searchData.objectA, 
                 _searchData.objectB, 

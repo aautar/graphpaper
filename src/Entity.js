@@ -356,7 +356,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
         const anchors = [];
         for(let i=0; i<connectorAnchors.length; i++) {
             const boundingRect = connectorAnchors[i].getBoundingRectange();
-            let routingPoints = new PointSet(self.getConnectorAnchorRoutingPoints(_gridSize));
+            let routingPoints = new PointSet(connectorAnchors[i].getRoutingPoints(_gridSize));
             anchors.push(
                 {
                     "id": connectorAnchors[i].getId(),
