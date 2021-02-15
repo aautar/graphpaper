@@ -39,6 +39,24 @@ const ClosestPairFinder = {
             }
         }
 
+        // If we have an anchor without no routing points, we end up with this situation
+        if(minDist === Number.MAX_VALUE) {
+            // Find and return the 2 anchors closest to each other
+            for(let x=0; x<objAConnectorAnchors.length; x++) {
+                const aCentroid = objAConnectorAnchors[x].getCentroid();
+                for(let y=0; y<objBConnectorAnchors.length; y++) {
+                    const bCentroid = objBConnectorAnchors[y].getCentroid();
+                    const d = Math.sqrt(Math.pow(bCentroid.getX()-aCentroid.getX(),2) + Math.pow(bCentroid.getY()-aCentroid.getY(),2));
+
+                    if(d < minDist) {
+                        startAnchorIdxWithMinDist = x;
+                        endAnchorIdxWithMinDist = y;                        
+                        minDist = d;
+                    }
+                }
+            }                
+        }
+
         return {
             "objectAAnchorIndex": startAnchorIdxWithMinDist,
             "objectAAnchor": objAConnectorAnchors[startAnchorIdxWithMinDist],

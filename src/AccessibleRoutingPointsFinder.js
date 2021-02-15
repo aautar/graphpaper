@@ -59,7 +59,7 @@ const AccessibleRoutingPointsFinder = {
                 if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                     isPointWithinObj = true;
                     const currentNumRoutingPoints = connectorAnchorToNumValidRoutingPoints.get(_rp.parentAnchorId) || 0;
-                    connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchorId, currentNumRoutingPoints - 1);
+                    connectorAnchorToNumValidRoutingPoints.set(_rp.parentAnchorId, Math.max(0, currentNumRoutingPoints - 1));
                 }
             }
 
