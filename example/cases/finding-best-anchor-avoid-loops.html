@@ -3,8 +3,8 @@
 
 <head>
     <title>GraphPaper</title>
-    <script src="../dist/graphpaper.js" type="text/javascript"></script>
-    <link href="common.css" rel="stylesheet">
+    <script src="../../dist/graphpaper.js" type="text/javascript"></script>
+    <link href="../common.css" rel="stylesheet">
 </head>
 
 <body>
@@ -54,8 +54,8 @@
 
         const obj1 = new GraphPaper.Entity(
             'obj1', 
-            0, 
-            0, 
+            611, 
+            419, 
             52, 
             52, 
             canvas,
@@ -67,12 +67,11 @@
         obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1a'));
         obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1b'));
         obj1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1c'));
-        obj1.translate(100,100);
 
         const obj2 = new GraphPaper.Entity(
             'obj2', 
-            0, 
-            0, 
+            83, 
+            335, 
             52, 
             52, 
             canvas,
@@ -87,10 +86,10 @@
 
         const obj3 = new GraphPaper.Entity(
             'obj3', 
-            0, 
-            0, 
-            52, 
-            52, 
+            200, 
+            200, 
+            316, 
+            388, 
             canvas,
             document.getElementById('obj3'), 
             [document.getElementById('translateHandle3')],
@@ -100,7 +99,6 @@
         obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3a'));        
         obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3b'));
         obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3c'));
-        obj3.translate(200,200);
 
         canvas.addEntity(obj1);
         canvas.addEntity(obj2);
