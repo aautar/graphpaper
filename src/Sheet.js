@@ -96,6 +96,9 @@ function Sheet(_sheetDomElement, _window) {
         refreshAllConnectorsInternal: {
             executionTime: null
         },
+        findBestConnectorAnchorsToConnectEntities: {
+            searchFuncExecutionTime: null
+        },
         connectorsRefreshTime: null
     };
 
@@ -937,6 +940,8 @@ function Sheet(_sheetDomElement, _window) {
      */
     this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
         const searchFunc = (_searchData) => {
+            const exTimeT1 = new Date();
+
             const entityDescriptors = [];
             sheetEntities.forEach(function(_e) {
                 entityDescriptors.push(_e.getDescriptor(self.getGridSize()));
@@ -951,6 +956,8 @@ function Sheet(_sheetDomElement, _window) {
             );
     
             _searchData.cb(result);
+
+            metrics.findBestConnectorAnchorsToConnectEntities.searchFuncExecutionTime = (new Date()) - exTimeT1;
         };
 
         setTimeout(function() {
@@ -959,7 +966,7 @@ function Sheet(_sheetDomElement, _window) {
                     "objectA": _entityA, // deprecated
                     "objectB": _entityB, // deprecated
                     "entityA": _entityA,
-                    "entityB": _entityB,                    
+                    "entityB": _entityB,
                     "cb": _onFound
                 }
             );
