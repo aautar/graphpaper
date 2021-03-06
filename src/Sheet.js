@@ -806,6 +806,31 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
+     * @param {ConnectorAnchor} _anchorA 
+     * @param {ConnectorAnchor} _anchorB 
+     * @returns {Connector[]}
+     */
+    this.getConnectorsBetweenAnchors = function(_anchorA, _anchorB) {
+        const foundConnectors = [];
+
+        objectConnectors.forEach((_conn) => {
+            const aS = _conn.getAnchorStart();
+            const aE = _conn.getAnchorEnd();
+
+            if(aS === _anchorA && aE === _anchorB) {
+                foundConnectors.push(_conn);
+            }
+
+            if(aS === _anchorB && aE === _anchorA) {
+                foundConnectors.push(_conn);
+            }
+        });
+
+        return foundConnectors;
+    };    
+
+    /**
+     * 
      * @param {Entity[]} _entitySet
      * @returns {Connector[]}
      */
