@@ -552,7 +552,7 @@ var GraphPaper = (function (exports) {
 
         const scaleDx = ((this.__right - centroid.getX()) + _gridSize) / (this.__right - centroid.getX());
         const scaleDy = ((this.__bottom - centroid.getY()) + _gridSize) / (this.__bottom - centroid.getY());        
-        
+
         const scaledPoints = [
             new Point(
                 ((this.__left - centroid.getX())*scaleDx) + centroid.getX(), 
@@ -1660,13 +1660,13 @@ var GraphPaper = (function (exports) {
 
   function Vec2(a,b){this.__x=a,this.__y=b;}Vec2.prototype=Object.create(Point.prototype,{}),Vec2.prototype.normalize=function(){var a=Math.sqrt(this.__x*this.__x+this.__y*this.__y);return 0===a?this:(this.__x/=a,this.__y/=a,this)},Vec2.prototype.dot=function(a){return this.__x*a.getX()+this.__y*a.getY()};
 
-  var PointInfo={point:null,visiblePoints:null};function PointVisibilityMap(){var a=this,b=new Map,c=new Map,d=new Map,e=0,f=0,g=function doesLineIntersectAnyBoundaryLines(a){var b=!0,e=!1,f=void 0;try{for(var g,h=c[Symbol.iterator]();!(b=(g=h.next()).done);b=!0){var j=_slicedToArray(g.value,2),k=j[0],l=j[1],m=d.get(k);if(!(a.getMinX()>m.outerBoundingRect.maxX)&&!(a.getMaxX()<m.outerBoundingRect.minX)&&!(a.getMinY()>m.outerBoundingRect.maxY)&&!(a.getMaxY()<m.outerBoundingRect.minY))for(var n,o=l.toArray(),p=0;p<o.length;p++)if(n=o[p].computeIntersectionType(a),n===LINE_INTERSECTION_TYPE.LINESEG)return !0}}catch(a){e=!0,f=a;}finally{try{b||null==h.return||h.return();}finally{if(e)throw f}}return !1},h=function computePointsVisibilityForPoint(a){a.visiblePoints.points.length=0;var c=!0,d=!1,e=void 0;try{for(var f,h=b[Symbol.iterator]();!(c=(f=h.next()).done);c=!0){var i=_slicedToArray(f.value,2),j=i[0],k=i[1],l=!0,m=!1,n=void 0;try{for(var o,p=k[Symbol.iterator]();!(l=(o=p.next()).done);l=!0){var q=_slicedToArray(o.value,2),r=q[0],s=q[1],t=new Line(a.point,r);0<t.getLength()&&!g(t)&&a.visiblePoints.points.push(r);}}catch(a){m=!0,n=a;}finally{try{l||null==p.return||p.return();}finally{if(m)throw n}}}}catch(a){d=!0,e=a;}finally{try{c||null==h.return||h.return();}finally{if(d)throw e}}a.visiblePoints.isValid=!0;},i=function arePointsVisibleToEachOther(a,b){for(var c=o(a),d=j(c),e=0;e<d.length;e++)if(d[e].isEqual(b))return !0;return !1},j=function getVisiblePointsRelativeTo(a){return a.visiblePoints.isValid||h(a),a.visiblePoints.points},k=function isPointInArray(a,b){for(var c=0;c<b.length;c++)if(a.isEqual(b[c]))return !0;return !1},l=function routeToEndpoint(a,b,c,d,e,f){for(var g,h=c.point,l=j(c),m=Number.MAX_SAFE_INTEGER,n=null,o=new Vec2(e.getX()-h.getX(),e.getY()-h.getY()).normalize(),p=0;p<l.length;p++)if(g=l[p],!k(g,b)){var q=new Line(h,g).getLength(),r=q+a,s=new Line(g,e).getLength(),t=new Vec2(g.getX()-h.getX(),g.getY()-h.getY()).normalize(),u=o.dot(t)*q;r+s-u<m&&(m=r+s-u,n=g);}return m===Number.MAX_SAFE_INTEGER?null:{cost:m,point:n}},m=function getBoundaryLinesFromEntityDescriptor(a){var b=new LineSet,c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});var e=a.connectorAnchors;return e.forEach(function(a){var c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});}),b},n=function hasEntityMutated(a,b){return !(a.x===b.x&&a.y===b.y&&a.width===b.width&&a.height===b.height)},o=function fetchPointInfoForPoint(a){var c=!0,d=!1,e=void 0;try{for(var f,g=b[Symbol.iterator]();!(c=(f=g.next()).done);c=!0){var h=_slicedToArray(f.value,2),i=h[0],j=h[1],k=!0,l=!1,m=void 0;try{for(var n,o=j[Symbol.iterator]();!(k=(n=o.next()).done);k=!0){var q=_slicedToArray(n.value,2),r=q[0],s=q[1];if(r===a)return p(r,s)}}catch(a){l=!0,m=a;}finally{try{k||null==o.return||o.return();}finally{if(l)throw m}}}}catch(a){d=!0,e=a;}finally{try{c||null==g.return||g.return();}finally{if(d)throw e}}return null},p=function buildPointInfo(a,b){var c=Object.create(PointInfo);return c.point=a,c.visiblePoints=b,c},q=function buildEmptyRoutingPointToVisibleSetMap(a,b,c){for(var d=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),e=AccessibleRoutingPointsFinder.find([a],b,c),f=e.accessibleRoutingPoints.toArray(),g=new Map,h=0;h<f.length;h++)g.set(f[h],{isValid:!1,points:[]});var i=d.getPointsScaledToGrid(c);return i.forEach(function(a){g.set(a,{isValid:!1,points:[]});}),g};this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors=function(a,g){e=0,f=0;for(var h,j=[],k=[],l=[],o=0;o<a.length;o++){h=a[o].id,j.push(h);var p=c.get(h),r=d.get(h);if(p&&!n(r,a[o])){f+=p.count();continue}var C=m(a[o]);c.set(h,C),f+=C.count();}for(var D=0;D<a.length;D++){var s=a[D].id,t=d.get(s);!t||n(t,a[D]);var E=q(a[D],a,g);b.set(s,E),d.set(s,a[D]),k.push(s),e+=E.size;}var u=!0,v=!1,w=void 0;try{for(var x,y=d[Symbol.iterator]();!(u=(x=y.next()).done);u=!0){var z=_slicedToArray(x.value,2),A=z[0],B=z[1];j.includes(A)||(k.push(A),l.push(A));}}catch(a){v=!0,w=a;}finally{try{u||null==y.return||y.return();}finally{if(v)throw w}}return l.forEach(function(a){d.delete(a),c.delete(a),b.delete(a);}),k.length},this.getCurrentNumRoutingPoints=function(){return e},this.getCurrentNumBoundaryLines=function(){return f},this.findVisiblePointInfoClosestTo=function(a){var c=null,d=Number.MAX_SAFE_INTEGER,e=!0,f=!1,h=void 0;try{for(var i,j=b[Symbol.iterator]();!(e=(i=j.next()).done);e=!0){var k=_slicedToArray(i.value,2),l=k[0],m=k[1],n=!0,o=!1,q=void 0;try{for(var r,s=m[Symbol.iterator]();!(n=(r=s.next()).done);n=!0){var t=_slicedToArray(r.value,2),u=t[0],v=t[1],w=new Line(a,u),x=w.getLength();x<d&&!g(w)&&(c=p(u,v),d=x);;}}catch(a){o=!0,q=a;}finally{try{n||null==s.return||s.return();}finally{if(o)throw q}}}}catch(a){f=!0,h=a;}finally{try{e||null==j.return||j.return();}finally{if(f)throw h}}return c},this.computeRoute=function(b,c,d){if(null===b||null===c)return new PointSet;var e=a.findVisiblePointInfoClosestTo(b);if(null===e)return new PointSet;for(var f,h=new Vec2(c.getX()-b.getX(),c.getY()-b.getY()).normalize(),j=[e.point],k=0,m=e;!0;){if(f=l(k,j,m,b,c),null===f){var n=new Line(j[j.length-1],c);if(g(n))return new PointSet;break}if(k+=new Line(m.point,f.point).getLength(),j.push(f.point),m=o(f.point),1>new Line(m.point,c).getLength())break}return d&&PointVisibilityMapRouteOptimizer.optimize(j,i),new PointSet(j)};}
+  var PointInfo={point:null,visiblePoints:null};function PointVisibilityMap(){var a=this,b=new Map,c=new Map,d=new Map,e=0,f=0,g=function doesLineIntersectAnyBoundaryLines(a){var b=!0,e=!1,f=void 0;try{for(var g,h=c[Symbol.iterator]();!(b=(g=h.next()).done);b=!0){var j=_slicedToArray(g.value,2),k=j[0],l=j[1],m=d.get(k);if(!(a.getMinX()>m.outerBoundingRect.maxX)&&!(a.getMaxX()<m.outerBoundingRect.minX)&&!(a.getMinY()>m.outerBoundingRect.maxY)&&!(a.getMaxY()<m.outerBoundingRect.minY))for(var n,o=l.toArray(),p=0;p<o.length;p++)if(n=o[p].computeIntersectionType(a),n===LINE_INTERSECTION_TYPE.LINESEG)return !0}}catch(a){e=!0,f=a;}finally{try{b||null==h.return||h.return();}finally{if(e)throw f}}return !1},h=function computePointsVisibilityForPoint(a){a.visiblePoints.points.length=0;var c=!0,d=!1,e=void 0;try{for(var f,h=b[Symbol.iterator]();!(c=(f=h.next()).done);c=!0){var i=_slicedToArray(f.value,2),j=i[0],k=i[1],l=!0,m=!1,n=void 0;try{for(var o,p=k[Symbol.iterator]();!(l=(o=p.next()).done);l=!0){var q=_slicedToArray(o.value,2),r=q[0],s=q[1],t=new Line(a.point,r);0<t.getLength()&&!g(t)&&a.visiblePoints.points.push(r);}}catch(a){m=!0,n=a;}finally{try{l||null==p.return||p.return();}finally{if(m)throw n}}}}catch(a){d=!0,e=a;}finally{try{c||null==h.return||h.return();}finally{if(d)throw e}}a.visiblePoints.isValid=!0;},i=function arePointsVisibleToEachOther(a,b){for(var c=o(a),d=j(c),e=0;e<d.length;e++)if(d[e].isEqual(b))return !0;return !1},j=function getVisiblePointsRelativeTo(a){return a.visiblePoints.isValid||h(a),a.visiblePoints.points},k=function isPointInArray(a,b){for(var c=0;c<b.length;c++)if(a.isEqual(b[c]))return !0;return !1},l=function routeToEndpoint(a,b,c,d,e,f){for(var g,h=c.point,l=j(c),m=Number.MAX_SAFE_INTEGER,n=null,o=new Vec2(e.getX()-h.getX(),e.getY()-h.getY()).normalize(),p=0;p<l.length;p++)if(g=l[p],!k(g,b)){var q=new Line(h,g).getLength(),r=q+a,s=new Line(g,e).getLength(),t=new Vec2(g.getX()-h.getX(),g.getY()-h.getY()).normalize(),u=o.dot(t)*q;r+s-u<m&&(m=r+s-u,n=g);}return m===Number.MAX_SAFE_INTEGER?null:{cost:m,point:n}},m=function getBoundaryLinesFromEntityDescriptor(a){var b=new LineSet,c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});var e=a.connectorAnchors;return e.forEach(function(a){var c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});}),b},n=function hasEntityMutated(a,b){return !(a.x===b.x&&a.y===b.y&&a.width===b.width&&a.height===b.height)},o=function fetchPointInfoForPoint(a){var c=!0,d=!1,e=void 0;try{for(var f,g=b[Symbol.iterator]();!(c=(f=g.next()).done);c=!0){var h=_slicedToArray(f.value,2),i=h[0],j=h[1],k=!0,l=!1,m=void 0;try{for(var n,o=j[Symbol.iterator]();!(k=(n=o.next()).done);k=!0){var q=_slicedToArray(n.value,2),r=q[0],s=q[1];if(r===a)return p(r,s)}}catch(a){l=!0,m=a;}finally{try{k||null==o.return||o.return();}finally{if(l)throw m}}}}catch(a){d=!0,e=a;}finally{try{c||null==g.return||g.return();}finally{if(d)throw e}}return null},p=function buildPointInfo(a,b){var c=Object.create(PointInfo);return c.point=a,c.visiblePoints=b,c},q=function buildEmptyRoutingPointToVisibleSetMap(a,b,c,d){for(var e=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),f=AccessibleRoutingPointsFinder.find([a],b,c),g=f.accessibleRoutingPoints.toArray(),h=new Map,i=0;i<g.length;i++)h.set(g[i],{isValid:!1,points:[]});var k=e.getPointsScaledToGrid(c*d);return k.forEach(function(a){h.set(a,{isValid:!1,points:[]});}),h};this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors=function(a,g,h){"undefined"==typeof h&&(h=1),e=0,f=0;for(var j,k=[],l=[],o=[],p=0;p<a.length;p++){j=a[p].id,k.push(j);var r=c.get(j),s=d.get(j);if(r&&!n(s,a[p])){f+=r.count();continue}var D=m(a[p]);c.set(j,D),f+=D.count();}for(var E=0;E<a.length;E++){var t=a[E].id,u=d.get(t);!u||n(u,a[E]);var F=q(a[E],a,g,h);b.set(t,F),d.set(t,a[E]),l.push(t),e+=F.size;}var v=!0,w=!1,x=void 0;try{for(var y,z=d[Symbol.iterator]();!(v=(y=z.next()).done);v=!0){var A=_slicedToArray(y.value,2),B=A[0],C=A[1];k.includes(B)||(l.push(B),o.push(B));}}catch(a){w=!0,x=a;}finally{try{v||null==z.return||z.return();}finally{if(w)throw x}}return o.forEach(function(a){d.delete(a),c.delete(a),b.delete(a);}),l.length},this.getCurrentNumRoutingPoints=function(){return e},this.getCurrentNumBoundaryLines=function(){return f},this.findVisiblePointInfoClosestTo=function(a){var c=null,d=Number.MAX_SAFE_INTEGER,e=!0,f=!1,h=void 0;try{for(var i,j=b[Symbol.iterator]();!(e=(i=j.next()).done);e=!0){var k=_slicedToArray(i.value,2),l=k[0],m=k[1],n=!0,o=!1,q=void 0;try{for(var r,s=m[Symbol.iterator]();!(n=(r=s.next()).done);n=!0){var t=_slicedToArray(r.value,2),u=t[0],v=t[1],w=new Line(a,u),x=w.getLength();x<d&&!g(w)&&(c=p(u,v),d=x);;}}catch(a){o=!0,q=a;}finally{try{n||null==s.return||s.return();}finally{if(o)throw q}}}}catch(a){f=!0,h=a;}finally{try{e||null==j.return||j.return();}finally{if(f)throw h}}return c},this.computeRoute=function(b,c,d){if(null===b||null===c)return new PointSet;var e=a.findVisiblePointInfoClosestTo(b);if(null===e)return new PointSet;for(var f,h=new Vec2(c.getX()-b.getX(),c.getY()-b.getY()).normalize(),j=[e.point],k=0,m=e;!0;){if(f=l(k,j,m,b,c),null===f){var n=new Line(j[j.length-1],c);if(g(n))return new PointSet;break}if(k+=new Line(m.point,f.point).getLength(),j.push(f.point),m=o(f.point),1>new Line(m.point,c).getLength())break}return d&&PointVisibilityMapRouteOptimizer.optimize(j,i),new PointSet(j)};}
 
   var SvgPathBuilder={pointToLineTo:function pointToLineTo(a,b){return 0===b?"M"+a.getX()+" "+a.getY():"L"+a.getX()+" "+a.getY()},pointTripletToTesselatedCurvePoints:function pointTripletToTesselatedCurvePoints(a,b){if(3!==a.length)throw new Error("_points must be array of exactly 3 points");var c=a[1],d=new Line(a[0],a[1]),e=new Line(a[1],a[2]),f=d.createShortenedLine(0,.5*b),g=e.createShortenedLine(.5*b,0);return [f.getStartPoint(),f.getEndPoint(),g.getStartPoint(),g.getEndPoint()]},pointsToPath:function pointsToPath(a,b){b=b||0;var c=[],d=0;if(0<b){for(;3<=a.length;){var e=a.shift(),f=a.shift(),g=a.shift(),h=SvgPathBuilder.pointTripletToTesselatedCurvePoints([e,f,g],b);a.unshift(h[3]),a.unshift(h[2]);for(var k=0;k<h.length-2;k++)c.push(SvgPathBuilder.pointToLineTo(h[k],d++));}for(;0<a.length;){var j=a.shift();c.push(SvgPathBuilder.pointToLineTo(j,d++));}}else for(var l,m=0;m<a.length;m++)l=a[m],c.push(SvgPathBuilder.pointToLineTo(l,m));return c.join(" ")}};
 
   var ConnectorRoutingAlgorithm=Object.freeze({STRAIGHT_LINE:0,STRAIGHT_LINE_BETWEEN_ANCHORS:1,STRAIGHT_LINE_BETWEEN_ANCHORS_AVOID_SELF_INTERSECTION:2,ASTAR:3,ASTAR_WITH_ROUTE_OPTIMIZATION:4});
 
-  var workerData={pointVisibilityMap:new PointVisibilityMap,requestQueue:[]},computeConnectorPath=function computeConnectorPath(a,b,c){var d=Point.fromArray(a.anchor_start_centroid_arr),e=Point.fromArray(a.anchor_end_centroid_arr),f=a.marker_start_size,g=a.marker_end_size,h=a.curvature_px,i=a.routing_algorithm,j=b.findDistanceToPointClosestTo(d),k=b.findPointsCloseTo(d,j).findPointClosestTo(e),l=b.findPointsCloseTo(e,j).findPointClosestTo(d),m=new PointSet;if(i==ConnectorRoutingAlgorithm.STRAIGHT_LINE_BETWEEN_ANCHORS)m=new PointSet([k,l]);else if(i===ConnectorRoutingAlgorithm.ASTAR||i===ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION){var r=!(i!==ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION);m=c.computeRoute(k,l,r);}else throw "Invalid routing algorithm";var n=m.toArray(),o=d,p=e;if(0<f&&1<=n.length){var s=new Line(n[0],d).createShortenedLine(0,f);o=s.getEndPoint();}if(0<g&&1<=n.length){var t=new Line(n[n.length-1],e).createShortenedLine(0,g);p=t.getEndPoint();}var q=[o].concat(_toConsumableArray(n),[p]);return {svgPath:SvgPathBuilder.pointsToPath(q,h),pointsInPath:q}},getConnectorRoutingPointsAroundAnchor=function getConnectorRoutingPointsAroundAnchor(a,b){var c=AccessibleRoutingPointsFinder.find(a,a,b);return c.accessibleRoutingPoints},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a=workerData.requestQueue.pop();workerData.requestQueue.length=0;var b={overallTime:null},c=new Date,d=a.gridSize,e=a.connectorDescriptors,f=a.entityDescriptors,g=new Date,h=getConnectorRoutingPointsAroundAnchor(f,d);b.msgDecodeTime=new Date-g;var i=new Date;workerData.pointVisibilityMap.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors(f,d),b.pointVisibilityMapCreationTime=new Date-i;var j=new Date;e.forEach(function(a){var b=computeConnectorPath(a,h,workerData.pointVisibilityMap),c=new PointSet(b.pointsInPath);a.svgPath=b.svgPath,a.pointsInPath=c.toFloat64Array().buffer;}),b.allPathsComputationTime=new Date-j,b.numRoutingPoints=workerData.pointVisibilityMap.getCurrentNumRoutingPoints(),b.numBoundaryLines=workerData.pointVisibilityMap.getCurrentNumBoundaryLines(),b.overallTime=new Date-c,postMessage({connectorDescriptors:e,metrics:b});}};setInterval(processRequestQueue,6),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
+  var workerData={pointVisibilityMap:new PointVisibilityMap,requestQueue:[]},computeConnectorPath=function computeConnectorPath(a,b,c){var d=Point.fromArray(a.anchor_start_centroid_arr),e=Point.fromArray(a.anchor_end_centroid_arr),f=a.marker_start_size,g=a.marker_end_size,h=a.curvature_px,i=a.routing_algorithm,j=b.findDistanceToPointClosestTo(d),k=b.findPointsCloseTo(d,j).findPointClosestTo(e),l=b.findPointsCloseTo(e,j).findPointClosestTo(d),m=new PointSet;if(i==ConnectorRoutingAlgorithm.STRAIGHT_LINE_BETWEEN_ANCHORS)m=new PointSet([k,l]);else if(i===ConnectorRoutingAlgorithm.ASTAR||i===ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION){var r=!(i!==ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION);m=c.computeRoute(k,l,r);}else throw "Invalid routing algorithm";var n=m.toArray(),o=d,p=e;if(0<f&&1<=n.length){var s=new Line(n[0],d).createShortenedLine(0,f);o=s.getEndPoint();}if(0<g&&1<=n.length){var t=new Line(n[n.length-1],e).createShortenedLine(0,g);p=t.getEndPoint();}var q=[o].concat(_toConsumableArray(n),[p]);return {svgPath:SvgPathBuilder.pointsToPath(q,h),pointsInPath:q}},getConnectorRoutingPointsAroundAnchor=function getConnectorRoutingPointsAroundAnchor(a,b){var c=AccessibleRoutingPointsFinder.find(a,a,b);return c.accessibleRoutingPoints},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a=workerData.requestQueue.pop();workerData.requestQueue.length=0;var b={overallTime:null},c=new Date,d=a.gridSize,e=a.connectorDescriptors,f=a.entityDescriptors,g=a.boundingExtentRoutingPointScaleFactor,h=new Date,i=getConnectorRoutingPointsAroundAnchor(f,d);b.msgDecodeTime=new Date-h;var j=new Date;workerData.pointVisibilityMap.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors(f,d,g),b.pointVisibilityMapCreationTime=new Date-j;var k=new Date;e.forEach(function(a){var b=computeConnectorPath(a,i,workerData.pointVisibilityMap),c=new PointSet(b.pointsInPath);a.svgPath=b.svgPath,a.pointsInPath=c.toFloat64Array().buffer;}),b.allPathsComputationTime=new Date-k,b.numRoutingPoints=workerData.pointVisibilityMap.getCurrentNumRoutingPoints(),b.numBoundaryLines=workerData.pointVisibilityMap.getCurrentNumBoundaryLines(),b.overallTime=new Date-c,postMessage({connectorDescriptors:e,metrics:b});}};setInterval(processRequestQueue,6),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
 
 }());
 `;
@@ -1713,7 +1713,9 @@ var GraphPaper = (function (exports) {
         var translateX = 0;
         var translateY = 0;
         var scaleFactor = 1.0;
-        var invScaleFactor = 1.0;    
+        var invScaleFactor = 1.0;
+
+        let boundingExtentRoutingPointScaleFactor = 1.0;
 
         const invTransformationMatrixStack = [];
         var currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
@@ -1870,6 +1872,14 @@ var GraphPaper = (function (exports) {
             return grid.getSize();
         };
 
+        /**
+         * 
+         * @param {Number} _scaleFactor 
+         */
+        this.setBoundingExtentRoutingPointScaleFactor = function(_scaleFactor) {
+            boundingExtentRoutingPointScaleFactor = _scaleFactor;
+        };
+
         const lockDomMetrics = function() {
             sheetOffsetLeft = _sheetDomElement.offsetLeft;
             sheetOffsetTop = _sheetDomElement.offsetTop;
@@ -1905,7 +1915,8 @@ var GraphPaper = (function (exports) {
                 {
                     "gridSize": self.getGridSize(),
                     "connectorDescriptors": connectorDescriptors,
-                    "entityDescriptors": entityDescriptors
+                    "entityDescriptors": entityDescriptors,
+                    "boundingExtentRoutingPointScaleFactor": boundingExtentRoutingPointScaleFactor
                 },
                 [
 
@@ -4628,7 +4639,14 @@ var GraphPaper = (function (exports) {
             return result;
         };
 
-        const buildEmptyRoutingPointToVisibleSetMap = function(_entityDescriptor, _allSiblingDescriptors, _gridSize) {
+        /**
+         * 
+         * @param {Object[]} _entityDescriptor 
+         * @param {Object[]} _allSiblingDescriptors 
+         * @param {Number} _gridSize 
+         * @param {Number} _boundingExtentRoutingPointScaleFactor 
+         */
+        const buildEmptyRoutingPointToVisibleSetMap = function(_entityDescriptor, _allSiblingDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor) {
             const entityBoundingRect = new Rectangle(_entityDescriptor.x, _entityDescriptor.y, _entityDescriptor.x + _entityDescriptor.width, _entityDescriptor.y + _entityDescriptor.height);
             const foundPoints = AccessibleRoutingPointsFinder.find([_entityDescriptor], _allSiblingDescriptors, _gridSize);
             const routingPoints = foundPoints.accessibleRoutingPoints.toArray();
@@ -4639,7 +4657,7 @@ var GraphPaper = (function (exports) {
             }
 
             // bounding extent routing points
-            const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
+            const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize * _boundingExtentRoutingPointScaleFactor);
             scaledPoints.forEach((_sp) => {
                 routingPointToVisibleSet.set(_sp, { isValid:false, points:[] });
             }); 
@@ -4647,7 +4665,17 @@ var GraphPaper = (function (exports) {
             return routingPointToVisibleSet;
         };
 
-        this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
+        /**
+         * 
+         * @param {Object[]} _entityDescriptors 
+         * @param {Number} _gridSize 
+         * @param {Number} _boundingExtentRoutingPointScaleFactor 
+         */
+        this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor) {
+            if(typeof _boundingExtentRoutingPointScaleFactor === 'undefined') {
+                _boundingExtentRoutingPointScaleFactor = 1.0;
+            }
+
             currentNumRoutingPoints = 0;
             currentNumOfBoundaryLines = 0;
 
@@ -4681,7 +4709,7 @@ var GraphPaper = (function (exports) {
 
                 // Entity has been mutated, all routing points for the entity are invalid
                 // .. also the inverse relationship (sibling routing points that point to this entity) are also invalid
-                const routingPointToVisibleSet = buildEmptyRoutingPointToVisibleSetMap(_entityDescriptors[i], _entityDescriptors, _gridSize);
+                const routingPointToVisibleSet = buildEmptyRoutingPointToVisibleSetMap(_entityDescriptors[i], _entityDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor);
                 entityIdToPointVisibility.set(entityId, routingPointToVisibleSet);
 
                 entityIdToDescriptor.set(entityId, _entityDescriptors[i]); // take advantage of this loop to also, finally, update descriptors as we're done with mutation checks

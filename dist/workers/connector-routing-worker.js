@@ -539,7 +539,7 @@
 
         const scaleDx = ((this.__right - centroid.getX()) + _gridSize) / (this.__right - centroid.getX());
         const scaleDy = ((this.__bottom - centroid.getY()) + _gridSize) / (this.__bottom - centroid.getY());        
-        
+
         const scaledPoints = [
             new Point(
                 ((this.__left - centroid.getX())*scaleDx) + centroid.getX(), 
@@ -1091,7 +1091,14 @@
             return result;
         };
 
-        const buildEmptyRoutingPointToVisibleSetMap = function(_entityDescriptor, _allSiblingDescriptors, _gridSize) {
+        /**
+         * 
+         * @param {Object[]} _entityDescriptor 
+         * @param {Object[]} _allSiblingDescriptors 
+         * @param {Number} _gridSize 
+         * @param {Number} _boundingExtentRoutingPointScaleFactor 
+         */
+        const buildEmptyRoutingPointToVisibleSetMap = function(_entityDescriptor, _allSiblingDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor) {
             const entityBoundingRect = new Rectangle(_entityDescriptor.x, _entityDescriptor.y, _entityDescriptor.x + _entityDescriptor.width, _entityDescriptor.y + _entityDescriptor.height);
             const foundPoints = AccessibleRoutingPointsFinder.find([_entityDescriptor], _allSiblingDescriptors, _gridSize);
             const routingPoints = foundPoints.accessibleRoutingPoints.toArray();
@@ -1102,7 +1109,7 @@
             }
 
             // bounding extent routing points
-            const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
+            const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize * _boundingExtentRoutingPointScaleFactor);
             scaledPoints.forEach((_sp) => {
                 routingPointToVisibleSet.set(_sp, { isValid:false, points:[] });
             }); 
@@ -1110,7 +1117,17 @@
             return routingPointToVisibleSet;
         };
 
-        this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
+        /**
+         * 
+         * @param {Object[]} _entityDescriptors 
+         * @param {Number} _gridSize 
+         * @param {Number} _boundingExtentRoutingPointScaleFactor 
+         */
+        this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor) {
+            if(typeof _boundingExtentRoutingPointScaleFactor === 'undefined') {
+                _boundingExtentRoutingPointScaleFactor = 1.0;
+            }
+
             currentNumRoutingPoints = 0;
             currentNumOfBoundaryLines = 0;
 
@@ -1144,7 +1161,7 @@
 
                 // Entity has been mutated, all routing points for the entity are invalid
                 // .. also the inverse relationship (sibling routing points that point to this entity) are also invalid
-                const routingPointToVisibleSet = buildEmptyRoutingPointToVisibleSetMap(_entityDescriptors[i], _entityDescriptors, _gridSize);
+                const routingPointToVisibleSet = buildEmptyRoutingPointToVisibleSetMap(_entityDescriptors[i], _entityDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor);
                 entityIdToPointVisibility.set(entityId, routingPointToVisibleSet);
 
                 entityIdToDescriptor.set(entityId, _entityDescriptors[i]); // take advantage of this loop to also, finally, update descriptors as we're done with mutation checks
@@ -1473,6 +1490,7 @@
         const gridSize = lastRequest.gridSize;
         const connectorDescriptors = lastRequest.connectorDescriptors;
         const entityDescriptors = lastRequest.entityDescriptors;
+        const boundingExtentRoutingPointScaleFactor = lastRequest.boundingExtentRoutingPointScaleFactor;
 
         const msgDecodeTimeT1 = new Date();
 
@@ -1484,7 +1502,7 @@
         const pointVisibilityMapCreationTimeT1 = new Date();
 
         // Update PV map
-        workerData.pointVisibilityMap.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors(entityDescriptors, gridSize);
+        workerData.pointVisibilityMap.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors(entityDescriptors, gridSize, boundingExtentRoutingPointScaleFactor);
 
         metrics.pointVisibilityMapCreationTime = (new Date()) - pointVisibilityMapCreationTimeT1;
 

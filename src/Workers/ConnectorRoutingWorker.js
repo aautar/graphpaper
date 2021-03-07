@@ -107,6 +107,7 @@ const processRequestQueue = function() {
     const gridSize = lastRequest.gridSize;
     const connectorDescriptors = lastRequest.connectorDescriptors;
     const entityDescriptors = lastRequest.entityDescriptors;
+    const boundingExtentRoutingPointScaleFactor = lastRequest.boundingExtentRoutingPointScaleFactor;
 
     const msgDecodeTimeT1 = new Date();
 
@@ -118,7 +119,7 @@ const processRequestQueue = function() {
     const pointVisibilityMapCreationTimeT1 = new Date();
 
     // Update PV map
-    workerData.pointVisibilityMap.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors(entityDescriptors, gridSize);
+    workerData.pointVisibilityMap.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors(entityDescriptors, gridSize, boundingExtentRoutingPointScaleFactor);
 
     metrics.pointVisibilityMapCreationTime = (new Date()) - pointVisibilityMapCreationTimeT1;
 

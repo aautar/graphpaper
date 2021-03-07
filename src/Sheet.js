@@ -57,7 +57,9 @@ function Sheet(_sheetDomElement, _window) {
     var translateX = 0;
     var translateY = 0;
     var scaleFactor = 1.0;
-    var invScaleFactor = 1.0;    
+    var invScaleFactor = 1.0;
+
+    let boundingExtentRoutingPointScaleFactor = 1.0;
 
     const invTransformationMatrixStack = [];
     var currentInvTransformationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
@@ -215,6 +217,14 @@ function Sheet(_sheetDomElement, _window) {
         return grid.getSize();
     };
 
+    /**
+     * 
+     * @param {Number} _scaleFactor 
+     */
+    this.setBoundingExtentRoutingPointScaleFactor = function(_scaleFactor) {
+        boundingExtentRoutingPointScaleFactor = _scaleFactor;
+    };
+
     const lockDomMetrics = function() {
         sheetOffsetLeft = _sheetDomElement.offsetLeft;
         sheetOffsetTop = _sheetDomElement.offsetTop;
@@ -250,7 +260,8 @@ function Sheet(_sheetDomElement, _window) {
             {
                 "gridSize": self.getGridSize(),
                 "connectorDescriptors": connectorDescriptors,
-                "entityDescriptors": entityDescriptors
+                "entityDescriptors": entityDescriptors,
+                "boundingExtentRoutingPointScaleFactor": boundingExtentRoutingPointScaleFactor
             },
             [
 

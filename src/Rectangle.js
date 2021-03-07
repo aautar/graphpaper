@@ -111,7 +111,7 @@ Rectangle.prototype.getPointsScaledToGrid = function(_gridSize) {
 
     const scaleDx = ((this.__right - centroid.getX()) + _gridSize) / (this.__right - centroid.getX());
     const scaleDy = ((this.__bottom - centroid.getY()) + _gridSize) / (this.__bottom - centroid.getY());        
-    
+
     const scaledPoints = [
         new Point(
             ((this.__left - centroid.getX())*scaleDx) + centroid.getX(), 

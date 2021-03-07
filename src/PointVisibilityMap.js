@@ -270,7 +270,14 @@ function PointVisibilityMap() {
         return result;
     };
 
-    const buildEmptyRoutingPointToVisibleSetMap = function(_entityDescriptor, _allSiblingDescriptors, _gridSize) {
+    /**
+     * 
+     * @param {Object[]} _entityDescriptor 
+     * @param {Object[]} _allSiblingDescriptors 
+     * @param {Number} _gridSize 
+     * @param {Number} _boundingExtentRoutingPointScaleFactor 
+     */
+    const buildEmptyRoutingPointToVisibleSetMap = function(_entityDescriptor, _allSiblingDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor) {
         const entityBoundingRect = new Rectangle(_entityDescriptor.x, _entityDescriptor.y, _entityDescriptor.x + _entityDescriptor.width, _entityDescriptor.y + _entityDescriptor.height);
         const foundPoints = AccessibleRoutingPointsFinder.find([_entityDescriptor], _allSiblingDescriptors, _gridSize);
         const routingPoints = foundPoints.accessibleRoutingPoints.toArray();
@@ -281,7 +288,7 @@ function PointVisibilityMap() {
         }
 
         // bounding extent routing points
-        const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize);
+        const scaledPoints = entityBoundingRect.getPointsScaledToGrid(_gridSize * _boundingExtentRoutingPointScaleFactor);
         scaledPoints.forEach((_sp) => {
             routingPointToVisibleSet.set(_sp, { isValid:false, points:[] });
         }); 
@@ -317,7 +324,17 @@ function PointVisibilityMap() {
         }
     };
 
-    this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize) {
+    /**
+     * 
+     * @param {Object[]} _entityDescriptors 
+     * @param {Number} _gridSize 
+     * @param {Number} _boundingExtentRoutingPointScaleFactor 
+     */
+    this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors = function(_entityDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor) {
+        if(typeof _boundingExtentRoutingPointScaleFactor === 'undefined') {
+            _boundingExtentRoutingPointScaleFactor = 1.0;
+        }
+
         currentNumRoutingPoints = 0;
         currentNumOfBoundaryLines = 0;
 
@@ -354,7 +371,7 @@ function PointVisibilityMap() {
 
             // Entity has been mutated, all routing points for the entity are invalid
             // .. also the inverse relationship (sibling routing points that point to this entity) are also invalid
-            const routingPointToVisibleSet = buildEmptyRoutingPointToVisibleSetMap(_entityDescriptors[i], _entityDescriptors, _gridSize);
+            const routingPointToVisibleSet = buildEmptyRoutingPointToVisibleSetMap(_entityDescriptors[i], _entityDescriptors, _gridSize, _boundingExtentRoutingPointScaleFactor);
             entityIdToPointVisibility.set(entityId, routingPointToVisibleSet);
 
             entityIdToDescriptor.set(entityId, _entityDescriptors[i]); // take advantage of this loop to also, finally, update descriptors as we're done with mutation checks
