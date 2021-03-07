@@ -6,6 +6,7 @@ import {PointVisibilityMapRouteOptimizer} from './PointVisibilityMapRouteOptimiz
 import {LineSet} from './LineSet';
 import {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
 import {Rectangle} from './Rectangle';
+import {Vec2} from './Vec2';
 
 const VisiblePoints = {
     isValid: false,
@@ -132,14 +133,24 @@ function PointVisibilityMap() {
      * @param {Number} _currentRouteLength 
      * @param {Point[]} _pointsInRoute 
      * @param {Object} _currentPointIndex 
+     * @param {Point} _startPoint 
      * @param {Point} _endPoint 
+     * @param {Vec2} _vecStartToEnd
      * @returns {Object|null}
      */
-    const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointInfo, _endPoint) {
+    const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointInfo, _startPoint, _endPoint, _vecStartToEnd) {
         const currentPoint = _currentPointInfo.point;
         const visiblePoints = getVisiblePointsRelativeTo(_currentPointInfo);
         let curMinCost = Number.MAX_SAFE_INTEGER;
         let visiblePointWithMinCost = null;
+
+        const vecToTargetIdeal = (new Vec2(_endPoint.getX() - currentPoint.getX(), _endPoint.getY() - currentPoint.getY())).normalize();
+
+        /*const dbgInterestAt = 1;
+        if(_pointsInRoute.length === dbgInterestAt) {
+            console.log('vecToTargetIdeal = ' + vecToTargetIdeal.toString());
+            console.log('currentPoint = ' + currentPoint.toString());
+        }*/
 
         for(let i=0; i<visiblePoints.length; i++) {
             const visiblePt = visiblePoints[i];
@@ -150,17 +161,41 @@ function PointVisibilityMap() {
             }
 
             // g(n) = length/cost of _startPoint to _vp + _currentRouteLength
-            const gn = (new Line(currentPoint, visiblePt)).getLength() + _currentRouteLength;
+            const currentToVisibleLength = (new Line(currentPoint, visiblePt)).getLength();
+            let gn = currentToVisibleLength + _currentRouteLength;
 
             // h(n) = length/cost of _vp to _endPoint
-            const hn = (new Line(visiblePt, _endPoint)).getLength();
+            let hn = (new Line(visiblePt, _endPoint)).getLength();
+
+            // t(n) = 
+            // a. get the relationship between the 2 vectors (dot product)
+            // b. scale to give influence (scale by currentToVisibleLength)
+            //    .. using currentToVisibleLength as scaling factor is influence towards longer paths in good directions vs shorter paths in bad directions
+            const vecVisibleToEndpt = (new Vec2(visiblePt.getX() - currentPoint.getX(), visiblePt.getY() - currentPoint.getY())).normalize();
+            const tn = vecToTargetIdeal.dot(vecVisibleToEndpt) * currentToVisibleLength;
+
+            // if we can go to the endpoint, let's do that
+            /*if(visiblePt.isEqual(_endPoint)) {
+                gn = 0;
+                hn = 0;
+            }*/
+
+            /*if(_pointsInRoute.length === dbgInterestAt) {
+                console.log('visiblePt = ' + visiblePt.toString());
+                console.log('vecVisibleToEndpt = ' + vecVisibleToEndpt.toString());
+                console.log(tn);
+            }*/        
 
             // see if this is the new min
-            if((gn + hn) < curMinCost) {
-                curMinCost = gn + hn;
+            if((gn + hn - tn) < curMinCost) {
+                curMinCost = gn + hn - tn;
                 visiblePointWithMinCost = visiblePt;
             }
         }
+
+        /*if(_pointsInRoute.length === dbgInterestAt) {
+            console.log('winner = ' + visiblePointWithMinCost.toString());
+        }*/
 
         if(curMinCost === Number.MAX_SAFE_INTEGER) {
             return null;
@@ -411,11 +446,13 @@ function PointVisibilityMap() {
             return new PointSet();
         }
 
-        let currentRouteLen = 0;
+        const vecStartToEnd = (new Vec2(_endPoint.getX() - _startPoint.getX(), _endPoint.getY() - _startPoint.getY())).normalize();
+
         const pointsInRoute = [firstPointInfo.point];
+        let currentRouteLen = 0;
         let currentPointInfo = firstPointInfo;
         while(true) {
-            const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointInfo, _endPoint);
+            const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointInfo, _startPoint, _endPoint, vecStartToEnd);
             if(routeSegment === null) {
                 // Is there unobstructed line to endpoint? 
                 // If not, failed to find route
