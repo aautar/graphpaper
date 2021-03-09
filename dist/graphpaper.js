@@ -3264,10 +3264,12 @@ var GraphPaper = (function (exports) {
 
         /**
          * @param {Element} _connectorAnchorDomElement
+         * @param {Number} _routingPointOffsetX
+         * @param {Number} _routingPointOffsetY
          * @returns {ConnectorAnchor}
          */    
-        this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement) {
-            const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet);
+        this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement, _routingPointOffsetX, _routingPointOffsetY) {
+            const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet, _routingPointOffsetX, _routingPointOffsetY);
             connectorAnchors.push(newAnchor);
             nextConnectorAnchorIdSuffix++;
             return newAnchor;
@@ -3275,10 +3277,12 @@ var GraphPaper = (function (exports) {
 
         /**
          * @param {Element} _connectorAnchorDomElement
+         * @param {Number} _routingPointOffsetX
+         * @param {Number} _routingPointOffsetY 
          * @returns {ConnectorAnchor}
          */    
-        this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement) {     
-            const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet);
+        this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement, _routingPointOffsetX, _routingPointOffsetY) {     
+            const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet, _routingPointOffsetX, _routingPointOffsetY);
 
             _connectorAnchorDomElement.addEventListener('click', function(e) {
                 _sheet.addConnectionAnchorToSelectionStack(anchor);
