@@ -873,32 +873,36 @@ var GraphPaper = (function (exports) {
      * @param {String} _id
      * @param {Element} _domElement
      * @param {Sheet} _sheet
+     * @param {Number} _routingPointOffsetX
+     * @param {Number} _routingPointOffsetY
      */
-    function ConnectorAnchor(_id, _domElement, _sheet) {
+    function ConnectorAnchor(_id, _domElement, _sheet, _routingPointOffsetX, _routingPointOffsetY) {
         const self = this;
-
         let routingPointDirections = ["top", "left", "bottom", "right"];
+
+        _routingPointOffsetX = _routingPointOffsetX || _sheet.getGridSize();
+        _routingPointOffsetY = _routingPointOffsetY || _sheet.getGridSize();
 
         const getDimensions = function() {
             const r = _sheet.transformDomRectToPageSpaceRect(_domElement.getBoundingClientRect());
             return new Point(r.getWidth(), r.getHeight());
         };
 
-        const routingPointDirectionToPoint = function(_direction, _centroid, _halfWidth, _halfHeight, _gridSize) {
+        const routingPointDirectionToPoint = function(_direction, _centroid, _halfWidth, _halfHeight) {
             if(_direction === 'top') {
-                return new Point(_centroid.getX(), _centroid.getY() - _halfHeight - _gridSize);
+                return new Point(_centroid.getX(), _centroid.getY() - _halfHeight - _routingPointOffsetY);
             }
 
             if(_direction === 'bottom') {
-                return new Point(_centroid.getX(), _centroid.getY() + _halfHeight + _gridSize);
+                return new Point(_centroid.getX(), _centroid.getY() + _halfHeight + _routingPointOffsetY);
             }
 
             if(_direction === 'left') {
-                return new Point(_centroid.getX() - _halfWidth - _gridSize, _centroid.getY());
+                return new Point(_centroid.getX() - _halfWidth - _routingPointOffsetX, _centroid.getY());
             }
 
             if(_direction === 'right') {
-                return new Point(_centroid.getX() + _halfWidth + _gridSize, _centroid.getY());
+                return new Point(_centroid.getX() + _halfWidth + _routingPointOffsetX, _centroid.getY());
             }
 
             return null;
@@ -968,10 +972,9 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {Number} _gridSize 
          * @returns {Point[]}
          */
-        this.getRoutingPoints = function(_gridSize) {
+        this.getRoutingPoints = function() {
             const dimensions = getDimensions();
             const centroid = self.getCentroid();
             const halfWidth = dimensions.getX() * 0.5;
@@ -979,7 +982,7 @@ var GraphPaper = (function (exports) {
 
             const result = [];
             routingPointDirections.forEach((_dir) => {
-                result.push(routingPointDirectionToPoint(_dir, centroid, halfWidth, halfHeight, _gridSize));
+                result.push(routingPointDirectionToPoint(_dir, centroid, halfWidth, halfHeight));
             });
 
             return result;
@@ -3288,13 +3291,12 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {Number} _gridSize 
          * @returns {Point[]}
          */
-        this.getConnectorAnchorRoutingPoints = function(_gridSize) {
+        this.getConnectorAnchorRoutingPoints = function() {
             const allRoutingPoints = [];
             connectorAnchors.forEach(function(_anchor) {
-                const anchorPoints = _anchor.getRoutingPoints(_gridSize);
+                const anchorPoints = _anchor.getRoutingPoints();
                 anchorPoints.forEach(function(_pt) {
                     allRoutingPoints.push(_pt);
                 });
@@ -3552,10 +3554,9 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * @param {Number} _gridSize
          * @returns {Object}
          */
-        this.getDescriptor = function(_gridSize) {
+        this.getDescriptor = function() {
             let outerBoundMinX = self.getX();
             let outerBoundMinY = self.getY();
             let outerBoundMaxX = self.getX() + self.getWidth();
@@ -3564,7 +3565,7 @@ var GraphPaper = (function (exports) {
             const anchors = [];
             for(let i=0; i<connectorAnchors.length; i++) {
                 const boundingRect = connectorAnchors[i].getBoundingRectange();
-                let routingPoints = new PointSet(connectorAnchors[i].getRoutingPoints(_gridSize));
+                let routingPoints = new PointSet(connectorAnchors[i].getRoutingPoints());
                 anchors.push(
                     {
                         "id": connectorAnchors[i].getId(),

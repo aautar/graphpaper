@@ -80,13 +80,12 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     /**
      * 
-     * @param {Number} _gridSize 
      * @returns {Point[]}
      */
-    this.getConnectorAnchorRoutingPoints = function(_gridSize) {
+    this.getConnectorAnchorRoutingPoints = function() {
         const allRoutingPoints = [];
         connectorAnchors.forEach(function(_anchor) {
-            const anchorPoints = _anchor.getRoutingPoints(_gridSize);
+            const anchorPoints = _anchor.getRoutingPoints();
             anchorPoints.forEach(function(_pt) {
                 allRoutingPoints.push(_pt);
             });
@@ -344,10 +343,9 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
-     * @param {Number} _gridSize
      * @returns {Object}
      */
-    this.getDescriptor = function(_gridSize) {
+    this.getDescriptor = function() {
         let outerBoundMinX = self.getX();
         let outerBoundMinY = self.getY();
         let outerBoundMaxX = self.getX() + self.getWidth();
@@ -356,7 +354,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
         const anchors = [];
         for(let i=0; i<connectorAnchors.length; i++) {
             const boundingRect = connectorAnchors[i].getBoundingRectange();
-            let routingPoints = new PointSet(connectorAnchors[i].getRoutingPoints(_gridSize));
+            let routingPoints = new PointSet(connectorAnchors[i].getRoutingPoints());
             anchors.push(
                 {
                     "id": connectorAnchors[i].getId(),
