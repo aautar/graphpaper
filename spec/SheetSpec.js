@@ -21,6 +21,12 @@ global.URL = {
     createObjectURL: () => { return '#'; }
 };
 
+const sheet = {
+    getGridSize: function() {
+        return 12.0;
+    }
+  };
+
 jasmine.clock().install();
 
 describe("Sheet", function() {
@@ -33,7 +39,7 @@ describe("Sheet", function() {
             _y, 
             _width, 
             _height, 
-            {}, 
+            sheet, 
             domElem, 
             [domElem], 
             [domElem]
@@ -376,7 +382,7 @@ describe("Canvas connectors", function() {
             _y, 
             _width, 
             _height, 
-            {}, 
+            sheet, 
             domElem, 
             [domElem], 
             [domElem]

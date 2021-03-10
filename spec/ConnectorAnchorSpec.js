@@ -27,6 +27,9 @@ describe("ConnectorAnchor.getWidth, ConnectorAnchor.getHeight", function() {
         const anchorElem = window.document.createElement('div');
 
         const sheet = {
+            getGridSize: function() {
+                return 12.0;
+            },
             transformDomRectToPageSpaceRect: function(_domRect) {
                 return new Rectangle(0, 0, anchorElemWidth, anchorElemHeight);
             }
