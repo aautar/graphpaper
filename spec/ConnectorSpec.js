@@ -10,13 +10,19 @@ const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 global.window = window;
 
+const sheet = {
+    getGridSize: function() {
+        return 12.0;
+    }
+};
+
 describe("Connector.getId", function() {
     it("creates an id = sorted ids of anchors", function() {
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -29,10 +35,10 @@ describe("Connector.getId", function() {
 describe("Connector.getAnchorStart", function() {
     it("returns starting ConnectorAnchor object", function() {
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -45,10 +51,10 @@ describe("Connector.getAnchorStart", function() {
 describe("Connector.getAnchorEnd", function() {
     it("returns ending ConnectorAnchor object", function() {
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -61,10 +67,10 @@ describe("Connector.getAnchorEnd", function() {
 describe("Connector.removePathElement", function() {
     it("remove SVG path element from DOM", function() {
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -82,10 +88,10 @@ describe("Connector.removePathElement", function() {
 describe("Connector.getLength", function() {
     it("returns euclidean length of all path lines", function() {
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -111,10 +117,10 @@ describe("Connector.getLength", function() {
 describe("Connector.getMidpoint", function() {
     it("returns midpoint of path consisting of single segment", function() {
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -137,10 +143,10 @@ describe("Connector.getMidpoint", function() {
 
     it("returns midpoint of path consisting of multiple segments", function() {
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -168,10 +174,10 @@ describe("Connector.getMidpoint", function() {
 describe("Connector.getMidpointDirection", function() {
     it("returns direction of midpoint segment", function() {
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -200,10 +206,10 @@ describe("Connector.on", function() {
         const clickCallback = jasmine.createSpy("click-callback");
         
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
 
@@ -228,10 +234,10 @@ describe("Connector.off", function() {
         const clickCallback = jasmine.createSpy("click-callback");
         
         const anchorStartElem = window.document.createElement('div');
-        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, {});        
+        const anchorStart = new ConnectorAnchor('connector-anchor-start-123', anchorStartElem, sheet);        
 
         const anchorEndElem = window.document.createElement('div');
-        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, {});        
+        const anchorEnd = new ConnectorAnchor('connector-anchor-end-987', anchorEndElem, sheet);        
 
         const containerDomElem = window.document.createElement('div');
         

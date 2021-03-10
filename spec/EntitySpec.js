@@ -10,6 +10,12 @@ const window = dom.window;
 global.requestAnimationFrame = (_render) => { _render(); };
 global.cancelAnimationFrame = () => { };
 
+const sheet = {
+  getGridSize: function() {
+      return 12.0;
+  }
+};
+
 describe("Entity constructor", function() {
   it("translates object into initial position", function() { 
     const objDomElem = window.document.createElement('div');
@@ -19,7 +25,7 @@ describe("Entity constructor", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         objDomElem, 
         [window.document.createElement('div')], 
         [window.document.createElement('div')]
@@ -37,7 +43,7 @@ describe("Entity constructor", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         objDomElem, 
         [window.document.createElement('div')], 
         [window.document.createElement('div')]
@@ -56,7 +62,7 @@ describe("Entity", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         window.document.createElement('div'), 
         [window.document.createElement('div')], 
         [window.document.createElement('div')]
@@ -94,7 +100,7 @@ describe("Entity", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         window.document.createElement('div'), 
         [translateHandleElement], 
         [window.document.createElement('div')]
@@ -114,7 +120,7 @@ describe("Entity", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         window.document.createElement('div'), 
         [window.document.createElement('div')], 
         [window.document.createElement('div')]
@@ -133,7 +139,7 @@ describe("Entity", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         window.document.createElement('div'), 
         [window.document.createElement('div')], 
         [window.document.createElement('div')]
@@ -155,7 +161,7 @@ describe("Entity.hasConnectorAnchor", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         window.document.createElement('div'), 
         [window.document.createElement('div')], 
         [window.document.createElement('div')]
@@ -177,7 +183,7 @@ describe("Entity.translate", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         entityDomElem, 
         [window.document.createElement('div')], 
         [window.document.createElement('div')]
@@ -199,7 +205,7 @@ describe("Entity.translate", function() {
         200, 
         10, 
         20, 
-        {}, 
+        sheet, 
         entityDomElem, 
         [window.document.createElement('div')], 
         [window.document.createElement('div')]

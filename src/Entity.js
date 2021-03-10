@@ -53,10 +53,12 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     /**
      * @param {Element} _connectorAnchorDomElement
+     * @param {Number} _routingPointOffsetX
+     * @param {Number} _routingPointOffsetY
      * @returns {ConnectorAnchor}
      */    
-    this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement) {
-        const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet);
+    this.addNonInteractableConnectorAnchor = function(_connectorAnchorDomElement, _routingPointOffsetX, _routingPointOffsetY) {
+        const newAnchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet, _routingPointOffsetX, _routingPointOffsetY);
         connectorAnchors.push(newAnchor);
         nextConnectorAnchorIdSuffix++;
         return newAnchor;
@@ -64,10 +66,12 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     /**
      * @param {Element} _connectorAnchorDomElement
+     * @param {Number} _routingPointOffsetX
+     * @param {Number} _routingPointOffsetY 
      * @returns {ConnectorAnchor}
      */    
-    this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement) {     
-        const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet);
+    this.addInteractableConnectorAnchor = function(_connectorAnchorDomElement, _routingPointOffsetX, _routingPointOffsetY) {     
+        const anchor = new ConnectorAnchor(_id + `-${nextConnectorAnchorIdSuffix}`, _connectorAnchorDomElement, _sheet, _routingPointOffsetX, _routingPointOffsetY);
 
         _connectorAnchorDomElement.addEventListener('click', function(e) {
             _sheet.addConnectionAnchorToSelectionStack(anchor);
@@ -80,13 +84,12 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     /**
      * 
-     * @param {Number} _gridSize 
      * @returns {Point[]}
      */
-    this.getConnectorAnchorRoutingPoints = function(_gridSize) {
+    this.getConnectorAnchorRoutingPoints = function() {
         const allRoutingPoints = [];
         connectorAnchors.forEach(function(_anchor) {
-            const anchorPoints = _anchor.getRoutingPoints(_gridSize);
+            const anchorPoints = _anchor.getRoutingPoints();
             anchorPoints.forEach(function(_pt) {
                 allRoutingPoints.push(_pt);
             });
@@ -344,10 +347,9 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
-     * @param {Number} _gridSize
      * @returns {Object}
      */
-    this.getDescriptor = function(_gridSize) {
+    this.getDescriptor = function() {
         let outerBoundMinX = self.getX();
         let outerBoundMinY = self.getY();
         let outerBoundMaxX = self.getX() + self.getWidth();
@@ -356,7 +358,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
         const anchors = [];
         for(let i=0; i<connectorAnchors.length; i++) {
             const boundingRect = connectorAnchors[i].getBoundingRectange();
-            let routingPoints = new PointSet(connectorAnchors[i].getRoutingPoints(_gridSize));
+            let routingPoints = new PointSet(connectorAnchors[i].getRoutingPoints());
             anchors.push(
                 {
                     "id": connectorAnchors[i].getId(),
