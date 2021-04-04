@@ -98,7 +98,7 @@
         const anchor2 = obj2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
         anchor2.setPossibleRoutingPointDirections(["top"]);
 
-        obj2.translate(100, 100);
+        obj2.translate(671, 179);
 
         const obj3 = new GraphPaper.Entity(
             'obj3', 
@@ -115,7 +115,7 @@
         const anchor3 = obj3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3'));
         anchor3.setPossibleRoutingPointDirections(["top"]);
 
-        obj3.translate(200,200);
+        obj3.translate(395,95);
 
         const obj4 = new GraphPaper.Entity(
             'obj4', 
@@ -132,7 +132,7 @@
         const anchor4 = obj4.addInteractableConnectorAnchor(document.getElementById('connectorAnchor4'));
         anchor4.setPossibleRoutingPointDirections(["top"]);
 
-        obj4.translate(400,200);
+        obj4.translate(479,263);
 
         canvas.addEntity(obj1);
         canvas.addEntity(obj2);
@@ -141,6 +141,27 @@
 
         canvas.initDebugMetricsPanel();
         canvas.setConnectorRefreshBufferTime(0);
+        canvas.setBoundingExtentRoutingPointScaleFactor(2.0);
+
+        const computeConnector = () => {
+            canvas.findBestConnectorAnchorsToConnectEntities(obj2, obj4, function(_bestAnchors) {
+
+                const existingConnectors = canvas.getConnectorsBetweenAnchors(_bestAnchors.objectAAnchor, _bestAnchors.objectBAnchor);
+
+                if(existingConnectors.length === 0) {
+                    // to optimize, we should only remove existing if it doesn't match the best
+                    const currentConnectors = canvas.getConnectorsBetweenEntities(obj2, obj4);
+                    for(let i=0; i<currentConnectors.length; i++) {
+                        canvas.removeConnector(currentConnectors[i]);      
+                    }
+
+                    canvas.makeNewConnectorFromAnchors(_bestAnchors.objectAAnchor, _bestAnchors.objectBAnchor);
+                }
+            });
+        };
+
+        canvas.on(GraphPaper.SheetEvent.ENTITY_TRANSLATED, computeConnector);
+        computeConnector();        
 
     </script>
 
