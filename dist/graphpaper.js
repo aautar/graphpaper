@@ -1789,6 +1789,10 @@ var GraphPaper = (function (exports) {
         let pendingConnectorRedraw = false;
 
 
+        var findBestConnectorAnchorsToConnectEntitiesTimeout = null;
+        var findBestConnectorAnchorsToConnectEntitiesSearchInputs = [];
+
+
         // Setup ConnectorRoutingWorker
         const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
         
@@ -2633,37 +2637,69 @@ var GraphPaper = (function (exports) {
          * @param {Entity} _objB
          */
         this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
-            const searchFunc = (_searchData) => {
+            const searchFunc = (_searchInputs) => {
                 const exTimeT1 = new Date();
+
+                const gridSize = self.getGridSize();
 
                 const entityDescriptors = [];
                 sheetEntities.forEach(function(_e) {
-                    entityDescriptors.push(_e.getDescriptor(self.getGridSize()));
+                    entityDescriptors[_e.getId()] = _e.getDescriptor(gridSize);
                 });
 
-                const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find([_entityA.getDescriptor(self.getGridSize()), _entityB.getDescriptor(self.getGridSize())], entityDescriptors, self.getGridSize());
+                for(let i=0; i<_searchInputs.length; i++) {
+                    const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find(
+                        [
+                            entityDescriptors[_searchInputs[i].entityA.getId()], 
+                            entityDescriptors[_searchInputs[i].entityB.getId()]
+                        ],
+                        entityDescriptors, 
+                        self.getGridSize()
+                    );
 
-                const result = ClosestPairFinder.findClosestPairBetweenObjects(
-                    _searchData.objectA, 
-                    _searchData.objectB, 
-                    accessibleRoutingPointsResult.connectorAnchorToNumValidRoutingPoints
-                );
-        
-                _searchData.cb(result);
+                    const result = ClosestPairFinder.findClosestPairBetweenObjects(
+                        _searchInputs[i].entityA, 
+                        _searchInputs[i].entityB, 
+                        accessibleRoutingPointsResult.connectorAnchorToNumValidRoutingPoints
+                    );
+            
+                    _searchInputs[i].cb(result);
+                }
 
                 metrics.findBestConnectorAnchorsToConnectEntities.searchFuncExecutionTime = (new Date()) - exTimeT1;
             };
 
-            setTimeout(function() {
-                searchFunc(
+            const alreadyInSearchInputs = function(_a, _b, _cb) {
+                for(let i=0; i<findBestConnectorAnchorsToConnectEntitiesSearchInputs.length; i++) {
+                    //console.log(findBestConnectorAnchorsToConnectEntitiesSearchInputs[i].entityA === _a);
+                    if(findBestConnectorAnchorsToConnectEntitiesSearchInputs[i].entityA === _a && findBestConnectorAnchorsToConnectEntitiesSearchInputs[i].entityB === _b) {
+                        console.log('true');
+                        return true;
+                    }
+                }
+
+                return false;
+            };
+
+            if(!alreadyInSearchInputs(_entityA, _entityB)) {
+                findBestConnectorAnchorsToConnectEntitiesSearchInputs.push(
                     {
-                        "objectA": _entityA, // deprecated
-                        "objectB": _entityB, // deprecated
                         "entityA": _entityA,
                         "entityB": _entityB,
                         "cb": _onFound
                     }
                 );
+            }
+
+            if(findBestConnectorAnchorsToConnectEntitiesTimeout) {
+                clearTimeout(findBestConnectorAnchorsToConnectEntitiesTimeout);
+                findBestConnectorAnchorsToConnectEntitiesTimeout = null;
+            }
+
+            findBestConnectorAnchorsToConnectEntitiesTimeout = setTimeout(function() {
+                searchFunc(findBestConnectorAnchorsToConnectEntitiesSearchInputs);
+                findBestConnectorAnchorsToConnectEntitiesTimeout = null;
+                findBestConnectorAnchorsToConnectEntitiesSearchInputs = [];
             }, connectorRefreshBufferTime);
         };
 
