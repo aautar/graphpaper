@@ -40,6 +40,12 @@
 
     <script type="text/javascript">
 	
+        /**
+         * 
+         * CASE: Paths should be such that they do not loop around objects (or attempt to do so, as such cases yield failure)
+         * 
+         * */        
+
         const canvas = new GraphPaper.Sheet(
             document.getElementById('paper'), 
             window

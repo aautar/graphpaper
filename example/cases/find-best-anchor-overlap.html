@@ -39,6 +39,13 @@
 
 
     <script type="text/javascript">
+
+        /**
+         * 
+         * CASE: obj3 overlaps the ConnectorAnchor (but not the routing point) of obj2, we expect a connector to still be constructured without issue
+         * from obj1 to obj2
+         * 
+         * */
 	
         const canvas = new GraphPaper.Sheet(
             document.getElementById('paper'), 

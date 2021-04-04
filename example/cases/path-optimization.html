@@ -56,7 +56,12 @@
 
 
     <script type="text/javascript">
-    
+        /**
+         * 
+         * CASE: Visualize route with and without route optimization
+         * 
+         * */    
+
         let optimizeConnectorRoute = true;
         const canvas = new GraphPaper.Sheet(
             document.getElementById('paper'), 
@@ -67,7 +72,15 @@
         canvas.initTransformationHandlers();
 
         canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
-            return new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px', 0, optimizeConnectorRoute);
+            return new GraphPaper.Connector(
+                _anchorStart, 
+                _anchorEnd, 
+                _containerDomElement, 
+                '#006dc9', 
+                '4px', 
+                0, 
+                optimizeConnectorRoute ? GraphPaper.ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION :  GraphPaper.ConnectorRoutingAlgorithm.ASTAR
+            );
         });
 
         const obj1 = new GraphPaper.Entity(
