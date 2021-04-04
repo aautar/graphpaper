@@ -27,9 +27,14 @@ const sheet = {
     }
   };
 
-jasmine.clock().install();
-
 describe("Sheet", function() {
+    beforeEach(function() {
+        jasmine.clock().install();
+    });
+
+    afterEach(function () {
+        jasmine.clock().uninstall();
+    });
 
     const makeEntity = function(_id, _x, _y, _width, _height) {
         const domElem = window.document.createElement('div');
@@ -348,6 +353,14 @@ describe("Sheet", function() {
 });
 
 describe("Canvas connectors", function() {
+    beforeEach(function() {
+        jasmine.clock().install();
+    });
+
+    afterEach(function () {
+        jasmine.clock().uninstall();
+    });    
+
     const makeAnchor = function(_id, _canvas) {
         const anchorElemWidth = 100;
         const anchorElemHeight = 200;
@@ -583,12 +596,17 @@ describe("Canvas.initMultiEntitySelectionHandler", function() {
     var pvWorkerMock = null;
 
     beforeEach(function() {
+        jasmine.clock().install();
         window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
         sheetDomElement = window.document.createElement('div');
         pvWorkerMock = {
             postMessage: function() { }
         };    
     });
+
+    afterEach(function () {
+        jasmine.clock().uninstall();
+    });    
 
     it("creates selection box DOM element", function() {
         const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
@@ -611,12 +629,17 @@ describe("Canvas emits MULTIPLE_OBJECT_SELECTION_STARTED event", function() {
     var pvWorkerMock = null;
 
     beforeEach(function() {
+        jasmine.clock().install();
         window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
         sheetDomElement = window.document.createElement('div');
         pvWorkerMock = {
             postMessage: function() { }
         };    
     });    
+
+    afterEach(function () {
+        jasmine.clock().uninstall();
+    });        
 
     it("emits event on mousedown", function() {
         const selectionStartedCallback = jasmine.createSpy("selection-started-callback");
