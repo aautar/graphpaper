@@ -857,18 +857,6 @@ var GraphPaper = (function (exports) {
         }
     };
 
-    const SheetEvent = Object.freeze({
-        DBLCLICK: "dblclick",
-        CLICK: "click",
-        CONNECTOR_UPDATED: "connector-updated",
-        ENTITY_ADDED: "entity-added",
-        ENTITY_REMOVED: "entity-removed",
-        ENTITY_RESIZED: "entity-resized",
-        ENTITY_TRANSLATED: "entity-translated",
-        MULTIPLE_ENTITY_SELECTION_STARTED: "multiple-object-selection-started",
-        MULTIPLE_ENTITIES_SELECTED: "multiple-objects-selected",
-    });
-
     /**
      * @param {String} _id
      * @param {Element} _domElement
@@ -1071,6 +1059,128 @@ var GraphPaper = (function (exports) {
             };
         }
     };
+
+    const BestToConnectEntitiesFinder = function() {
+        this.findBestTimeout = null;
+        this.searchInputs = [];
+        this.currentSheetEntities = [];
+        this.currentGridSize = 11.0;
+        this.findBufferTime = 6.94;
+        this.metrics = {
+            searchFuncExecutionTime: null
+        };
+    };
+
+    /**
+     * 
+     * @returns {Number}
+     */
+    BestToConnectEntitiesFinder.prototype.getSearchFuncExecutionTime = function() {
+        return this.metrics.searchFuncExecutionTime;
+    };
+
+    /**
+     * 
+     * @param {Entity} _a 
+     * @param {Entity} _b 
+     * @param {Function} _cb 
+     * @returns 
+     */
+    BestToConnectEntitiesFinder.prototype.alreadyInSearchInputs = function(_a, _b, _cb) {
+        for(let i=0; i<this.searchInputs.length; i++) {
+            if(
+                this.searchInputs[i].entityA === _a && 
+                this.searchInputs[i].entityB === _b &&
+                this.searchInputs[i].cb.toString() === _cb.toString()
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    BestToConnectEntitiesFinder.prototype.clearSearchInputs = function() {
+        this.searchInputs.length = 0;
+    };
+
+    BestToConnectEntitiesFinder.prototype.search = function() {
+        const exTimeT1 = new Date();
+
+        const gridSize = this.currentGridSize;
+
+        const entityDescriptors = [];
+        this.currentSheetEntities.forEach(function(_e) {
+            entityDescriptors[_e.getId()] = _e.getDescriptor(gridSize);
+        });
+
+        for(let i=0; i<this.searchInputs.length; i++) {
+            const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find(
+                [
+                    entityDescriptors[this.searchInputs[i].entityA.getId()], 
+                    entityDescriptors[this.searchInputs[i].entityB.getId()]
+                ],
+                entityDescriptors, 
+                gridSize
+            );
+
+            const result = ClosestPairFinder.findClosestPairBetweenObjects(
+                this.searchInputs[i].entityA, 
+                this.searchInputs[i].entityB, 
+                accessibleRoutingPointsResult.connectorAnchorToNumValidRoutingPoints
+            );
+
+            this.searchInputs[i].cb(result);
+        }
+
+        this.metrics.searchFuncExecutionTime = (new Date()) - exTimeT1;
+    };
+
+    /**
+     * 
+     * @param {Entity} _entityA 
+     * @param {Entity} _entityB 
+     * @param {Function} _onFound 
+     */
+    BestToConnectEntitiesFinder.prototype.findBest = function(_entityA, _entityB, _onFound, _sheetEntities, _gridSize) {
+        this.currentSheetEntities = _sheetEntities;
+        this.currentGridSize = _gridSize;
+
+        if(!this.alreadyInSearchInputs(_entityA, _entityB, _onFound)) {
+            this.searchInputs.push(
+                {
+                    "entityA": _entityA,
+                    "entityB": _entityB,
+                    "cb": _onFound
+                }
+            );
+        }
+
+        if(this.findBestTimeout) {
+            clearTimeout(this.findBestTimeout);
+            this.findBestTimeout = null;
+        }
+
+        const searchFunc = () => {
+            this.search(this.searchInputs);
+            this.findBestTimeout = null;
+            this.searchInputs = [];            
+        };
+
+        this.findBestTimeout = setTimeout(searchFunc, this.findBufferTime);
+    };
+
+    const SheetEvent = Object.freeze({
+        DBLCLICK: "dblclick",
+        CLICK: "click",
+        CONNECTOR_UPDATED: "connector-updated",
+        ENTITY_ADDED: "entity-added",
+        ENTITY_REMOVED: "entity-removed",
+        ENTITY_RESIZED: "entity-resized",
+        ENTITY_TRANSLATED: "entity-translated",
+        MULTIPLE_ENTITY_SELECTION_STARTED: "multiple-object-selection-started",
+        MULTIPLE_ENTITIES_SELECTED: "multiple-objects-selected",
+    });
 
     const DebugMetricsPanel = function(_window) {
         var debugPanelElem = null;
@@ -1789,9 +1899,7 @@ var GraphPaper = (function (exports) {
         let pendingConnectorRedraw = false;
 
 
-        var findBestConnectorAnchorsToConnectEntitiesTimeout = null;
-        var findBestConnectorAnchorsToConnectEntitiesSearchInputs = [];
-
+        const bestConnectorAnchorsForEntityConnectionsFinder = new BestToConnectEntitiesFinder();
 
         // Setup ConnectorRoutingWorker
         const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
@@ -2637,70 +2745,8 @@ var GraphPaper = (function (exports) {
          * @param {Entity} _objB
          */
         this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
-            const searchFunc = (_searchInputs) => {
-                const exTimeT1 = new Date();
-
-                const gridSize = self.getGridSize();
-
-                const entityDescriptors = [];
-                sheetEntities.forEach(function(_e) {
-                    entityDescriptors[_e.getId()] = _e.getDescriptor(gridSize);
-                });
-
-                for(let i=0; i<_searchInputs.length; i++) {
-                    const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find(
-                        [
-                            entityDescriptors[_searchInputs[i].entityA.getId()], 
-                            entityDescriptors[_searchInputs[i].entityB.getId()]
-                        ],
-                        entityDescriptors, 
-                        self.getGridSize()
-                    );
-
-                    const result = ClosestPairFinder.findClosestPairBetweenObjects(
-                        _searchInputs[i].entityA, 
-                        _searchInputs[i].entityB, 
-                        accessibleRoutingPointsResult.connectorAnchorToNumValidRoutingPoints
-                    );
-            
-                    _searchInputs[i].cb(result);
-                }
-
-                metrics.findBestConnectorAnchorsToConnectEntities.searchFuncExecutionTime = (new Date()) - exTimeT1;
-            };
-
-            const alreadyInSearchInputs = function(_a, _b, _cb) {
-                for(let i=0; i<findBestConnectorAnchorsToConnectEntitiesSearchInputs.length; i++) {
-                    //console.log(findBestConnectorAnchorsToConnectEntitiesSearchInputs[i].entityA === _a);
-                    if(findBestConnectorAnchorsToConnectEntitiesSearchInputs[i].entityA === _a && findBestConnectorAnchorsToConnectEntitiesSearchInputs[i].entityB === _b) {
-                        console.log('true');
-                        return true;
-                    }
-                }
-
-                return false;
-            };
-
-            if(!alreadyInSearchInputs(_entityA, _entityB)) {
-                findBestConnectorAnchorsToConnectEntitiesSearchInputs.push(
-                    {
-                        "entityA": _entityA,
-                        "entityB": _entityB,
-                        "cb": _onFound
-                    }
-                );
-            }
-
-            if(findBestConnectorAnchorsToConnectEntitiesTimeout) {
-                clearTimeout(findBestConnectorAnchorsToConnectEntitiesTimeout);
-                findBestConnectorAnchorsToConnectEntitiesTimeout = null;
-            }
-
-            findBestConnectorAnchorsToConnectEntitiesTimeout = setTimeout(function() {
-                searchFunc(findBestConnectorAnchorsToConnectEntitiesSearchInputs);
-                findBestConnectorAnchorsToConnectEntitiesTimeout = null;
-                findBestConnectorAnchorsToConnectEntitiesSearchInputs = [];
-            }, connectorRefreshBufferTime);
+            bestConnectorAnchorsForEntityConnectionsFinder.findBest(_entityA, _entityB, _onFound, sheetEntities, self.getGridSize());
+            metrics.findBestConnectorAnchorsToConnectEntities.searchFuncExecutionTime = bestConnectorAnchorsForEntityConnectionsFinder.getSearchFuncExecutionTime();
         };
 
         /**
