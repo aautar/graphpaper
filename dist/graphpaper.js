@@ -1067,6 +1067,7 @@ var GraphPaper = (function (exports) {
         this.currentGridSize = 11.0;
         this.findBufferTime = 6.94;
         this.metrics = {
+            batchSize: null,
             searchFuncExecutionTime: null
         };
     };
@@ -1077,6 +1078,14 @@ var GraphPaper = (function (exports) {
      */
     BestToConnectEntitiesFinder.prototype.getSearchFuncExecutionTime = function() {
         return this.metrics.searchFuncExecutionTime;
+    };
+
+    /**
+     * 
+     * @returns {Number}
+     */
+     BestToConnectEntitiesFinder.prototype.getSearchFuncBatchSize = function() {
+        return this.metrics.batchSize;
     };
 
     /**
@@ -1107,6 +1116,7 @@ var GraphPaper = (function (exports) {
     BestToConnectEntitiesFinder.prototype.search = function() {
         const exTimeT1 = new Date();
 
+        const inputBatchSize = this.searchInputs.length;
         const gridSize = this.currentGridSize;
 
         const entityDescriptors = [];
@@ -1133,6 +1143,7 @@ var GraphPaper = (function (exports) {
             this.searchInputs[i].cb(result);
         }
 
+        this.metrics.batchSize = inputBatchSize;
         this.metrics.searchFuncExecutionTime = (new Date()) - exTimeT1;
     };
 
@@ -1867,6 +1878,7 @@ var GraphPaper = (function (exports) {
                 executionTime: null
             },
             findBestConnectorAnchorsToConnectEntities: {
+                batchSize: null,
                 searchFuncExecutionTime: null
             },
             connectorsRefreshTime: null
@@ -2746,6 +2758,7 @@ var GraphPaper = (function (exports) {
          */
         this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
             bestConnectorAnchorsForEntityConnectionsFinder.findBest(_entityA, _entityB, _onFound, sheetEntities, self.getGridSize());
+            metrics.findBestConnectorAnchorsToConnectEntities.batchSize = bestConnectorAnchorsForEntityConnectionsFinder.getSearchFuncBatchSize();
             metrics.findBestConnectorAnchorsToConnectEntities.searchFuncExecutionTime = bestConnectorAnchorsForEntityConnectionsFinder.getSearchFuncExecutionTime();
         };
 

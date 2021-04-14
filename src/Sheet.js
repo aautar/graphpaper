@@ -98,6 +98,7 @@ function Sheet(_sheetDomElement, _window) {
             executionTime: null
         },
         findBestConnectorAnchorsToConnectEntities: {
+            batchSize: null,
             searchFuncExecutionTime: null
         },
         connectorsRefreshTime: null
@@ -977,6 +978,7 @@ function Sheet(_sheetDomElement, _window) {
      */
     this.findBestConnectorAnchorsToConnectEntities = function(_entityA, _entityB, _onFound) {
         bestConnectorAnchorsForEntityConnectionsFinder.findBest(_entityA, _entityB, _onFound, sheetEntities, self.getGridSize());
+        metrics.findBestConnectorAnchorsToConnectEntities.batchSize = bestConnectorAnchorsForEntityConnectionsFinder.getSearchFuncBatchSize();
         metrics.findBestConnectorAnchorsToConnectEntities.searchFuncExecutionTime = bestConnectorAnchorsForEntityConnectionsFinder.getSearchFuncExecutionTime();
     };
 

@@ -8,6 +8,7 @@ const BestToConnectEntitiesFinder = function() {
     this.currentGridSize = 11.0;
     this.findBufferTime = 6.94;
     this.metrics = {
+        batchSize: null,
         searchFuncExecutionTime: null
     };
 };
@@ -18,6 +19,14 @@ const BestToConnectEntitiesFinder = function() {
  */
 BestToConnectEntitiesFinder.prototype.getSearchFuncExecutionTime = function() {
     return this.metrics.searchFuncExecutionTime;
+};
+
+/**
+ * 
+ * @returns {Number}
+ */
+ BestToConnectEntitiesFinder.prototype.getSearchFuncBatchSize = function() {
+    return this.metrics.batchSize;
 };
 
 /**
@@ -48,6 +57,7 @@ BestToConnectEntitiesFinder.prototype.clearSearchInputs = function() {
 BestToConnectEntitiesFinder.prototype.search = function() {
     const exTimeT1 = new Date();
 
+    const inputBatchSize = this.searchInputs.length;
     const gridSize = this.currentGridSize;
 
     const entityDescriptors = [];
@@ -74,6 +84,7 @@ BestToConnectEntitiesFinder.prototype.search = function() {
         this.searchInputs[i].cb(result);
     }
 
+    this.metrics.batchSize = inputBatchSize;
     this.metrics.searchFuncExecutionTime = (new Date()) - exTimeT1;
 };
 
