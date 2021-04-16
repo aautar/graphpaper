@@ -1124,13 +1124,16 @@ var GraphPaper = (function (exports) {
             entityDescriptors[_e.getId()] = _e.getDescriptor(gridSize);
         });
 
+        // maybe update AccessibleRoutingPointsFinder.find to handle an object?
+        const entityDescriptorsArr = Object.values(entityDescriptors);
+
         for(let i=0; i<this.searchInputs.length; i++) {
             const accessibleRoutingPointsResult = AccessibleRoutingPointsFinder.find(
                 [
                     entityDescriptors[this.searchInputs[i].entityA.getId()], 
                     entityDescriptors[this.searchInputs[i].entityB.getId()]
                 ],
-                entityDescriptors, 
+                entityDescriptorsArr, 
                 gridSize
             );
 
