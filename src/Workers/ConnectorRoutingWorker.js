@@ -29,16 +29,19 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
     const curvaturePx = _connectorDescriptor.curvature_px;
     const routingAlgorithm = _connectorDescriptor.routing_algorithm;
 
-    const anchorPointMinDist = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
+    // Note: we shouldn't assume the min. distance is the same for both start and end points, moving an entity may cause this value to change
+    // for one point and not the other, and lead to a null value for adjustedStart and/or adjustedEnd
+    const anchorPointMinDistS = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorStartCentroid);
+    const anchorPointMinDistE = _routingPointsAroundAnchorSet.findDistanceToPointClosestTo(anchorEndCentroid);
 
     // Find adjustedStart, adjustedEnd .. anchor points closest to the desired start point and end point
     // Note that when desired start or end are closed off within a boundary, values will be null
     const adjustedStart = _routingPointsAroundAnchorSet
-        .findPointsCloseTo(anchorStartCentroid, anchorPointMinDist) // get all points within radius
+        .findPointsCloseTo(anchorStartCentroid, anchorPointMinDistS) // get all points within radius
         .findPointClosestTo(anchorEndCentroid); // for all points within radius, get the once closest to the endpoint
 
     const adjustedEnd = _routingPointsAroundAnchorSet
-        .findPointsCloseTo(anchorEndCentroid, anchorPointMinDist)
+        .findPointsCloseTo(anchorEndCentroid, anchorPointMinDistE)
         .findPointClosestTo(anchorStartCentroid);
 
     let routingPoints = new PointSet();
