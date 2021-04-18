@@ -14,7 +14,7 @@ sheet.on(GraphPaper.SheetEvent.CLICK, (eventData) => {
 
 ## Remove event handler
 
-Use the `Canvas.off()` method to remove an event handler
+Use the `Sheet.off()` method to remove an event handler
 
 ```javascript
 sheet.off(GraphPaper.SheetEvent.CLICK, registeredCallbackFunction);
@@ -28,19 +28,19 @@ Emitted when the user clicks or taps an empty area of the sheet
 ### `SheetEvent.DBLCLICK`
 Emitted when the user double-clicks or double-taps an empty area of the sheet
 
-### `CanvasEvent.CONNECTOR_UPDATED`
+### `SheetEvent.CONNECTOR_UPDATED`
 Emitted when a connector connecting entities has been updated in some way
 
-### `CanvasEvent.OBJECT_ADDED`
+### `SheetEvent.OBJECT_ADDED`
 Emitted when an entity has been added to the sheet
 
-### `CanvasEvent.OBJECT_REMOVED`
+### `SheetEvent.OBJECT_REMOVED`
 Emitted when an entity has been removed from the sheet
 
-### `CanvasEvent.OBJECT_RESIZED`
+### `SheetEvent.OBJECT_RESIZED`
 Emitted when an entity has been resized
 
-### `CanvasEvent.MULTIPLE_OBJECTS_SELECTED`
+### `SheetEvent.MULTIPLE_OBJECTS_SELECTED`
 Emitted when a selection box, *possibly* containing multiple entities, has been created
 
 
