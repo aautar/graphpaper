@@ -2,11 +2,11 @@
 
 [![CircleCI](https://circleci.com/gh/aautar/graphpaper.svg?style=svg)](https://circleci.com/gh/aautar/graphpaper)
 
-GraphPaper is a library for creating 2D interactive workspaces in web application. It isn't an out-of-the-box solution, a lot of implementation details are pushed to consumers. Typically, GraphPaper serves as a foundation for handling user interactions and transformation of objects, but markup and styling of those objects are left to the caller whenever possible.
+GraphPaper is a library for creating 2D interactive workspaces in web application. It isn't an out-of-the-box solution, a lot of implementation details are pushed to consumers. GraphPaper serves as a foundation for handling user interactions and transformation of objects, but markup and styling of those objects are left to the caller whenever possible.
 
 GraphPaper was an offshoot of [ScratchGraph](https://scratchgraph.com), and is one of its core dependencies.
 
-GraphPaper is still very much a work-in-progress. Major, breaking, changes to the public API are not unsusual. However, releases are semantically versioned, so major releases are tagged appropriately and should not cause issues if consumed appropiately.
+GraphPaper is very much a work-in-progress, expect major, breaking, changes to the public API. That said, releases are semantically versioned, with major releases are tagged appropriately, so things should not unexpectedly break if consumed appropiately.
 
 ## Documentation
 
@@ -17,8 +17,9 @@ GraphPaper is still very much a work-in-progress. Major, breaking, changes to th
 - [Sheet Events](docs/sheet-events.md)
 - [Entity methods](docs/entity-methods.md)
 - [Entity events](docs/entity-events.md)
-- Connectors (TDB)
 - [Multi-Entity Selection & Transformation](docs/multi-selection-transformation.md)
+- Connectors (TDB)
+- Clusters (TDB)
 
 
 ## Quick Start: Sheets & Entities
@@ -67,17 +68,16 @@ Now we can create the `GraphPaper.Sheet` object:
 
 ```javascript
 const sheet = new GraphPaper.Sheet(
-    document.getElementById('sheet'),                   // DOM element of the Sheet
-    window                                              // parent window 
+    document.getElementById('sheet'),   // DOM element of the Sheet
+    window                              // parent window 
 );
 ```
 
-The sheet will be created with the default, 12x12, dotted grid (note that this is one instance where GraphPaper does take control of some styling here, as the grid requires dynamic generation of an SVG image).
+The sheet will be created with the default, 12x12, dotted grid (note that this is one instance where GraphPaper does take control of some styling, as the grid requires dynamic generation of an SVG image).
 
 The sheet will be created and rendered. Now we can add entities to the sheet.
 
 ### Create an entity
-
 Entities are things which live on the sheet. GraphPaper can handle interactions with entities, taking responsibility for transformations, computing and rendering connectors between entities, selecting and transforming a set of entities, etc.
 
 Let's create a simple entity that we can translate on the sheet. We'll update the page to add a `<div>` for the entity, another `<div>` that'll serve as a handle (the thing you click on and drag to move the entity) for translation, and some styles for both.
