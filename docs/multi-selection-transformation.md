@@ -3,13 +3,13 @@
 Initialize multi-entity selection on a sheet:
 
 ```javascript
-canvas.initMultiEntitySelectionHandler()
+sheet.initMultiEntitySelectionHandler()
 ```
 
-Clicking and dragging (or touching and dragging) on an empty area of the canvas will now create a selection rectangle, once the user is done (releases mouse button or end touch interaction), the canvas will emit a `CanvasEvent.MULTIPLE_OBJECTS_SELECTED` event.
+Clicking and dragging (or touching and dragging) on an empty area of the canvas will now create a selection rectangle, once the user is done (releases mouse button or end touch interaction), the canvas will emit a `SheetEvent.MULTIPLE_ENTITIES_SELECTED` event.
 
 ```javascript
-canvas.on(GraphPaper.SheetEvent.MULTIPLE_OBJECTS_SELECTED, function(e) {
+sheet.on(GraphPaper.SheetEvent.MULTIPLE_ENTITIES_SELECTED, function(e) {
     console.log(e);
 });
 ```
