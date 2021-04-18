@@ -16,6 +16,7 @@ GraphPaper is still very much a work-in-progress. Major, breaking, changes to th
 - [Modifying a sheet's grid](docs/sheet-modify-grid.md)
 - [Sheet Events](docs/sheet-events.md)
 - [Entity methods](docs/entity-methods.md)
+- [Entity events](docs/entity-events.md)
 - Connectors (TDB)
 - [Multi-Entity Selection & Transformation](docs/multi-selection-transformation.md)
 
