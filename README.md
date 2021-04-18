@@ -23,6 +23,8 @@ GraphPaper is still very much a work-in-progress. Major, breaking, changes to th
 
 ## Quick Start: Sheets & Entities
 
+Sheets are workspaces. Entities are things that live and can be manipulated within Sheets.
+
 ![graphpaper-connector](https://user-images.githubusercontent.com/12861733/33002147-358957a8-cd80-11e7-89ae-1b211c0eb2db.png)
 
 
