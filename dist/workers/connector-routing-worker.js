@@ -993,7 +993,7 @@
                 // b. scale to give influence (scale by currentToVisibleLength)
                 //    .. using currentToVisibleLength as scaling factor is influence towards longer paths in good directions vs shorter paths in bad directions
                 const vecVisibleToEndpt = (new Vec2(visiblePt.getX() - currentPoint.getX(), visiblePt.getY() - currentPoint.getY())).normalize();
-                const tn = vecToTargetIdeal.dot(vecVisibleToEndpt) * currentToVisibleLength;
+                let tn = vecToTargetIdeal.dot(vecVisibleToEndpt) * currentToVisibleLength;
 
                 if(_endPoint.getX() > currentPoint.getX() && visiblePt.getX() > _endPoint.getX()) {
                     tn = 0;
