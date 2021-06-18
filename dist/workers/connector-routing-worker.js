@@ -995,6 +995,22 @@
                 const vecVisibleToEndpt = (new Vec2(visiblePt.getX() - currentPoint.getX(), visiblePt.getY() - currentPoint.getY())).normalize();
                 const tn = vecToTargetIdeal.dot(vecVisibleToEndpt) * currentToVisibleLength;
 
+                if(_endPoint.getX() > currentPoint.getX() && visiblePt.getX() > _endPoint.getX()) {
+                    tn = 0;
+                }
+
+                if(_endPoint.getX() < currentPoint.getX() && visiblePt.getX() < _endPoint.getX()) {
+                    tn = 0;
+                }
+
+                if(_endPoint.getY() > currentPoint.getY() && visiblePt.getY() > _endPoint.getY()) {
+                    tn = 0;
+                }
+
+                if(_endPoint.getY() < currentPoint.getY() && visiblePt.getY() < _endPoint.getY()) {
+                    tn = 0;
+                }
+
                 // if we can go to the endpoint, let's do that
                 /*if(visiblePt.isEqual(_endPoint)) {
                     gn = 0;
