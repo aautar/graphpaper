@@ -48,9 +48,8 @@ const computeConnectorPath = function(_connectorDescriptor, _routingPointsAround
 
     if(routingAlgorithm == ConnectorRoutingAlgorithm.STRAIGHT_LINE_BETWEEN_ANCHORS) {
         routingPoints = new PointSet([adjustedStart, adjustedEnd]);
-    } else if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR || routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) {
-        const optimizeRoute = (routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION) ? true: false;
-        routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, optimizeRoute);
+    } else if(routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR || routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION || routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION) {
+        routingPoints = _pointVisibilityMap.computeRoute(adjustedStart, adjustedEnd, routingAlgorithm);
     } else {
         throw "Invalid routing algorithm";
     }

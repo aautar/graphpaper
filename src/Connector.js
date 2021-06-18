@@ -34,7 +34,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     }
 
     if(typeof _routingAlgorithm === 'undefined') {
-        _routingAlgorithm = ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION;
+        _routingAlgorithm = ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION;
     }
 
     /**

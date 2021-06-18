@@ -7,6 +7,7 @@ import {LineSet} from './LineSet';
 import {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
 import {Rectangle} from './Rectangle';
 import {Vec2} from './Vec2';
+import { ConnectorRoutingAlgorithm } from './ConnectorRoutingAlgorithm';
 
 const VisiblePoints = {
     isValid: false,
@@ -136,9 +137,10 @@ function PointVisibilityMap() {
      * @param {Point} _startPoint 
      * @param {Point} _endPoint 
      * @param {Vec2} _vecStartToEnd
+     * @param {Number|ConnectorRoutingAlgorithm} _routingAlgorithm
      * @returns {Object|null}
      */
-    const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointInfo, _startPoint, _endPoint, _vecStartToEnd) {
+    const routeToEndpoint = function(_currentRouteLength, _pointsInRoute, _currentPointInfo, _startPoint, _endPoint, _vecStartToEnd, _routingAlgorithm) {
         const currentPoint = _currentPointInfo.point;
         const visiblePoints = getVisiblePointsRelativeTo(_currentPointInfo);
         let curMinCost = Number.MAX_SAFE_INTEGER;
@@ -167,27 +169,30 @@ function PointVisibilityMap() {
             // h(n) = length/cost of _vp to _endPoint
             let hn = (new Line(visiblePt, _endPoint)).getLength();
 
-            // t(n) = 
-            // a. get the relationship between the 2 vectors (dot product)
-            // b. scale to give influence (scale by currentToVisibleLength)
-            //    .. using currentToVisibleLength as scaling factor is influence towards longer paths in good directions vs shorter paths in bad directions
-            const vecVisibleToEndpt = (new Vec2(visiblePt.getX() - currentPoint.getX(), visiblePt.getY() - currentPoint.getY())).normalize();
-            let tn = vecToTargetIdeal.dot(vecVisibleToEndpt) * currentToVisibleLength;
+            let tn = 0;
+            if(_routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION) {
+                // t(n) = 
+                // a. get the relationship between the 2 vectors (dot product)
+                // b. scale to give influence (scale by currentToVisibleLength)
+                //    .. using currentToVisibleLength as scaling factor is influence towards longer paths in good directions vs shorter paths in bad directions
+                const vecVisibleToEndpt = (new Vec2(visiblePt.getX() - currentPoint.getX(), visiblePt.getY() - currentPoint.getY())).normalize();
+                tn = vecToTargetIdeal.dot(vecVisibleToEndpt) * currentToVisibleLength;
 
-            if(_endPoint.getX() > currentPoint.getX() && visiblePt.getX() > _endPoint.getX()) {
-                tn = 0;
-            }
+                if(_endPoint.getX() > currentPoint.getX() && visiblePt.getX() > _endPoint.getX()) {
+                    tn = 0;
+                }
 
-            if(_endPoint.getX() < currentPoint.getX() && visiblePt.getX() < _endPoint.getX()) {
-                tn = 0;
-            }
+                if(_endPoint.getX() < currentPoint.getX() && visiblePt.getX() < _endPoint.getX()) {
+                    tn = 0;
+                }
 
-            if(_endPoint.getY() > currentPoint.getY() && visiblePt.getY() > _endPoint.getY()) {
-                tn = 0;
-            }
+                if(_endPoint.getY() > currentPoint.getY() && visiblePt.getY() > _endPoint.getY()) {
+                    tn = 0;
+                }
 
-            if(_endPoint.getY() < currentPoint.getY() && visiblePt.getY() < _endPoint.getY()) {
-                tn = 0;
+                if(_endPoint.getY() < currentPoint.getY() && visiblePt.getY() < _endPoint.getY()) {
+                    tn = 0;
+                }
             }
 
             // if we can go to the endpoint, let's do that
@@ -342,6 +347,19 @@ function PointVisibilityMap() {
 
     /**
      * 
+     * @param {Number|ConnectorRoutingAlgorithm} _routingAlgorithm
+     * @returns {Boolean}
+     */
+    const doesRoutingAlgorithmRequireOptimization = function(_routingAlgorithm) {
+        if(_routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION || _routingAlgorithm === ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION) {
+            return true;
+        }
+
+        return false;
+    };
+
+    /**
+     * 
      * @param {Object[]} _entityDescriptors 
      * @param {Number} _gridSize 
      * @param {Number} _boundingExtentRoutingPointScaleFactor 
@@ -463,11 +481,11 @@ function PointVisibilityMap() {
     /**
      * @param {Point} _startPoint
      * @param {Point} _endPoint
-     * @param {Boolean} _optimizeRoute
+     * @param {Number|ConnectorRoutingAlgorithm} _routingAlgorithm
      * 
      * @return {PointSet}
      */
-    this.computeRoute = function(_startPoint, _endPoint, _optimizeRoute) {
+    this.computeRoute = function(_startPoint, _endPoint, _routingAlgorithm) {
         // if no valid startpoint or endpoint, we can't route
         if(_startPoint === null || _endPoint === null) {
             return new PointSet();
@@ -485,7 +503,7 @@ function PointVisibilityMap() {
         let currentRouteLen = 0;
         let currentPointInfo = firstPointInfo;
         while(true) {
-            const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointInfo, _startPoint, _endPoint, vecStartToEnd);
+            const routeSegment = routeToEndpoint(currentRouteLen, pointsInRoute, currentPointInfo, _startPoint, _endPoint, vecStartToEnd, _routingAlgorithm);
             if(routeSegment === null) {
                 // Is there unobstructed line to endpoint? 
                 // If not, failed to find route
@@ -512,7 +530,7 @@ function PointVisibilityMap() {
             }
         }
 
-        if(_optimizeRoute) {
+        if(doesRoutingAlgorithmRequireOptimization(_routingAlgorithm)) {
             PointVisibilityMapRouteOptimizer.optimize(pointsInRoute, arePointsVisibleToEachOther);
         }
 
