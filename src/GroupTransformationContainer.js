@@ -1,5 +1,6 @@
 import {Entity} from './Entity';
 import {GroupTransformationContainerEvent} from './GroupTransformationContainerEvent';
+import {Rectangle} from './Rectangle';
 
 /**
  * @param {Sheet} _sheet
@@ -11,6 +12,10 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
     const self = this;
     const eventNameToHandlerFunc = new Map();
 
+    /**
+     * 
+     * @returns {Rectangle}
+     */
     const calculateBoundingRect = function() {
         var r = _sheet.calcBoundingRectForEntities(_entities);
         if(_sizeAdjustmentPx) {
@@ -75,6 +80,14 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
      */
     this.getEntities = function() {
         return _entities;
+    };
+
+    /**
+     * 
+     * @returns {Rectangle}
+     */
+    this.getBoundingRect = function() {
+        return boundingRect;
     };
 
     /**

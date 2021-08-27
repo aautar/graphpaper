@@ -3856,6 +3856,10 @@ var GraphPaper = (function (exports) {
         const self = this;
         const eventNameToHandlerFunc = new Map();
 
+        /**
+         * 
+         * @returns {Rectangle}
+         */
         const calculateBoundingRect = function() {
             var r = _sheet.calcBoundingRectForEntities(_entities);
             if(_sizeAdjustmentPx) {
@@ -3920,6 +3924,14 @@ var GraphPaper = (function (exports) {
          */
         this.getEntities = function() {
             return _entities;
+        };
+
+        /**
+         * 
+         * @returns {Rectangle}
+         */
+        this.getBoundingRect = function() {
+            return boundingRect;
         };
 
         /**
