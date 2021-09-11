@@ -2370,6 +2370,16 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * 
+         * @param {Number} _newWidth 
+         * @param {Number} _newHeight 
+         */
+        this.resize = function(_newWidth, _newHeight) {
+            _sheetDomElement.style.width = `${_newWidth}px`;
+            _sheetDomElement.style.height = `${_newHeight}px`;
+        };
+
+        /**
          * @param {Entity[]} _objs 
          * @returns {Rectangle}
          */
