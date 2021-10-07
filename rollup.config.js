@@ -47,12 +47,13 @@ export default [
       babel(babelConfig),
       stringifyWorker(
         {
+          "exportVarName": "ConnectorRoutingWorkerJsString",
           "srcBundleName": "connector-routing-worker.min.js",
           "dest": "src/Workers/ConnectorRoutingWorker.string.js"
         }
       )
-    ],        
-  },  
+    ],
+  },
   {
     input: 'src/GraphPaper.js',
     output: {
