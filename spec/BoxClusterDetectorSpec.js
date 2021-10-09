@@ -24,19 +24,19 @@ describe("BoxClusterDetector::areEntitiesClose", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );
+        ).getDescriptor();
 
         const e2 = new Entity(
-        "obj-456",
-        112, 
-        222, 
-        10, 
-        20, 
-        {}, 
-        createMockDomElem(), 
-        [createMockDomElem()], 
-        [createMockDomElem()]
-        );        
+            "obj-456",
+            112, 
+            222, 
+            10, 
+            20, 
+            {}, 
+            createMockDomElem(), 
+            [createMockDomElem()], 
+            [createMockDomElem()]
+        ).getDescriptor();        
 
         const detector = new BoxClusterDetector(12.0);
         const isClose = detector.areEntitiesClose(e1, e2);
@@ -54,7 +54,7 @@ describe("BoxClusterDetector::areEntitiesClose", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );
+        ).getDescriptor();
 
         const e2 = new Entity(
             "obj-456",
@@ -66,7 +66,7 @@ describe("BoxClusterDetector::areEntitiesClose", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );        
+        ).getDescriptor();        
 
         const detector = new BoxClusterDetector(12.0);
         const isClose = detector.areEntitiesClose(e1, e2);
@@ -87,7 +87,7 @@ describe("BoxClusterDetector::getAllEntitiesCloseTo", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );
+        ).getDescriptor();
 
         const detector = new BoxClusterDetector(12.0);
         const nearbyEntities = detector.getAllEntitiesCloseTo(entity, []);
@@ -105,7 +105,7 @@ describe("BoxClusterDetector::getAllEntitiesCloseTo", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );
+        ).getDescriptor();
 
         const e2 = new Entity(
             "obj-456",
@@ -117,7 +117,7 @@ describe("BoxClusterDetector::getAllEntitiesCloseTo", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );        
+        ).getDescriptor();        
 
         const detector = new BoxClusterDetector(12.0);
         const nearbyEntities = detector.getAllEntitiesCloseTo(e1, [e1, e2]);
@@ -138,7 +138,7 @@ describe("BoxClusterDetector::getClusterEntitiesFromSeed", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );
+        ).getDescriptor();
 
         const e2 = new Entity(
             "obj-456",
@@ -150,7 +150,7 @@ describe("BoxClusterDetector::getClusterEntitiesFromSeed", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );        
+        ).getDescriptor();        
 
         const e3 = new Entity(
             "obj-789",
@@ -162,7 +162,7 @@ describe("BoxClusterDetector::getClusterEntitiesFromSeed", function() {
             createMockDomElem(), 
             [createMockDomElem()], 
             [createMockDomElem()]
-        );        
+        ).getDescriptor();        
 
         const resultSet = [e1];
 
@@ -181,7 +181,7 @@ describe("BoxClusterDetector::computeClusters", function() {
     });  
 
     it("return empty array of clusters for single entity", function() {  
-        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
 
         const detector = new BoxClusterDetector(12.0);
         const clusters = detector.computeClusters([e1], []);
@@ -189,8 +189,8 @@ describe("BoxClusterDetector::computeClusters", function() {
     });
   
     it("return single Cluster for 2 entities close to each other", function() {  
-        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
-        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
 
         const idGenerator = function() {
             return "new-cluster-id";
@@ -206,9 +206,9 @@ describe("BoxClusterDetector::computeClusters", function() {
     });
 
     it("adds entity to exiting Cluster and returns that Cluster", function() {  
-        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
-        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
-        const newEntity = new Entity("obj-789", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const newEntity = new Entity("obj-789", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
 
         const existingCluster = new Cluster("existing-cluster-id");
         existingCluster.addEntity(e1);
@@ -229,9 +229,9 @@ describe("BoxClusterDetector::computeClusters", function() {
     });  
 
     it("return single Cluster for 3 entities close to each other", function() {  
-        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
-        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
-        const e3 = new Entity("obj-789", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e3 = new Entity("obj-789", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
 
         const idGenerator = function() {
             return "new-cluster-id";
@@ -257,21 +257,25 @@ describe("BoxClusterDetector::computeClusters", function() {
         };
 
         const existingCluster = new Cluster("existing-cluster-id");
-        existingCluster.addEntity(e1);
-        existingCluster.addEntity(e2);    
-        existingCluster.addEntity(e3);    
+        existingCluster.addEntity(e1.getDescriptor());
+        existingCluster.addEntity(e2.getDescriptor());    
+        existingCluster.addEntity(e3.getDescriptor());    
 
         e2.translate(1000.0, 1000.0);
 
+        const e1Descriptor = e1.getDescriptor();
+        const e2Descriptor = e2.getDescriptor();
+        const e3Descriptor = e3.getDescriptor();
+
         const detector = new BoxClusterDetector(12.0);
-        const clusters = detector.computeClusters([e1,e2,e3], [existingCluster], idGenerator);
+        const clusters = detector.computeClusters([e1Descriptor, e2Descriptor, e3Descriptor], [existingCluster], idGenerator);
 
         expect(clusters.length).toEqual(1);
         expect(clusters[0].getId()).toEqual('existing-cluster-id');
-        expect(clusters[0].getEntities().indexOf(e1) >= 0).toEqual(true);
-        expect(clusters[0].getEntities().indexOf(e2) >= 0).toEqual(false);
-        expect(clusters[0].getEntities().indexOf(e3) >= 0).toEqual(true);
-    });      
+        expect(clusters[0].getEntities().indexOf(e1Descriptor) >= 0).toEqual(true);
+        expect(clusters[0].getEntities().indexOf(e2Descriptor) >= 0).toEqual(false);
+        expect(clusters[0].getEntities().indexOf(e3Descriptor) >= 0).toEqual(true);
+    });
 
     it("removes cluster when all objects have dispersed", function() {  
         const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
@@ -291,8 +295,12 @@ describe("BoxClusterDetector::computeClusters", function() {
         e2.translate(2000.0, 2000.0);
         e3.translate(3000.0, 3000.0);
 
+        const e1Descriptor = e1.getDescriptor();
+        const e2Descriptor = e2.getDescriptor();
+        const e3Descriptor = e3.getDescriptor();
+
         const detector = new BoxClusterDetector(12.0);
-        const clusters = detector.computeClusters([e1,e2,e3], [existingCluster], idGenerator);
+        const clusters = detector.computeClusters([e1Descriptor, e2Descriptor, e3Descriptor], [existingCluster], idGenerator);
 
         expect(clusters.length).toEqual(0);
     });

@@ -12,6 +12,7 @@ import {GroupTransformationContainer} from './GroupTransformationContainer';
 import {Connector} from './Connector';
 import {GRID_STYLE, Grid} from './Grid';
 import {GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
+import {ClusterDetectionWorkerJsString} from './Workers/ClusterDetectionWorker.string';
 import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
 
 /**
@@ -133,6 +134,9 @@ function Sheet(_sheetDomElement, _window) {
 
     const bestConnectorAnchorsForEntityConnectionsFinder = new BestToConnectEntitiesFinder();
 
+    // Setup ClusterDetectionWorker
+    const clusterDetectionWorkerUrl = URL.createObjectURL(new Blob([ ClusterDetectionWorkerJsString ]));
+
     // Setup ConnectorRoutingWorker
     const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
     
@@ -193,7 +197,7 @@ function Sheet(_sheetDomElement, _window) {
         metrics.connectorRoutingWorker.allPathsComputationTime = _msg.data.metrics.allPathsComputationTime;
 
         debugMetricsPanel.refresh(metrics);
-    };    
+    };
 
     /**
      * @param {Grid} _grid

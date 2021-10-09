@@ -1,75 +1,55 @@
+import {DescriptorCollection} from './DescriptorCollection';
+
 /**
  * 
- * @param {String} _id 
+ * @param {String} _clusterId
  */
-function Cluster(_id) {
-
-    const self = this;
-
-    /**
-     * @type {Entity[]}
-     */
-    const entities = [];
+function Cluster(_clusterId) {
+    const descriptorCollection = new DescriptorCollection(_clusterId);
 
     /**
      * @returns {String}
      */
     this.getId = function() {
-        return _id;
+        return descriptorCollection.getId();
     };
 
     /**
-     * @param {Entity} _obj
+     * @param {Object} _entity
      * @returns {Number|null}
      */
     this.getEntityIndex = function(_entity) {
-        return self.getEntityIndexById(_entity.getId());
+        return descriptorCollection.getDescriptorIndex(_entity);
     };
 
     /**
-     * @param {String} _objId
+     * @param {String} _entityId
      * @returns {Number|null}
      */
     this.getEntityIndexById = function(_entityId) {
-        for(let i=0; i<entities.length; i++) {
-            if(entities[i].getId() === _entityId) {
-                return i;
-            }
-        }
-
-        return null;
+        return descriptorCollection.getDescriptorIndexById(_entityId);
     };
 
     /**
-     * @param {Entity} _o
+     * @param {Object} _entity
      * @returns {Boolean}
      */
     this.addEntity = function(_entity) {
-        if(self.getEntityIndex(_entity) !== null) {
-            return false;
-        }
-
-        entities.push(_entity);
-        return true;
+        return descriptorCollection.addDescriptor(_entity);
     };
 
     /**
-     * @returns {Entity[]}
+     * @returns {Object[]}
      */
     this.getEntities = function() {
-        return entities;
+        return descriptorCollection.getDescriptors();
     };
 
     /**
      * @returns {String[]}
      */
     this.getEntityIds = function() {
-        const ids = [];
-        entities.forEach(function(_o) {
-            ids.push(_o.getId());
-        });
-
-        return ids;
+        return descriptorCollection.getIds();
     };    
 
     /**
@@ -77,17 +57,11 @@ function Cluster(_id) {
      * @returns {Boolean}
      */
     this.removeEntityById = function(_id) {
-        const idx = self.getEntityIndexById(_id);
-        if(idx === null) {
-            return false;
-        }
-
-        entities.splice(idx, 1);
-        return true;
+        return descriptorCollection.removeById(_id);
     };
 
     this.removeAllEntities = function() {
-        entities.length = 0;
+        return descriptorCollection.removeAll();
     };
 };
 

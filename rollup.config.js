@@ -55,6 +55,25 @@ export default [
     ],
   },
   {
+    input: 'src/Workers/ClusterDetectionWorker.js',
+    output: {
+      format: 'iife',
+      file: 'dist/workers/cluster-detection-worker.min.js',
+      name: 'ClusterDetectionWorker',
+      sourcemap: false,
+    },
+    plugins: [
+      babel(babelConfig),
+      stringifyWorker(
+        {
+          "exportVarName": "ClusterDetectionWorkerJsString",
+          "srcBundleName": "cluster-detection-worker.min.js",
+          "dest": "src/Workers/ClusterDetectionWorker.string.js"
+        }
+      )
+    ],
+  },
+  {
     input: 'src/GraphPaper.js',
     output: {
       format: 'iife',
