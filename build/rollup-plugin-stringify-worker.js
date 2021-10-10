@@ -7,7 +7,7 @@ const stringifyWorkerPlugin = function (options) {
 
             console.log(`Creating stringified worker...`);
             const workerCode = bundle[options.srcBundleName].code;
-            const workerStringWrap = `const ${options.exportVarName} = \`${workerCode}\`; export { ${options.exportVarName} }`;
+            const workerStringWrap = `const ${options.exportVarName} = String.raw\`${workerCode}\`; export { ${options.exportVarName} }`;
 
             fs.writeFile(options.dest, workerStringWrap, function(err) {
                 if(err) {
