@@ -1,4 +1,4 @@
-const ConnectorRoutingWorkerJsString = `(function () {
+const ConnectorRoutingWorkerJsString = String.raw`(function () {
   'use strict';
 
   function _slicedToArray(arr, i) {
