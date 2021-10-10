@@ -5,13 +5,13 @@ import {DescriptorCollection} from './DescriptorCollection';
  * @param {String} _clusterId
  */
 function Cluster(_clusterId) {
-    const descriptorCollection = new DescriptorCollection(_clusterId);
+    const entityDescriptorCollection = new DescriptorCollection(_clusterId);
 
     /**
      * @returns {String}
      */
     this.getId = function() {
-        return descriptorCollection.getId();
+        return _clusterId;
     };
 
     /**
@@ -19,7 +19,7 @@ function Cluster(_clusterId) {
      * @returns {Number|null}
      */
     this.getEntityIndex = function(_entity) {
-        return descriptorCollection.getDescriptorIndex(_entity);
+        return entityDescriptorCollection.getDescriptorIndex(_entity);
     };
 
     /**
@@ -27,7 +27,7 @@ function Cluster(_clusterId) {
      * @returns {Number|null}
      */
     this.getEntityIndexById = function(_entityId) {
-        return descriptorCollection.getDescriptorIndexById(_entityId);
+        return entityDescriptorCollection.getDescriptorIndexById(_entityId);
     };
 
     /**
@@ -35,21 +35,21 @@ function Cluster(_clusterId) {
      * @returns {Boolean}
      */
     this.addEntity = function(_entity) {
-        return descriptorCollection.addDescriptor(_entity);
+        return entityDescriptorCollection.addDescriptor(_entity);
     };
 
     /**
      * @returns {Object[]}
      */
     this.getEntities = function() {
-        return descriptorCollection.getDescriptors();
+        return entityDescriptorCollection.getDescriptors();
     };
 
     /**
      * @returns {String[]}
      */
     this.getEntityIds = function() {
-        return descriptorCollection.getIds();
+        return entityDescriptorCollection.getIds();
     };    
 
     /**
@@ -57,11 +57,22 @@ function Cluster(_clusterId) {
      * @returns {Boolean}
      */
     this.removeEntityById = function(_id) {
-        return descriptorCollection.removeById(_id);
+        return entityDescriptorCollection.removeById(_id);
     };
 
     this.removeAllEntities = function() {
-        return descriptorCollection.removeAll();
+        return entityDescriptorCollection.removeAll();
+    };
+
+    /**
+     * 
+     * @returns {Object}
+     */
+    this.toJSON = function() {
+        return {
+            "id": _clusterId,
+            "entities": entityDescriptorCollection.getDescriptors()
+        };
     };
 };
 
