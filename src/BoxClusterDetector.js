@@ -179,6 +179,9 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Function} _getNewIdFunc
      */
     this.computeClusters = function(_entityDescriptors, _knownClusters, _getNewIdFunc) {
+        const newClusters = [];
+        const updatedClusters = [];
+
         const clusters = _knownClusters.map(function(_c) {
             return _c;
         });
@@ -197,12 +200,14 @@ function BoxClusterDetector(_boxExtentOffset) {
                 const intersectingClusterToNumEntitiesIntersecting = self.findIntersectingClustersForEntities(entitiesForCluster, clusters);
 
                 if(intersectingClusterToNumEntitiesIntersecting.size === 0) {
-                    const newCluster = new Cluster(_getNewIdFunc());
+                    const clusterId = _getNewIdFunc();
+                    const newCluster = new Cluster(clusterId);
                     entitiesForCluster.forEach(function(_clusterEntity) {
                         newCluster.addEntity(_clusterEntity);
                     });    
 
                     clusters.push(newCluster);
+                    newClusters.push(newCluster);
                 } else {
                     const clusterToModify = getClusterWithMostEntitiesFromClusterMap(intersectingClusterToNumEntitiesIntersecting);
 
@@ -215,6 +220,7 @@ function BoxClusterDetector(_boxExtentOffset) {
                         clusterToModify.addEntity(_clusterEntity);
                     });
 
+                    updatedClusters.push(clusterToModify);
                 }
 
                 removeEntitiesFromArray(entitiesForCluster, entitiesUnderConsideration);
@@ -224,8 +230,19 @@ function BoxClusterDetector(_boxExtentOffset) {
             }
         }
 
+        // Get IDs of empty and singleton clusters
+        const emptyAndSingletonClusters = 
+            clusters
+                .filter(function(_c) {
+                    if(_c.getEntities().length < 2) {
+                        return true;
+                    }
+
+                    return false;
+                });
+
         // Filter out clusters w/o any entities
-        const nonEmptyClusters = clusters.filter(function(_c) {
+        const nonEmptyNonSingletonClusters = clusters.filter(function(_c) {
             if(_c.getEntities().length >= 2) {
                 return true;
             }
@@ -233,7 +250,13 @@ function BoxClusterDetector(_boxExtentOffset) {
             return false;
         });
 
-        return nonEmptyClusters;
+        return {
+            "allClusters": clusters,
+            "nonEmptyNonSingletonClusters": nonEmptyNonSingletonClusters,
+            "newClusters": newClusters,
+            "updatedClusters": updatedClusters,
+            "emptyAndSingletonClusters": emptyAndSingletonClusters
+        };
     };
 };
 
