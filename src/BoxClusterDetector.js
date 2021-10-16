@@ -1,5 +1,4 @@
 import {Rectangle} from './Rectangle';
-import {Entity} from './Entity';
 import {Cluster} from './Cluster';
 
 function BoxClusterDetector(_boxExtentOffset) {
@@ -7,13 +6,13 @@ function BoxClusterDetector(_boxExtentOffset) {
 
     /**
      * 
-     * @param {Entity} _entity 
-     * @param {Entity[]} _sheetEntitiesArray 
+     * @param {Object} _entityDescriptor 
+     * @param {Object[]} _sheetEntityDescriptorsArray 
      * @returns {Number}
      */
-    const getEntityIndexFromArray = function(_entity, _sheetEntitiesArray) {
-        for(let i=0; i<_sheetEntitiesArray.length; i++) {
-            if(_sheetEntitiesArray[i].getId() === _entity.getId()) {
+    const getEntityIndexFromArray = function(_entityDescriptor, _sheetEntityDescriptorsArray) {
+        for(let i=0; i<_sheetEntityDescriptorsArray.length; i++) {
+            if(_sheetEntityDescriptorsArray[i].id === _entityDescriptor.id) {
                 return i;
             }
         }
@@ -23,19 +22,19 @@ function BoxClusterDetector(_boxExtentOffset) {
 
     /**
      * 
-     * @param {Entity[]} _entities 
-     * @param {Entity[]} _sheetEntitiesArray 
-     * @returns {Entity[]}
+     * @param {Object} _entityDescriptor 
+     * @param {Object[]} _sheetEntityDescriptorsArray
+     * @returns {Object[]}
      */
-    const removeEntitiesFromArray = function(_entities, _sheetEntitiesArray) {
-        for(let i=0; i<_entities.length; i++) {
-            const idx = getEntityIndexFromArray(_entities[i], _sheetEntitiesArray);
+    const removeEntitiesFromArray = function(_entityDescriptor, _sheetEntityDescriptorsArray) {
+        for(let i=0; i<_entityDescriptor.length; i++) {
+            const idx = getEntityIndexFromArray(_entityDescriptor[i], _sheetEntityDescriptorsArray);
             if(idx !== -1) {
-                _sheetEntitiesArray.splice(idx, 1);
+                _sheetEntityDescriptorsArray.splice(idx, 1);
             }
         }
 
-        return _sheetEntitiesArray;
+        return _sheetEntityDescriptorsArray;
     };
 
     /**
@@ -71,41 +70,41 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
-     * @param {Entity} _objA
-     * @param {Entity} _objB
+     * @param {Object} _entityA
+     * @param {Object} _entityB
      * @returns {Boolean}
      */
     this.areEntitiesClose = function(_entityA, _entityB) {
         const nA = new Rectangle(
-            _entityA.getX() - _boxExtentOffset, 
-            _entityA.getY() - _boxExtentOffset, 
-            _entityA.getX() + _entityA.getWidth() + _boxExtentOffset, 
-            _entityA.getY() + _entityA.getHeight() + _boxExtentOffset
+            _entityA.x - _boxExtentOffset, 
+            _entityA.y - _boxExtentOffset, 
+            _entityA.x + _entityA.width + _boxExtentOffset, 
+            _entityA.y + _entityA.height + _boxExtentOffset
         );
 
         const nB = new Rectangle(
-            _entityB.getX() - _boxExtentOffset, 
-            _entityB.getY() - _boxExtentOffset, 
-            _entityB.getX() + _entityB.getWidth() + _boxExtentOffset, 
-            _entityB.getY() + _entityB.getHeight() + _boxExtentOffset
+            _entityB.x - _boxExtentOffset, 
+            _entityB.y - _boxExtentOffset, 
+            _entityB.x + _entityB.width + _boxExtentOffset, 
+            _entityB.y + _entityB.height + _boxExtentOffset
         );
         
         return nA.checkIntersect(nB);
     };
    
     /**
-     * @param {Entity} _obj
-     * @param {Entity[]} _entitiesUnderConsideration
-     * @returns {Entity[]}
+     * @param {Object} _entityDescriptor
+     * @param {Object[]} _entitiesUnderConsideration
+     * @returns {Object[]}
      */
-    this.getAllEntitiesCloseTo = function(_entity, _entitiesUnderConsideration) {
+    this.getAllEntitiesCloseTo = function(_entityDescriptor, _entitiesUnderConsideration) {
         const resultSet = [];
         for(let i=0; i<_entitiesUnderConsideration.length; i++) {
-            if(_entity.getId() === _entitiesUnderConsideration[i].getId()) {
+            if(_entityDescriptor.id === _entitiesUnderConsideration[i].id) {
                 continue;
             }
 
-            if(self.areEntitiesClose(_entity, _entitiesUnderConsideration[i])) {
+            if(self.areEntitiesClose(_entityDescriptor, _entitiesUnderConsideration[i])) {
                 resultSet.push(_entitiesUnderConsideration[i]);
             }
         }
@@ -114,9 +113,9 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
-     * @param {Entity} _seedObj
-     * @param {Entity[]} _entitiesUnderConsideration
-     * @param {Entity[]} _resultSet
+     * @param {Object} _seedEntity
+     * @param {Object[]} _entitiesUnderConsideration
+     * @param {Object[]} _resultSet
      */
     this.getClusterEntitiesFromSeed = function(_seedEntity, _entitiesUnderConsideration, _resultSet) {
         const closeByEntities = self.getAllEntitiesCloseTo(_seedEntity, _entitiesUnderConsideration);
@@ -125,19 +124,19 @@ function BoxClusterDetector(_boxExtentOffset) {
         } else {
             removeEntitiesFromArray(closeByEntities.concat([_seedEntity]), _entitiesUnderConsideration);
 
-            closeByEntities.forEach(function(_o) {
-                _resultSet.push(_o);
-                self.getClusterEntitiesFromSeed(_o, _entitiesUnderConsideration, _resultSet);
+            closeByEntities.forEach(function(_entity) {
+                _resultSet.push(_entity);
+                self.getClusterEntitiesFromSeed(_entity, _entitiesUnderConsideration, _resultSet);
             });
         }
     };
 
     /**
-     * @param {Entity[]} _entities
+     * @param {Object[]} _entityDescriptors
      * @param {Cluster[]} _clusters
      * @returns {Map<Cluster,Number>}
      */
-    this.findIntersectingClustersForEntities = function(_entities, _clusters) {
+    this.findIntersectingClustersForEntities = function(_entityDescriptors, _clusters) {
         // Map of Cluster that is intersecting to number of entities in _objs that is intersecting the given Cluster
         const intersectingClusterToNumEntitiesIntersecting = new Map();
 
@@ -145,9 +144,9 @@ function BoxClusterDetector(_boxExtentOffset) {
             const clusterEntities = _cluster.getEntities();
 
             for(let i=0; i<clusterEntities.length; i++) {
-                for(let j=0; j<_entities.length; j++) {
+                for(let j=0; j<_entityDescriptors.length; j++) {
 
-                    if(clusterEntities[i].getId() !== _entities[j].getId()) {
+                    if(clusterEntities[i].id !== _entityDescriptors[j].id) {
                         continue;
                     }
 
@@ -165,46 +164,51 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
-     * @param {Entity} _entity
+     * @param {Object} _entityDescriptor
      * @param {Cluster[]} _clusters
      */
-    this.removeEntityFromClusters = function(_entity, _clusters) {
+    this.removeEntityFromClusters = function(_entityDescriptor, _clusters) {
         _clusters.forEach(function(_c) {
-            _c.removeEntityById(_entity.getId());
+            _c.removeEntityById(_entityDescriptor.id);
         });
     };
 
     /**
-     * @param {Entity[]} _entities
+     * @param {Object[]} _entityDescriptors
      * @param {Cluster[]} _knownClusters
      * @param {Function} _getNewIdFunc
      */
-    this.computeClusters = function(_entities, _knownClusters, _getNewIdFunc) {
+    this.computeClusters = function(_entityDescriptors, _knownClusters, _getNewIdFunc) {
+        const newClusterIds = new Set();
+        const updatedClusterIds = new Set();
+        const deletedClusterIds = new Set();
+
         const clusters = _knownClusters.map(function(_c) {
             return _c;
         });
 
-        const entitiesUnderConsideration = _entities.map(function(_o) {
-            return _o;
+        const entitiesUnderConsideration = _entityDescriptors.map(function(_e) {
+            return _e;
         });
 
         while(entitiesUnderConsideration.length > 0) {
-            const entity = entitiesUnderConsideration.pop();
+            const entityDescriptor = entitiesUnderConsideration.pop();
 
-            const entitiesForCluster = [entity];
-            self.getClusterEntitiesFromSeed(entity, entitiesUnderConsideration, entitiesForCluster);
+            const entitiesForCluster = [entityDescriptor];
+            self.getClusterEntitiesFromSeed(entityDescriptor, entitiesUnderConsideration, entitiesForCluster);
 
             if(entitiesForCluster.length > 1) {
-
                 const intersectingClusterToNumEntitiesIntersecting = self.findIntersectingClustersForEntities(entitiesForCluster, clusters);
 
                 if(intersectingClusterToNumEntitiesIntersecting.size === 0) {
-                    const newCluster = new Cluster(_getNewIdFunc());
+                    const clusterId = _getNewIdFunc();
+                    const newCluster = new Cluster(clusterId);
                     entitiesForCluster.forEach(function(_clusterEntity) {
                         newCluster.addEntity(_clusterEntity);
                     });    
 
                     clusters.push(newCluster);
+                    newClusterIds.add(clusterId);
                 } else {
                     const clusterToModify = getClusterWithMostEntitiesFromClusterMap(intersectingClusterToNumEntitiesIntersecting);
 
@@ -217,17 +221,44 @@ function BoxClusterDetector(_boxExtentOffset) {
                         clusterToModify.addEntity(_clusterEntity);
                     });
 
+                    updatedClusterIds.add(clusterToModify.getId());
                 }
 
                 removeEntitiesFromArray(entitiesForCluster, entitiesUnderConsideration);
                 
             } else {
-                self.removeEntityFromClusters(entity, clusters);
+                self.removeEntityFromClusters(entityDescriptor, clusters);
+
+                clusters.forEach((_c) => {
+                    updatedClusterIds.add(_c.getId());
+                });                
             }
         }
 
+        // Get IDs of empty and singleton clusters
+        const emptyAndSingletonClusters = 
+            clusters
+                .filter(function(_c) {
+                    if(_c.getEntities().length < 2) {
+                        return true;
+                    }
+
+                    return false;
+                });
+
+        // Mark empty and single clusters as deleted clusters
+        emptyAndSingletonClusters.forEach((_c) => {
+            updatedClusterIds.delete(_c.getId());
+            deletedClusterIds.add(_c.getId());
+        });
+
+        // Don't mark new clusters as also being updated clusters
+        newClusterIds.forEach((_cId) => {
+            updatedClusterIds.delete(_cId);
+        });
+
         // Filter out clusters w/o any entities
-        const nonEmptyClusters = clusters.filter(function(_c) {
+        const nonEmptyNonSingletonClusters = clusters.filter(function(_c) {
             if(_c.getEntities().length >= 2) {
                 return true;
             }
@@ -235,7 +266,12 @@ function BoxClusterDetector(_boxExtentOffset) {
             return false;
         });
 
-        return nonEmptyClusters;
+        return {
+            "clusters": nonEmptyNonSingletonClusters,
+            "newClusterIds": newClusterIds,
+            "updatedClusterIds": updatedClusterIds,
+            "deletedClusterIds": deletedClusterIds,
+        };
     };
 };
 

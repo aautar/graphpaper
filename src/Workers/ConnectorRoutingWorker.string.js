@@ -1,20 +1,16 @@
-const ConnectorRoutingWorkerJsString = `(function () {
+const ConnectorRoutingWorkerJsString = String.raw`(function () {
   'use strict';
 
   function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
 
   function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
 
   function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-      return arr2;
-    }
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
   function _arrayWithHoles(arr) {
@@ -22,21 +18,21 @@ const ConnectorRoutingWorkerJsString = `(function () {
   }
 
   function _iterableToArray(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
   }
 
   function _iterableToArrayLimit(arr, i) {
-    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-      return;
-    }
+    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
 
+    if (_i == null) return;
     var _arr = [];
     var _n = true;
     var _d = false;
-    var _e = undefined;
+
+    var _s, _e;
 
     try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
         _arr.push(_s.value);
 
         if (i && _arr.length === i) break;
@@ -55,12 +51,86 @@ const ConnectorRoutingWorkerJsString = `(function () {
     return _arr;
   }
 
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance");
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
+  function _createForOfIteratorHelper(o, allowArrayLike) {
+    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
+
+    if (!it) {
+      if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+        if (it) o = it;
+        var i = 0;
+
+        var F = function () {};
+
+        return {
+          s: F,
+          n: function () {
+            if (i >= o.length) return {
+              done: true
+            };
+            return {
+              done: false,
+              value: o[i++]
+            };
+          },
+          e: function (e) {
+            throw e;
+          },
+          f: F
+        };
+      }
+
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+
+    var normalCompletion = true,
+        didErr = false,
+        err;
+    return {
+      s: function () {
+        it = it.call(o);
+      },
+      n: function () {
+        var step = it.next();
+        normalCompletion = step.done;
+        return step;
+      },
+      e: function (e) {
+        didErr = true;
+        err = e;
+      },
+      f: function () {
+        try {
+          if (!normalCompletion && it.return != null) it.return();
+        } finally {
+          if (didErr) throw err;
+        }
+      }
+    };
   }
 
   function Point(a,b){this.__x=a,this.__y=b;}Point.prototype.getX=function(){return this.__x},Point.prototype.getY=function(){return this.__y},Point.prototype.isEqual=function(a){return !(this.__x!==a.getX()||this.__y!==a.getY())},Point.prototype.getCartesianPoint=function(a,b){return new Point(this.__x-.5*a,-this.__y+.5*b)},Point.prototype.toString=function(){return this.__x+" "+this.__y},Point.prototype.toArray=function(){return [this.__x,this.__y]},Point.fromArray=function(a){return new Point(a[0],a[1])};
@@ -83,7 +153,7 @@ const ConnectorRoutingWorkerJsString = `(function () {
 
   var ConnectorRoutingAlgorithm=Object.freeze({STRAIGHT_LINE:0,STRAIGHT_LINE_BETWEEN_ANCHORS:1,STRAIGHT_LINE_BETWEEN_ANCHORS_AVOID_SELF_INTERSECTION:2,ASTAR:3,ASTAR_WITH_ROUTE_OPTIMIZATION:4,ASTAR_THETA_WITH_ROUTE_OPTIMIZATION:5});
 
-  var PointInfo={point:null,visiblePoints:null};function PointVisibilityMap(){var a=this,b=new Map,c=new Map,d=new Map,e=0,f=0,g=function doesLineIntersectAnyBoundaryLines(a){var b=!0,e=!1,f=void 0;try{for(var g,h=c[Symbol.iterator]();!(b=(g=h.next()).done);b=!0){var j=_slicedToArray(g.value,2),k=j[0],l=j[1],m=d.get(k);if(!(a.getMinX()>m.outerBoundingRect.maxX)&&!(a.getMaxX()<m.outerBoundingRect.minX)&&!(a.getMinY()>m.outerBoundingRect.maxY)&&!(a.getMaxY()<m.outerBoundingRect.minY))for(var n,o=l.toArray(),p=0;p<o.length;p++)if(n=o[p].computeIntersectionType(a),n===LINE_INTERSECTION_TYPE.LINESEG)return !0}}catch(a){e=!0,f=a;}finally{try{b||null==h.return||h.return();}finally{if(e)throw f}}return !1},h=function computePointsVisibilityForPoint(a){a.visiblePoints.points.length=0;var c=!0,d=!1,e=void 0;try{for(var f,h=b[Symbol.iterator]();!(c=(f=h.next()).done);c=!0){var i=_slicedToArray(f.value,2),j=i[0],k=i[1],l=!0,m=!1,n=void 0;try{for(var o,p=k[Symbol.iterator]();!(l=(o=p.next()).done);l=!0){var q=_slicedToArray(o.value,2),r=q[0],s=q[1],t=new Line(a.point,r);0<t.getLength()&&!g(t)&&a.visiblePoints.points.push(r);}}catch(a){m=!0,n=a;}finally{try{l||null==p.return||p.return();}finally{if(m)throw n}}}}catch(a){d=!0,e=a;}finally{try{c||null==h.return||h.return();}finally{if(d)throw e}}a.visiblePoints.isValid=!0;},i=function arePointsVisibleToEachOther(a,b){for(var c=o(a),d=j(c),e=0;e<d.length;e++)if(d[e].isEqual(b))return !0;return !1},j=function getVisiblePointsRelativeTo(a){return a.visiblePoints.isValid||h(a),a.visiblePoints.points},k=function isPointInArray(a,b){for(var c=0;c<b.length;c++)if(a.isEqual(b[c]))return !0;return !1},l=function routeToEndpoint(a,b,c,d,e,f,g){for(var h,l=c.point,m=j(c),n=Number.MAX_SAFE_INTEGER,o=null,p=new Vec2(e.getX()-l.getX(),e.getY()-l.getY()).normalize(),q=0;q<m.length;q++)if(h=m[q],!k(h,b)){var r=new Line(l,h).getLength(),s=r+a,t=new Line(h,e).getLength(),u=0;if(g===ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION){var v=new Vec2(h.getX()-l.getX(),h.getY()-l.getY()).normalize();u=p.dot(v)*r,e.getX()>l.getX()&&h.getX()>e.getX()&&(u=0),e.getX()<l.getX()&&h.getX()<e.getX()&&(u=0),e.getY()>l.getY()&&h.getY()>e.getY()&&(u=0),e.getY()<l.getY()&&h.getY()<e.getY()&&(u=0);}s+t-u<n&&(n=s+t-u,o=h);}return n===Number.MAX_SAFE_INTEGER?null:{cost:n,point:o}},m=function getBoundaryLinesFromEntityDescriptor(a){var b=new LineSet,c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});var e=a.connectorAnchors;return e.forEach(function(a){var c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});}),b},n=function hasEntityMutated(a,b){return !(a.x===b.x&&a.y===b.y&&a.width===b.width&&a.height===b.height)},o=function fetchPointInfoForPoint(a){var c=!0,d=!1,e=void 0;try{for(var f,g=b[Symbol.iterator]();!(c=(f=g.next()).done);c=!0){var h=_slicedToArray(f.value,2),i=h[0],j=h[1],k=!0,l=!1,m=void 0;try{for(var n,o=j[Symbol.iterator]();!(k=(n=o.next()).done);k=!0){var q=_slicedToArray(n.value,2),r=q[0],s=q[1];if(r===a)return p(r,s)}}catch(a){l=!0,m=a;}finally{try{k||null==o.return||o.return();}finally{if(l)throw m}}}}catch(a){d=!0,e=a;}finally{try{c||null==g.return||g.return();}finally{if(d)throw e}}return null},p=function buildPointInfo(a,b){var c=Object.create(PointInfo);return c.point=a,c.visiblePoints=b,c},q=function buildEmptyRoutingPointToVisibleSetMap(a,b,c,d){for(var e=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),f=AccessibleRoutingPointsFinder.find([a],b,c),g=f.accessibleRoutingPoints.toArray(),h=new Map,i=0;i<g.length;i++)h.set(g[i],{isValid:!1,points:[]});var k=e.getPointsScaledToGrid(c*d);return k.forEach(function(a){h.set(a,{isValid:!1,points:[]});}),h},s=function doesRoutingAlgorithmRequireOptimization(a){return !(a!==ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION&&a!==ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION)};this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors=function(a,g,h){"undefined"==typeof h&&(h=1),e=0,f=0;for(var j,k=[],l=[],o=[],p=0;p<a.length;p++){j=a[p].id,k.push(j);var r=c.get(j),s=d.get(j);if(r&&!n(s,a[p])){f+=r.count();continue}var D=m(a[p]);c.set(j,D),f+=D.count();}for(var E=0;E<a.length;E++){var t=a[E].id,u=d.get(t);!u||n(u,a[E]);var F=q(a[E],a,g,h);b.set(t,F),d.set(t,a[E]),l.push(t),e+=F.size;}var v=!0,w=!1,x=void 0;try{for(var y,z=d[Symbol.iterator]();!(v=(y=z.next()).done);v=!0){var A=_slicedToArray(y.value,2),B=A[0],C=A[1];k.includes(B)||(l.push(B),o.push(B));}}catch(a){w=!0,x=a;}finally{try{v||null==z.return||z.return();}finally{if(w)throw x}}return o.forEach(function(a){d.delete(a),c.delete(a),b.delete(a);}),l.length},this.getCurrentNumRoutingPoints=function(){return e},this.getCurrentNumBoundaryLines=function(){return f},this.findVisiblePointInfoClosestTo=function(a){var c=null,d=Number.MAX_SAFE_INTEGER,e=!0,f=!1,h=void 0;try{for(var i,j=b[Symbol.iterator]();!(e=(i=j.next()).done);e=!0){var k=_slicedToArray(i.value,2),l=k[0],m=k[1],n=!0,o=!1,q=void 0;try{for(var r,s=m[Symbol.iterator]();!(n=(r=s.next()).done);n=!0){var t=_slicedToArray(r.value,2),u=t[0],v=t[1],w=new Line(a,u),x=w.getLength();x<d&&!g(w)&&(c=p(u,v),d=x);;}}catch(a){o=!0,q=a;}finally{try{n||null==s.return||s.return();}finally{if(o)throw q}}}}catch(a){f=!0,h=a;}finally{try{e||null==j.return||j.return();}finally{if(f)throw h}}return c},this.computeRoute=function(b,c,d){if(null===b||null===c)return new PointSet;var e=a.findVisiblePointInfoClosestTo(b);if(null===e)return new PointSet;for(var f,h=new Vec2(c.getX()-b.getX(),c.getY()-b.getY()).normalize(),j=[e.point],k=0,m=e;!0;){if(f=l(k,j,m,b,c,h,d),null===f){var n=new Line(j[j.length-1],c);if(g(n))return new PointSet;break}if(k+=new Line(m.point,f.point).getLength(),j.push(f.point),m=o(f.point),1>new Line(m.point,c).getLength())break}return s(d)&&PointVisibilityMapRouteOptimizer.optimize(j,i),new PointSet(j)};}
+  var PointInfo={point:null,visiblePoints:null};function PointVisibilityMap(){var a=this,b=new Map,c=new Map,d=new Map,e=0,f=0,g=function doesLineIntersectAnyBoundaryLines(a){var b,e=_createForOfIteratorHelper(c);try{for(e.s();!(b=e.n()).done;){var f=_slicedToArray(b.value,2),g=f[0],h=f[1],j=d.get(g);if(!(a.getMinX()>j.outerBoundingRect.maxX)&&!(a.getMaxX()<j.outerBoundingRect.minX)&&!(a.getMinY()>j.outerBoundingRect.maxY)&&!(a.getMaxY()<j.outerBoundingRect.minY))for(var k,l=h.toArray(),m=0;m<l.length;m++)if(k=l[m].computeIntersectionType(a),k===LINE_INTERSECTION_TYPE.LINESEG)return !0}}catch(a){e.e(a);}finally{e.f();}return !1},h=function computePointsVisibilityForPoint(a){a.visiblePoints.points.length=0;var c,d=_createForOfIteratorHelper(b);try{for(d.s();!(c=d.n()).done;){var e,f=_slicedToArray(c.value,2),h=f[0],i=f[1],j=_createForOfIteratorHelper(i);try{for(j.s();!(e=j.n()).done;){var k=_slicedToArray(e.value,2),l=k[0],m=k[1],n=new Line(a.point,l);0<n.getLength()&&!g(n)&&a.visiblePoints.points.push(l);}}catch(a){j.e(a);}finally{j.f();}}}catch(a){d.e(a);}finally{d.f();}a.visiblePoints.isValid=!0;},i=function arePointsVisibleToEachOther(a,b){for(var c=o(a),d=j(c),e=0;e<d.length;e++)if(d[e].isEqual(b))return !0;return !1},j=function getVisiblePointsRelativeTo(a){return a.visiblePoints.isValid||h(a),a.visiblePoints.points},k=function isPointInArray(a,b){for(var c=0;c<b.length;c++)if(a.isEqual(b[c]))return !0;return !1},l=function routeToEndpoint(a,b,c,d,e,f,g){for(var h,l=c.point,m=j(c),n=Number.MAX_SAFE_INTEGER,o=null,p=new Vec2(e.getX()-l.getX(),e.getY()-l.getY()).normalize(),q=0;q<m.length;q++)if(h=m[q],!k(h,b)){var r=new Line(l,h).getLength(),s=r+a,t=new Line(h,e).getLength(),u=0;if(g===ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION){var v=new Vec2(h.getX()-l.getX(),h.getY()-l.getY()).normalize();u=p.dot(v)*r,e.getX()>l.getX()&&h.getX()>e.getX()&&(u=0),e.getX()<l.getX()&&h.getX()<e.getX()&&(u=0),e.getY()>l.getY()&&h.getY()>e.getY()&&(u=0),e.getY()<l.getY()&&h.getY()<e.getY()&&(u=0);}s+t-u<n&&(n=s+t-u,o=h);}return n===Number.MAX_SAFE_INTEGER?null:{cost:n,point:o}},m=function getBoundaryLinesFromEntityDescriptor(a){var b=new LineSet,c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});var e=a.connectorAnchors;return e.forEach(function(a){var c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});}),b},n=function hasEntityMutated(a,b){return !(a.x===b.x&&a.y===b.y&&a.width===b.width&&a.height===b.height)},o=function fetchPointInfoForPoint(a){var c,d=_createForOfIteratorHelper(b);try{for(d.s();!(c=d.n()).done;){var e,f=_slicedToArray(c.value,2),g=f[0],h=f[1],i=_createForOfIteratorHelper(h);try{for(i.s();!(e=i.n()).done;){var j=_slicedToArray(e.value,2),k=j[0],l=j[1];if(k===a)return p(k,l)}}catch(a){i.e(a);}finally{i.f();}}}catch(a){d.e(a);}finally{d.f();}return null},p=function buildPointInfo(a,b){var c=Object.create(PointInfo);return c.point=a,c.visiblePoints=b,c},q=function buildEmptyRoutingPointToVisibleSetMap(a,b,c,d){for(var e=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),f=AccessibleRoutingPointsFinder.find([a],b,c),g=f.accessibleRoutingPoints.toArray(),h=new Map,i=0;i<g.length;i++)h.set(g[i],{isValid:!1,points:[]});var k=e.getPointsScaledToGrid(c*d);return k.forEach(function(a){h.set(a,{isValid:!1,points:[]});}),h},s=function doesRoutingAlgorithmRequireOptimization(a){return !(a!==ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION&&a!==ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION)};this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors=function(a,g,h){"undefined"==typeof h&&(h=1),e=0,f=0;for(var j,k=[],l=[],o=[],p=0;p<a.length;p++){j=a[p].id,k.push(j);var r=c.get(j),s=d.get(j);if(r&&!n(s,a[p])){f+=r.count();continue}var A=m(a[p]);c.set(j,A),f+=A.count();}for(var B=0;B<a.length;B++){var t=a[B].id,u=d.get(t);!u||n(u,a[B]);var C=q(a[B],a,g,h);b.set(t,C),d.set(t,a[B]),l.push(t),e+=C.size;}var v,w=_createForOfIteratorHelper(d);try{for(w.s();!(v=w.n()).done;){var x=_slicedToArray(v.value,2),y=x[0],z=x[1];k.includes(y)||(l.push(y),o.push(y));}}catch(a){w.e(a);}finally{w.f();}return o.forEach(function(a){d.delete(a),c.delete(a),b.delete(a);}),l.length},this.getCurrentNumRoutingPoints=function(){return e},this.getCurrentNumBoundaryLines=function(){return f},this.findVisiblePointInfoClosestTo=function(a){var c,d=null,e=Number.MAX_SAFE_INTEGER,f=_createForOfIteratorHelper(b);try{for(f.s();!(c=f.n()).done;){var h,i=_slicedToArray(c.value,2),j=i[0],k=i[1],l=_createForOfIteratorHelper(k);try{for(l.s();!(h=l.n()).done;){var m=_slicedToArray(h.value,2),n=m[0],o=m[1],q=new Line(a,n),r=q.getLength();r<e&&!g(q)&&(d=p(n,o),e=r);;}}catch(a){l.e(a);}finally{l.f();}}}catch(a){f.e(a);}finally{f.f();}return d},this.computeRoute=function(b,c,d){if(null===b||null===c)return new PointSet;var e=a.findVisiblePointInfoClosestTo(b);if(null===e)return new PointSet;for(var f,h=new Vec2(c.getX()-b.getX(),c.getY()-b.getY()).normalize(),j=[e.point],k=0,m=e;!0;){if(f=l(k,j,m,b,c,h,d),null===f){var n=new Line(j[j.length-1],c);if(g(n))return new PointSet;break}if(k+=new Line(m.point,f.point).getLength(),j.push(f.point),m=o(f.point),1>new Line(m.point,c).getLength())break}return s(d)&&PointVisibilityMapRouteOptimizer.optimize(j,i),new PointSet(j)};}
 
   var SvgPathBuilder={pointToLineTo:function pointToLineTo(a,b){return 0===b?"M"+a.getX()+" "+a.getY():"L"+a.getX()+" "+a.getY()},pointTripletToTesselatedCurvePoints:function pointTripletToTesselatedCurvePoints(a,b){if(3!==a.length)throw new Error("_points must be array of exactly 3 points");var c=a[1],d=new Line(a[0],a[1]),e=new Line(a[1],a[2]),f=d.createShortenedLine(0,.5*b),g=e.createShortenedLine(.5*b,0);return [f.getStartPoint(),f.getEndPoint(),g.getStartPoint(),g.getEndPoint()]},pointsToPath:function pointsToPath(a,b){b=b||0;var c=[],d=0;if(0<b){for(;3<=a.length;){var e=a.shift(),f=a.shift(),g=a.shift(),h=SvgPathBuilder.pointTripletToTesselatedCurvePoints([e,f,g],b);a.unshift(h[3]),a.unshift(h[2]);for(var k=0;k<h.length-2;k++)c.push(SvgPathBuilder.pointToLineTo(h[k],d++));}for(;0<a.length;){var j=a.shift();c.push(SvgPathBuilder.pointToLineTo(j,d++));}}else for(var l,m=0;m<a.length;m++)l=a[m],c.push(SvgPathBuilder.pointToLineTo(l,m));return c.join(" ")}};
 
