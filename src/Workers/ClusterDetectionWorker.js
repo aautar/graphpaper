@@ -11,12 +11,11 @@ const workerData = {
  * @param {Cluster[]} _clusters 
  * @returns {Object[]}
  */
-const clustersToTransferrableObject = function(_clusters) {
-    const result = [];
+const clustersToTransferrableMap = function(_clusters) {
+    const result = new Map();
 
     for(let i=0; i<_clusters.length; i++) {
-        const clusterObj = _clusters[i].toJSON();
-        result.push(clusterObj);
+        result.set(_clusters[i].getId(), _clusters[i].toJSON());
     }
 
     return result;
@@ -39,7 +38,7 @@ const processRequestQueue = function() {
 
     postMessage(
         {
-            "clusters": clustersToTransferrableObject(clusterDetectResult.clusters),
+            "clusters": clustersToTransferrableMap(clusterDetectResult.clusters),
             "newClusterIds": clusterDetectResult.newClusterIds,
             "updatedClusterIds": clusterDetectResult.updatedClusterIds,
             "deletedClusterIds": clusterDetectResult.deletedClusterIds,

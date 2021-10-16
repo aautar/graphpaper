@@ -14,6 +14,7 @@ import {GRID_STYLE, Grid} from './Grid';
 import {GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
 import {ClusterDetectionWorkerJsString} from './Workers/ClusterDetectionWorker.string';
 import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
+import {Cluster} from './Cluster';
 
 /**
  * @callback HandleSheetInteractionCallback
@@ -136,10 +137,35 @@ function Sheet(_sheetDomElement, _window) {
 
     // Setup ClusterDetectionWorker
     const clusterDetectionWorkerUrl = URL.createObjectURL(new Blob([ ClusterDetectionWorkerJsString ]));
+    const clusterDetectionWorker = new Worker(clusterDetectionWorkerUrl);
+
+    clusterDetectionWorker.onmessage = function(_msg) {
+        const constructClusterFromJSON = function(_json) {
+            const result = new Cluster(_json.id);
+            _json.entities.forEach((_entityDescriptor) => {
+                result.addEntity(_entityDescriptor);
+            });
+
+            return result;
+        };
+
+        const data = _msg.data;
+
+        data.newClusterIds.forEach((_cId) => {
+            emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
+        });
+
+        data.updatedClusterIds.forEach((_cId) => {
+            emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
+        });
+
+        data.deletedClusterIds.forEach((_cId) => {
+            emitEvent(SheetEvent.CLUSTER_DELETED, { 'clusterId': _cId });
+        });
+    };
 
     // Setup ConnectorRoutingWorker
     const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
-    
     const connectorRoutingWorker = new Worker(workerUrl);
 
     connectorRoutingWorker.onmessage = function(_msg) {
@@ -246,6 +272,29 @@ function Sheet(_sheetDomElement, _window) {
 
     this.hasDomMetricsLock = function() {
         return isDomMetricsLockActive;
+    };
+
+    const refreshAllClustersInternal = function() {
+        lockDomMetrics();
+
+        const gridSize = self.getGridSize();
+
+        const entityDescriptors = [];
+        sheetEntities.forEach(function(_e) {
+            entityDescriptors.push(_e.getDescriptor(gridSize));
+        });
+
+        clusterDetectionWorker.postMessage(
+            {
+                "gridSize": gridSize,
+                "entityDescriptors": entityDescriptors
+            },
+            [
+
+            ]
+        );
+
+        unlockDomMetrics();
     };
 
     const refreshAllConnectorsInternal = function() {
@@ -740,7 +789,8 @@ function Sheet(_sheetDomElement, _window) {
 
         _obj.on(EntityEvent.RESIZE, function(e) {
             emitEvent(SheetEvent.ENTITY_RESIZED, { 'object': e.obj });
-            self.refreshAllConnectors();    
+            self.refreshAllConnectors();
+            refreshAllClustersInternal();
         });
 
         _obj.on(EntityEvent.TRANSLATE_START, handleMoveStart);
@@ -754,13 +804,15 @@ function Sheet(_sheetDomElement, _window) {
                 }
             );
 
-            if(!e.withinGroupTransformation) {
+            if(!e.withinGroupTransformation) { // don't refresh, we only want to refresh when the entire group has been translated
                 self.refreshAllConnectors();
+                refreshAllClustersInternal();
             }
         });
 
         sheetEntities.push(_obj);
-        self.refreshAllConnectors();       
+        self.refreshAllConnectors();
+        refreshAllClustersInternal();
 
         emitEvent(SheetEvent.ENTITY_ADDED, { "object":_obj });
     };    
@@ -777,6 +829,7 @@ function Sheet(_sheetDomElement, _window) {
             if(sheetEntities[i].getId() === _entityId) {
                 sheetEntities.splice(i, 1);
                 self.refreshAllConnectors();
+                refreshAllClustersInternal();
                 emitEvent(SheetEvent.ENTITY_REMOVED, { "object":sheetEntities[i] });
                 return true;
             }
@@ -1096,6 +1149,7 @@ function Sheet(_sheetDomElement, _window) {
 
         _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
         _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
+        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE, refreshAllClustersInternal);
     };
 
     /**
@@ -1107,6 +1161,7 @@ function Sheet(_sheetDomElement, _window) {
             if(groupTransformationContainers[i] === _groupTransformationContainer) {
                 _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
                 _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
+                _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE, refreshAllClustersInternal);
                 _sheetDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
                 groupTransformationContainers.splice(i, 1);
                 return true;
