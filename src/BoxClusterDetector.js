@@ -166,11 +166,18 @@ function BoxClusterDetector(_boxExtentOffset) {
     /**
      * @param {Object} _entityDescriptor
      * @param {Cluster[]} _clusters
+     * @returns {String[]}
      */
     this.removeEntityFromClusters = function(_entityDescriptor, _clusters) {
+        const mutatedClusterIds = [];
         _clusters.forEach(function(_c) {
-            _c.removeEntityById(_entityDescriptor.id);
+            const wasFoundAndRemoved = _c.removeEntityById(_entityDescriptor.id);
+            if(wasFoundAndRemoved) {
+                mutatedClusterIds.push(_c.getId());
+            }
         });
+
+        return mutatedClusterIds;
     };
 
     /**
@@ -217,7 +224,11 @@ function BoxClusterDetector(_boxExtentOffset) {
 
                     // Remove entity from any cluster it's currently in, add it to clusterToModify
                     entitiesForCluster.forEach(function(_clusterEntity) {
-                        self.removeEntityFromClusters(_clusterEntity, clusters);                    
+                        const clustersMutated = self.removeEntityFromClusters(_clusterEntity, clusters);
+                        clustersMutated.forEach((_clusterId) => {
+                            updatedClusterIds.add(_clusterId);
+                        });
+
                         clusterToModify.addEntity(_clusterEntity);
                     });
 
@@ -225,13 +236,11 @@ function BoxClusterDetector(_boxExtentOffset) {
                 }
 
                 removeEntitiesFromArray(entitiesForCluster, entitiesUnderConsideration);
-                
             } else {
-                self.removeEntityFromClusters(entityDescriptor, clusters);
-
-                clusters.forEach((_c) => {
-                    updatedClusterIds.add(_c.getId());
-                });                
+                const clustersMutated = self.removeEntityFromClusters(entityDescriptor, clusters);
+                clustersMutated.forEach((_clusterId) => {
+                    updatedClusterIds.add(_clusterId);
+                });
             }
         }
 

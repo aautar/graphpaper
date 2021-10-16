@@ -247,6 +247,55 @@ describe("BoxClusterDetector::computeClusters", function() {
         expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e3) >= 0).toEqual(true);
     });
 
+    it("return 2 new clusters for 4 entities seperated into 2 clusters", function() {  
+        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e3 = new Entity("obj-789", 1000, 1000, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e4 = new Entity("obj-101112", 1000, 1012, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+
+        let idIdx = 1;
+        const idGenerator = function() {
+            return `new-cluster-id-${idIdx++}`;
+        };
+
+        const detector = new BoxClusterDetector(12.0);
+        const clusterDetectorResult = detector.computeClusters([e1,e2,e3,e4], [], idGenerator);
+
+        expect(clusterDetectorResult.clusters.length).toEqual(2);
+        expect(clusterDetectorResult.newClusterIds.size).toEqual(2);
+        expect(clusterDetectorResult.updatedClusterIds.size).toEqual(0);
+
+        // this might be flaky, we don't really care which index maps to which cluster
+        expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e3) >= 0).toEqual(true);
+        expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e4) >= 0).toEqual(true);        
+        expect(clusterDetectorResult.clusters[1].getEntities().indexOf(e1) >= 0).toEqual(true);
+        expect(clusterDetectorResult.clusters[1].getEntities().indexOf(e2) >= 0).toEqual(true);
+    });    
+
+    it("returns correct number of new, updated, deleted clusters when entity is moved from one cluster to another", function() {  
+        let e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        let e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        let e3 = new Entity("obj-789", 1000, 1000, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        let e4 = new Entity("obj-101112", 1000, 1012, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+
+        let idIdx = 1;
+        const idGenerator = function() {
+            return `new-cluster-id-${idIdx++}`;
+        };
+
+        const detector = new BoxClusterDetector(12.0);
+        const firstClusterDetectorResult = detector.computeClusters([e1,e2,e3,e4], [], idGenerator);
+
+        // move e4
+        e4 = new Entity("obj-101112", 100, 212, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const secondClusterDetectorResult = detector.computeClusters([e1,e2,e3,e4], firstClusterDetectorResult.clusters, idGenerator);
+
+        expect(secondClusterDetectorResult.clusters.length).toEqual(1);
+        expect(secondClusterDetectorResult.newClusterIds.size).toEqual(0);
+        expect(secondClusterDetectorResult.updatedClusterIds.size).toEqual(1);
+        expect(secondClusterDetectorResult.deletedClusterIds.size).toEqual(1);
+    });
+
     it("removes moved entity from an existing cluster", function() {  
         const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
         const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
