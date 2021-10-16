@@ -179,8 +179,9 @@ function BoxClusterDetector(_boxExtentOffset) {
      * @param {Function} _getNewIdFunc
      */
     this.computeClusters = function(_entityDescriptors, _knownClusters, _getNewIdFunc) {
-        const newClusters = [];
-        const updatedClusters = [];
+        const newClusterIds = new Set();
+        const updatedClusterIds = new Set();
+        const deletedClusterIds = new Set();
 
         const clusters = _knownClusters.map(function(_c) {
             return _c;
@@ -207,7 +208,7 @@ function BoxClusterDetector(_boxExtentOffset) {
                     });    
 
                     clusters.push(newCluster);
-                    newClusters.push(newCluster);
+                    newClusterIds.add(clusterId);
                 } else {
                     const clusterToModify = getClusterWithMostEntitiesFromClusterMap(intersectingClusterToNumEntitiesIntersecting);
 
@@ -220,13 +221,17 @@ function BoxClusterDetector(_boxExtentOffset) {
                         clusterToModify.addEntity(_clusterEntity);
                     });
 
-                    updatedClusters.push(clusterToModify);
+                    updatedClusterIds.add(clusterToModify.getId());
                 }
 
                 removeEntitiesFromArray(entitiesForCluster, entitiesUnderConsideration);
                 
             } else {
                 self.removeEntityFromClusters(entityDescriptor, clusters);
+
+                clusters.forEach((_c) => {
+                    updatedClusterIds.add(_c.getId());
+                });                
             }
         }
 
@@ -241,6 +246,17 @@ function BoxClusterDetector(_boxExtentOffset) {
                     return false;
                 });
 
+        // Mark empty and single clusters as deleted clusters
+        emptyAndSingletonClusters.forEach((_c) => {
+            updatedClusterIds.delete(_c.getId());
+            deletedClusterIds.add(_c.getId());
+        });
+
+        // Don't mark new clusters as also being updated clusters
+        newClusterIds.forEach((_cId) => {
+            updatedClusterIds.delete(_cId);
+        });
+
         // Filter out clusters w/o any entities
         const nonEmptyNonSingletonClusters = clusters.filter(function(_c) {
             if(_c.getEntities().length >= 2) {
@@ -251,11 +267,10 @@ function BoxClusterDetector(_boxExtentOffset) {
         });
 
         return {
-            "allClusters": clusters,
-            "nonEmptyNonSingletonClusters": nonEmptyNonSingletonClusters,
-            "newClusters": newClusters,
-            "updatedClusters": updatedClusters,
-            "emptyAndSingletonClusters": emptyAndSingletonClusters
+            "clusters": nonEmptyNonSingletonClusters,
+            "newClusterIds": newClusterIds,
+            "updatedClusterIds": updatedClusterIds,
+            "deletedClusterIds": deletedClusterIds,
         };
     };
 };
