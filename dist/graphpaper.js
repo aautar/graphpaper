@@ -1721,9 +1721,9 @@ var GraphPaper = (function (exports) {
 
     function DescriptorCollection(a){var b=this,c=[];this.getId=function(){return a},this.getDescriptorIndex=function(a){return b.getDescriptorIndexById(a.id)},this.getDescriptorIndexById=function(a){for(var b=0;b<c.length;b++)if(c[b].id===a)return b;return null},this.addDescriptor=function(a){return !(null!==b.getDescriptorIndex(a))&&(c.push(a),!0)},this.getDescriptors=function(){return c},this.getIds=function(){var a=[];return c.forEach(function(b){a.push(b.id);}),a},this.removeById=function(a){var d=b.getDescriptorIndexById(a);return null!==d&&(c.splice(d,1),!0)},this.removeAll=function(){c.length=0;};}
 
-    function Cluster(a){var b=new DescriptorCollection(a);this.getId=function(){return a},this.getEntityIndex=function(a){return b.getDescriptorIndex(a)},this.getEntityIndexById=function(a){return b.getDescriptorIndexById(a)},this.addEntity=function(a){return b.addDescriptor(a)},this.getEntities=function(){return b.getDescriptors()},this.getEntityIds=function(){return b.getIds()},this.removeEntityById=function(a){return b.removeById(a)},this.removeAllEntities=function(){return b.removeAll()},this.toJSON=function(){return {id:a,entities:b.getDescriptors()}};}
+    function Cluster(a){var b=new DescriptorCollection(a);this.getId=function(){return a},this.getEntityIndex=function(a){return b.getDescriptorIndex(a)},this.getEntityIndexById=function(a){return b.getDescriptorIndexById(a)},this.addEntity=function(a){return b.addDescriptor(a)},this.getEntities=function(){return b.getDescriptors()},this.getEntityIds=function(){return b.getIds()},this.removeEntityById=function(a){return b.removeById(a)},this.removeAllEntities=function(){return b.removeAll()},this.hasEntities=function(a){for(var c=!0,d=0;d<a.length;d++)if(null===b.getDescriptorIndexById(a[d])){c=!1;break}return c},this.toJSON=function(){return {id:a,entities:b.getDescriptors()}};}
 
-    function BoxClusterDetector(a){var b=this,c=function getEntityIndexFromArray(a,b){for(var c=0;c<b.length;c++)if(b[c].id===a.id)return c;return -1},d=function removeEntitiesFromArray(a,b){for(var d,e=0;e<a.length;e++)d=c(a[e],b),-1!==d&&b.splice(d,1);return b},e=function getClusterWithMostEntitiesFromClusterMap(a){var b=0,c=null;return a.forEach(function(a,d,e){a>b&&(b=a,c=d);}),c};this.areEntitiesClose=function(b,c){var d=new Rectangle(b.x-a,b.y-a,b.x+b.width+a,b.y+b.height+a),e=new Rectangle(c.x-a,c.y-a,c.x+c.width+a,c.y+c.height+a);return d.checkIntersect(e)},this.getAllEntitiesCloseTo=function(a,c){for(var d=[],e=0;e<c.length;e++)a.id!==c[e].id&&b.areEntitiesClose(a,c[e])&&d.push(c[e]);return d},this.getClusterEntitiesFromSeed=function(a,c,e){var f=b.getAllEntitiesCloseTo(a,c);return 0===f.length?[]:void(d(f.concat([a]),c),f.forEach(function(a){e.push(a),b.getClusterEntitiesFromSeed(a,c,e);}))},this.findIntersectingClustersForEntities=function(a,b){var c=new Map;return b.forEach(function(b){for(var d=b.getEntities(),e=0;e<d.length;e++)for(var f=0;f<a.length;f++)if(d[e].id===a[f].id)if(c.has(b)){var g=c.get(b);c.set(b,g+1);}else c.set(b,1);}),c},this.removeEntityFromClusters=function(a,b){var c=[];return b.forEach(function(b){var d=b.removeEntityById(a.id);d&&c.push(b.getId());}),c},this.computeClusters=function(a,c,f){for(var g=new Set,h=new Set,i=new Set,j=c.map(function(a){return a}),k=a.map(function(a){return a});0<k.length;){var l=k.pop(),m=[l];if(b.getClusterEntitiesFromSeed(l,k,m),1<m.length){var p=b.findIntersectingClustersForEntities(m,j);0===p.size?function(){var a=f(),b=new Cluster(a);m.forEach(function(a){b.addEntity(a);}),j.push(b),g.add(a);}():function(){var a=e(p);a.removeAllEntities(),m.forEach(function(c){var d=b.removeEntityFromClusters(c,j);d.forEach(function(a){h.add(a);}),a.addEntity(c);}),h.add(a.getId());}(),d(m,k);}else {var q=b.removeEntityFromClusters(l,j);q.forEach(function(a){h.add(a);});}}var n=j.filter(function(a){return !!(2>a.getEntities().length)});n.forEach(function(a){h.delete(a.getId()),i.add(a.getId());}),g.forEach(function(a){h.delete(a);});var o=j.filter(function(a){return !!(2<=a.getEntities().length)});return {clusters:o,newClusterIds:g,updatedClusterIds:h,deletedClusterIds:i}};}
+    function BoxClusterDetector(a){var b=this,c=function getEntityIndexFromArray(a,b){for(var c=0;c<b.length;c++)if(b[c].id===a.id)return c;return -1},d=function removeEntitiesFromArray(a,b){for(var d,e=0;e<a.length;e++)d=c(a[e],b),-1!==d&&b.splice(d,1);return b},e=function getClusterWithMostEntitiesFromClusterMap(a){var b=0,c=null;return a.forEach(function(a,d,e){a>b&&(b=a,c=d);}),c};this.areEntitiesClose=function(b,c){var d=new Rectangle(b.x-a,b.y-a,b.x+b.width+a,b.y+b.height+a),e=new Rectangle(c.x-a,c.y-a,c.x+c.width+a,c.y+c.height+a);return d.checkIntersect(e)},this.getAllEntitiesCloseTo=function(a,c){for(var d=[],e=0;e<c.length;e++)a.id!==c[e].id&&b.areEntitiesClose(a,c[e])&&d.push(c[e]);return d},this.getClusterEntitiesFromSeed=function(a,c,e){var f=b.getAllEntitiesCloseTo(a,c);return 0===f.length?[]:void(d(f.concat([a]),c),f.forEach(function(a){e.push(a),b.getClusterEntitiesFromSeed(a,c,e);}))},this.findIntersectingClustersForEntities=function(a,b){var c=new Map;return b.forEach(function(b){for(var d=b.getEntities(),e=0;e<d.length;e++)for(var f=0;f<a.length;f++)if(d[e].id===a[f].id)if(c.has(b)){var g=c.get(b);c.set(b,g+1);}else c.set(b,1);}),c},this.removeEntityFromClusters=function(a,b){var c=[];return b.forEach(function(b){var d=b.removeEntityById(a.id);d&&c.push(b.getId());}),c},this.computeClusters=function(a,c,f){for(var g=new Set,h=new Set,i=new Set,j=c.map(function(a){return a}),k=a.map(function(a){return a});0<k.length;){var l=k.pop(),m=[l];if(b.getClusterEntitiesFromSeed(l,k,m),1<m.length){var p=b.findIntersectingClustersForEntities(m,j);0===p.size?function(){var a=f(),b=new Cluster(a);m.forEach(function(a){b.addEntity(a);}),j.push(b),g.add(a);}():function(){var a=e(p),c=a.getEntityIds();a.removeAllEntities(),m.forEach(function(c){var d=b.removeEntityFromClusters(c,j);d.forEach(function(a){h.add(a);}),a.addEntity(c);}),a.getEntityIds().length===c.length&&a.hasEntities(c)||h.add(a.getId());}(),d(m,k);}else {var q=b.removeEntityFromClusters(l,j);q.forEach(function(a){h.add(a);});}}var n=j.filter(function(a){return !!(2>a.getEntities().length)});n.forEach(function(a){h.delete(a.getId()),i.add(a.getId());}),g.forEach(function(a){h.delete(a);});var o=j.filter(function(a){return !!(2<=a.getEntities().length)});return {clusters:o,newClusterIds:g,updatedClusterIds:h,deletedClusterIds:i}};}
 
     var UUID={v4:function v4(){return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(a){var b=0|16*Math.random(),c="x"==a?b:8|3&b;return c.toString(16)})}};
 
@@ -2054,6 +2054,23 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
+         * @param {String[]} _entityIds 
+         * @returns {Boolean}
+         */
+        this.hasEntities = function(_entityIds) {
+            let isEquivalent = true;
+            for(let i=0; i<_entityIds.length; i++) {
+                if(entityDescriptorCollection.getDescriptorIndexById(_entityIds[i]) === null) {
+                    isEquivalent = false;
+                    break;
+                }
+            }
+
+            return isEquivalent;
+        };
+
+        /**
+         * 
          * @returns {Object}
          */
         this.toJSON = function() {
@@ -2197,6 +2214,10 @@ var GraphPaper = (function (exports) {
             };
 
             const data = _msg.data;
+
+            if(data.updatedClusterIds.size > 0) {
+                console.log(data.updatedClusterIds);
+            }
 
             data.newClusterIds.forEach((_cId) => {
                 emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
@@ -4578,6 +4599,7 @@ var GraphPaper = (function (exports) {
                         newClusterIds.add(clusterId);
                     } else {
                         const clusterToModify = getClusterWithMostEntitiesFromClusterMap(intersectingClusterToNumEntitiesIntersecting);
+                        const preEntityIds = clusterToModify.getEntityIds();
 
                         // Clear out entities in cluster
                         clusterToModify.removeAllEntities();
@@ -4592,7 +4614,9 @@ var GraphPaper = (function (exports) {
                             clusterToModify.addEntity(_clusterEntity);
                         });
 
-                        updatedClusterIds.add(clusterToModify.getId());
+                        if(clusterToModify.getEntityIds().length === preEntityIds.length && clusterToModify.hasEntities(preEntityIds)) ; else {
+                            updatedClusterIds.add(clusterToModify.getId());
+                        }
                     }
 
                     removeEntitiesFromArray(entitiesForCluster, entitiesUnderConsideration);

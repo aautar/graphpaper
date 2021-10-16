@@ -151,6 +151,10 @@ function Sheet(_sheetDomElement, _window) {
 
         const data = _msg.data;
 
+        if(data.updatedClusterIds.size > 0) {
+            console.log(data.updatedClusterIds);
+        }
+
         data.newClusterIds.forEach((_cId) => {
             emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
         });

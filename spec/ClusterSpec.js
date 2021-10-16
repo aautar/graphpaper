@@ -6,23 +6,23 @@ const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 
+const makeEntityDescriptor = function(_id, _x, _y, _width, _height) {
+    const e = new Entity(
+        _id,
+        _x, 
+        _y, 
+        _width, 
+        _height, 
+        {}, 
+        window.document.createElement('div'), 
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
+    );
+
+    return e.getDescriptor();
+};
+
 describe("Cluster", function() {
-    function makeEntityDescriptor(_id, _x, _y, _width, _height) {
-        const e = new Entity(
-            _id,
-            _x, 
-            _y, 
-            _width, 
-            _height, 
-            {}, 
-            window.document.createElement('div'), 
-            [window.document.createElement('div')], 
-            [window.document.createElement('div')]
-        );
-
-        return e.getDescriptor();
-    };    
-
     it("returns ID when getId is called", function() {
         var c = new Cluster("cluster-id");
         expect(c.getId()).toBe("cluster-id");
@@ -61,6 +61,23 @@ describe("Cluster", function() {
 
         expect(c.removeEntityById("obj-id-1")).toEqual(true);
         expect(c.getEntityIds()).toEqual(["obj-id-2"]);
-    });    
+    });
+});
 
+describe("Cluster.hasEntities", function() {
+    it("returns true if cluster contains all given entities", function() {
+        const c = new Cluster("cluster-id");
+        c.addEntity(makeEntityDescriptor("obj-id-1"));
+        c.addEntity(makeEntityDescriptor("obj-id-2"));
+
+        expect(c.hasEntities(["obj-id-1", "obj-id-2"])).toEqual(true);
+    });
+
+    it("returns false if cluster is missing entity", function() {
+        const c = new Cluster("cluster-id");
+        c.addEntity(makeEntityDescriptor("obj-id-1"));
+        c.addEntity(makeEntityDescriptor("obj-id-2"));
+
+        expect(c.hasEntities(["obj-id-1", "obj-id-2", "missing-one"])).toEqual(false);
+    });    
 });

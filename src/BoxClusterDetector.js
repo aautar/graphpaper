@@ -218,6 +218,7 @@ function BoxClusterDetector(_boxExtentOffset) {
                     newClusterIds.add(clusterId);
                 } else {
                     const clusterToModify = getClusterWithMostEntitiesFromClusterMap(intersectingClusterToNumEntitiesIntersecting);
+                    const preEntityIds = clusterToModify.getEntityIds();
 
                     // Clear out entities in cluster
                     clusterToModify.removeAllEntities();
@@ -232,7 +233,11 @@ function BoxClusterDetector(_boxExtentOffset) {
                         clusterToModify.addEntity(_clusterEntity);
                     });
 
-                    updatedClusterIds.add(clusterToModify.getId());
+                    if(clusterToModify.getEntityIds().length === preEntityIds.length && clusterToModify.hasEntities(preEntityIds)) {
+                        // we ended up with the same cluster, no update
+                    } else {
+                        updatedClusterIds.add(clusterToModify.getId());
+                    }
                 }
 
                 removeEntitiesFromArray(entitiesForCluster, entitiesUnderConsideration);

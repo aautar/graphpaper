@@ -66,6 +66,23 @@ function Cluster(_clusterId) {
 
     /**
      * 
+     * @param {String[]} _entityIds 
+     * @returns {Boolean}
+     */
+    this.hasEntities = function(_entityIds) {
+        let isEquivalent = true;
+        for(let i=0; i<_entityIds.length; i++) {
+            if(entityDescriptorCollection.getDescriptorIndexById(_entityIds[i]) === null) {
+                isEquivalent = false;
+                break;
+            }
+        }
+
+        return isEquivalent;
+    };
+
+    /**
+     * 
      * @returns {Object}
      */
     this.toJSON = function() {
