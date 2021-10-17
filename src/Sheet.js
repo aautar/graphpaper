@@ -137,96 +137,100 @@ function Sheet(_sheetDomElement, _window) {
 
     // Setup ClusterDetectionWorker
     const clusterDetectionWorkerUrl = URL.createObjectURL(new Blob([ ClusterDetectionWorkerJsString ]));
-    const clusterDetectionWorker = new Worker(clusterDetectionWorkerUrl);
+    let clusterDetectionWorker = null;
 
-    clusterDetectionWorker.onmessage = function(_msg) {
-        const constructClusterFromJSON = function(_json) {
-            const result = new Cluster(_json.id);
-            _json.entities.forEach((_entityDescriptor) => {
-                result.addEntity(_entityDescriptor);
+    this.initClusterDetectionWorker = function() {
+        clusterDetectionWorker = new Worker(clusterDetectionWorkerUrl);
+        
+        clusterDetectionWorker.onmessage = function(_msg) {
+            const constructClusterFromJSON = function(_json) {
+                const result = new Cluster(_json.id);
+                _json.entities.forEach((_entityDescriptor) => {
+                    result.addEntity(_entityDescriptor);
+                });
+
+                return result;
+            };
+
+            const data = _msg.data;
+
+            data.newClusterIds.forEach((_cId) => {
+                emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
             });
 
-            return result;
+            data.updatedClusterIds.forEach((_cId) => {
+                emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
+            });
+
+            data.deletedClusterIds.forEach((_cId) => {
+                emitEvent(SheetEvent.CLUSTER_DELETED, { 'clusterId': _cId });
+            });
         };
-
-        const data = _msg.data;
-
-        if(data.updatedClusterIds.size > 0) {
-            console.log(data.updatedClusterIds);
-        }
-
-        data.newClusterIds.forEach((_cId) => {
-            emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
-        });
-
-        data.updatedClusterIds.forEach((_cId) => {
-            emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
-        });
-
-        data.deletedClusterIds.forEach((_cId) => {
-            emitEvent(SheetEvent.CLUSTER_DELETED, { 'clusterId': _cId });
-        });
     };
 
     // Setup ConnectorRoutingWorker
-    const workerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
-    const connectorRoutingWorker = new Worker(workerUrl);
+    const connectorRoutingWorkerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
+    let connectorRoutingWorker = null;
 
-    connectorRoutingWorker.onmessage = function(_msg) {
-        const connectorsRefreshTimeT1 = new Date();
-        const connectorDescriptors = _msg.data.connectorDescriptors;
-        const refreshCalls = [];
+    this.initConnectorRoutingWorker = function() {
+        connectorRoutingWorker = new Worker(connectorRoutingWorkerUrl);
+    
+        connectorRoutingWorker.onmessage = function(_msg) {
+            const connectorsRefreshTimeT1 = new Date();
+            const connectorDescriptors = _msg.data.connectorDescriptors;
+            const refreshCalls = [];
 
-        const getConnectorDescriptorById = function(_id) {
-            for(let i=0; i<connectorDescriptors.length; i++) {
-                if(connectorDescriptors[i].id === _id) {
-                    return connectorDescriptors[i];
+            const getConnectorDescriptorById = function(_id) {
+                for(let i=0; i<connectorDescriptors.length; i++) {
+                    if(connectorDescriptors[i].id === _id) {
+                        return connectorDescriptors[i];
+                    }
                 }
-            }
 
-            return null;
-        };
+                return null;
+            };
 
-        const renderInternal = function() {
-            refreshCalls.forEach((_rc) => {
-                _rc();
-            });
-            pendingConnectorRedraw = false;
-        };
-
-
-        objectConnectors.forEach(function(_c) {
-            const descriptor = getConnectorDescriptorById(_c.getId());
-            if(descriptor) {
-                const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
-                _c.updatePathPoints(ps.toArray());
-
-                refreshCalls.push(() => {
-                    _c.refresh(descriptor.svgPath);
+            const renderInternal = function() {
+                refreshCalls.forEach((_rc) => {
+                    _rc();
                 });
+                pendingConnectorRedraw = false;
+            };
 
-                // May want defer this, rendering affected if consumer has a long-running handler
-                emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
+
+            objectConnectors.forEach(function(_c) {
+                const descriptor = getConnectorDescriptorById(_c.getId());
+                if(descriptor) {
+                    const ps = new PointSet(new Float64Array(descriptor.pointsInPath));
+                    _c.updatePathPoints(ps.toArray());
+
+                    refreshCalls.push(() => {
+                        _c.refresh(descriptor.svgPath);
+                    });
+
+                    // May want defer this, rendering affected if consumer has a long-running handler
+                    emitEvent(SheetEvent.CONNECTOR_UPDATED, { 'connector': _c });
+                }
+            });
+            
+            if(pendingConnectorRedraw) {
+                cancelAnimationFrame(renderInternal);
             }
-        });
-        
-        if(pendingConnectorRedraw) {
-            cancelAnimationFrame(renderInternal);
-        }
 
-        pendingConnectorRedraw = true;
-        requestAnimationFrame(renderInternal);
+            pendingConnectorRedraw = true;
+            requestAnimationFrame(renderInternal);
 
-        metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
+            metrics.connectorsRefreshTime = (new Date()) - connectorsRefreshTimeT1;
 
-        metrics.connectorRoutingWorker.executionTime = _msg.data.metrics.overallTime;
-        metrics.connectorRoutingWorker.numBoundaryLines = _msg.data.metrics.numBoundaryLines;
-        metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
-        metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
-        metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
-        metrics.connectorRoutingWorker.allPathsComputationTime = _msg.data.metrics.allPathsComputationTime;
+            metrics.connectorRoutingWorker.executionTime = _msg.data.metrics.overallTime;
+            metrics.connectorRoutingWorker.numBoundaryLines = _msg.data.metrics.numBoundaryLines;
+            metrics.connectorRoutingWorker.numRoutingPoints = _msg.data.metrics.numRoutingPoints;
+            metrics.connectorRoutingWorker.msgDecodeTime = _msg.data.metrics.msgDecodeTime;
+            metrics.connectorRoutingWorker.pointVisibilityMapCreationTime = _msg.data.metrics.pointVisibilityMapCreationTime;
+            metrics.connectorRoutingWorker.allPathsComputationTime = _msg.data.metrics.allPathsComputationTime;
 
-        debugMetricsPanel.refresh(metrics);
+            debugMetricsPanel.refresh(metrics);
+        };
     };
 
     /**
@@ -278,7 +282,19 @@ function Sheet(_sheetDomElement, _window) {
         return isDomMetricsLockActive;
     };
 
+    /**
+     * @todo
+     * @param {Cluster[]} _clusters 
+     */
+     this.setClusterDetectorKnownClusters = function(_clusters) {
+
+    };
+
     const refreshAllClustersInternal = function() {
+        if(clusterDetectionWorker === null) {
+            return;
+        }
+
         lockDomMetrics();
 
         const gridSize = self.getGridSize();
@@ -302,6 +318,10 @@ function Sheet(_sheetDomElement, _window) {
     };
 
     const refreshAllConnectorsInternal = function() {
+        if(connectorRoutingWorker === null) {
+            return;
+        }
+
         lockDomMetrics();
 
         const executionTimeT1 = new Date();
@@ -1091,7 +1111,6 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _dblTapRadius
      */
     this.initInteractionHandlers = function(_dblTapSpeed, _dblTapRadius) {
-
         doubleTapDetector = new DoubleTapDetector(_dblTapSpeed, _dblTapRadius);
 
         // dblclick on empty area of the sheet
