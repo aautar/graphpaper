@@ -96,6 +96,9 @@ function Sheet(_sheetDomElement, _window) {
             pointVisibilityMapCreationTime: null,
             allPathsComputationTime: null
         },
+        clusterDetectionWorker: {
+            computeClustersTime: null,
+        },
         refreshAllConnectorsInternal: {
             executionTime: null
         },
@@ -165,6 +168,8 @@ function Sheet(_sheetDomElement, _window) {
             data.deletedClusterIds.forEach((_cId) => {
                 emitEvent(SheetEvent.CLUSTER_DELETED, { 'clusterId': _cId });
             });
+
+            metrics.clusterDetectionWorker.computeClustersTime = data.metrics.computeClustersTime;
         };
     };
 

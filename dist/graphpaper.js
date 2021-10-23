@@ -1727,7 +1727,7 @@ var GraphPaper = (function (exports) {
 
     var UUID={v4:function v4(){return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(a){var b=0|16*Math.random(),c="x"==a?b:8|3&b;return c.toString(16)})}};
 
-    var workerData={requestQueue:[],knownClusters:[]},clustersToTransferrableMap=function clustersToTransferrableMap(a){for(var b=new Map,c=0;c<a.length;c++)b.set(a[c].getId(),a[c].toJSON());return b},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a=workerData.requestQueue.pop();workerData.requestQueue.length=0;var b=a.entityDescriptors,c=new BoxClusterDetector(12),d=c.computeClusters(b,workerData.knownClusters,UUID.v4);postMessage({clusters:clustersToTransferrableMap(d.clusters),newClusterIds:d.newClusterIds,updatedClusterIds:d.updatedClusterIds,deletedClusterIds:d.deletedClusterIds}),workerData.knownClusters=d.clusters;}};setInterval(processRequestQueue,50),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
+    var workerData={requestQueue:[],knownClusters:[]},clustersToTransferrableMap=function clustersToTransferrableMap(a){for(var b=new Map,c=0;c<a.length;c++)b.set(a[c].getId(),a[c].toJSON());return b},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a={overallTime:null},b=workerData.requestQueue.pop();workerData.requestQueue.length=0;var c=b.entityDescriptors,d=new BoxClusterDetector(12),e=new Date,f=d.computeClusters(c,workerData.knownClusters,UUID.v4);a.computeClustersTime=new Date-e,postMessage({metrics:a,clusters:clustersToTransferrableMap(f.clusters),newClusterIds:f.newClusterIds,updatedClusterIds:f.updatedClusterIds,deletedClusterIds:f.deletedClusterIds}),workerData.knownClusters=f.clusters;}};setInterval(processRequestQueue,50),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
 
 }());
 `;
@@ -2160,6 +2160,9 @@ var GraphPaper = (function (exports) {
                 pointVisibilityMapCreationTime: null,
                 allPathsComputationTime: null
             },
+            clusterDetectionWorker: {
+                computeClustersTime: null,
+            },
             refreshAllConnectorsInternal: {
                 executionTime: null
             },
@@ -2229,6 +2232,8 @@ var GraphPaper = (function (exports) {
                 data.deletedClusterIds.forEach((_cId) => {
                     emitEvent(SheetEvent.CLUSTER_DELETED, { 'clusterId': _cId });
                 });
+
+                metrics.clusterDetectionWorker.computeClustersTime = data.metrics.computeClustersTime;
             };
         };
 

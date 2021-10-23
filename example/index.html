@@ -51,6 +51,7 @@
         canvas.initInteractionHandlers();
         canvas.initTransformationHandlers();
         canvas.initConnectorRoutingWorker();
+        canvas.initClusterDetectionWorker();
 
         canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
             const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px', 0, GraphPaper.ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION);

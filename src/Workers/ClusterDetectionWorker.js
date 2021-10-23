@@ -26,6 +26,9 @@ const processRequestQueue = function() {
         return;
     }
 
+    const metrics = {};
+    metrics.overallTime = null;
+
     // grab last request, toss the rest
     const lastRequest = workerData.requestQueue.pop();
     workerData.requestQueue.length = 0;
@@ -34,10 +37,13 @@ const processRequestQueue = function() {
     const entityDescriptors = lastRequest.entityDescriptors;
     const clusterDetector = new BoxClusterDetector(12.0);
 
+    const computeClustersTimeT1 = new Date();
     const clusterDetectResult = clusterDetector.computeClusters(entityDescriptors, workerData.knownClusters, UUID.v4);
+    metrics.computeClustersTime = (new Date()) - computeClustersTimeT1;
 
     postMessage(
         {
+            "metrics": metrics,
             "clusters": clustersToTransferrableMap(clusterDetectResult.clusters),
             "newClusterIds": clusterDetectResult.newClusterIds,
             "updatedClusterIds": clusterDetectResult.updatedClusterIds,
