@@ -181,6 +181,27 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
+     * 
+     * @param {String[]} _currentEntityIds 
+     * @param {Cluster[]} _clusters
+     * @returns {Cluster[]}
+     */
+    this.mapToClustersWithOldEntitiesRemoved = function(_currentEntityIds, _clusters) {
+        const result = _clusters.map(function(_c) {
+            const clusterEntityIds = _c.getEntityIds();
+            for(let i=0; i<clusterEntityIds.length; i++) {
+                if(_currentEntityIds.indexOf(clusterEntityIds[i]) === -1) {
+                    _c.removeEntityById(clusterEntityIds[i]);
+                }
+            }
+
+            return _c;
+        });
+
+        return result;
+    };
+
+    /**
      * @param {Object[]} _entityDescriptors
      * @param {Cluster[]} _knownClusters
      * @param {Function} _getNewIdFunc
@@ -190,13 +211,15 @@ function BoxClusterDetector(_boxExtentOffset) {
         const updatedClusterIds = new Set();
         const deletedClusterIds = new Set();
 
-        const clusters = _knownClusters.map(function(_c) {
-            return _c;
-        });
-
         const entitiesUnderConsideration = _entityDescriptors.map(function(_e) {
             return _e;
         });
+
+        const entitiesUnderConsiderationIds = _entityDescriptors.map(function(_e) {
+            return _e.id;
+        });        
+
+        const clusters = self.mapToClustersWithOldEntitiesRemoved(entitiesUnderConsiderationIds, _knownClusters);
 
         while(entitiesUnderConsideration.length > 0) {
             const entityDescriptor = entitiesUnderConsideration.pop();
@@ -278,7 +301,7 @@ function BoxClusterDetector(_boxExtentOffset) {
             }
 
             return false;
-        });
+        });  
 
         return {
             "clusters": nonEmptyNonSingletonClusters,

@@ -205,6 +205,40 @@ describe("BoxClusterDetector::computeClusters", function() {
         expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e2) >= 0).toEqual(true);
     });
 
+    it("returns cluster ID in deletedClusterIds when only 1 entity left in cluster", function() {
+        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+
+        const idGenerator = function() {
+            return "new-cluster-id";
+        };
+
+        const detector = new BoxClusterDetector(12.0);
+        const firstClusterDetectorResult = detector.computeClusters([e1, e2], [], idGenerator);
+        const secondClusterDetectorResult = detector.computeClusters([e1], firstClusterDetectorResult.clusters, idGenerator);
+
+        expect(secondClusterDetectorResult.clusters.length).toEqual(0);
+        expect(secondClusterDetectorResult.deletedClusterIds.size).toEqual(1);
+        expect(secondClusterDetectorResult.deletedClusterIds.has("new-cluster-id")).toEqual(true);
+    });
+
+    it("returns cluster ID in deletedClusterIds when all entities in cluster have been deleted", function() {  
+        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
+
+        const idGenerator = function() {
+            return "new-cluster-id";
+        };
+
+        const detector = new BoxClusterDetector(12.0);
+        const firstClusterDetectorResult = detector.computeClusters([e1, e2], [], idGenerator);
+        const secondClusterDetectorResult = detector.computeClusters([], firstClusterDetectorResult.clusters, idGenerator);
+
+        expect(secondClusterDetectorResult.clusters.length).toEqual(0);
+        expect(secondClusterDetectorResult.deletedClusterIds.size).toEqual(1);
+        expect(secondClusterDetectorResult.deletedClusterIds.has("new-cluster-id")).toEqual(true);
+    });
+
     it("adds entity to exiting Cluster and returns that Cluster", function() {  
         const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
         const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]).getDescriptor();
