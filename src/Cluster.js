@@ -93,4 +93,13 @@ function Cluster(_clusterId) {
     };
 };
 
+Cluster.fromJSON = function(_clusterJSON) {
+    const result = new Cluster(_clusterJSON.id);
+    _clusterJSON.entities.forEach((_entityDescriptor) => {
+        result.addEntity(_entityDescriptor);
+    });
+
+    return result;
+};
+
 export { Cluster };
