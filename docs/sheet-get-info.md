@@ -1,23 +1,24 @@
 # Get information about a sheet
 
-# Get dimensions
+### Dimensions
 
-### Get the width of a sheet
+The dimensions of a sheet can be queries with the `Sheet.getWidth()` and `Sheet.getHeight()` methods.
 
+##### Syntax
 ```javascript
-sheet.getWidth();
+const width = sheet.getWidth();
+const height = sheet.getHeight();
 ```
 
-### Get the height of a sheet
+Both methods return a `Number`.
 
+
+### Bounding box
+A bounding box representing the "active" area of the Sheet, i.e. the area containing Entities, can be retrieved with the `Sheet.calcBoundingBox()` method.
+
+##### Syntax
 ```javascript
-sheet.getHeight();
+const boundingBox = sheet.calcBoundingBox();
 ```
 
-### Get sheet bounding box
-
-```javascript
-sheet.calcBoundingBox();
-```
-
-This methods will return a `Graphpaper.Rectangle` representing the "active" area of a sheet. The rectange will be [bounding box](https://en.wikipedia.org/wiki/Minimum_bounding_box) of the region containing entities on the sheet. If there are no entities on the sheet, the rectangle will represent the entire sheet.
+This methods will return a `Graphpaper.Rectangle` representing the "active" area of a sheet. The rectange will be a [bounding box](https://en.wikipedia.org/wiki/Minimum_bounding_box) of the region containing entities on the sheet. If there are no entities on the sheet, the rectangle will represent the entire sheet.
