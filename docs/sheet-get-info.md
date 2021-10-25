@@ -4,7 +4,6 @@
 
 The dimensions of a sheet can be queries with the `Sheet.getWidth()` and `Sheet.getHeight()` methods.
 
-##### Syntax
 ```javascript
 const width = sheet.getWidth();
 const height = sheet.getHeight();
@@ -16,7 +15,6 @@ Both methods return a `Number`.
 ### Bounding box
 A bounding box representing the "active" area of the Sheet, i.e. the area containing Entities, can be retrieved with the `Sheet.calcBoundingBox()` method.
 
-##### Syntax
 ```javascript
 const boundingBox = sheet.calcBoundingBox();
 ```
