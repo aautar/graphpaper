@@ -1,4 +1,5 @@
 import {BoxClusterDetector} from '../BoxClusterDetector';
+import {Cluster} from '../Cluster';
 import {UUID} from '../UUID';
 
 const workerData = {
@@ -36,6 +37,19 @@ const processRequestQueue = function() {
     // process request
     const entityDescriptors = lastRequest.entityDescriptors;
     const clusterDetector = new BoxClusterDetector(12.0);
+
+    if(lastRequest.knownClustersOverwrite !== null) {
+        const toClusterArray = (_jsonArr) => {
+            const result = [];
+            _jsonArr.forEach((_clusterJSON) => {
+                result.push(Cluster.fromJSON(_clusterJSON));
+            });
+
+            return result;
+        };
+
+        workerData.knownClusters = toClusterArray(lastRequest.knownClustersOverwrite);
+    }
 
     const computeClustersTimeT1 = new Date();
     const clusterDetectResult = clusterDetector.computeClusters(entityDescriptors, workerData.knownClusters, UUID.v4);

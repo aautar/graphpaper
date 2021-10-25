@@ -1721,13 +1721,13 @@ var GraphPaper = (function (exports) {
 
     function DescriptorCollection(a){var b=this,c=[];this.getId=function(){return a},this.getDescriptorIndex=function(a){return b.getDescriptorIndexById(a.id)},this.getDescriptorIndexById=function(a){for(var b=0;b<c.length;b++)if(c[b].id===a)return b;return null},this.addDescriptor=function(a){return !(null!==b.getDescriptorIndex(a))&&(c.push(a),!0)},this.getDescriptors=function(){return c},this.getIds=function(){var a=[];return c.forEach(function(b){a.push(b.id);}),a},this.removeById=function(a){var d=b.getDescriptorIndexById(a);return null!==d&&(c.splice(d,1),!0)},this.removeAll=function(){c.length=0;};}
 
-    function Cluster(a){var b=new DescriptorCollection(a);this.getId=function(){return a},this.getEntityIndex=function(a){return b.getDescriptorIndex(a)},this.getEntityIndexById=function(a){return b.getDescriptorIndexById(a)},this.addEntity=function(a){return b.addDescriptor(a)},this.getEntities=function(){return b.getDescriptors()},this.getEntityIds=function(){return b.getIds()},this.removeEntityById=function(a){return b.removeById(a)},this.removeAllEntities=function(){return b.removeAll()},this.hasEntities=function(a){for(var c=!0,d=0;d<a.length;d++)if(null===b.getDescriptorIndexById(a[d])){c=!1;break}return c},this.toJSON=function(){return {id:a,entities:b.getDescriptors()}};}
+    function Cluster(a){var b=new DescriptorCollection(a);this.getId=function(){return a},this.getEntityIndex=function(a){return b.getDescriptorIndex(a)},this.getEntityIndexById=function(a){return b.getDescriptorIndexById(a)},this.addEntity=function(a){return b.addDescriptor(a)},this.getEntities=function(){return b.getDescriptors()},this.getEntityIds=function(){return b.getIds()},this.removeEntityById=function(a){return b.removeById(a)},this.removeAllEntities=function(){return b.removeAll()},this.hasEntities=function(a){for(var c=!0,d=0;d<a.length;d++)if(null===b.getDescriptorIndexById(a[d])){c=!1;break}return c},this.toJSON=function(){return {id:a,entities:b.getDescriptors()}};}Cluster.fromJSON=function(a){var b=new Cluster(a.id);return a.entities.forEach(function(a){b.addEntity(a);}),b};
 
     function BoxClusterDetector(a){var b=this,c=function getEntityIndexFromArray(a,b){for(var c=0;c<b.length;c++)if(b[c].id===a.id)return c;return -1},d=function removeEntitiesFromArray(a,b){for(var d,e=0;e<a.length;e++)d=c(a[e],b),-1!==d&&b.splice(d,1);return b},e=function getClusterWithMostEntitiesFromClusterMap(a){var b=0,c=null;return a.forEach(function(a,d,e){a>b&&(b=a,c=d);}),c};this.areEntitiesClose=function(b,c){var d=new Rectangle(b.x-a,b.y-a,b.x+b.width+a,b.y+b.height+a),e=new Rectangle(c.x-a,c.y-a,c.x+c.width+a,c.y+c.height+a);return d.checkIntersect(e)},this.getAllEntitiesCloseTo=function(a,c){for(var d=[],e=0;e<c.length;e++)a.id!==c[e].id&&b.areEntitiesClose(a,c[e])&&d.push(c[e]);return d},this.getClusterEntitiesFromSeed=function(a,c,e){var f=b.getAllEntitiesCloseTo(a,c);return 0===f.length?[]:void(d(f.concat([a]),c),f.forEach(function(a){e.push(a),b.getClusterEntitiesFromSeed(a,c,e);}))},this.findIntersectingClustersForEntities=function(a,b){var c=new Map;return b.forEach(function(b){for(var d=b.getEntities(),e=0;e<d.length;e++)for(var f=0;f<a.length;f++)if(d[e].id===a[f].id)if(c.has(b)){var g=c.get(b);c.set(b,g+1);}else c.set(b,1);}),c},this.removeEntityFromClusters=function(a,b){var c=[];return b.forEach(function(b){var d=b.removeEntityById(a.id);d&&c.push(b.getId());}),c},this.mapToClustersWithOldEntitiesRemoved=function(a,b){var c=b.map(function(b){for(var c=b.getEntityIds(),d=0;d<c.length;d++)-1===a.indexOf(c[d])&&b.removeEntityById(c[d]);return b});return c},this.computeClusters=function(a,c,f){for(var g=new Set,h=new Set,i=new Set,j=a.map(function(a){return a}),k=a.map(function(a){return a.id}),l=b.mapToClustersWithOldEntitiesRemoved(k,c);0<j.length;){var m=j.pop(),n=[m];if(b.getClusterEntitiesFromSeed(m,j,n),1<n.length){var q=b.findIntersectingClustersForEntities(n,l);0===q.size?function(){var a=f(),b=new Cluster(a);n.forEach(function(a){b.addEntity(a);}),l.push(b),g.add(a);}():function(){var a=e(q),c=a.getEntityIds();a.removeAllEntities(),n.forEach(function(c){var d=b.removeEntityFromClusters(c,l);d.forEach(function(a){h.add(a);}),a.addEntity(c);}),a.getEntityIds().length===c.length&&a.hasEntities(c)||h.add(a.getId());}(),d(n,j);}else {var r=b.removeEntityFromClusters(m,l);r.forEach(function(a){h.add(a);});}}var o=l.filter(function(a){return !!(2>a.getEntities().length)});o.forEach(function(a){h.delete(a.getId()),i.add(a.getId());}),g.forEach(function(a){h.delete(a);});var p=l.filter(function(a){return !!(2<=a.getEntities().length)});return {clusters:p,newClusterIds:g,updatedClusterIds:h,deletedClusterIds:i}};}
 
     var UUID={v4:function v4(){return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(a){var b=0|16*Math.random(),c="x"==a?b:8|3&b;return c.toString(16)})}};
 
-    var workerData={requestQueue:[],knownClusters:[]},clustersToTransferrableMap=function clustersToTransferrableMap(a){for(var b=new Map,c=0;c<a.length;c++)b.set(a[c].getId(),a[c].toJSON());return b},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a={overallTime:null},b=workerData.requestQueue.pop();workerData.requestQueue.length=0;var c=b.entityDescriptors,d=new BoxClusterDetector(12),e=new Date,f=d.computeClusters(c,workerData.knownClusters,UUID.v4);a.computeClustersTime=new Date-e,postMessage({metrics:a,clusters:clustersToTransferrableMap(f.clusters),newClusterIds:f.newClusterIds,updatedClusterIds:f.updatedClusterIds,deletedClusterIds:f.deletedClusterIds}),workerData.knownClusters=f.clusters;}};setInterval(processRequestQueue,50),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
+    var workerData={requestQueue:[],knownClusters:[]},clustersToTransferrableMap=function clustersToTransferrableMap(a){for(var b=new Map,c=0;c<a.length;c++)b.set(a[c].getId(),a[c].toJSON());return b},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a={overallTime:null},b=workerData.requestQueue.pop();workerData.requestQueue.length=0;var c=b.entityDescriptors,d=new BoxClusterDetector(12);if(null!==b.knownClustersOverwrite){var g=function toClusterArray(a){var b=[];return a.forEach(function(a){b.push(Cluster.fromJSON(a));}),b};workerData.knownClusters=g(b.knownClustersOverwrite);}var e=new Date,f=d.computeClusters(c,workerData.knownClusters,UUID.v4);a.computeClustersTime=new Date-e,postMessage({metrics:a,clusters:clustersToTransferrableMap(f.clusters),newClusterIds:f.newClusterIds,updatedClusterIds:f.updatedClusterIds,deletedClusterIds:f.deletedClusterIds}),workerData.knownClusters=f.clusters;}};setInterval(processRequestQueue,50),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
 
 }());
 `;
@@ -2080,6 +2080,14 @@ var GraphPaper = (function (exports) {
             };
         };
     }
+    Cluster.fromJSON = function(_clusterJSON) {
+        const result = new Cluster(_clusterJSON.id);
+        _clusterJSON.entities.forEach((_entityDescriptor) => {
+            result.addEntity(_entityDescriptor);
+        });
+
+        return result;
+    };
 
     /**
      * @callback HandleSheetInteractionCallback
@@ -2203,6 +2211,9 @@ var GraphPaper = (function (exports) {
         const bestConnectorAnchorsForEntityConnectionsFinder = new BestToConnectEntitiesFinder();
 
         // Setup ClusterDetectionWorker
+
+        // JSON representation of known clusters
+        let knownClustersOverwrite = null;
         const clusterDetectionWorkerUrl = URL.createObjectURL(new Blob([ ClusterDetectionWorkerJsString ]));
         let clusterDetectionWorker = null;
 
@@ -2210,23 +2221,14 @@ var GraphPaper = (function (exports) {
             clusterDetectionWorker = new Worker(clusterDetectionWorkerUrl);
             
             clusterDetectionWorker.onmessage = function(_msg) {
-                const constructClusterFromJSON = function(_json) {
-                    const result = new Cluster(_json.id);
-                    _json.entities.forEach((_entityDescriptor) => {
-                        result.addEntity(_entityDescriptor);
-                    });
-
-                    return result;
-                };
-
                 const data = _msg.data;
 
                 data.newClusterIds.forEach((_cId) => {
-                    emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
+                    emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': Cluster.fromJSON(data.clusters.get(_cId)) });
                 });
 
                 data.updatedClusterIds.forEach((_cId) => {
-                    emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
+                    emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': Cluster.fromJSON(data.clusters.get(_cId)) });
                 });
 
                 data.deletedClusterIds.forEach((_cId) => {
@@ -2234,8 +2236,22 @@ var GraphPaper = (function (exports) {
                 });
 
                 metrics.clusterDetectionWorker.computeClustersTime = data.metrics.computeClustersTime;
+
+                knownClustersOverwrite = null;
             };
         };
+
+        /**
+         * @param {Cluster[]} _clusters 
+         */
+         this.overwriteClusterDetectorKnownClusters = function(_clusters) {
+            const _clusterJSON = [];
+            _clusters.forEach((_c) => {
+                _clusterJSON.push(_c.toJSON());
+            });
+
+            knownClustersOverwrite = _clusterJSON;
+        };    
 
         // Setup ConnectorRoutingWorker
         const connectorRoutingWorkerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
@@ -2347,16 +2363,12 @@ var GraphPaper = (function (exports) {
             isDomMetricsLockActive = false;
         };
 
+        /**
+         * 
+         * @returns {Boolean}
+         */
         this.hasDomMetricsLock = function() {
             return isDomMetricsLockActive;
-        };
-
-        /**
-         * @todo
-         * @param {Cluster[]} _clusters 
-         */
-         this.setClusterDetectorKnownClusters = function(_clusters) {
-
         };
 
         const refreshAllClustersInternal = function() {
@@ -2373,16 +2385,13 @@ var GraphPaper = (function (exports) {
                 entityDescriptors.push(_e.getDescriptor(gridSize));
             });
 
-            clusterDetectionWorker.postMessage(
-                {
-                    "gridSize": gridSize,
-                    "entityDescriptors": entityDescriptors
-                },
-                [
-
-                ]
-            );
-
+            const postData = {
+                "gridSize": gridSize,
+                "entityDescriptors": entityDescriptors,
+                "knownClustersOverwrite": knownClustersOverwrite
+            };
+           
+            clusterDetectionWorker.postMessage(postData, []);
             unlockDomMetrics();
         };
 

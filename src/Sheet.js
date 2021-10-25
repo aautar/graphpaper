@@ -139,6 +139,9 @@ function Sheet(_sheetDomElement, _window) {
     const bestConnectorAnchorsForEntityConnectionsFinder = new BestToConnectEntitiesFinder();
 
     // Setup ClusterDetectionWorker
+
+    // JSON representation of known clusters
+    let knownClustersOverwrite = null;
     const clusterDetectionWorkerUrl = URL.createObjectURL(new Blob([ ClusterDetectionWorkerJsString ]));
     let clusterDetectionWorker = null;
 
@@ -146,23 +149,14 @@ function Sheet(_sheetDomElement, _window) {
         clusterDetectionWorker = new Worker(clusterDetectionWorkerUrl);
         
         clusterDetectionWorker.onmessage = function(_msg) {
-            const constructClusterFromJSON = function(_json) {
-                const result = new Cluster(_json.id);
-                _json.entities.forEach((_entityDescriptor) => {
-                    result.addEntity(_entityDescriptor);
-                });
-
-                return result;
-            };
-
             const data = _msg.data;
 
             data.newClusterIds.forEach((_cId) => {
-                emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
+                emitEvent(SheetEvent.CLUSTER_CREATED, { 'cluster': Cluster.fromJSON(data.clusters.get(_cId)) });
             });
 
             data.updatedClusterIds.forEach((_cId) => {
-                emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': constructClusterFromJSON(data.clusters.get(_cId)) });
+                emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': Cluster.fromJSON(data.clusters.get(_cId)) });
             });
 
             data.deletedClusterIds.forEach((_cId) => {
@@ -170,8 +164,22 @@ function Sheet(_sheetDomElement, _window) {
             });
 
             metrics.clusterDetectionWorker.computeClustersTime = data.metrics.computeClustersTime;
+
+            knownClustersOverwrite = null;
         };
     };
+
+    /**
+     * @param {Cluster[]} _clusters 
+     */
+     this.overwriteClusterDetectorKnownClusters = function(_clusters) {
+        const _clusterJSON = [];
+        _clusters.forEach((_c) => {
+            _clusterJSON.push(_c.toJSON());
+        });
+
+        knownClustersOverwrite = _clusterJSON;
+    };    
 
     // Setup ConnectorRoutingWorker
     const connectorRoutingWorkerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
@@ -283,16 +291,12 @@ function Sheet(_sheetDomElement, _window) {
         isDomMetricsLockActive = false;
     };
 
+    /**
+     * 
+     * @returns {Boolean}
+     */
     this.hasDomMetricsLock = function() {
         return isDomMetricsLockActive;
-    };
-
-    /**
-     * @todo
-     * @param {Cluster[]} _clusters 
-     */
-     this.setClusterDetectorKnownClusters = function(_clusters) {
-
     };
 
     const refreshAllClustersInternal = function() {
@@ -309,16 +313,13 @@ function Sheet(_sheetDomElement, _window) {
             entityDescriptors.push(_e.getDescriptor(gridSize));
         });
 
-        clusterDetectionWorker.postMessage(
-            {
-                "gridSize": gridSize,
-                "entityDescriptors": entityDescriptors
-            },
-            [
-
-            ]
-        );
-
+        const postData = {
+            "gridSize": gridSize,
+            "entityDescriptors": entityDescriptors,
+            "knownClustersOverwrite": knownClustersOverwrite
+        };
+       
+        clusterDetectionWorker.postMessage(postData, []);
         unlockDomMetrics();
     };
 
