@@ -12,6 +12,7 @@ GraphPaper is very much a work-in-progress, expect major, breaking, changes to t
 
 - [Transformation & Spaces](docs/spaces.md)
 - [Getting information about a sheet](docs/sheet-get-info.md)
+- [Sheet Transformations](docs/sheet-transformations.md)
 - [Adding, removing, and querying entities on a sheet](docs/sheet-entities.md)
 - [Modifying a sheet's grid](docs/sheet-modify-grid.md)
 - [Sheet Events](docs/sheet-events.md)
