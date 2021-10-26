@@ -10,17 +10,26 @@ GraphPaper is very much a work-in-progress, expect major, breaking, changes to t
 
 ## Documentation
 
+### Concepts
 - [Transformation & Spaces](docs/spaces.md)
+
+### Working with Sheets
 - [Getting information about a sheet](docs/sheet-get-info.md)
 - [Sheet Transformations](docs/sheet-transformations.md)
-- [Adding, removing, and querying entities on a sheet](docs/sheet-entities.md)
 - [Modifying a sheet's grid](docs/sheet-modify-grid.md)
 - [Sheet Events](docs/sheet-events.md)
+
+### Entities
+- [Adding, removing, and querying entities on a sheet](docs/sheet-entities.md)
 - [Entity methods](docs/entity-methods.md)
 - [Entity events](docs/entity-events.md)
 - [Multi-Entity Selection & Transformation](docs/multi-selection-transformation.md)
-- Connectors (TDB)
-- Clusters (TDB)
+
+### Connectors
+- Connectors (TBD)
+
+### Clusters
+- Clusters (TBD)
 
 
 ## Quick Start: Sheets & Entities
