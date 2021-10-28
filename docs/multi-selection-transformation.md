@@ -15,8 +15,37 @@ sheet.on(GraphPaper.SheetEvent.MULTIPLE_ENTITIES_SELECTED, function(e) {
 ```
 
 The event object (e) has 2 fields:
-- `selectedEntities` contains entities within the selection rectangle
-- `boundingRect` is a bounding rectangle around the selected entities
+```javascript
+{
+    `selectedEntities`,     // entities within the selection rectangle
+    `boundingRect`,         // a bounding rectangle around the selected entities
+}
+```
 
 ### Group (multi-entity) transformation
-TBD
+Group transformations are supported by creating a `GroupTransformationContainer` with a set of entities and attaching it to a sheet via `Sheet.attachGroupTransformationContainer()`. 
+
+Currently only translations are supported on containers, which is enabled by calling `GroupTransformationContainer.initTranslateInteractionHandler()`.
+
+```javascript
+const container = new GraphPaper.GroupTransformationContainer(sheet, entities);
+container.initTranslateInteractionHandler();
+sheet.attachGroupTransformationContainer(container);
+```
+
+Typically you'll want to use a `GroupTransformationContainer` to respond to entity selection on a sheet. This requires listening for the `SheetEvent.MULTIPLE_ENTITIES_SELECTED` event, detaching any current container on the sheet, creating a new container, then attaching the new container.
+
+```javascript
+let currentContainer = null;
+sheet.on(GraphPaper.SheetEvent.MULTIPLE_ENTITIES_SELECTED, (e) => {
+    // clear any current group transformation containers
+    if(currentContainer) {
+        sheet.detachGroupTransformationContainer(currentContainer);
+    }
+
+    // create new GroupTransformationContainer..
+    currentContainer = new GraphPaper.GroupTransformationContainer(sheet, e.selectedObjects);
+    currentContainer.initTranslateInteractionHandler();
+    sheet.attachGroupTransformationContainer(currentContainer);
+});
+```
