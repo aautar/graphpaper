@@ -1723,11 +1723,11 @@ var GraphPaper = (function (exports) {
 
     function Cluster(a){var b=new DescriptorCollection(a);this.getId=function(){return a},this.getEntityIndex=function(a){return b.getDescriptorIndex(a)},this.getEntityIndexById=function(a){return b.getDescriptorIndexById(a)},this.addEntity=function(a){return b.addDescriptor(a)},this.getEntities=function(){return b.getDescriptors()},this.getEntityIds=function(){return b.getIds()},this.removeEntityById=function(a){return b.removeById(a)},this.removeAllEntities=function(){return b.removeAll()},this.hasEntities=function(a){for(var c=!0,d=0;d<a.length;d++)if(null===b.getDescriptorIndexById(a[d])){c=!1;break}return c},this.toJSON=function(){return {id:a,entities:b.getDescriptors()}};}Cluster.fromJSON=function(a){var b=new Cluster(a.id);return a.entities.forEach(function(a){b.addEntity(a);}),b};
 
-    function BoxClusterDetector(a){var b=this,c=function getEntityIndexFromArray(a,b){for(var c=0;c<b.length;c++)if(b[c].id===a.id)return c;return -1},d=function removeEntitiesFromArray(a,b){for(var d,e=0;e<a.length;e++)d=c(a[e],b),-1!==d&&b.splice(d,1);return b},e=function getClusterWithMostEntitiesFromClusterMap(a){var b=0,c=null;return a.forEach(function(a,d,e){a>b&&(b=a,c=d);}),c};this.areEntitiesClose=function(b,c){var d=new Rectangle(b.x-a,b.y-a,b.x+b.width+a,b.y+b.height+a),e=new Rectangle(c.x-a,c.y-a,c.x+c.width+a,c.y+c.height+a);return d.checkIntersect(e)},this.getAllEntitiesCloseTo=function(a,c){for(var d=[],e=0;e<c.length;e++)a.id!==c[e].id&&b.areEntitiesClose(a,c[e])&&d.push(c[e]);return d},this.getClusterEntitiesFromSeed=function(a,c,e){var f=b.getAllEntitiesCloseTo(a,c);return 0===f.length?[]:void(d(f.concat([a]),c),f.forEach(function(a){e.push(a),b.getClusterEntitiesFromSeed(a,c,e);}))},this.findIntersectingClustersForEntities=function(a,b){var c=new Map;return b.forEach(function(b){for(var d=b.getEntities(),e=0;e<d.length;e++)for(var f=0;f<a.length;f++)if(d[e].id===a[f].id)if(c.has(b)){var g=c.get(b);c.set(b,g+1);}else c.set(b,1);}),c},this.removeEntityFromClusters=function(a,b){var c=[];return b.forEach(function(b){var d=b.removeEntityById(a.id);d&&c.push(b.getId());}),c},this.mapToClustersWithOldEntitiesRemoved=function(a,b){var c=b.map(function(b){for(var c=b.getEntityIds(),d=0;d<c.length;d++)-1===a.indexOf(c[d])&&b.removeEntityById(c[d]);return b});return c},this.computeClusters=function(a,c,f){for(var g=new Set,h=new Set,i=new Set,j=a.map(function(a){return a}),k=a.map(function(a){return a.id}),l=b.mapToClustersWithOldEntitiesRemoved(k,c);0<j.length;){var m=j.pop(),n=[m];if(b.getClusterEntitiesFromSeed(m,j,n),1<n.length){var q=b.findIntersectingClustersForEntities(n,l);0===q.size?function(){var a=f(),b=new Cluster(a);n.forEach(function(a){b.addEntity(a);}),l.push(b),g.add(a);}():function(){var a=e(q),c=a.getEntityIds();a.removeAllEntities(),n.forEach(function(c){var d=b.removeEntityFromClusters(c,l);d.forEach(function(a){h.add(a);}),a.addEntity(c);}),a.getEntityIds().length===c.length&&a.hasEntities(c)||h.add(a.getId());}(),d(n,j);}else {var r=b.removeEntityFromClusters(m,l);r.forEach(function(a){h.add(a);});}}var o=l.filter(function(a){return !!(2>a.getEntities().length)});o.forEach(function(a){h.delete(a.getId()),i.add(a.getId());}),g.forEach(function(a){h.delete(a);});var p=l.filter(function(a){return !!(2<=a.getEntities().length)});return {clusters:p,newClusterIds:g,updatedClusterIds:h,deletedClusterIds:i}};}
+    function BoxClusterDetector(a){var b=this,c=function getEntityIndexFromArray(a,b){for(var c=0;c<b.length;c++)if(b[c].id===a.id)return c;return -1},d=function removeEntitiesFromArray(a,b){for(var d,e=0;e<a.length;e++)d=c(a[e],b),-1!==d&&b.splice(d,1);return b},e=function getClusterWithMostEntitiesFromClusterMap(a){var b=0,c=null;return a.forEach(function(a,d,e){a>b&&(b=a,c=d);}),c},f=function computeDiffBetweenArrays(a,b){var c=[],d=[];return b.forEach(function(b){-1===a.indexOf(b)&&d.push(b);}),a.forEach(function(a){-1===b.indexOf(a)&&c.push(a);}),{onlyInA:c,onlyInB:d}};this.areEntitiesClose=function(b,c){var d=new Rectangle(b.x-a,b.y-a,b.x+b.width+a,b.y+b.height+a),e=new Rectangle(c.x-a,c.y-a,c.x+c.width+a,c.y+c.height+a);return d.checkIntersect(e)},this.getAllEntitiesCloseTo=function(a,c){for(var d=[],e=0;e<c.length;e++)a.id!==c[e].id&&b.areEntitiesClose(a,c[e])&&d.push(c[e]);return d},this.getClusterEntitiesFromSeed=function(a,c,e){var f=b.getAllEntitiesCloseTo(a,c);return 0===f.length?[]:void(d(f.concat([a]),c),f.forEach(function(a){e.push(a),b.getClusterEntitiesFromSeed(a,c,e);}))},this.findIntersectingClustersForEntities=function(a,b){var c=new Map;return b.forEach(function(b){for(var d=b.getEntities(),e=0;e<d.length;e++)for(var f=0;f<a.length;f++)if(d[e].id===a[f].id)if(c.has(b)){var g=c.get(b);c.set(b,g+1);}else c.set(b,1);}),c},this.removeEntityFromClusters=function(a,b){var c=[];return b.forEach(function(b){var d=b.removeEntityById(a.id);d&&c.push(b.getId());}),c},this.mapToClustersWithOldEntitiesRemoved=function(a,b){var c=b.map(function(b){for(var c=b.getEntityIds(),d=0;d<c.length;d++)-1===a.indexOf(c[d])&&b.removeEntityById(c[d]);return b});return c},this.computeClusters=function(a,c,g){for(var h=new Set,i=new Set,j=new Set,k=new Map,l=new Map,m=a.map(function(a){return a}),n=a.map(function(a){return a.id}),o=b.mapToClustersWithOldEntitiesRemoved(n,c);0<m.length;){var p=m.pop(),q=[p];if(b.getClusterEntitiesFromSeed(p,m,q),1<q.length){var t=b.findIntersectingClustersForEntities(q,o);0===t.size?function(){var a=g(),b=new Cluster(a);q.forEach(function(a){b.addEntity(a);}),o.push(b),h.add(a);}():function(){var a=e(t),c=a.getEntityIds();if(a.removeAllEntities(),q.forEach(function(c){var d=b.removeEntityFromClusters(c,o);d.forEach(function(a){i.add(a);}),a.addEntity(c);}),a.getEntityIds().length===c.length&&a.hasEntities(c));else {i.add(a.getId());var d=a.getEntityIds(),g=f(c,d);l.set(a.getId(),g.onlyInA),k.set(a.getId(),g.onlyInB);}}(),d(q,m);}else {var u=b.removeEntityFromClusters(p,o);u.forEach(function(a){i.add(a);});}}var r=o.filter(function(a){return !!(2>a.getEntities().length)});r.forEach(function(a){i.delete(a.getId()),j.add(a.getId());}),h.forEach(function(a){i.delete(a);});var s=o.filter(function(a){return !!(2<=a.getEntities().length)});return {clusters:s,newClusterIds:h,updatedClusterIds:i,deletedClusterIds:j,updatedClusterToRemovedEntitites:l,updatedClusterToAddedEntitites:k}};}
 
     var UUID={v4:function v4(){return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(a){var b=0|16*Math.random(),c="x"==a?b:8|3&b;return c.toString(16)})}};
 
-    var workerData={requestQueue:[],knownClusters:[]},clustersToTransferrableMap=function clustersToTransferrableMap(a){for(var b=new Map,c=0;c<a.length;c++)b.set(a[c].getId(),a[c].toJSON());return b},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a={overallTime:null},b=workerData.requestQueue.pop();workerData.requestQueue.length=0;var c=b.entityDescriptors,d=new BoxClusterDetector(12);if(null!==b.knownClustersOverwrite){var g=function toClusterArray(a){var b=[];return a.forEach(function(a){b.push(Cluster.fromJSON(a));}),b};workerData.knownClusters=g(b.knownClustersOverwrite);}var e=new Date,f=d.computeClusters(c,workerData.knownClusters,UUID.v4);a.computeClustersTime=new Date-e,postMessage({metrics:a,clusters:clustersToTransferrableMap(f.clusters),newClusterIds:f.newClusterIds,updatedClusterIds:f.updatedClusterIds,deletedClusterIds:f.deletedClusterIds}),workerData.knownClusters=f.clusters;}};setInterval(processRequestQueue,50),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
+    var workerData={requestQueue:[],knownClusters:[]},clustersToTransferrableMap=function clustersToTransferrableMap(a){for(var b=new Map,c=0;c<a.length;c++)b.set(a[c].getId(),a[c].toJSON());return b},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a={overallTime:null},b=workerData.requestQueue.pop();workerData.requestQueue.length=0;var c=b.entityDescriptors,d=new BoxClusterDetector(12);if(null!==b.knownClustersOverwrite){var g=function toClusterArray(a){var b=[];return a.forEach(function(a){b.push(Cluster.fromJSON(a));}),b};workerData.knownClusters=g(b.knownClustersOverwrite);}var e=new Date,f=d.computeClusters(c,workerData.knownClusters,UUID.v4);a.computeClustersTime=new Date-e,postMessage({metrics:a,clusters:clustersToTransferrableMap(f.clusters),newClusterIds:f.newClusterIds,updatedClusterIds:f.updatedClusterIds,deletedClusterIds:f.deletedClusterIds,updatedClusterToRemovedEntitites:f.updatedClusterToRemovedEntitites,updatedClusterToAddedEntitites:f.updatedClusterToAddedEntitites}),workerData.knownClusters=f.clusters;}};setInterval(processRequestQueue,50),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
 
 }());
 `;
@@ -2228,7 +2228,18 @@ var GraphPaper = (function (exports) {
                 });
 
                 data.updatedClusterIds.forEach((_cId) => {
-                    emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': Cluster.fromJSON(data.clusters.get(_cId)) });
+                    const eventObj = { 
+                        "cluster": Cluster.fromJSON(data.clusters.get(_cId)),
+                        "entitiesAdded": data.updatedClusterToAddedEntitites,
+                        "entitiesRemoved": data.updatedClusterToRemovedEntitites,
+                    };
+
+                    console.log(eventObj);
+
+                    emitEvent(
+                        SheetEvent.CLUSTER_UPDATED, 
+                        eventObj
+                    );
                 });
 
                 data.deletedClusterIds.forEach((_cId) => {
@@ -2390,7 +2401,7 @@ var GraphPaper = (function (exports) {
                 "entityDescriptors": entityDescriptors,
                 "knownClustersOverwrite": knownClustersOverwrite
             };
-           
+
             clusterDetectionWorker.postMessage(postData, []);
             unlockDomMetrics();
         };
@@ -4484,6 +4495,34 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * 
+         * @param {String[]} _arrA 
+         * @param {String[]} _arrB 
+         * @returns {Object}
+         */
+        const computeDiffBetweenArrays = function(_arrA, _arrB) {
+            const onlyInA = [];
+            const onlyInB = [];
+
+            _arrB.forEach((_postItem) => {
+                if(_arrA.indexOf(_postItem) === -1) {
+                    onlyInB.push(_postItem);
+                }
+            });
+
+            _arrA.forEach((_preItem) => {
+                if(_arrB.indexOf(_preItem) === -1) {
+                    onlyInA.push(_preItem);
+                }
+            });
+
+            return {
+                "onlyInA": onlyInA,
+                "onlyInB": onlyInB
+            };
+        };
+
+        /**
          * @param {Object} _entityA
          * @param {Object} _entityB
          * @returns {Boolean}
@@ -4624,6 +4663,8 @@ var GraphPaper = (function (exports) {
             const newClusterIds = new Set();
             const updatedClusterIds = new Set();
             const deletedClusterIds = new Set();
+            const updatedClusterToAddedEntitites = new Map();
+            const updatedClusterToRemovedEntitites = new Map();
 
             const entitiesUnderConsideration = _entityDescriptors.map(function(_e) {
                 return _e;
@@ -4672,6 +4713,12 @@ var GraphPaper = (function (exports) {
 
                         if(clusterToModify.getEntityIds().length === preEntityIds.length && clusterToModify.hasEntities(preEntityIds)) ; else {
                             updatedClusterIds.add(clusterToModify.getId());
+
+                            const postUpdateEntityIds = clusterToModify.getEntityIds();
+                            const diffResult = computeDiffBetweenArrays(preEntityIds, postUpdateEntityIds);
+
+                            updatedClusterToRemovedEntitites.set(clusterToModify.getId(), diffResult.onlyInA);
+                            updatedClusterToAddedEntitites.set(clusterToModify.getId(), diffResult.onlyInB);
                         }
                     }
 
@@ -4720,6 +4767,8 @@ var GraphPaper = (function (exports) {
                 "newClusterIds": newClusterIds,
                 "updatedClusterIds": updatedClusterIds,
                 "deletedClusterIds": deletedClusterIds,
+                "updatedClusterToRemovedEntitites": updatedClusterToRemovedEntitites,
+                "updatedClusterToAddedEntitites": updatedClusterToAddedEntitites,
             };
         };
     }

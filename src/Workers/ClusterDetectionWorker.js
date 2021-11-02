@@ -62,6 +62,8 @@ const processRequestQueue = function() {
             "newClusterIds": clusterDetectResult.newClusterIds,
             "updatedClusterIds": clusterDetectResult.updatedClusterIds,
             "deletedClusterIds": clusterDetectResult.deletedClusterIds,
+            "updatedClusterToRemovedEntitites": clusterDetectResult.updatedClusterToRemovedEntitites,
+            "updatedClusterToAddedEntitites": clusterDetectResult.updatedClusterToAddedEntitites,            
         }
     );
 

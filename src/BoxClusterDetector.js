@@ -57,6 +57,34 @@ function BoxClusterDetector(_boxExtentOffset) {
     };
 
     /**
+     * 
+     * @param {String[]} _arrA 
+     * @param {String[]} _arrB 
+     * @returns {Object}
+     */
+    const computeDiffBetweenArrays = function(_arrA, _arrB) {
+        const onlyInA = [];
+        const onlyInB = [];
+
+        _arrB.forEach((_postItem) => {
+            if(_arrA.indexOf(_postItem) === -1) {
+                onlyInB.push(_postItem);
+            }
+        });
+
+        _arrA.forEach((_preItem) => {
+            if(_arrB.indexOf(_preItem) === -1) {
+                onlyInA.push(_preItem);
+            }
+        });
+
+        return {
+            "onlyInA": onlyInA,
+            "onlyInB": onlyInB
+        };
+    };
+
+    /**
      * @param {Map<Cluster, Number>} _clusterToEntityCountMap 
      * @returns {Cluster[]}
      */
@@ -210,6 +238,8 @@ function BoxClusterDetector(_boxExtentOffset) {
         const newClusterIds = new Set();
         const updatedClusterIds = new Set();
         const deletedClusterIds = new Set();
+        const updatedClusterToAddedEntitites = new Map();
+        const updatedClusterToRemovedEntitites = new Map();
 
         const entitiesUnderConsideration = _entityDescriptors.map(function(_e) {
             return _e;
@@ -260,6 +290,12 @@ function BoxClusterDetector(_boxExtentOffset) {
                         // we ended up with the same cluster, no update
                     } else {
                         updatedClusterIds.add(clusterToModify.getId());
+
+                        const postUpdateEntityIds = clusterToModify.getEntityIds();
+                        const diffResult = computeDiffBetweenArrays(preEntityIds, postUpdateEntityIds);
+
+                        updatedClusterToRemovedEntitites.set(clusterToModify.getId(), diffResult.onlyInA);
+                        updatedClusterToAddedEntitites.set(clusterToModify.getId(), diffResult.onlyInB);
                     }
                 }
 
@@ -308,6 +344,8 @@ function BoxClusterDetector(_boxExtentOffset) {
             "newClusterIds": newClusterIds,
             "updatedClusterIds": updatedClusterIds,
             "deletedClusterIds": deletedClusterIds,
+            "updatedClusterToRemovedEntitites": updatedClusterToRemovedEntitites,
+            "updatedClusterToAddedEntitites": updatedClusterToAddedEntitites,
         };
     };
 };

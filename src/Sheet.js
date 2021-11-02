@@ -156,7 +156,16 @@ function Sheet(_sheetDomElement, _window) {
             });
 
             data.updatedClusterIds.forEach((_cId) => {
-                emitEvent(SheetEvent.CLUSTER_UPDATED, { 'cluster': Cluster.fromJSON(data.clusters.get(_cId)) });
+                const eventObj = { 
+                    "cluster": Cluster.fromJSON(data.clusters.get(_cId)),
+                    "entitiesAdded": data.updatedClusterToAddedEntitites,
+                    "entitiesRemoved": data.updatedClusterToRemovedEntitites,
+                };
+
+                emitEvent(
+                    SheetEvent.CLUSTER_UPDATED, 
+                    eventObj
+                );
             });
 
             data.deletedClusterIds.forEach((_cId) => {
@@ -318,7 +327,7 @@ function Sheet(_sheetDomElement, _window) {
             "entityDescriptors": entityDescriptors,
             "knownClustersOverwrite": knownClustersOverwrite
         };
-       
+
         clusterDetectionWorker.postMessage(postData, []);
         unlockDomMetrics();
     };
