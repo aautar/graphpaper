@@ -302,8 +302,15 @@ function BoxClusterDetector(_boxExtentOffset) {
                 removeEntitiesFromArray(entitiesForCluster, entitiesUnderConsideration);
             } else {
                 const clustersMutated = self.removeEntityFromClusters(entityDescriptor, clusters);
-                clustersMutated.forEach((_clusterId) => {
+                clustersMutated.forEach((_clusterId) => {                    
                     updatedClusterIds.add(_clusterId);
+
+                    const existingEntry = updatedClusterToRemovedEntitites.get(_clusterId);
+                    if(existingEntry) {
+                        existingEntry.push(entityDescriptor.id);
+                    } else {
+                        updatedClusterToRemovedEntitites.set(_clusterId, [entityDescriptor.id]);
+                    }
                 });
             }
         }
@@ -322,12 +329,17 @@ function BoxClusterDetector(_boxExtentOffset) {
         // Mark empty and single clusters as deleted clusters
         emptyAndSingletonClusters.forEach((_c) => {
             updatedClusterIds.delete(_c.getId());
+            updatedClusterToAddedEntitites.delete(_c.getId());
+            updatedClusterToRemovedEntitites.delete(_c.getId());
+
             deletedClusterIds.add(_c.getId());
         });
 
         // Don't mark new clusters as also being updated clusters
         newClusterIds.forEach((_cId) => {
             updatedClusterIds.delete(_cId);
+            updatedClusterToAddedEntitites.delete(_cId);
+            updatedClusterToRemovedEntitites.delete(_cId);            
         });
 
         // Filter out clusters w/o any entities

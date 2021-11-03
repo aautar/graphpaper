@@ -358,7 +358,41 @@ describe("BoxClusterDetector::computeClusters", function() {
         expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e1Descriptor) >= 0).toEqual(true);
         expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e2Descriptor) >= 0).toEqual(false);
         expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e3Descriptor) >= 0).toEqual(true);
+        expect(clusterDetectorResult.updatedClusterIds.size).toEqual(1);
+        expect(clusterDetectorResult.updatedClusterToRemovedEntitites.get('existing-cluster-id')).toEqual(['obj-456']);
     });
+
+    it("removes moved entity from an existing cluster (removed entity is first popped for consideration)", function() {  
+        const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+        const e2 = new Entity("obj-456", 112, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+        const e3 = new Entity("obj-789", 114, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
+
+        const idGenerator = function() {
+            return "new-cluster-id";
+        };
+
+        const existingCluster = new Cluster("existing-cluster-id");
+        existingCluster.addEntity(e1.getDescriptor());
+        existingCluster.addEntity(e2.getDescriptor());    
+        existingCluster.addEntity(e3.getDescriptor());    
+
+        e2.translate(1000.0, 1000.0);
+
+        const e1Descriptor = e1.getDescriptor();
+        const e2Descriptor = e2.getDescriptor();
+        const e3Descriptor = e3.getDescriptor();
+
+        const detector = new BoxClusterDetector(12.0);
+        const clusterDetectorResult = detector.computeClusters([e1Descriptor, e3Descriptor, e2Descriptor], [existingCluster], idGenerator);
+
+        expect(clusterDetectorResult.clusters.length).toEqual(1);
+        expect(clusterDetectorResult.clusters[0].getId()).toEqual('existing-cluster-id');
+        expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e1Descriptor) >= 0).toEqual(true);
+        expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e2Descriptor) >= 0).toEqual(false);
+        expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e3Descriptor) >= 0).toEqual(true);
+        expect(clusterDetectorResult.updatedClusterIds.size).toEqual(1);
+        expect(clusterDetectorResult.updatedClusterToRemovedEntitites.get('existing-cluster-id')).toEqual(['obj-456']);
+    });    
 
     it("returns empty cluster all objects have dispersed", function() {  
         const e1 = new Entity("obj-123", 100, 200, 10, 20, {}, createMockDomElem(), [createMockDomElem()], [createMockDomElem()]);
