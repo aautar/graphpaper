@@ -2230,11 +2230,9 @@ var GraphPaper = (function (exports) {
                 data.updatedClusterIds.forEach((_cId) => {
                     const eventObj = { 
                         "cluster": Cluster.fromJSON(data.clusters.get(_cId)),
-                        "entitiesAdded": data.updatedClusterToAddedEntitites,
-                        "entitiesRemoved": data.updatedClusterToRemovedEntitites,
+                        "entitiesAdded": data.updatedClusterToAddedEntitites.get(_cId),
+                        "entitiesRemoved": data.updatedClusterToRemovedEntitites.get(_cId),
                     };
-
-                    console.log(eventObj);
 
                     emitEvent(
                         SheetEvent.CLUSTER_UPDATED, 
