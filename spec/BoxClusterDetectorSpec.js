@@ -392,6 +392,7 @@ describe("BoxClusterDetector::computeClusters", function() {
         expect(clusterDetectorResult.clusters[0].getEntities().indexOf(e3Descriptor) >= 0).toEqual(true);
         expect(clusterDetectorResult.updatedClusterIds.size).toEqual(1);
         expect(clusterDetectorResult.updatedClusterToRemovedEntitites.get('existing-cluster-id')).toEqual(['obj-456']);
+        expect(clusterDetectorResult.updatedClusterToAddedEntitites.get('existing-cluster-id')).toEqual([]);
     });    
 
     it("returns empty cluster all objects have dispersed", function() {  

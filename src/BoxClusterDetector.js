@@ -311,6 +311,11 @@ function BoxClusterDetector(_boxExtentOffset) {
                     } else {
                         updatedClusterToRemovedEntitites.set(_clusterId, [entityDescriptor.id]);
                     }
+
+                    // make sure updatedClusterToAddedEntitites entry is set
+                    if(typeof updatedClusterToAddedEntitites.get(_clusterId) === 'undefined') {
+                        updatedClusterToAddedEntitites.set(_clusterId, []);
+                    }
                 });
             }
         }
