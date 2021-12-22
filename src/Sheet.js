@@ -140,8 +140,12 @@ function Sheet(_sheetDomElement, _window) {
 
     // Setup ClusterDetectionWorker
 
-    // JSON representation of known clusters
+    /**
+     * JSON representation of known clusters
+     * @type {Object[]|null}
+     */
     let knownClustersOverwrite = null;
+
     const clusterDetectionWorkerUrl = URL.createObjectURL(new Blob([ ClusterDetectionWorkerJsString ]));
     let clusterDetectionWorker = null;
 
@@ -188,7 +192,42 @@ function Sheet(_sheetDomElement, _window) {
         });
 
         knownClustersOverwrite = _clusterJSON;
-    };    
+    };
+
+    /**
+     * @param {Cluster} _cluster
+     */
+     this.updateClusterDetectorKnownCluster = function(_cluster) {
+        let foundMatch = false;
+        for(let i=0; i<knownClustersOverwrite.length; i++) {
+            if(knownClustersOverwrite[i].id === _cluster.getId()) {
+                foundMatch = true;
+                knownClustersOverwrite[i] = _cluster.toJSON();
+                break;
+            }
+        }
+
+        if(!foundMatch) {
+            knownClustersOverwrite.push(_cluster.toJSON());
+        }
+    };
+
+    /**
+     * @param {Cluster} _cluster
+     * @returns {Boolean}
+     */
+     this.deleteClusterDetectorKnownCluster = function(_cluster) {
+        let foundMatch = false;
+        for(let i=0; i<knownClustersOverwrite.length; i++) {
+            if(knownClustersOverwrite[i].id === _cluster.getId()) {
+                foundMatch = true;
+                knownClustersOverwrite.splice(i, 1);
+                break;
+            }
+        }
+
+        return foundMatch;
+    };
 
     // Setup ConnectorRoutingWorker
     const connectorRoutingWorkerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
