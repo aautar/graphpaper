@@ -198,6 +198,10 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Cluster} _cluster
      */
      this.updateClusterDetectorKnownCluster = function(_cluster) {
+        if(knownClustersOverwrite === null) {
+            knownClustersOverwrite = [];
+        }
+
         let foundMatch = false;
         for(let i=0; i<knownClustersOverwrite.length; i++) {
             if(knownClustersOverwrite[i].id === _cluster.getId()) {
@@ -217,6 +221,10 @@ function Sheet(_sheetDomElement, _window) {
      * @returns {Boolean}
      */
      this.deleteClusterDetectorKnownCluster = function(_cluster) {
+        if(knownClustersOverwrite === null) {
+            return false;
+        }
+
         let foundMatch = false;
         for(let i=0; i<knownClustersOverwrite.length; i++) {
             if(knownClustersOverwrite[i].id === _cluster.getId()) {
