@@ -47,28 +47,36 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      */
     const pathElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
-    pathElem.style.stroke = _strokeColor; 
-    pathElem.style.strokeWidth = _strokeWidth;         
-
-    pathElem.addEventListener("click", function(e) {
-        self.dispatchEvent(ConnectorEvent.CLICK, {"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
-    });
-
-    pathElem.addEventListener("mouseenter", function(e) {
-        self.dispatchEvent(ConnectorEvent.MOUSE_ENTER, {"connector":self, "pointerAtX": e.pageX, "pointerAtY": e.pageY});
-    });
-
-    pathElem.addEventListener("mouseleave", function(e) {
-        self.dispatchEvent(ConnectorEvent.MOUSE_LEAVE, {"connector":self });
-    });        
+    pathElem.style.stroke = _strokeColor;
+    pathElem.style.strokeWidth = _strokeWidth;
 
     /**
      * @type {Element}
+     * 
+     * Transparent copy of pathElem, with a larger stroke, that is used for interaction (e.g. click, mousenter, etc.) events.
+     * This is to address the fact that it can be difficult to interact with pathElem when the stroke is small.
+     * 
      */
-    var svgDomElem = null;
+    const interactionElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    interactionElem.setAttribute("d", 'M0 0 L0 0');
+    interactionElem.style.stroke = 'transparent';
+    interactionElem.style.strokeWidth = '12px';
+
+    interactionElem.addEventListener("click", function(e) {
+        self.dispatchEvent(ConnectorEvent.CLICK, {"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
+    });
+
+    interactionElem.addEventListener("mouseenter", function(e) {
+        self.dispatchEvent(ConnectorEvent.MOUSE_ENTER, {"connector":self, "pointerAtX": e.pageX, "pointerAtY": e.pageY});
+    });
+
+    interactionElem.addEventListener("mouseleave", function(e) {
+        self.dispatchEvent(ConnectorEvent.MOUSE_LEAVE, {"connector":self });
+    });        
 
     this.appendPathToContainerDomElement = function() {
-        svgDomElem = _containerDomElement.appendChild(pathElem);
+        _containerDomElement.appendChild(pathElem);
+        _containerDomElement.appendChild(interactionElem);
     };
 
     /**
@@ -77,11 +85,13 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      */    
     this.setMarkerStart = function(_url, _size) {
         pathElem.setAttribute(`marker-start`, `url(${_url})`);
+        interactionElem.setAttribute(`marker-start`, `url(${_url})`);
         markerStartSize = _size;
     };
 
     this.unsetMarkerStart = function() {
         pathElem.removeAttribute(`marker-start`);
+        interactionElem.removeAttribute(`marker-start`);
         markerStartSize = 0;
     };
 
@@ -91,11 +101,13 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      */
     this.setMarkerEnd = function(_url, _size) {
         pathElem.setAttribute(`marker-end`, `url(${_url})`);
+        interactionElem.setAttribute(`marker-end`, `url(${_url})`);
         markerEndSize = _size;
     };
 
     this.unsetMarkerEnd = function() {
         pathElem.removeAttribute(`marker-end`);
+        interactionElem.removeAttribute(`marker-end`);
         markerEndSize = 0;
     };    
 
@@ -200,6 +212,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      */
     this.refresh = function(_svgPath) {
         pathElem.setAttribute("d", _svgPath);
+        interactionElem.setAttribute("d", _svgPath);
     };
 
     /**
@@ -234,6 +247,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
 
     this.removePathElement = function() {
         pathElem.remove();
+        interactionElem.remove();
     };
 
     /**

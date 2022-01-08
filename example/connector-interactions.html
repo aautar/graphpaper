@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GraphPaper</title>
+    <link href="common.css" rel="stylesheet">
+    <script src="../dist/graphpaper.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+    
+    <div id="paper">
+
+        <div id="obj1" class="obj">
+            <div id="translateHandle1" class="translateHandle"></div>
+            <div id="translateHandle1b" class="translateHandle" style="margin-left:-45px;"></div>
+            <div id="resizeHandle1"  class="resizeHandle"></div>
+            <div id="connectorAnchor1" class="connectorAnchor"></div>
+        </div>
+
+        <div id="obj2" class="obj">
+            <div id="translateHandle2" class="translateHandle"></div>
+            <div id="resizeHandle2" class="resizeHandle"></div>
+            <div id="connectorAnchor2" class="connectorAnchor"></div>
+        </div>        
+
+
+        <div id="obj3" class="obj">
+            <div id="translateHandle3" class="translateHandle"></div>
+            <div id="resizeHandle3" class="resizeHandle"></div>
+            <div id="connectorAnchor3" class="connectorAnchor"></div>
+        </div>        
+
+        <div id="obj4" class="obj">
+            <div id="translateHandle4" class="translateHandle"></div>
+            <div id="resizeHandle4" class="resizeHandle"></div>
+            <div id="connectorAnchor4" class="connectorAnchor"></div>
+        </div>            
+
+    </div>
+
+
+    <script type="text/javascript">
+	
+        const sheet = new GraphPaper.Sheet(
+            document.getElementById('paper'), 
+            window
+        );
+
+        sheet.initInteractionHandlers();
+        sheet.initTransformationHandlers();
+        sheet.initConnectorRoutingWorker();
+        sheet.initClusterDetectionWorker();
+
+        sheet.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
+            const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px', 0, GraphPaper.ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION);
+            c.on(GraphPaper.ConnectorEvent.CLICK, function(e) {
+                console.log(e);
+            });
+
+            c.on(GraphPaper.ConnectorEvent.MOUSE_ENTER, function(e) {
+                console.log(`Connecter.MOUSE_ENTER ${e.connector.getId()}`);
+            });
+
+            c.on(GraphPaper.ConnectorEvent.MOUSE_LEAVE, function(e) {
+                console.log(`Connecter.MOUSE_LEAVE ${e.connector.getId()}`);
+            });            
+
+            return c;
+        });
+
+        const entity1 = new GraphPaper.Entity(
+            'e1', 
+            0, 
+            0, 
+            52, 
+            52, 
+            sheet,
+            document.getElementById('obj1'), 
+            [document.getElementById('translateHandle1'), document.getElementById('translateHandle1b')],
+            [document.getElementById('resizeHandle1')]
+        );
+
+        const anchor1 = entity1.addInteractableConnectorAnchor(document.getElementById('connectorAnchor1'));
+        anchor1.setPossibleRoutingPointDirections(["top"]);
+
+        const entity2 = new GraphPaper.Entity(
+            'e2', 
+            0, 
+            0, 
+            52, 
+            52, 
+            sheet,
+            document.getElementById('obj2'), 
+            [document.getElementById('translateHandle2')],
+            [document.getElementById('resizeHandle2')]
+        );
+
+        const anchor2 = entity2.addInteractableConnectorAnchor(document.getElementById('connectorAnchor2'));
+        anchor2.setPossibleRoutingPointDirections(["top"]);
+
+        entity2.translate(671, 179);
+
+        const entity3 = new GraphPaper.Entity(
+            'e3', 
+            0, 
+            0, 
+            52, 
+            52, 
+            sheet,
+            document.getElementById('obj3'), 
+            [document.getElementById('translateHandle3')],
+            [document.getElementById('resizeHandle3')]
+        );
+
+        const anchor3 = entity3.addInteractableConnectorAnchor(document.getElementById('connectorAnchor3'));
+        anchor3.setPossibleRoutingPointDirections(["top"]);
+
+        entity3.translate(395,95);
+
+        const entity4 = new GraphPaper.Entity(
+            'e4', 
+            0, 
+            0, 
+            52, 
+            52, 
+            sheet,
+            document.getElementById('obj4'), 
+            [document.getElementById('translateHandle4')],
+            [document.getElementById('resizeHandle4')]
+        );
+
+        const anchor4 = entity4.addInteractableConnectorAnchor(document.getElementById('connectorAnchor4'));
+        anchor4.setPossibleRoutingPointDirections(["top"]);
+
+        entity4.translate(479,263);
+
+        sheet.addEntity(entity1);
+        sheet.addEntity(entity2);
+        sheet.addEntity(entity3);
+        sheet.addEntity(entity4);       
+
+        sheet.initDebugMetricsPanel();
+        sheet.setConnectorRefreshBufferTime(0);
+        sheet.setBoundingExtentRoutingPointScaleFactor(2.0);
+
+        const computeConnector = () => {
+            sheet.findBestConnectorAnchorsToConnectEntities(entity2, entity4, function(_bestAnchors) {
+
+                const existingConnectors = sheet.getConnectorsBetweenAnchors(_bestAnchors.objectAAnchor, _bestAnchors.objectBAnchor);
+
+                if(existingConnectors.length === 0) {
+                    // to optimize, we should only remove existing if it doesn't match the best
+                    const currentConnectors = sheet.getConnectorsBetweenEntities(entity2, entity4);
+                    for(let i=0; i<currentConnectors.length; i++) {
+                        sheet.removeConnector(currentConnectors[i]);      
+                    }
+
+                    sheet.makeNewConnectorFromAnchors(_bestAnchors.objectAAnchor, _bestAnchors.objectBAnchor);
+                }
+            });
+        };
+
+        sheet.on(GraphPaper.SheetEvent.ENTITY_TRANSLATED, computeConnector);
+        computeConnector();        
+
+    </script>
+
+</body>
+
+</html>
