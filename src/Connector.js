@@ -9,25 +9,17 @@ import {Point} from './Point';
  * @param {ConnectorAnchor} _anchorStart 
  * @param {ConnectorAnchor} _anchorEnd
  * @param {Element} _containerDomElement
- * @param {String} _strokeColor
- * @param {String} _strokeWidth
  * @param {Number} _curvaturePx
  * @param {ConnectorRoutingAlgorithm} _routingAlgorithm
  */
-function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _routingAlgorithm) {
+function Connector(_anchorStart, _anchorEnd, _containerDomElement, _curvaturePx, _routingAlgorithm) {
     const self = this;
 
     const eventNameToHandlerFunc = new Map();
     let markerStartSize = 0;
     let markerEndSize = 0;
-
-    if(typeof _strokeColor === 'undefined') {
-        _strokeColor = '#000';
-    }
-
-    if(typeof _strokeWidth === 'undefined') {
-        _strokeWidth = '2px';
-    }
+    const defaultStrokeColor = '#000';
+    const defaultStrokeWidth = '2px';
 
     if(typeof _curvaturePx === 'undefined') {
         _curvaturePx = 0;
@@ -47,8 +39,8 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
      */
     const pathElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathElem.setAttribute("d", 'M0 0 L0 0');
-    pathElem.style.stroke = _strokeColor;
-    pathElem.style.strokeWidth = _strokeWidth;
+    pathElem.style.stroke = defaultStrokeColor;
+    pathElem.style.strokeWidth = defaultStrokeWidth;
 
     /**
      * @type {Element}
@@ -60,7 +52,7 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
     const interactionElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
     interactionElem.setAttribute("d", 'M0 0 L0 0');
     interactionElem.style.stroke = 'transparent';
-    interactionElem.style.strokeWidth = '12px';
+    interactionElem.style.strokeWidth = defaultStrokeWidth;
 
     interactionElem.addEventListener("click", function(e) {
         self.dispatchEvent(ConnectorEvent.CLICK, {"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
@@ -250,20 +242,69 @@ function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor,
         interactionElem.remove();
     };
 
-    /**
-     * @param {String} _cl
-     * @returns {undefined}
-     */
-    this.addClassToDomElement = function(_cl) {
-        pathElem.classList.add(_cl);
+    this.removeDefaultStyles = function() {
+        self.setInlineStyleOnPathElement('stroke', '');
+        self.setInlineStyleOnPathElement('strokeWidth', '');
+        self.setInlineStyleOnInteractionElement('stroke', '');
+        self.setInlineStyleOnInteractionElement('strokeWidth', '');        
     };
 
     /**
-     * @param {String} _cl
-     * @returns {undefined}
+     * 
+     * @param {String} _key 
+     * @param {String} _value 
+     */
+    this.setInlineStyleOnPathElement = function(_key, _value) {
+        pathElem.style[_key] = _value;
+    };
+
+    /**
+     * 
+     * @param {String[]} _cssClassesToAdd
+     */
+    this.addStyleClassesToPathElement = function(_cssClassesToAdd) {
+        _cssClassesToAdd.forEach((_cls) => {
+            pathElem.classList.add(_cls);
+        });
+    };
+
+    /**
+     * 
+     * @param {String[]} _cssClassesToRemove 
+     */
+     this.removeStyleClassesFromPathElement = function(_cssClassesToRemove) {
+        _cssClassesToRemove.forEach((_cls) => {
+            pathElem.classList.remove(_cls);
+        });
+    };
+
+    /**
+     * 
+     * @param {String} _key 
+     * @param {String} _value 
      */    
-    this.removeClassFromDomElement = function(_cl) {
-        pathElem.classList.remove(_cl);
+    this.setInlineStyleOnInteractionElement = function(_key, _value) {
+        interactionElem.style[_key] = _value;
+    };
+
+    /**
+     * 
+     * @param {String[]} _cssClassesToAdd 
+     */    
+    this.addStyleClassesToInteractionElement = function(_cssClassesToAdd) {
+        _cssClassesToAdd.forEach((_cls) => {
+            interactionElem.classList.add(_cls);
+        });
+    };
+
+    /**
+     * 
+     * @param {String[]} _cssClassesToRemove 
+     */    
+    this.removeStyleClassesFromInteractionElement = function(_cssClassesToRemove) {
+        _cssClassesToRemove.forEach((_cls) => {
+            interactionElem.classList.remove(_cls);
+        });
     };
 
     /**
