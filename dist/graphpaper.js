@@ -1437,13 +1437,11 @@ var GraphPaper = (function (exports) {
          */    
         this.setMarkerStart = function(_url, _size) {
             pathElem.setAttribute(`marker-start`, `url(${_url})`);
-            interactionElem.setAttribute(`marker-start`, `url(${_url})`);
             markerStartSize = _size;
         };
 
         this.unsetMarkerStart = function() {
             pathElem.removeAttribute(`marker-start`);
-            interactionElem.removeAttribute(`marker-start`);
             markerStartSize = 0;
         };
 
@@ -1453,13 +1451,11 @@ var GraphPaper = (function (exports) {
          */
         this.setMarkerEnd = function(_url, _size) {
             pathElem.setAttribute(`marker-end`, `url(${_url})`);
-            interactionElem.setAttribute(`marker-end`, `url(${_url})`);
             markerEndSize = _size;
         };
 
         this.unsetMarkerEnd = function() {
             pathElem.removeAttribute(`marker-end`);
-            interactionElem.removeAttribute(`marker-end`);
             markerEndSize = 0;
         };    
 
