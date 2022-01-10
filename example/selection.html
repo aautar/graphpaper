@@ -55,7 +55,11 @@
         canvas.initMultiEntitySelectionHandler();
 
         canvas.setConnectorFactory(function(_anchorStart, _anchorEnd, _containerDomElement) {
-            const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement, '#006dc9', '4px');
+            const c = new GraphPaper.Connector(_anchorStart, _anchorEnd, _containerDomElement);
+            c.removeDefaultStyles();
+            c.addStyleClassesToPathElement(['connector-path']);
+            c.addStyleClassesToInteractionElement(['connector-interaction-path']);
+
             c.on(GraphPaper.ConnectorEvent.CLICK, function(e) {
                 console.log(e);
             });

@@ -77,7 +77,7 @@ describe("Connector.removePathElement", function() {
         const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');    
         connector.appendPathToContainerDomElement(); 
         
-        expect(containerDomElem.getElementsByTagName('path').length).toBe(1);
+        expect(containerDomElem.getElementsByTagName('path').length).toBe(2); // 2 b/c we have the path and interaction elements
 
         connector.removePathElement();
 
@@ -223,7 +223,10 @@ describe("Connector.on", function() {
             'cancelable': true
         });
 
-        containerDomElem.getElementsByTagNameNS("http://www.w3.org/2000/svg", "path")[0].dispatchEvent(event);
+        /**
+         * @todo flaky, need to make sure we consistently target the interaction element
+         */
+        containerDomElem.getElementsByTagNameNS("http://www.w3.org/2000/svg", "path")[1].dispatchEvent(event);
 
         expect(clickCallback).toHaveBeenCalled();        
     }); 
@@ -290,7 +293,7 @@ describe("Connector.getDescriptor", function() {
         };
 
         const containerDomElem = window.document.createElement('div');
-        const connector = new Connector(anchorStart, anchorEnd, containerDomElem, '#fff', '2px');
+        const connector = new Connector(anchorStart, anchorEnd, containerDomElem);
 
         expect(connector.getDescriptor()).toEqual(expectedDescriptor);
     });

@@ -1369,25 +1369,17 @@ var GraphPaper = (function (exports) {
      * @param {ConnectorAnchor} _anchorStart 
      * @param {ConnectorAnchor} _anchorEnd
      * @param {Element} _containerDomElement
-     * @param {String} _strokeColor
-     * @param {String} _strokeWidth
      * @param {Number} _curvaturePx
      * @param {ConnectorRoutingAlgorithm} _routingAlgorithm
      */
-    function Connector(_anchorStart, _anchorEnd, _containerDomElement, _strokeColor, _strokeWidth, _curvaturePx, _routingAlgorithm) {
+    function Connector(_anchorStart, _anchorEnd, _containerDomElement, _curvaturePx, _routingAlgorithm) {
         const self = this;
 
         const eventNameToHandlerFunc = new Map();
         let markerStartSize = 0;
         let markerEndSize = 0;
-
-        if(typeof _strokeColor === 'undefined') {
-            _strokeColor = '#000';
-        }
-
-        if(typeof _strokeWidth === 'undefined') {
-            _strokeWidth = '2px';
-        }
+        const defaultStrokeColor = '#000';
+        const defaultStrokeWidth = '2px';
 
         if(typeof _curvaturePx === 'undefined') {
             _curvaturePx = 0;
@@ -1407,28 +1399,36 @@ var GraphPaper = (function (exports) {
          */
         const pathElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
         pathElem.setAttribute("d", 'M0 0 L0 0');
-        pathElem.style.stroke = _strokeColor; 
-        pathElem.style.strokeWidth = _strokeWidth;         
-
-        pathElem.addEventListener("click", function(e) {
-            self.dispatchEvent(ConnectorEvent.CLICK, {"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
-        });
-
-        pathElem.addEventListener("mouseenter", function(e) {
-            self.dispatchEvent(ConnectorEvent.MOUSE_ENTER, {"connector":self, "pointerAtX": e.pageX, "pointerAtY": e.pageY});
-        });
-
-        pathElem.addEventListener("mouseleave", function(e) {
-            self.dispatchEvent(ConnectorEvent.MOUSE_LEAVE, {"connector":self });
-        });        
+        pathElem.style.stroke = defaultStrokeColor;
+        pathElem.style.strokeWidth = defaultStrokeWidth;
 
         /**
          * @type {Element}
+         * 
+         * Transparent copy of pathElem, with a larger stroke, that is used for interaction (e.g. click, mousenter, etc.) events.
+         * This is to address the fact that it can be difficult to interact with pathElem when the stroke is small.
+         * 
          */
-        var svgDomElem = null;
+        const interactionElem = window.document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        interactionElem.setAttribute("d", 'M0 0 L0 0');
+        interactionElem.style.stroke = 'transparent';
+        interactionElem.style.strokeWidth = defaultStrokeWidth;
+
+        interactionElem.addEventListener("click", function(e) {
+            self.dispatchEvent(ConnectorEvent.CLICK, {"connector":self, "clickedAtX": e.pageX, "clickedAtY": e.pageY});
+        });
+
+        interactionElem.addEventListener("mouseenter", function(e) {
+            self.dispatchEvent(ConnectorEvent.MOUSE_ENTER, {"connector":self, "pointerAtX": e.pageX, "pointerAtY": e.pageY});
+        });
+
+        interactionElem.addEventListener("mouseleave", function(e) {
+            self.dispatchEvent(ConnectorEvent.MOUSE_LEAVE, {"connector":self });
+        });        
 
         this.appendPathToContainerDomElement = function() {
-            svgDomElem = _containerDomElement.appendChild(pathElem);
+            _containerDomElement.appendChild(pathElem);
+            _containerDomElement.appendChild(interactionElem);
         };
 
         /**
@@ -1437,11 +1437,13 @@ var GraphPaper = (function (exports) {
          */    
         this.setMarkerStart = function(_url, _size) {
             pathElem.setAttribute(`marker-start`, `url(${_url})`);
+            interactionElem.setAttribute(`marker-start`, `url(${_url})`);
             markerStartSize = _size;
         };
 
         this.unsetMarkerStart = function() {
             pathElem.removeAttribute(`marker-start`);
+            interactionElem.removeAttribute(`marker-start`);
             markerStartSize = 0;
         };
 
@@ -1451,11 +1453,13 @@ var GraphPaper = (function (exports) {
          */
         this.setMarkerEnd = function(_url, _size) {
             pathElem.setAttribute(`marker-end`, `url(${_url})`);
+            interactionElem.setAttribute(`marker-end`, `url(${_url})`);
             markerEndSize = _size;
         };
 
         this.unsetMarkerEnd = function() {
             pathElem.removeAttribute(`marker-end`);
+            interactionElem.removeAttribute(`marker-end`);
             markerEndSize = 0;
         };    
 
@@ -1560,6 +1564,7 @@ var GraphPaper = (function (exports) {
          */
         this.refresh = function(_svgPath) {
             pathElem.setAttribute("d", _svgPath);
+            interactionElem.setAttribute("d", _svgPath);
         };
 
         /**
@@ -1594,22 +1599,72 @@ var GraphPaper = (function (exports) {
 
         this.removePathElement = function() {
             pathElem.remove();
+            interactionElem.remove();
+        };
+
+        this.removeDefaultStyles = function() {
+            self.setInlineStyleOnPathElement('stroke', '');
+            self.setInlineStyleOnPathElement('strokeWidth', '');
+            self.setInlineStyleOnInteractionElement('stroke', '');
+            self.setInlineStyleOnInteractionElement('strokeWidth', '');        
         };
 
         /**
-         * @param {String} _cl
-         * @returns {undefined}
+         * 
+         * @param {String} _key 
+         * @param {String} _value 
          */
-        this.addClassToDomElement = function(_cl) {
-            pathElem.classList.add(_cl);
+        this.setInlineStyleOnPathElement = function(_key, _value) {
+            pathElem.style[_key] = _value;
         };
 
         /**
-         * @param {String} _cl
-         * @returns {undefined}
+         * 
+         * @param {String[]} _cssClassesToAdd
+         */
+        this.addStyleClassesToPathElement = function(_cssClassesToAdd) {
+            _cssClassesToAdd.forEach((_cls) => {
+                pathElem.classList.add(_cls);
+            });
+        };
+
+        /**
+         * 
+         * @param {String[]} _cssClassesToRemove 
+         */
+         this.removeStyleClassesFromPathElement = function(_cssClassesToRemove) {
+            _cssClassesToRemove.forEach((_cls) => {
+                pathElem.classList.remove(_cls);
+            });
+        };
+
+        /**
+         * 
+         * @param {String} _key 
+         * @param {String} _value 
          */    
-        this.removeClassFromDomElement = function(_cl) {
-            pathElem.classList.remove(_cl);
+        this.setInlineStyleOnInteractionElement = function(_key, _value) {
+            interactionElem.style[_key] = _value;
+        };
+
+        /**
+         * 
+         * @param {String[]} _cssClassesToAdd 
+         */    
+        this.addStyleClassesToInteractionElement = function(_cssClassesToAdd) {
+            _cssClassesToAdd.forEach((_cls) => {
+                interactionElem.classList.add(_cls);
+            });
+        };
+
+        /**
+         * 
+         * @param {String[]} _cssClassesToRemove 
+         */    
+        this.removeStyleClassesFromInteractionElement = function(_cssClassesToRemove) {
+            _cssClassesToRemove.forEach((_cls) => {
+                interactionElem.classList.remove(_cls);
+            });
         };
 
         /**
@@ -2212,8 +2267,12 @@ var GraphPaper = (function (exports) {
 
         // Setup ClusterDetectionWorker
 
-        // JSON representation of known clusters
+        /**
+         * JSON representation of known clusters
+         * @type {Object[]|null}
+         */
         let knownClustersOverwrite = null;
+
         const clusterDetectionWorkerUrl = URL.createObjectURL(new Blob([ ClusterDetectionWorkerJsString ]));
         let clusterDetectionWorker = null;
 
@@ -2260,7 +2319,50 @@ var GraphPaper = (function (exports) {
             });
 
             knownClustersOverwrite = _clusterJSON;
-        };    
+        };
+
+        /**
+         * @param {Cluster} _cluster
+         */
+         this.updateClusterDetectorKnownCluster = function(_cluster) {
+            if(knownClustersOverwrite === null) {
+                knownClustersOverwrite = [];
+            }
+
+            let foundMatch = false;
+            for(let i=0; i<knownClustersOverwrite.length; i++) {
+                if(knownClustersOverwrite[i].id === _cluster.getId()) {
+                    foundMatch = true;
+                    knownClustersOverwrite[i] = _cluster.toJSON();
+                    break;
+                }
+            }
+
+            if(!foundMatch) {
+                knownClustersOverwrite.push(_cluster.toJSON());
+            }
+        };
+
+        /**
+         * @param {Cluster} _cluster
+         * @returns {Boolean}
+         */
+         this.deleteClusterDetectorKnownCluster = function(_cluster) {
+            if(knownClustersOverwrite === null) {
+                return false;
+            }
+
+            let foundMatch = false;
+            for(let i=0; i<knownClustersOverwrite.length; i++) {
+                if(knownClustersOverwrite[i].id === _cluster.getId()) {
+                    foundMatch = true;
+                    knownClustersOverwrite.splice(i, 1);
+                    break;
+                }
+            }
+
+            return foundMatch;
+        };
 
         // Setup ConnectorRoutingWorker
         const connectorRoutingWorkerUrl = URL.createObjectURL(new Blob([ ConnectorRoutingWorkerJsString ]));
