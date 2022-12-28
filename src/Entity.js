@@ -111,14 +111,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @returns {Boolean}
      */
     this.hasConnectorAnchor = function(_anchor) {
-        const anchors = self.getConnectorAnchors();
-        for(let i=0; i<anchors.length; i++) {
-            if(anchors[i] === _anchor) {
-                return true;
-            }
-        }
-
-        return false;
+        return self.hasAnyConnectorAnchor([_anchor]);
     };
 
     /**
