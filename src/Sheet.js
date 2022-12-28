@@ -874,7 +874,7 @@ function Sheet(_sheetDomElement, _window) {
         _obj.on(EntityEvent.RESIZE_START, handleResizeStart);
 
         _obj.on(EntityEvent.RESIZE, function(e) {
-            emitEvent(SheetEvent.ENTITY_RESIZED, { 'object': e.obj });
+            emitEvent(SheetEvent.ENTITY_RESIZED, { 'entity': e.obj });
             self.refreshAllConnectors();
             refreshAllClustersInternal();
         });

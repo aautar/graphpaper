@@ -93,7 +93,7 @@ Emitted when an entity has been resized.
 The event object contains the following fields:
 ```javascript
 {
-    object,   // The Entity that has been resized
+    entity,   // The Entity that has been resized
 }
 ```
 
