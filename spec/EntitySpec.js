@@ -174,6 +174,28 @@ describe("Entity.hasConnectorAnchor", function() {
   }); 
 });
 
+describe("Entity.hasAnyConnectorAnchor", function() {
+  it("returns true if 1+ anchor is assigned to Entity", function() {  
+    const o = new Entity(
+        "obj-123",
+        100, 
+        200, 
+        10, 
+        20, 
+        sheet, 
+        window.document.createElement('div'), 
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
+    );
+
+    const anchorElemA = window.document.createElement('div');
+    const anchorElemB = window.document.createElement('div');
+    const newAnchorA = o.addInteractableConnectorAnchor(anchorElem);
+
+    expect(o.hasAnyConnectorAnchor([newAnchorA, anchorElemB])).toBe(true);
+  }); 
+});
+
 describe("Entity.translate", function() {
   it("translates entity", function() {
     const entityDomElem = window.document.createElement('div');    
