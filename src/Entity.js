@@ -123,19 +123,21 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     /**
      * 
-     * @param {ConnectorAnchor} _anchor 
+     * @param {ConnectorAnchor[]} _anchors
      * @returns {Boolean}
      */
-     this.hasConnectorAnchor = function(_anchor) {
-        const anchors = self.getConnectorAnchors();
-        for(let i=0; i<anchors.length; i++) {
-            if(anchors[i] === _anchor) {
-                return true;
+     this.hasAnyConnectorAnchor = function(_anchors) {
+        const haystack = self.getConnectorAnchors();
+        for(let i=0; i<haystack.length; i++) {
+            for(let j=0; j<_anchors.length; j++) {
+                if(haystack[i] === _anchors[j]) {
+                    return true;
+                }
             }
         }
 
         return false;
-    };    
+    };
 
     /**
      * @returns {Point|null}

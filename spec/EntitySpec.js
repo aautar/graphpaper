@@ -176,7 +176,7 @@ describe("Entity.hasConnectorAnchor", function() {
 
 describe("Entity.hasAnyConnectorAnchor", function() {
   it("returns true if 1+ anchor is assigned to Entity", function() {  
-    const o = new Entity(
+    const entity = new Entity(
         "obj-123",
         100, 
         200, 
@@ -190,9 +190,9 @@ describe("Entity.hasAnyConnectorAnchor", function() {
 
     const anchorElemA = window.document.createElement('div');
     const anchorElemB = window.document.createElement('div');
-    const newAnchorA = o.addInteractableConnectorAnchor(anchorElem);
+    const newAnchorA = entity.addInteractableConnectorAnchor(anchorElemA);
 
-    expect(o.hasAnyConnectorAnchor([newAnchorA, anchorElemB])).toBe(true);
+    expect(entity.hasAnyConnectorAnchor([newAnchorA, anchorElemB])).toBe(true);
   }); 
 });
 
