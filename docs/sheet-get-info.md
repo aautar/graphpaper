@@ -1,7 +1,6 @@
 # Get information about a sheet
 
 ### Dimensions
-
 The dimensions of a sheet can be queries with the `Sheet.getWidth()` and `Sheet.getHeight()` methods.
 
 ```javascript
@@ -28,3 +27,6 @@ const offsetPoint = sheet.getSheetOffset();
 ```
 
 This method will return a `GraphPaper.Point` with the offset. If DOM metrics have been locked, the cached values will be returned, if not the offsets will be calculated and returned.
+
+### Transformations
+See [Sheet Transformations](sheet-transformations.md).
