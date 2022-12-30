@@ -1,6 +1,7 @@
 import {BoxClusterDetector} from '../BoxClusterDetector';
 import {Cluster} from '../Cluster';
 import {UUID} from '../UUID';
+import {EntityOverlapFinder} from '../Overlap/EntityOverlapFinder';
 
 const workerData = {
     requestQueue: [],
@@ -55,6 +56,9 @@ const processRequestQueue = function() {
     const clusterDetectResult = clusterDetector.computeClusters(entityDescriptors, workerData.knownClusters, UUID.v4);
     metrics.computeClustersTime = (new Date()) - computeClustersTimeT1;
 
+    // Maybe not the best place to do this (i.e. not directly related to clusters) or maybe we should rename worker?
+    const overlappingEntities = (new EntityOverlapFinder()).findOverlappingEntities(entityDescriptors);
+
     postMessage(
         {
             "metrics": metrics,
@@ -63,7 +67,8 @@ const processRequestQueue = function() {
             "updatedClusterIds": clusterDetectResult.updatedClusterIds,
             "deletedClusterIds": clusterDetectResult.deletedClusterIds,
             "updatedClusterToRemovedEntitites": clusterDetectResult.updatedClusterToRemovedEntitites,
-            "updatedClusterToAddedEntitites": clusterDetectResult.updatedClusterToAddedEntitites,            
+            "updatedClusterToAddedEntitites": clusterDetectResult.updatedClusterToAddedEntitites,
+            "overlappingEntities": overlappingEntities,
         }
     );
 

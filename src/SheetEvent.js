@@ -9,6 +9,7 @@ const SheetEvent = Object.freeze({
     ENTITY_REMOVED: "entity-removed",
     ENTITY_RESIZED: "entity-resized",
     ENTITY_TRANSLATED: "entity-translated",
+    ENTITY_OVERLAP_DETECTED: "entity-overlap-detected",
     MULTIPLE_ENTITY_SELECTION_STARTED: "multiple-object-selection-started",
     MULTIPLE_ENTITIES_SELECTED: "multiple-objects-selected",
 });

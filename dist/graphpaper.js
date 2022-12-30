@@ -1195,6 +1195,7 @@ var GraphPaper = (function (exports) {
         ENTITY_REMOVED: "entity-removed",
         ENTITY_RESIZED: "entity-resized",
         ENTITY_TRANSLATED: "entity-translated",
+        ENTITY_OVERLAP_DETECTED: "entity-overlap-detected",
         MULTIPLE_ENTITY_SELECTION_STARTED: "multiple-object-selection-started",
         MULTIPLE_ENTITIES_SELECTED: "multiple-objects-selected",
     });
@@ -1778,7 +1779,9 @@ var GraphPaper = (function (exports) {
 
     var UUID={v4:function v4(){return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(a){var b=0|16*Math.random(),c="x"==a?b:8|3&b;return c.toString(16)})}};
 
-    var workerData={requestQueue:[],knownClusters:[]},clustersToTransferrableMap=function clustersToTransferrableMap(a){for(var b=new Map,c=0;c<a.length;c++)b.set(a[c].getId(),a[c].toJSON());return b},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a={overallTime:null},b=workerData.requestQueue.pop();workerData.requestQueue.length=0;var c=b.entityDescriptors,d=new BoxClusterDetector(12);if(null!==b.knownClustersOverwrite){var g=function toClusterArray(a){var b=[];return a.forEach(function(a){b.push(Cluster.fromJSON(a));}),b};workerData.knownClusters=g(b.knownClustersOverwrite);}var e=new Date,f=d.computeClusters(c,workerData.knownClusters,UUID.v4);a.computeClustersTime=new Date-e,postMessage({metrics:a,clusters:clustersToTransferrableMap(f.clusters),newClusterIds:f.newClusterIds,updatedClusterIds:f.updatedClusterIds,deletedClusterIds:f.deletedClusterIds,updatedClusterToRemovedEntitites:f.updatedClusterToRemovedEntitites,updatedClusterToAddedEntitites:f.updatedClusterToAddedEntitites}),workerData.knownClusters=f.clusters;}};setInterval(processRequestQueue,50),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
+    function EntityOverlapFinder(){var b=function addOverlapMapEntries(a,b,c){if(a.has(b)){var d=a.get(b);d.push(c);}else a.set(b,[c]);if(a.has(c)){var e=a.get(c);e.push(b);}else a.set(c,[b]);};this.findOverlappingEntities=function(a){for(var c=new Map,d=0;d<a.length;d++)for(var e=a[d],f=new Rectangle(e.x,e.y,e.x+e.width,e.y+e.height),g=d+1;g<a.length;g++){var h=a[g],k=new Rectangle(h.x,h.y,h.x+h.width,h.y+h.height),l=f.checkIntersect(k);l&&b(c,e.id,h.id);}return c};}
+
+    var workerData={requestQueue:[],knownClusters:[]},clustersToTransferrableMap=function clustersToTransferrableMap(a){for(var b=new Map,c=0;c<a.length;c++)b.set(a[c].getId(),a[c].toJSON());return b},processRequestQueue=function processRequestQueue(){if(0!==workerData.requestQueue.length){var a={overallTime:null},b=workerData.requestQueue.pop();workerData.requestQueue.length=0;var c=b.entityDescriptors,d=new BoxClusterDetector(12);if(null!==b.knownClustersOverwrite){var h=function toClusterArray(a){var b=[];return a.forEach(function(a){b.push(Cluster.fromJSON(a));}),b};workerData.knownClusters=h(b.knownClustersOverwrite);}var e=new Date,f=d.computeClusters(c,workerData.knownClusters,UUID.v4);a.computeClustersTime=new Date-e;var g=new EntityOverlapFinder().findOverlappingEntities(c);postMessage({metrics:a,clusters:clustersToTransferrableMap(f.clusters),newClusterIds:f.newClusterIds,updatedClusterIds:f.updatedClusterIds,deletedClusterIds:f.deletedClusterIds,updatedClusterToRemovedEntitites:f.updatedClusterToRemovedEntitites,updatedClusterToAddedEntitites:f.updatedClusterToAddedEntitites,overlappingEntities:g}),workerData.knownClusters=f.clusters;}};setInterval(processRequestQueue,50),onmessage=function onmessage(a){workerData.requestQueue.push(a.data);};
 
 }());
 `;
@@ -2298,6 +2301,23 @@ var GraphPaper = (function (exports) {
                 data.deletedClusterIds.forEach((_cId) => {
                     emitEvent(SheetEvent.CLUSTER_DELETED, { 'clusterId': _cId });
                 });
+
+                for(let [entityId, overlappingEntityIds] of data.overlappingEntities) {
+                    console.log(
+                        { 
+                            "entityId": entityId,
+                            "overlappingEntityIds": overlappingEntityIds,
+                        }
+                    );
+                    
+                    emitEvent(
+                        SheetEvent.ENTITY_OVERLAP_DETECTED, 
+                        { 
+                            "entityId": entityId,
+                            "overlappingEntityIds": overlappingEntityIds,
+                        }
+                    );
+                }
 
                 metrics.clusterDetectionWorker.computeClustersTime = data.metrics.computeClustersTime;
 
@@ -2997,7 +3017,7 @@ var GraphPaper = (function (exports) {
             _obj.on(EntityEvent.RESIZE_START, handleResizeStart);
 
             _obj.on(EntityEvent.RESIZE, function(e) {
-                emitEvent(SheetEvent.ENTITY_RESIZED, { 'object': e.obj });
+                emitEvent(SheetEvent.ENTITY_RESIZED, { 'entity': e.obj });
                 self.refreshAllConnectors();
                 refreshAllClustersInternal();
             });

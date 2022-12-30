@@ -15,6 +15,7 @@ import {GroupTransformationContainerEvent } from './GroupTransformationContainer
 import {ClusterDetectionWorkerJsString} from './Workers/ClusterDetectionWorker.string';
 import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
 import {Cluster} from './Cluster';
+import {EntityOverlapFinder} from './Overlap/EntityOverlapFinder';
 
 /**
  * @callback HandleSheetInteractionCallback
@@ -175,6 +176,16 @@ function Sheet(_sheetDomElement, _window) {
             data.deletedClusterIds.forEach((_cId) => {
                 emitEvent(SheetEvent.CLUSTER_DELETED, { 'clusterId': _cId });
             });
+
+            for(let [entityId, overlappingEntityIds] of data.overlappingEntities) {
+                emitEvent(
+                    SheetEvent.ENTITY_OVERLAP_DETECTED, 
+                    { 
+                        "entityId": entityId,
+                        "overlappingEntityIds": overlappingEntityIds,
+                    }
+                );
+            }
 
             metrics.clusterDetectionWorker.computeClustersTime = data.metrics.computeClustersTime;
 
