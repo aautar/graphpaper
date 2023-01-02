@@ -3,7 +3,8 @@ import {Point} from './Point';
 import {Rectangle} from './Rectangle';
 import {Sheet} from './Sheet';
 import {ConnectorAnchor} from './ConnectorAnchor';
-import { PointSet } from './PointSet';
+import {PointSet} from './PointSet';
+import {Originator} from './Originator';
 
 /**
  * 
@@ -215,8 +216,9 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @param {Number} _x
      * @param {Number} _y
      * @param {Boolean} [_withinGroupTransformation=false]
+     * @param {Originator} [_originator=Originator.PROGRAM]
      */
-    this.translate = function(_x, _y, _withinGroupTransformation) {
+    this.translate = function(_x, _y, _withinGroupTransformation, _originator) {
         if(_x === x && _y === y) {
             return;
         }
@@ -233,7 +235,8 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                     "obj": self, 
                     "x": _x, 
                     "y": _y,
-                    "withinGroupTransformation": _withinGroupTransformation ? true : false
+                    "withinGroupTransformation": _withinGroupTransformation ? true : false,
+                    "originator": _originator ? _originator : Originator.PROGRAM,
                 }
             );
         });
@@ -256,9 +259,9 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     /**
      * @param {Number} _width
      * @param {Number} _height
-     * @param {Function} _domElementStyleUpdateOverrideFunc
+     * @param {Originator} [_source=Originator.PROGRAM]
      */
-    this.resize = function(_width, _height) {            
+    this.resize = function(_width, _height, _originator) {            
         width = _width;
         height = _height;
 
@@ -266,7 +269,14 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
         const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE) || [];
         observers.forEach(function(handler) {
-            handler({"obj":self, "width": _width, "height": _height});
+            handler(
+                {
+                    "obj": self, 
+                    "width": _width, 
+                    "height": _height,
+                    "originator": _originator ? _originator : Originator.PROGRAM,
+                }
+            );
         });
     };
 
@@ -449,7 +459,8 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                 "obj": self,
                 "x": e.touches[0].pageX, 
                 "y": e.touches[0].pageY,
-                "isTouch": true
+                "isTouch": true,
+                "originator": Originator.USER,
             });
         });        
 
@@ -464,7 +475,8 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                 "obj": self,
                 "x": e.pageX, 
                 "y": e.pageY,
-                "isTouch": false
+                "isTouch": false,
+                "originator": Originator.USER,
             });
         });        
         
@@ -498,7 +510,8 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                 "x": _e.pageX, 
                 "y": _e.pageY,
                 "resizeCursor": _resizeCursor,
-                "isTouch": false
+                "isTouch": false,
+                "originator": Originator.USER,
             });
         });    
     };
@@ -513,7 +526,8 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                 "x": _e.touches[0].pageX,  
                 "y": _e.touches[0].pageY,
                 "resizeCursor": _resizeCursor,
-                "isTouch": true
+                "isTouch": true,
+                "originator": Originator.USER,
             });
         });
     };
@@ -535,8 +549,8 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     bindTranslateHandleElements();
     bindResizeHandleElements();
-    self.translate(_x, _y);
-    self.resize(_width, _height);
+    self.translate(_x, _y, false, Originator.PROGRAM);
+    self.resize(_width, _height, Originator.PROGRAM);
 };
 
 export { Entity };

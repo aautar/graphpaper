@@ -19,3 +19,4 @@ export * from './ConnectorAnchor';
 export * from './ConnectorRoutingAlgorithm';
 export * from './PointVisibilityMap';
 export * from './Grid';
+export * from './Originator';

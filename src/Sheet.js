@@ -15,7 +15,7 @@ import {GroupTransformationContainerEvent } from './GroupTransformationContainer
 import {ClusterDetectionWorkerJsString} from './Workers/ClusterDetectionWorker.string';
 import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
 import {Cluster} from './Cluster';
-import {EntityOverlapFinder} from './Overlap/EntityOverlapFinder';
+import {Originator} from './Originator';
 
 /**
  * @callback HandleSheetInteractionCallback
@@ -885,7 +885,12 @@ function Sheet(_sheetDomElement, _window) {
         _obj.on(EntityEvent.RESIZE_START, handleResizeStart);
 
         _obj.on(EntityEvent.RESIZE, function(e) {
-            emitEvent(SheetEvent.ENTITY_RESIZED, { 'entity': e.obj });
+            emitEvent(SheetEvent.ENTITY_RESIZED, 
+                { 
+                    "entity": e.obj,
+                    "originator": e.originator,
+                }
+            );
             self.refreshAllConnectors();
             refreshAllClustersInternal();
         });
@@ -897,7 +902,8 @@ function Sheet(_sheetDomElement, _window) {
                 SheetEvent.ENTITY_TRANSLATED, 
                 { 
                     "object": e.obj,
-                    "withinGroupTransformation": e.withinGroupTransformation
+                    "withinGroupTransformation": e.withinGroupTransformation,
+                    "originator": e.originator,
                 }
             );
 
@@ -1303,7 +1309,7 @@ function Sheet(_sheetDomElement, _window) {
         objectDragX = mx;
         objectDragY = my;		
 
-        entity.translate(mx, my);
+        entity.translate(mx, my, false, Originator.USER);
     };
 
     /**
@@ -1316,7 +1322,7 @@ function Sheet(_sheetDomElement, _window) {
         const translateOffset = entity.getTranslateHandleOffset();
         const mx = self.snapToGrid(_x + translateOffset.getX());
         const my = self.snapToGrid(_y + translateOffset.getY());
-        entity.translate(mx, my);       
+        entity.translate(mx, my, false, Originator.USER);       
     };         
 
     /**
@@ -1346,7 +1352,7 @@ function Sheet(_sheetDomElement, _window) {
         const newWidth = ((mx - left)+1);
         const newHeight = ((my - top)+1);
 
-        entity.resize(newWidth, newHeight);
+        entity.resize(newWidth, newHeight, Originator.USER);
     };
 
     const handleResizeEnd = function() {

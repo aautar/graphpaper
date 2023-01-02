@@ -1,4 +1,5 @@
 import {Entity} from './Entity';
+import {Originator} from './Originator';
 import {GroupTransformationContainerEvent} from './GroupTransformationContainerEvent';
 import {Rectangle} from './Rectangle';
 
@@ -113,13 +114,12 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
         selBox.style.top = `${currentTop}px`;        
 
         for(let i=0; i<_entities.length; i++) {
-            const obj = _entities[i];
             const rp = entityPositionRelativeToBoundingRect[i];
-
-            obj.translate(
+            _entities[i].translate(
                 _sheet.snapToGrid(currentLeft + rp.x), 
                 _sheet.snapToGrid(currentTop + rp.y),
-                true
+                true,
+                Originator.USER,
             );
         }
 

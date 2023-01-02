@@ -2144,6 +2144,15 @@ var GraphPaper = (function (exports) {
     };
 
     /**
+     * @readonly
+     * @enum {Number}
+     */
+    const Originator = Object.freeze({
+        PROGRAM: 0,
+        USER: 1,
+    });
+
+    /**
      * @callback HandleSheetInteractionCallback
      * @param {String} interactionType
      * @param {Object} interactionData
@@ -2303,13 +2312,6 @@ var GraphPaper = (function (exports) {
                 });
 
                 for(let [entityId, overlappingEntityIds] of data.overlappingEntities) {
-                    console.log(
-                        { 
-                            "entityId": entityId,
-                            "overlappingEntityIds": overlappingEntityIds,
-                        }
-                    );
-                    
                     emitEvent(
                         SheetEvent.ENTITY_OVERLAP_DETECTED, 
                         { 
@@ -3017,7 +3019,12 @@ var GraphPaper = (function (exports) {
             _obj.on(EntityEvent.RESIZE_START, handleResizeStart);
 
             _obj.on(EntityEvent.RESIZE, function(e) {
-                emitEvent(SheetEvent.ENTITY_RESIZED, { 'entity': e.obj });
+                emitEvent(SheetEvent.ENTITY_RESIZED, 
+                    { 
+                        "entity": e.obj,
+                        "originator": e.originator,
+                    }
+                );
                 self.refreshAllConnectors();
                 refreshAllClustersInternal();
             });
@@ -3029,7 +3036,8 @@ var GraphPaper = (function (exports) {
                     SheetEvent.ENTITY_TRANSLATED, 
                     { 
                         "object": e.obj,
-                        "withinGroupTransformation": e.withinGroupTransformation
+                        "withinGroupTransformation": e.withinGroupTransformation,
+                        "originator": e.originator,
                     }
                 );
 
@@ -3435,7 +3443,7 @@ var GraphPaper = (function (exports) {
             objectDragX = mx;
             objectDragY = my;		
 
-            entity.translate(mx, my);
+            entity.translate(mx, my, false, Originator.USER);
         };
 
         /**
@@ -3448,7 +3456,7 @@ var GraphPaper = (function (exports) {
             const translateOffset = entity.getTranslateHandleOffset();
             const mx = self.snapToGrid(_x + translateOffset.getX());
             const my = self.snapToGrid(_y + translateOffset.getY());
-            entity.translate(mx, my);       
+            entity.translate(mx, my, false, Originator.USER);       
         };         
 
         /**
@@ -3478,7 +3486,7 @@ var GraphPaper = (function (exports) {
             const newWidth = ((mx - left)+1);
             const newHeight = ((my - top)+1);
 
-            entity.resize(newWidth, newHeight);
+            entity.resize(newWidth, newHeight, Originator.USER);
         };
 
         const handleResizeEnd = function() {
@@ -4038,8 +4046,9 @@ var GraphPaper = (function (exports) {
          * @param {Number} _x
          * @param {Number} _y
          * @param {Boolean} [_withinGroupTransformation=false]
+         * @param {Originator} [_originator=Originator.PROGRAM]
          */
-        this.translate = function(_x, _y, _withinGroupTransformation) {
+        this.translate = function(_x, _y, _withinGroupTransformation, _originator) {
             if(_x === x && _y === y) {
                 return;
             }
@@ -4056,7 +4065,8 @@ var GraphPaper = (function (exports) {
                         "obj": self, 
                         "x": _x, 
                         "y": _y,
-                        "withinGroupTransformation": _withinGroupTransformation ? true : false
+                        "withinGroupTransformation": _withinGroupTransformation ? true : false,
+                        "originator": _originator ? _originator : Originator.PROGRAM,
                     }
                 );
             });
@@ -4079,9 +4089,9 @@ var GraphPaper = (function (exports) {
         /**
          * @param {Number} _width
          * @param {Number} _height
-         * @param {Function} _domElementStyleUpdateOverrideFunc
+         * @param {Originator} [_source=Originator.PROGRAM]
          */
-        this.resize = function(_width, _height) {            
+        this.resize = function(_width, _height, _originator) {            
             width = _width;
             height = _height;
 
@@ -4089,7 +4099,14 @@ var GraphPaper = (function (exports) {
 
             const observers = eventNameToHandlerFunc.get(EntityEvent.RESIZE) || [];
             observers.forEach(function(handler) {
-                handler({"obj":self, "width": _width, "height": _height});
+                handler(
+                    {
+                        "obj": self, 
+                        "width": _width, 
+                        "height": _height,
+                        "originator": _originator ? _originator : Originator.PROGRAM,
+                    }
+                );
             });
         };
 
@@ -4272,7 +4289,8 @@ var GraphPaper = (function (exports) {
                     "obj": self,
                     "x": e.touches[0].pageX, 
                     "y": e.touches[0].pageY,
-                    "isTouch": true
+                    "isTouch": true,
+                    "originator": Originator.USER,
                 });
             });        
 
@@ -4287,7 +4305,8 @@ var GraphPaper = (function (exports) {
                     "obj": self,
                     "x": e.pageX, 
                     "y": e.pageY,
-                    "isTouch": false
+                    "isTouch": false,
+                    "originator": Originator.USER,
                 });
             });        
             
@@ -4319,7 +4338,8 @@ var GraphPaper = (function (exports) {
                     "x": _e.pageX, 
                     "y": _e.pageY,
                     "resizeCursor": _resizeCursor,
-                    "isTouch": false
+                    "isTouch": false,
+                    "originator": Originator.USER,
                 });
             });    
         };
@@ -4333,7 +4353,8 @@ var GraphPaper = (function (exports) {
                     "x": _e.touches[0].pageX,  
                     "y": _e.touches[0].pageY,
                     "resizeCursor": _resizeCursor,
-                    "isTouch": true
+                    "isTouch": true,
+                    "originator": Originator.USER,
                 });
             });
         };
@@ -4355,8 +4376,8 @@ var GraphPaper = (function (exports) {
 
         bindTranslateHandleElements();
         bindResizeHandleElements();
-        self.translate(_x, _y);
-        self.resize(_width, _height);
+        self.translate(_x, _y, false, Originator.PROGRAM);
+        self.resize(_width, _height, Originator.PROGRAM);
     }
 
     /**
@@ -4470,13 +4491,12 @@ var GraphPaper = (function (exports) {
             selBox.style.top = `${currentTop}px`;        
 
             for(let i=0; i<_entities.length; i++) {
-                const obj = _entities[i];
                 const rp = entityPositionRelativeToBoundingRect[i];
-
-                obj.translate(
+                _entities[i].translate(
                     _sheet.snapToGrid(currentLeft + rp.x), 
                     _sheet.snapToGrid(currentTop + rp.y),
-                    true
+                    true,
+                    Originator.USER,
                 );
             }
 
@@ -5554,6 +5574,7 @@ var GraphPaper = (function (exports) {
     exports.Line = Line;
     exports.LineIntersection = LineIntersection;
     exports.MatrixMath = MatrixMath;
+    exports.Originator = Originator;
     exports.Point = Point;
     exports.PointVisibilityMap = PointVisibilityMap;
     exports.Rectangle = Rectangle;
