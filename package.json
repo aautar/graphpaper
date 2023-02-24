@@ -11,7 +11,7 @@
     "@babel/preset-env": "^7.15.6",
     "babel-preset-minify": "^0.5.1",
     "jasmine-es6": "0.4.0",
-    "jsdom": "^11.12.0",
+    "jsdom": "^16.5.0",
     "process-nextick-args": "^1.0.7",
     "rollup": "^2.1.0",
     "rollup-plugin-babel": "^4.3.3"
