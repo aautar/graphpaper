@@ -1,7 +1,5 @@
 $provisioningScript = <<SCRIPT
 
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository -y ppa:nginx/stable
 sudo apt-get -y update
 
 if ! [ -L /var/www ]; then
@@ -10,7 +8,7 @@ if ! [ -L /var/www ]; then
 fi
 
 # Install nginx
-sudo apt-get install -y nginx-common
+sudo apt-get install -y nginx-full
 
 # Nginx
 if [ ! -f /etc/nginx/sites-available/vagrant ]; then
