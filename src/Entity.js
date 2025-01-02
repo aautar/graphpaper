@@ -43,7 +43,15 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      */
     var currentResizeHandleElementActivated = null;
 
+    /**
+     * @type {Map<String, Function>}
+     */
     const eventNameToHandlerFunc = new Map();
+
+    /**
+     * @type {Entity[]}
+     */
+    const subEntities = [];
 
     let x = null;
     let y = null;
@@ -223,6 +231,9 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             return;
         }
 
+        const dx = _x - x;
+        const dy = _y - y;
+
         x = _x;
         y = _y;
 
@@ -239,6 +250,10 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                     "originator": _originator ? _originator : Originator.PROGRAM,
                 }
             );
+        });
+
+        subEntities.forEach((_subEntity) => {
+            _subEntity.translate(_subEntity.getX() + dx, _subEntity.getY() + dy, false, Originator.PROGRAM);
         });
     };
 
@@ -411,6 +426,15 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                 "maxY": outerBoundMaxY
             }
         }
+    };
+
+    /**
+     * Attach sub-entities which will translate relative to this entity, when a translate transform occurs
+     * 
+     * @param {Entity[]} _subEntities 
+     */
+    this.attachSubEntities = function(_subEntities) {
+        subEntities.push(..._subEntities);
     };
 
     /**
