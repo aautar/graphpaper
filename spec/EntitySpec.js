@@ -33,7 +33,7 @@ describe("Entity constructor", function() {
 
     expect(objDomElem.style.left).toBe('100px');
     expect(objDomElem.style.top).toBe('200px');
-  }); 
+  });
 
   it("resizer object to initial size", function() { 
     const objDomElem = window.document.createElement('div');
@@ -171,7 +171,7 @@ describe("Entity.hasConnectorAnchor", function() {
     const newAnchor = o.addInteractableConnectorAnchor(anchorElem);
 
     expect(o.hasConnectorAnchor(newAnchor)).toBe(true);
-  }); 
+  });
 });
 
 describe("Entity.translate", function() {
@@ -216,5 +216,37 @@ describe("Entity.translate", function() {
     entity.translate(250, 300);
 
     expect(translateCallback).toHaveBeenCalled();
+  });
+});
+
+describe("Entity.attachSubEntities", function() {
+  it("attaches sub-entities", function() {
+    const parent = new Entity(
+        "obj-parent",
+        100, 
+        200, 
+        10, 
+        20, 
+        sheet, 
+        window.document.createElement('div'), 
+        [window.document.createElement('div')], 
+        [window.document.createElement('div')]
+    );
+
+    const sub = new Entity(
+      "obj-sub",
+      110, 
+      210, 
+      10, 
+      20, 
+      sheet, 
+      window.document.createElement('div'), 
+      [window.document.createElement('div')], 
+      [window.document.createElement('div')]
+    );
+
+    parent.attachSubEntities([sub]);
+
+    expect(parent.getAttachedSubEntities()).toEqual([sub]);
   });
 });

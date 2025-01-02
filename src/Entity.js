@@ -439,6 +439,14 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     /**
      * 
+     * @returns {Entity[]}
+     */
+    this.getAttachedSubEntities = function() {
+        return subEntities;
+    };
+
+    /**
+     * 
      * @param {String} _eventName 
      * @param {*} _handlerFunc 
      */
