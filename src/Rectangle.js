@@ -1,6 +1,5 @@
 import {Point} from './Point';
 import {Line} from './Line';
-import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
 
 /**
  * 
