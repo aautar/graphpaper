@@ -704,6 +704,15 @@ var GraphPaper = (function (exports) {
             return resultPoint;        
         };
 
+        /**
+         * Find distance to a point in the set that is closes to the given point (_point)
+         * 
+         * @todo Evaluate if this is actually needed. Seems like the distance can be computed and returned by findPointClosestTo()
+         * .. or distance can be easily computed with point returned by findPointClosestTo()
+         * 
+         * @param {Point} _point 
+         * @returns {Number}
+         */
         this.findDistanceToPointClosestTo = function(_point) {
             var currentMinLength = Number.MAX_SAFE_INTEGER;
 
