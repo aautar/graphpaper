@@ -2138,6 +2138,13 @@ var GraphPaper = (function (exports) {
      * @param {Object} interactionData
      */ 
 
+    /**
+     * Sheet event callback
+     * 
+     * @callback SheetEventCallback
+     * @param {Object} eventData
+     */
+
      /**
      * @param {Element} _sheetDomElement 
      * @param {Window} _window
@@ -2244,8 +2251,11 @@ var GraphPaper = (function (exports) {
 
         /**
          * Event name -> Callback map
+         * 
+         * @type {Map<string, SheetEventCallback>}
          */
         const eventHandlers = new Map();
+
         var connectorRefreshStartTime = null;
         var connectorRefreshTimeout = null;
         let pendingConnectorRedraw = false;
@@ -3787,6 +3797,11 @@ var GraphPaper = (function (exports) {
             });
         };
 
+        /**
+         * 
+         * @param {String} _eventName 
+         * @param {String} _eventData 
+         */
         const emitEvent = function(_eventName, _eventData) {
             const allCallbacks = eventHandlers.get(_eventName) || [];
 
@@ -3796,6 +3811,11 @@ var GraphPaper = (function (exports) {
             }
         };
 
+        /**
+         * 
+         * @param {String} _eventName 
+         * @param {SheetEventCallback} _callback 
+         */
         this.off = function(_eventName, _callback) {
             const allCallbacks = eventHandlers.get(_eventName) || [];
 
@@ -3809,6 +3829,11 @@ var GraphPaper = (function (exports) {
             eventHandlers.set(_eventName, allCallbacks);
         };
 
+        /**
+         * 
+         * @param {String} _eventName 
+         * @param {SheetEventCallback} _callback 
+         */
         this.on = function(_eventName, _callback) {
             const allCallbacks = eventHandlers.get(_eventName) || [];
             allCallbacks.push(_callback);
