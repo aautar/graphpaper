@@ -1,4 +1,4 @@
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
 import stringifyWorker from './build/rollup-plugin-stringify-worker';
 
 const babelConfig = {
