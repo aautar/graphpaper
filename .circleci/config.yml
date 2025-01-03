@@ -4,7 +4,8 @@ jobs:
     working_directory: ~/repo
     
     docker:
-      - image: circleci/node:10.0.0
+      - image: cimg/node:20.18.1
+
     environment:
       - NODE_ENV: development      
     steps:
@@ -35,7 +36,7 @@ jobs:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
 
-      - deploy:
+      - run:
           name: Updating version num and publishing
           command: |
             if [[ "${CIRCLE_TAG}" =~ v[0-9]+(\.[0-9]+)* ]]; then
