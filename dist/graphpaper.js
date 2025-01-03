@@ -2167,7 +2167,11 @@ var GraphPaper = (function (exports) {
         svgElem.style.height = "100%";
         const connectorsContainerDomElement = _sheetDomElement.appendChild(svgElem);
 
-        // Selection box element
+        /**
+         * Selection box DOM Element, shown when the user drags to select multiple entities
+         * 
+         * @type {Element}
+         */
         var selectionBoxElem = null;
 
         /**
@@ -3613,10 +3617,12 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * @param {String[]} _selectionRectStyleCssClasses
+         * Create the selection box element that's shown when the user drag to select entities
+         * 
+         * @param {String[]} _selectionRectStyleCssClasses 
+         * @returns {Element}
          */
-        this.initMultiEntitySelectionHandler = function(_selectionRectStyleCssClasses) {
-            // Create selection box DOM element
+        const createSelectionBoxElement = function(_selectionRectStyleCssClasses) {
             const selBox = _window.document.createElement("div");
             selBox.classList.add("ia-selection-box");
             selBox.style.display = "none";
@@ -3635,7 +3641,14 @@ var GraphPaper = (function (exports) {
                 });
             }
 
-            selectionBoxElem = _sheetDomElement.appendChild(selBox);
+            return  _sheetDomElement.appendChild(selBox);
+        };
+
+        /**
+         * @param {String[]} _selectionRectStyleCssClasses
+         */
+        this.initMultiEntitySelectionHandler = function(_selectionRectStyleCssClasses) {
+            selectionBoxElem = createSelectionBoxElement(_selectionRectStyleCssClasses);
 
             const handleTouchSelectionStart = function(e) {
                 const hasSelectionStarted = handleMultiEntitySelectionStart(e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop(), e.target);
