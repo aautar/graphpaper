@@ -46,8 +46,14 @@ function Sheet(_sheetDomElement, _window) {
     // Selection box element
     var selectionBoxElem = null;
 
-    // GroupTransformationContainers
+    /**
+     * @type {GroupTransformationContainer[]}
+     */
     const groupTransformationContainers = [];
+
+    /**
+     * @type {GroupTransformationContainer}
+     */
     var currentGroupTransformationContainerBeingDragged = null;
   
     /**

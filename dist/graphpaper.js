@@ -2161,8 +2161,14 @@ var GraphPaper = (function (exports) {
         // Selection box element
         var selectionBoxElem = null;
 
-        // GroupTransformationContainers
+        /**
+         * @type {GroupTransformationContainer[]}
+         */
         const groupTransformationContainers = [];
+
+        /**
+         * @type {GroupTransformationContainer}
+         */
         var currentGroupTransformationContainerBeingDragged = null;
       
         /**
