@@ -4,7 +4,7 @@ jobs:
     working_directory: ~/repo
     
     docker:
-      - image: cimg/node:23.5
+      - image: cimg/node:18.20
 
     environment:
       - NODE_ENV: development      
