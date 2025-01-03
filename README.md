@@ -11,6 +11,8 @@ GraphPaper is very much a work-in-progress, expect major, breaking, changes to t
 ## Documentation
 
 ### Concepts
+- Guiding principles (TBD)
+- Data flow (TBD)
 - [Transformation & Spaces](docs/spaces.md)
 
 ### Working with Sheets
@@ -24,6 +26,7 @@ GraphPaper is very much a work-in-progress, expect major, breaking, changes to t
 - [Entity methods](docs/entity-methods.md)
 - [Entity events](docs/entity-events.md)
 - [Multi-Entity Selection & Transformation](docs/multi-selection-transformation.md)
+- Sub-Entities (TBD)
 
 ### Connectors
 - Connectors (TBD)
