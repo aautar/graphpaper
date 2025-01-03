@@ -43,7 +43,15 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      */
     var currentResizeHandleElementActivated = null;
 
+    /**
+     * @type {Map<String, Function>}
+     */
     const eventNameToHandlerFunc = new Map();
+
+    /**
+     * @type {Entity[]}
+     */
+    const subEntities = [];
 
     let x = null;
     let y = null;
@@ -223,10 +231,14 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             return;
         }
 
+        const dx = _x - x;
+        const dy = _y - y;
+        const originator = _originator ? _originator : Originator.PROGRAM;
+
         x = _x;
         y = _y;
 
-        self.render();       
+        self.render();
 
         const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE) || [];
         observers.forEach(function(handler) {
@@ -236,8 +248,18 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                     "x": _x, 
                     "y": _y,
                     "withinGroupTransformation": _withinGroupTransformation ? true : false,
-                    "originator": _originator ? _originator : Originator.PROGRAM,
+                    "originator": originator,
                 }
+            );
+        });
+
+        const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
+        subEntities.forEach((_subEntity) => {
+            _subEntity.translate(
+                _subEntity.getX() + dx, 
+                _subEntity.getY() + dy, 
+                false, 
+                originatorForSubEntities,
             );
         });
     };
@@ -411,6 +433,23 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                 "maxY": outerBoundMaxY
             }
         }
+    };
+
+    /**
+     * Attach sub-entities which will translate relative to this entity, when a translate transform occurs
+     * 
+     * @param {Entity[]} _subEntities 
+     */
+    this.attachSubEntities = function(_subEntities) {
+        subEntities.push(..._subEntities);
+    };
+
+    /**
+     * 
+     * @returns {Entity[]}
+     */
+    this.getAttachedSubEntities = function() {
+        return subEntities;
     };
 
     /**
