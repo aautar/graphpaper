@@ -3863,11 +3863,35 @@ var GraphPaper = (function (exports) {
          */
         const subEntities = [];
 
+        /**
+         * @type {Number|null}
+         */
         let x = null;
+
+        /**
+         * @type {Number|null}
+         */
         let y = null;
+
+        /**
+         * @type {Number|null}
+         */
         let width = null;
+
+
+        /**
+         * @type {Number|null}
+         */
         let height = null;
+
+        /**
+         * @type {Boolean}
+         */
         let hasPendingFrame = false;
+
+        /**
+         * @type {Object}
+         */
         let overwrittenRenderStyles = {};
 
         /**
