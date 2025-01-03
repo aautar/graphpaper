@@ -1133,7 +1133,7 @@ var GraphPaper = (function (exports) {
                     entityDescriptors[this.searchInputs[i].entityA.getId()], 
                     entityDescriptors[this.searchInputs[i].entityB.getId()]
                 ],
-                entityDescriptorsArr, 
+                entityDescriptorsArr,  // assuming all entities are possible occluders? maybe only consider those within extents
                 gridSize
             );
 
@@ -2150,6 +2150,8 @@ var GraphPaper = (function (exports) {
     const Originator = Object.freeze({
         PROGRAM: 0,
         USER: 1,
+        PROGRAM_VIA_PARENT_ENTITY: 2,
+        USER_VIA_PARENT_ENTITY: 3,
     });
 
     /**
@@ -3873,7 +3875,15 @@ var GraphPaper = (function (exports) {
          */
         var currentTranslateHandleElementActivated = null;
 
+        /**
+         * @type {Map<String, Function>}
+         */
         const eventNameToHandlerFunc = new Map();
+
+        /**
+         * @type {Entity[]}
+         */
+        const subEntities = [];
 
         let x = null;
         let y = null;
@@ -4053,10 +4063,14 @@ var GraphPaper = (function (exports) {
                 return;
             }
 
+            const dx = _x - x;
+            const dy = _y - y;
+            const originator = _originator ? _originator : Originator.PROGRAM;
+
             x = _x;
             y = _y;
 
-            self.render();       
+            self.render();
 
             const observers = eventNameToHandlerFunc.get(EntityEvent.TRANSLATE) || [];
             observers.forEach(function(handler) {
@@ -4066,8 +4080,18 @@ var GraphPaper = (function (exports) {
                         "x": _x, 
                         "y": _y,
                         "withinGroupTransformation": _withinGroupTransformation ? true : false,
-                        "originator": _originator ? _originator : Originator.PROGRAM,
+                        "originator": originator,
                     }
+                );
+            });
+
+            const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
+            subEntities.forEach((_subEntity) => {
+                _subEntity.translate(
+                    _subEntity.getX() + dx, 
+                    _subEntity.getY() + dy, 
+                    false, 
+                    originatorForSubEntities,
                 );
             });
         };
@@ -4241,6 +4265,23 @@ var GraphPaper = (function (exports) {
                     "maxY": outerBoundMaxY
                 }
             }
+        };
+
+        /**
+         * Attach sub-entities which will translate relative to this entity, when a translate transform occurs
+         * 
+         * @param {Entity[]} _subEntities 
+         */
+        this.attachSubEntities = function(_subEntities) {
+            subEntities.push(..._subEntities);
+        };
+
+        /**
+         * 
+         * @returns {Entity[]}
+         */
+        this.getAttachedSubEntities = function() {
+            return subEntities;
         };
 
         /**
