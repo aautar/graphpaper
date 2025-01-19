@@ -2,6 +2,7 @@ import {Entity} from './Entity';
 import {Originator} from './Originator';
 import {GroupTransformationContainerEvent} from './GroupTransformationContainerEvent';
 import {Rectangle} from './Rectangle';
+import { GroupEncapsulationBox } from './GroupEncapsulationBox';
 
 /**
  * @param {Sheet} _sheet
@@ -26,54 +27,40 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
         return r;
     };
 
-    var boundingRect = calculateBoundingRect();
+    /**
+     * @returns {Object[]}
+     */
+    const calcEntityPositionRelativeToBoundingRect = function() {
+        const posRelativeToBoundingRect = [];
+        _entities.forEach(function(_obj) {
+            const rp = {
+                "x": _obj.getX() - currentLeft,
+                "y": _obj.getY() - currentTop
+            };
+    
+            posRelativeToBoundingRect.push(rp);
+        });
+
+        return posRelativeToBoundingRect;
+    };
+
+    let boundingRect = calculateBoundingRect();
+    let currentLeft = boundingRect.getLeft();
+    let currentTop = boundingRect.getTop();
 
     var accTranslateX = 0.0;
     var accTranslateY = 0.0;    
 
-    var currentLeft = boundingRect.getLeft();
-    var currentTop = boundingRect.getTop();
+    const entityPositionRelativeToBoundingRect = calcEntityPositionRelativeToBoundingRect();
+    const encapsulationBox = new GroupEncapsulationBox(_entities, _containerStyleCssClasses, boundingRect);
 
-    const entityPositionRelativeToBoundingRect = [];
-
-    _entities.forEach(function(_obj) {
-        const rp = {
-            "x": _obj.getX() - currentLeft,
-            "y": _obj.getY() - currentTop
-        };
-
-        entityPositionRelativeToBoundingRect.push(rp);
-    });
-
-    const selBox = window.document.createElement("div");
-    selBox.classList.add('ia-group-transformation-container');
-    selBox.style.display = "none";
-    selBox.style.position = "absolute";
-    selBox.style.left = `${currentLeft}px`;
-    selBox.style.top = `${currentTop}px`;
-    selBox.style.width = `${boundingRect.getWidth()}px`;
-    selBox.style.height = `${boundingRect.getHeight()}px`;    
-
-    // only display the container if we have 1+ entity in the group
-    if(_entities.length > 0) {
-        selBox.style.display = "block";
-    }
-
-    if(typeof _containerStyleCssClasses === 'undefined' || _containerStyleCssClasses.length === 0) {
-        // default styling if no classes are provided
-        selBox.style.border = "1px solid rgb(158, 158, 158)";
-        selBox.style.backgroundColor = "rgba(153, 153, 153, 0.5)";       
-    } else {
-        // CSS classes will control styling for things GraphPaper doesn't care about
-        // (GraphPaper style concerns are handled via inline styles which will always take precedance)
-        _containerStyleCssClasses.forEach(function(_class) {
-            selBox.classList.add(_class);
-        });
-    }
-
-
+    /**
+     * @todo Rethink why this needs to be exposed
+     * 
+     * @returns {Element}
+     */
     this.getContainerDomElement = function() {
-        return selBox;
+        return encapsulationBox.getEncapsulationBoxDomElement();
     };
     
     /**
@@ -110,8 +97,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
         currentLeft = newLeft;
         currentTop = newTop;
 
-        selBox.style.left = `${currentLeft}px`;
-        selBox.style.top = `${currentTop}px`;        
+        encapsulationBox.translate(currentLeft, currentTop);
 
         for(let i=0; i<_entities.length; i++) {
             const rp = entityPositionRelativeToBoundingRect[i];
@@ -140,8 +126,7 @@ function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClass
     };
 
     this.initTranslateInteractionHandler = function() {
-        selBox.addEventListener('touchstart', translateTouchStartHandler);        
-        selBox.addEventListener('mousedown', translateMouseDownHandler);
+        encapsulationBox.initTranslateInteractionHandler(translateMouseDownHandler, translateTouchStartHandler);
     };
 
     /**

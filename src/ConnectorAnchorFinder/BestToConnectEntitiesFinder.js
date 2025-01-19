@@ -74,7 +74,7 @@ BestToConnectEntitiesFinder.prototype.search = function() {
                 entityDescriptors[this.searchInputs[i].entityA.getId()], 
                 entityDescriptors[this.searchInputs[i].entityB.getId()]
             ],
-            entityDescriptorsArr, 
+            entityDescriptorsArr,  // assuming all entities are possible occluders? maybe only consider those within extents
             gridSize
         );
 

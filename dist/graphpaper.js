@@ -4477,6 +4477,68 @@ var GraphPaper = (function (exports) {
     }
 
     /**
+     * @param {Entity[]} _entities
+     * @param {String[]} _containerStyleCssClasses
+     * @param {Rectangle} _boundingRect
+     */
+    function GroupEncapsulationBox(_entities, _containerStyleCssClasses, _boundingRect)  {
+
+        const encapsulationBox = window.document.createElement("div");
+        encapsulationBox.classList.add('ia-group-transformation-container');
+        encapsulationBox.style.display = "none";
+        encapsulationBox.style.position = "absolute";
+        encapsulationBox.style.left = `${_boundingRect.getLeft()}px`;
+        encapsulationBox.style.top = `${_boundingRect.getTop()}px`;
+        encapsulationBox.style.width = `${_boundingRect.getWidth()}px`;
+        encapsulationBox.style.height = `${_boundingRect.getHeight()}px`;    
+
+        // only display the container if we have 1+ entity in the group
+        if(_entities.length > 0) {
+            encapsulationBox.style.display = "block";
+        }
+
+        if(typeof _containerStyleCssClasses === 'undefined' || _containerStyleCssClasses.length === 0) {
+            // default styling if no classes are provided
+            encapsulationBox.style.border = "1px solid rgb(158, 158, 158)";
+            encapsulationBox.style.backgroundColor = "rgba(153, 153, 153, 0.5)";       
+        } else {
+            // CSS classes will control styling for things GraphPaper doesn't care about
+            // (GraphPaper style concerns are handled via inline styles which will always take precedance)
+            _containerStyleCssClasses.forEach(function(_class) {
+                encapsulationBox.classList.add(_class);
+            });
+        }
+
+        /**
+         * 
+         * @param {Number} _x 
+         * @param {Number} _y 
+         */
+        this.translate = function(_x, _y) {
+            encapsulationBox.style.left = `${_x}px`;
+            encapsulationBox.style.top = `${_y}px`;      
+        };
+
+        /**
+         * 
+         * @param {*} _translateMouseDownHandler 
+         * @param {*} _translateTouchStartHandler 
+         */
+        this.initTranslateInteractionHandler = function(_translateMouseDownHandler, _translateTouchStartHandler) {
+            encapsulationBox.addEventListener('touchstart', _translateTouchStartHandler);        
+            encapsulationBox.addEventListener('mousedown', _translateMouseDownHandler);
+        };
+
+        /**
+         * 
+         * @returns {Element}
+         */
+        this.getEncapsulationBoxDomElement = function() {
+            return encapsulationBox;
+        };
+    }
+
+    /**
      * @param {Sheet} _sheet
      * @param {Entity[]} _entities
      * @param {String[]} _containerStyleCssClasses
@@ -4499,54 +4561,40 @@ var GraphPaper = (function (exports) {
             return r;
         };
 
-        var boundingRect = calculateBoundingRect();
+        /**
+         * @returns {Object[]}
+         */
+        const calcEntityPositionRelativeToBoundingRect = function() {
+            const posRelativeToBoundingRect = [];
+            _entities.forEach(function(_obj) {
+                const rp = {
+                    "x": _obj.getX() - currentLeft,
+                    "y": _obj.getY() - currentTop
+                };
+        
+                posRelativeToBoundingRect.push(rp);
+            });
+
+            return posRelativeToBoundingRect;
+        };
+
+        let boundingRect = calculateBoundingRect();
+        let currentLeft = boundingRect.getLeft();
+        let currentTop = boundingRect.getTop();
 
         var accTranslateX = 0.0;
         var accTranslateY = 0.0;    
 
-        var currentLeft = boundingRect.getLeft();
-        var currentTop = boundingRect.getTop();
+        const entityPositionRelativeToBoundingRect = calcEntityPositionRelativeToBoundingRect();
+        const encapsulationBox = new GroupEncapsulationBox(_entities, _containerStyleCssClasses, boundingRect);
 
-        const entityPositionRelativeToBoundingRect = [];
-
-        _entities.forEach(function(_obj) {
-            const rp = {
-                "x": _obj.getX() - currentLeft,
-                "y": _obj.getY() - currentTop
-            };
-
-            entityPositionRelativeToBoundingRect.push(rp);
-        });
-
-        const selBox = window.document.createElement("div");
-        selBox.classList.add('ia-group-transformation-container');
-        selBox.style.display = "none";
-        selBox.style.position = "absolute";
-        selBox.style.left = `${currentLeft}px`;
-        selBox.style.top = `${currentTop}px`;
-        selBox.style.width = `${boundingRect.getWidth()}px`;
-        selBox.style.height = `${boundingRect.getHeight()}px`;    
-
-        // only display the container if we have 1+ entity in the group
-        if(_entities.length > 0) {
-            selBox.style.display = "block";
-        }
-
-        if(typeof _containerStyleCssClasses === 'undefined' || _containerStyleCssClasses.length === 0) {
-            // default styling if no classes are provided
-            selBox.style.border = "1px solid rgb(158, 158, 158)";
-            selBox.style.backgroundColor = "rgba(153, 153, 153, 0.5)";       
-        } else {
-            // CSS classes will control styling for things GraphPaper doesn't care about
-            // (GraphPaper style concerns are handled via inline styles which will always take precedance)
-            _containerStyleCssClasses.forEach(function(_class) {
-                selBox.classList.add(_class);
-            });
-        }
-
-
+        /**
+         * @todo Rethink why this needs to be exposed
+         * 
+         * @returns {Element}
+         */
         this.getContainerDomElement = function() {
-            return selBox;
+            return encapsulationBox.getEncapsulationBoxDomElement();
         };
         
         /**
@@ -4583,8 +4631,7 @@ var GraphPaper = (function (exports) {
             currentLeft = newLeft;
             currentTop = newTop;
 
-            selBox.style.left = `${currentLeft}px`;
-            selBox.style.top = `${currentTop}px`;        
+            encapsulationBox.translate(currentLeft, currentTop);
 
             for(let i=0; i<_entities.length; i++) {
                 const rp = entityPositionRelativeToBoundingRect[i];
@@ -4613,8 +4660,7 @@ var GraphPaper = (function (exports) {
         };
 
         this.initTranslateInteractionHandler = function() {
-            selBox.addEventListener('touchstart', translateTouchStartHandler);        
-            selBox.addEventListener('mousedown', translateMouseDownHandler);
+            encapsulationBox.initTranslateInteractionHandler(translateMouseDownHandler, translateTouchStartHandler);
         };
 
         /**
