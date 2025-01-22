@@ -85,6 +85,11 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     let overwrittenRenderStyles = {};
 
     /**
+     * @type {Boolean}
+     */
+    let allowedWithinMultiEntitySelection = true;
+
+    /**
      * @param {Element} _connectorAnchorDomElement
      * @param {Number} _routingPointOffsetX
      * @param {Number} _routingPointOffsetY
@@ -159,6 +164,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      */    
     this.getTranslateHandleOffset = function() {
         if(currentTranslateHandleElementActivated) {
+            // return new Point(-currentTranslateHandleElementActivated.offsetWidth * 0.5, -currentTranslateHandleElementActivated.offsetHeight * 0.5);
             return new Point(
                 -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
                 -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
@@ -245,6 +251,22 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
+     * 
+     * @param {Boolean} _isSelectable 
+     */
+    this.setAllowedWithinMultiEntitySelection = function(_isSelectable) {
+        allowedWithinMultiEntitySelection = _isSelectable;
+    };
+
+    /**
+     * 
+     * @returns {Boolean}
+     */
+    this.isAllowedWithinMultiEntitySelection = function() {
+        return allowedWithinMultiEntitySelection;
+    }
+
+    /**
      * @param {Number} _x
      * @param {Number} _y
      * @param {Boolean} [_withinGroupTransformation=false]
@@ -276,6 +298,10 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                 }
             );
         });
+
+        //if(hasGroupTransformationContainer) {
+        //    translateGTC
+        //}
 
         const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
         subEntities.forEach((_subEntity) => {

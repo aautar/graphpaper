@@ -29,3 +29,5 @@ path { fill: none; }
 .translateHandle { cursor:move; display:block; width:12px; height:12px; background:#0094ff; border-radius:12px; }
 .resizeHandle { cursor:nwse-resize; display:block; position:absolute; bottom:3px; right:3px; width:12px; height:12px; background:url(resize-handle.svg) 0 0 no-repeat; } 
 .connectorAnchor { cursor:pointer; display:block; position:absolute; top:0px; right:-18px; width:12px; height:12px; background:#fff; border:2px solid rgb(0, 109, 201); border-radius:4px; }
+
+.encapsulation-box {  position:absolute; top:0; left:0; width:10px; height:10px; border:1px solid rgb(158, 158, 158); background-color:rgba(153, 153, 153, 0.5) ;}

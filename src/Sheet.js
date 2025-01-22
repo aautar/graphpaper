@@ -1307,7 +1307,7 @@ function Sheet(_sheetDomElement, _window) {
      * 
      * @param {Object} _e
      */
-    const handleMoveStart = function(_e) {     
+    const handleMoveStart = function(_e) {
         objectIdBeingDragged = _e.obj.getId();
         objectDragX = _e.x;
         objectDragY = _e.y;
@@ -1442,7 +1442,7 @@ function Sheet(_sheetDomElement, _window) {
             Math.max(multiObjectSelectionStartY, multiObjectSelectionEndY)
         );
 
-        const selectedEntities = self.getEntitiesWithinRect(selectionRect);
+        const selectedEntities = self.getEntitiesWithinRect(selectionRect).filter((_entity) => _entity.isAllowedWithinMultiEntitySelection() );
         const boundingRect = self.calcBoundingRectForEntities(selectedEntities);
 
         selectionBoxElem.style.left = `${boundingRect.getLeft()}px`;

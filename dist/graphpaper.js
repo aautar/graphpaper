@@ -3430,7 +3430,7 @@ var GraphPaper = (function (exports) {
          * 
          * @param {Object} _e
          */
-        const handleMoveStart = function(_e) {     
+        const handleMoveStart = function(_e) {
             objectIdBeingDragged = _e.obj.getId();
             objectDragX = _e.x;
             objectDragY = _e.y;
@@ -3565,7 +3565,7 @@ var GraphPaper = (function (exports) {
                 Math.max(multiObjectSelectionStartY, multiObjectSelectionEndY)
             );
 
-            const selectedEntities = self.getEntitiesWithinRect(selectionRect);
+            const selectedEntities = self.getEntitiesWithinRect(selectionRect).filter((_entity) => _entity.isAllowedWithinMultiEntitySelection() );
             const boundingRect = self.calcBoundingRectForEntities(selectedEntities);
 
             selectionBoxElem.style.left = `${boundingRect.getLeft()}px`;
@@ -3948,6 +3948,11 @@ var GraphPaper = (function (exports) {
         let overwrittenRenderStyles = {};
 
         /**
+         * @type {Boolean}
+         */
+        let allowedWithinMultiEntitySelection = true;
+
+        /**
          * @param {Element} _connectorAnchorDomElement
          * @param {Number} _routingPointOffsetX
          * @param {Number} _routingPointOffsetY
@@ -4022,6 +4027,7 @@ var GraphPaper = (function (exports) {
          */    
         this.getTranslateHandleOffset = function() {
             if(currentTranslateHandleElementActivated) {
+                // return new Point(-currentTranslateHandleElementActivated.offsetWidth * 0.5, -currentTranslateHandleElementActivated.offsetHeight * 0.5);
                 return new Point(
                     -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
                     -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
@@ -4108,6 +4114,22 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * 
+         * @param {Boolean} _isSelectable 
+         */
+        this.setAllowedWithinMultiEntitySelection = function(_isSelectable) {
+            allowedWithinMultiEntitySelection = _isSelectable;
+        };
+
+        /**
+         * 
+         * @returns {Boolean}
+         */
+        this.isAllowedWithinMultiEntitySelection = function() {
+            return allowedWithinMultiEntitySelection;
+        };
+
+        /**
          * @param {Number} _x
          * @param {Number} _y
          * @param {Boolean} [_withinGroupTransformation=false]
@@ -4139,6 +4161,10 @@ var GraphPaper = (function (exports) {
                     }
                 );
             });
+
+            //if(hasGroupTransformationContainer) {
+            //    translateGTC
+            //}
 
             const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
             subEntities.forEach((_subEntity) => {
@@ -4477,6 +4503,8 @@ var GraphPaper = (function (exports) {
     }
 
     /**
+     * Is this just a type of Entity?
+     * 
      * @param {Entity[]} _entities
      * @param {String[]} _containerStyleCssClasses
      * @param {Rectangle} _boundingRect
