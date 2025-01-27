@@ -164,11 +164,14 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      */    
     this.getTranslateHandleOffset = function() {
         if(currentTranslateHandleElementActivated) {
-            // return new Point(-currentTranslateHandleElementActivated.offsetWidth * 0.5, -currentTranslateHandleElementActivated.offsetHeight * 0.5);
-            return new Point(
-                -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
-                -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
-            );
+            if(currentTranslateHandleElementActivated === _domElement) {
+                return new Point(-currentTranslateHandleElementActivated.offsetWidth * 0.5, -currentTranslateHandleElementActivated.offsetHeight * 0.5);
+            } else {   
+                return new Point(
+                    -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
+                    -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
+                );
+            }
         }
 
         return null;
