@@ -396,7 +396,7 @@ function Sheet(_sheetDomElement, _window) {
         const gridSize = self.getGridSize();
 
         const entityDescriptors = [];
-        sheetEntities.forEach(function(_e) {
+        sheetEntities.filter((_e) => _e.isAllowedWithinCluster()).forEach(function(_e) {
             entityDescriptors.push(_e.getDescriptor(gridSize));
         });
 

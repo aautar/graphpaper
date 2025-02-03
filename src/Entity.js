@@ -90,6 +90,11 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     let allowedWithinMultiEntitySelection = true;
 
     /**
+     * @type {Boolean}
+     */
+    let allowedWithinCluster = true;
+
+    /**
      * @param {Element} _connectorAnchorDomElement
      * @param {Number} _routingPointOffsetX
      * @param {Number} _routingPointOffsetY
@@ -267,7 +272,23 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      */
     this.isAllowedWithinMultiEntitySelection = function() {
         return allowedWithinMultiEntitySelection;
-    }
+    };
+
+    /**
+     * 
+     * @param {Boolean} _isSelectable 
+     */
+    this.setAllowedWithinCluster = function(_isAllowedWithinCluster) {
+        allowedWithinCluster = _isAllowedWithinCluster;
+    };
+
+    /**
+     * 
+     * @returns {Boolean}
+     */
+    this.isAllowedWithinCluster = function() {
+        return allowedWithinCluster;
+    };
 
     /**
      * @param {Number} _x
