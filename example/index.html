@@ -150,7 +150,8 @@
         canvas.setConnectorRefreshBufferTime(0);
         canvas.setBoundingExtentRoutingPointScaleFactor(2.0);
 
-        const computeConnector = () => {
+        const computeConnector = (e) => {
+            console.log(e);
             canvas.findBestConnectorAnchorsToConnectEntities(obj2, obj4, function(_bestAnchors) {
 
                 const existingConnectors = canvas.getConnectorsBetweenAnchors(_bestAnchors.objectAAnchor, _bestAnchors.objectBAnchor);
@@ -168,7 +169,15 @@
         };
 
         canvas.on(GraphPaper.SheetEvent.ENTITY_TRANSLATED, computeConnector);
-        computeConnector();        
+        canvas.on(GraphPaper.SheetEvent.ENTITY_RESIZED, function(e) {
+            console.log(e);
+        });
+
+        computeConnector();
+
+        obj4.translate(479,273);
+
+        window.sheet = canvas;
 
     </script>
 

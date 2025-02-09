@@ -36,7 +36,9 @@
             <div id="translateHandle4" class="translateHandle"></div>
             <div id="resizeHandle4" class="resizeHandle"></div>
             <div id="connectorAnchor4" class="connectorAnchor"></div>
-        </div>            
+        </div>
+
+        <div id="encapsulation-box" class="encapsulation-box"></div>
 
     </div>
 
@@ -66,6 +68,13 @@
 
             return c;
         });
+
+        const encapsulationBox = new GraphPaper.GroupEncapsulationEntity(
+            'encapsulation-box', 
+            canvas,
+            document.getElementById('encapsulation-box'),
+            10
+        );
 
         const obj1 = new GraphPaper.Entity(
             'obj1', 
@@ -130,33 +139,13 @@
         canvas.addEntity(obj2);
         canvas.addEntity(obj3);
         canvas.addEntity(obj4);
+        canvas.addEntity(encapsulationBox);
 
         obj3.suspendTranslateInteractions();
         obj3.resumeTranslateInteractions();
 
         canvas.on(GraphPaper.SheetEvent.MULTIPLE_ENTITIES_SELECTED, function(e) {
-
-            console.log(e);
-
-            // clear any current group transformation containers
-            if(currentGroupTransformationContainer) {
-                canvas.detachGroupTransformationContainer(currentGroupTransformationContainer);
-                currentGroupTransformationContainer.getEntities().forEach(function(_obj) {
-                    // (we're using raw GraphPaper.Entity objects and keeping selection state in the DOM, in a real app we'd likely encapsulate the state info in an object)
-                    _obj.getDomElement().classList.remove('selected');
-                });
-            }
-
-            // create new GroupTransformationContainer..
-            currentGroupTransformationContainer = new GraphPaper.GroupTransformationContainer(canvas, e.selectedObjects);
-            currentGroupTransformationContainer.initTranslateInteractionHandler();
-            canvas.attachGroupTransformationContainer(currentGroupTransformationContainer);
-
-            // reflect selection state on object DOM elements
-            currentGroupTransformationContainer.getEntities().forEach(function(_obj) {
-                _obj.getDomElement().classList.add('selected');
-            });
-
+            encapsulationBox.setEncapsulatedEntities(e.selectedObjects);
         });
 
     </script>

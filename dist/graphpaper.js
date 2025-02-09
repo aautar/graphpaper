@@ -634,11 +634,6 @@ var GraphPaper = (function (exports) {
         return false;
     };
 
-    const GroupTransformationContainerEvent = Object.freeze({
-        TRANSLATE_START: 'group-transformation-container-translate-start',
-        TRANSLATE: 'group-transformation-container-translate',
-    });
-
     const EntityEvent = Object.freeze({
         TRANSLATE_START: 'obj-translate-start',
         TRANSLATE: 'obj-translate',
@@ -2173,17 +2168,7 @@ var GraphPaper = (function (exports) {
          * @type {Element}
          */
         var selectionBoxElem = null;
-
-        /**
-         * @type {GroupTransformationContainer[]}
-         */
-        const groupTransformationContainers = [];
-
-        /**
-         * @type {GroupTransformationContainer}
-         */
-        var currentGroupTransformationContainerBeingDragged = null;
-      
+     
         /**
          * @type {Grid}
          */
@@ -2519,7 +2504,7 @@ var GraphPaper = (function (exports) {
             const gridSize = self.getGridSize();
 
             const entityDescriptors = [];
-            sheetEntities.forEach(function(_e) {
+            sheetEntities.filter((_e) => _e.isAllowedWithinCluster()).forEach(function(_e) {
                 entityDescriptors.push(_e.getDescriptor(gridSize));
             });
 
@@ -3381,56 +3366,11 @@ var GraphPaper = (function (exports) {
             });
         };
 
-        const setCurrentGroupTransformationContainerBeingDragged = function(e) {
-            currentGroupTransformationContainerBeingDragged = e.container;
-        };
-
-        /**
-         * @param {GroupTransformationContainer} _groupTransformationContainer
-         */
-        this.attachGroupTransformationContainer = function(_groupTransformationContainer) {
-            _sheetDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
-            groupTransformationContainers.push(_groupTransformationContainer);
-
-            _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
-            _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
-            _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE, refreshAllClustersInternal);
-        };
-
-        /**
-         * @param {GroupTransformationContainer} _groupTransformationContainer
-         * @returns {Boolean}
-         */
-        this.detachGroupTransformationContainer = function(_groupTransformationContainer) {
-            for(let i=0; i<groupTransformationContainers.length; i++) {
-                if(groupTransformationContainers[i] === _groupTransformationContainer) {
-                    _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
-                    _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
-                    _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE, refreshAllClustersInternal);
-                    _sheetDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
-                    groupTransformationContainers.splice(i, 1);
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        /**
-         * 
-         * @param {Number} _dx 
-         * @param {Number} _dy 
-         */
-        const handleGroupTransformationContainerMove = function(_dx, _dy) {
-            const gtc = currentGroupTransformationContainerBeingDragged;        
-            gtc.translateByOffset(_dx, _dy);
-        };
-
         /**
          * 
          * @param {Object} _e
          */
-        const handleMoveStart = function(_e) {     
+        const handleMoveStart = function(_e) {
             objectIdBeingDragged = _e.obj.getId();
             objectDragX = _e.x;
             objectDragY = _e.y;
@@ -3565,7 +3505,7 @@ var GraphPaper = (function (exports) {
                 Math.max(multiObjectSelectionStartY, multiObjectSelectionEndY)
             );
 
-            const selectedEntities = self.getEntitiesWithinRect(selectionRect);
+            const selectedEntities = self.getEntitiesWithinRect(selectionRect).filter((_entity) => _entity.isAllowedWithinMultiEntitySelection() );
             const boundingRect = self.calcBoundingRectForEntities(selectedEntities);
 
             selectionBoxElem.style.left = `${boundingRect.getLeft()}px`;
@@ -3708,19 +3648,6 @@ var GraphPaper = (function (exports) {
                     e.preventDefault();
                 }
 
-                if(currentGroupTransformationContainerBeingDragged !== null) {
-                    const dx = (e.touches[0].pageX - self.getOffsetLeft()) - touchMoveLastX;
-                    const dy = (e.touches[0].pageY - self.getOffsetTop()) - touchMoveLastY;
-
-                    const invTransformedPos = MatrixMath.vecMat4Multiply(
-                        [dx, dy, 0, 1],
-                        currentInvTransformationMatrix
-                    );                    
-
-                    handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);        
-                    e.preventDefault();        
-                }
-
                 if(multiObjectSelectionStarted) {
                     updateSelectionBoxEndPoint(e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop());
                     e.preventDefault();
@@ -3749,15 +3676,6 @@ var GraphPaper = (function (exports) {
                     handleResize(invTransformedPos[0], invTransformedPos[1]);
                 }
 
-                if(currentGroupTransformationContainerBeingDragged !== null) {
-                    const invTransformedPos = MatrixMath.vecMat4Multiply(
-                        [e.movementX, e.movementY, 0, 1],
-                        currentInvTransformationMatrix
-                    );                    
-
-                    handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);                
-                }
-
                 if(multiObjectSelectionStarted) {
                     updateSelectionBoxEndPoint(e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop());
                 }
@@ -3774,12 +3692,7 @@ var GraphPaper = (function (exports) {
                 
                 if(objectIdBeingResized !== null) {
                     handleResizeEnd();
-                }
-
-                if(currentGroupTransformationContainerBeingDragged !== null) {
-                    currentGroupTransformationContainerBeingDragged.endTranslate();
-                    currentGroupTransformationContainerBeingDragged = null;
-                }            
+                } 
 
                 if(multiObjectSelectionStarted) {
                     handleMultiEntitySelectionEnd();
@@ -3802,11 +3715,6 @@ var GraphPaper = (function (exports) {
                         handleResizeEnd();
                     }
 
-                    if(currentGroupTransformationContainerBeingDragged !== null) {
-                        currentGroupTransformationContainerBeingDragged.endTranslate();
-                        currentGroupTransformationContainerBeingDragged = null;
-                    }
-
                     if(multiObjectSelectionStarted) {
                         handleMultiEntitySelectionEnd();
                     }
@@ -3818,7 +3726,7 @@ var GraphPaper = (function (exports) {
 
             _sheetDomElement.addEventListener('mousedown', function (e) {
                 // if we're dragging something, stop propagation
-                if(currentGroupTransformationContainerBeingDragged !== null || objectIdBeingDragged !== null || objectIdBeingResized !== null) {
+                if(objectIdBeingDragged !== null || objectIdBeingResized !== null) {
                     e.preventDefault();
                     e.stopPropagation();
                 }
@@ -3912,11 +3820,6 @@ var GraphPaper = (function (exports) {
         const eventNameToHandlerFunc = new Map();
 
         /**
-         * @type {Entity[]}
-         */
-        const subEntities = [];
-
-        /**
          * @type {Number|null}
          */
         let x = null;
@@ -3946,6 +3849,16 @@ var GraphPaper = (function (exports) {
          * @type {Object}
          */
         let overwrittenRenderStyles = {};
+
+        /**
+         * @type {Boolean}
+         */
+        let allowedWithinMultiEntitySelection = true;
+
+        /**
+         * @type {Boolean}
+         */
+        let allowedWithinCluster = true;
 
         /**
          * @param {Element} _connectorAnchorDomElement
@@ -4022,10 +3935,14 @@ var GraphPaper = (function (exports) {
          */    
         this.getTranslateHandleOffset = function() {
             if(currentTranslateHandleElementActivated) {
-                return new Point(
-                    -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
-                    -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
-                );
+                if(currentTranslateHandleElementActivated === _domElement) {
+                    return new Point(-currentTranslateHandleElementActivated.offsetWidth * 0.5, -currentTranslateHandleElementActivated.offsetHeight * 0.5);
+                } else {   
+                    return new Point(
+                        -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
+                        -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
+                    );
+                }
             }
 
             return null;
@@ -4108,6 +4025,38 @@ var GraphPaper = (function (exports) {
         };
 
         /**
+         * 
+         * @param {Boolean} _isSelectable 
+         */
+        this.setAllowedWithinMultiEntitySelection = function(_isSelectable) {
+            allowedWithinMultiEntitySelection = _isSelectable;
+        };
+
+        /**
+         * 
+         * @returns {Boolean}
+         */
+        this.isAllowedWithinMultiEntitySelection = function() {
+            return allowedWithinMultiEntitySelection;
+        };
+
+        /**
+         * 
+         * @param {Boolean} _isSelectable 
+         */
+        this.setAllowedWithinCluster = function(_isAllowedWithinCluster) {
+            allowedWithinCluster = _isAllowedWithinCluster;
+        };
+
+        /**
+         * 
+         * @returns {Boolean}
+         */
+        this.isAllowedWithinCluster = function() {
+            return allowedWithinCluster;
+        };
+
+        /**
          * @param {Number} _x
          * @param {Number} _y
          * @param {Boolean} [_withinGroupTransformation=false]
@@ -4118,8 +4067,6 @@ var GraphPaper = (function (exports) {
                 return;
             }
 
-            const dx = _x - x;
-            const dy = _y - y;
             const originator = _originator ? _originator : Originator.PROGRAM;
 
             x = _x;
@@ -4132,21 +4079,11 @@ var GraphPaper = (function (exports) {
                 handler(
                     {
                         "obj": self, 
-                        "x": _x, 
+                        "x": _x,
                         "y": _y,
                         "withinGroupTransformation": _withinGroupTransformation ? true : false,
                         "originator": originator,
                     }
-                );
-            });
-
-            const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
-            subEntities.forEach((_subEntity) => {
-                _subEntity.translate(
-                    _subEntity.getX() + dx, 
-                    _subEntity.getY() + dy, 
-                    false, 
-                    originatorForSubEntities,
                 );
             });
         };
@@ -4323,23 +4260,6 @@ var GraphPaper = (function (exports) {
         };
 
         /**
-         * Attach sub-entities which will translate relative to this entity, when a translate transform occurs
-         * 
-         * @param {Entity[]} _subEntities 
-         */
-        this.attachSubEntities = function(_subEntities) {
-            subEntities.push(..._subEntities);
-        };
-
-        /**
-         * 
-         * @returns {Entity[]}
-         */
-        this.getAttachedSubEntities = function() {
-            return subEntities;
-        };
-
-        /**
          * 
          * @param {String} _eventName 
          * @param {*} _handlerFunc 
@@ -4474,201 +4394,6 @@ var GraphPaper = (function (exports) {
         bindResizeHandleElements();
         self.translate(_x, _y, false, Originator.PROGRAM);
         self.resize(_width, _height, Originator.PROGRAM);
-    }
-
-    /**
-     * @param {Sheet} _sheet
-     * @param {Entity[]} _entities
-     * @param {String[]} _containerStyleCssClasses
-     * @param {Number} _sizeAdjustmentPx
-     */
-    function GroupTransformationContainer(_sheet, _entities, _containerStyleCssClasses, _sizeAdjustmentPx)  {
-        const self = this;
-        const eventNameToHandlerFunc = new Map();
-
-        /**
-         * 
-         * @returns {Rectangle}
-         */
-        const calculateBoundingRect = function() {
-            var r = _sheet.calcBoundingRectForEntities(_entities);
-            if(_sizeAdjustmentPx) {
-                r = r.getUniformlyResizedCopy(_sizeAdjustmentPx);
-            }
-
-            return r;
-        };
-
-        var boundingRect = calculateBoundingRect();
-
-        var accTranslateX = 0.0;
-        var accTranslateY = 0.0;    
-
-        var currentLeft = boundingRect.getLeft();
-        var currentTop = boundingRect.getTop();
-
-        const entityPositionRelativeToBoundingRect = [];
-
-        _entities.forEach(function(_obj) {
-            const rp = {
-                "x": _obj.getX() - currentLeft,
-                "y": _obj.getY() - currentTop
-            };
-
-            entityPositionRelativeToBoundingRect.push(rp);
-        });
-
-        const selBox = window.document.createElement("div");
-        selBox.classList.add('ia-group-transformation-container');
-        selBox.style.display = "none";
-        selBox.style.position = "absolute";
-        selBox.style.left = `${currentLeft}px`;
-        selBox.style.top = `${currentTop}px`;
-        selBox.style.width = `${boundingRect.getWidth()}px`;
-        selBox.style.height = `${boundingRect.getHeight()}px`;    
-
-        // only display the container if we have 1+ entity in the group
-        if(_entities.length > 0) {
-            selBox.style.display = "block";
-        }
-
-        if(typeof _containerStyleCssClasses === 'undefined' || _containerStyleCssClasses.length === 0) {
-            // default styling if no classes are provided
-            selBox.style.border = "1px solid rgb(158, 158, 158)";
-            selBox.style.backgroundColor = "rgba(153, 153, 153, 0.5)";       
-        } else {
-            // CSS classes will control styling for things GraphPaper doesn't care about
-            // (GraphPaper style concerns are handled via inline styles which will always take precedance)
-            _containerStyleCssClasses.forEach(function(_class) {
-                selBox.classList.add(_class);
-            });
-        }
-
-
-        this.getContainerDomElement = function() {
-            return selBox;
-        };
-        
-        /**
-         * @returns {Entity[]}
-         */
-        this.getEntities = function() {
-            return _entities;
-        };
-
-        /**
-         * 
-         * @returns {Rectangle}
-         */
-        this.getBoundingRect = function() {
-            return boundingRect;
-        };
-
-        /**
-         * @param {Number} _dx
-         * @param {Number} _dy
-         */
-        this.translateByOffset = function(_dx, _dy) {
-            accTranslateX += _dx;
-            accTranslateY += _dy;
-
-            const newLeft = _sheet.snapToGrid(boundingRect.getLeft() + accTranslateX);
-            const newTop = _sheet.snapToGrid(boundingRect.getTop() + accTranslateY);
-
-            if(currentLeft === newLeft && currentTop === newTop) {
-                // no translation
-                return;
-            }
-
-            currentLeft = newLeft;
-            currentTop = newTop;
-
-            selBox.style.left = `${currentLeft}px`;
-            selBox.style.top = `${currentTop}px`;        
-
-            for(let i=0; i<_entities.length; i++) {
-                const rp = entityPositionRelativeToBoundingRect[i];
-                _entities[i].translate(
-                    _sheet.snapToGrid(currentLeft + rp.x), 
-                    _sheet.snapToGrid(currentTop + rp.y),
-                    true,
-                    Originator.USER,
-                );
-            }
-
-            const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE) || [];
-            observers.forEach(function(handler) {
-                handler({
-                    "container": self,
-                    "x": currentLeft, 
-                    "y": currentTop
-                });
-            });
-        };
-
-        this.endTranslate = function() {
-            accTranslateX = 0.0;
-            accTranslateY = 0.0;
-            boundingRect = calculateBoundingRect();
-        };
-
-        this.initTranslateInteractionHandler = function() {
-            selBox.addEventListener('touchstart', translateTouchStartHandler);        
-            selBox.addEventListener('mousedown', translateMouseDownHandler);
-        };
-
-        /**
-         * 
-         * @param {String} _eventName 
-         * @param {*} _handlerFunc 
-         */
-        this.on = function(_eventName, _handlerFunc) {
-            const allHandlers = eventNameToHandlerFunc.get(_eventName) || [];
-            allHandlers.push(_handlerFunc);
-            eventNameToHandlerFunc.set(_eventName, allHandlers);        
-        };
-
-        /**
-         * 
-         * @param {String} _eventName 
-         * @param {*} _callback 
-         */
-        this.off = function(_eventName, _callback) {
-            const allCallbacks = eventNameToHandlerFunc.get(_eventName) || [];
-
-            for(let i=0; i<allCallbacks.length; i++) {
-                if(allCallbacks[i] === _callback) {
-                    allCallbacks.splice(i, 1);
-                    break;
-                }
-            }
-
-            eventNameToHandlerFunc.set(_eventName, allCallbacks);
-        };
-
-        const translateTouchStartHandler = function(e) {
-            const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE_START) || [];
-            observers.forEach(function(handler) {
-                handler({
-                    "container": self,
-                    "x": e.touches[0].pageX, 
-                    "y": e.touches[0].pageY,
-                    "isTouch": true
-                });
-            });
-        };
-
-        const translateMouseDownHandler = function(e) {       
-            const observers = eventNameToHandlerFunc.get(GroupTransformationContainerEvent.TRANSLATE_START) || [];
-            observers.forEach(function(handler) {
-                handler({
-                    "container": self,
-                    "x": e.pageX, 
-                    "y": e.pageY,
-                    "isTouch": false
-                });
-            });
-        };
     }
 
     function BoxClusterDetector(_boxExtentOffset) {
@@ -5653,6 +5378,110 @@ var GraphPaper = (function (exports) {
         };
     }
 
+    /**
+     * 
+     * @param {String} _id
+     * @param {Sheet} _sheet
+     * @param {Element} _domElement
+     * @param {Number} _sizeAdjustmentPx
+     * 
+     **/
+    function GroupEncapsulationEntity(_id, _sheet, _domElement, _sizeAdjustmentPx)  {
+
+        const self = this;
+        const encapsulatedEntities = [];
+
+        Entity.call(
+            this,
+            _id, 
+            0, 
+            0, 
+            0, 
+            0, 
+            _sheet, 
+            _domElement, 
+            [_domElement], 
+            []
+        );
+
+        const parentTranslate = this.translate;
+
+        self.setAllowedWithinMultiEntitySelection(false);
+        self.setAllowedWithinCluster(false);
+
+        /**
+         * 
+         * @returns {Rectangle}
+         */
+        const calculateBoundingRect = function() {
+            let r = _sheet.calcBoundingRectForEntities(encapsulatedEntities);
+            if(r.getWidth() === 0 || r.getHeight() === 0) {
+                return r; // don't bother with size adjustment if the box has no dimension
+            }
+
+            if(_sizeAdjustmentPx) {
+                r = r.getUniformlyResizedCopy(_sizeAdjustmentPx);
+            }
+
+            return r;
+        };
+
+        const clearEncapsulatedEntities = function() {
+            encapsulatedEntities.length = 0;
+        };
+
+        /**
+         * @param {Number} _x
+         * @param {Number} _y
+         * @param {Originator} [_originator=Originator.PROGRAM]
+         */
+        this.translate = function(_x, _y, _originator) {
+            const dx = _x - self.getX();
+            const dy = _y - self.getY();
+
+            //
+            // Always translate the encapsulted entities first...
+            //
+            const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
+            encapsulatedEntities.forEach((_subEntity) => {
+                _subEntity.translate(
+                    _subEntity.getX() + dx,
+                    _subEntity.getY() + dy,
+                    true,
+                    originatorForSubEntities,
+                );
+            });
+
+            //
+            // .. b/c the translate event from this entity will trigger connector and cluster refreshes 
+            // .. (since _withinGroupTransformation is false)
+            //
+            parentTranslate(_x, _y, false, _originator);
+        };
+
+        /**
+         * 
+         * @param {Entity[]} _encapsulatedEntities 
+         */
+        this.setEncapsulatedEntities = function(_encapsulatedEntities) {
+
+            /**
+             * @todo validate that _encapsulatedEntities does not contain this entity
+             */
+
+            clearEncapsulatedEntities();
+            encapsulatedEntities.push(..._encapsulatedEntities);
+
+            const bbox = calculateBoundingRect();
+
+            parentTranslate(bbox.getLeft(), bbox.getTop(), false, Originator.PROGRAM);
+            self.resize(bbox.getWidth(), bbox.getHeight());
+        };
+    }
+
+    GroupEncapsulationEntity.prototype = Object.create(Entity.prototype);
+    GroupEncapsulationEntity.prototype.constructor = GroupEncapsulationEntity;
+
     exports.BoxClusterDetector = BoxClusterDetector;
     exports.Cluster = Cluster;
     exports.Connector = Connector;
@@ -5664,8 +5493,7 @@ var GraphPaper = (function (exports) {
     exports.EntityEvent = EntityEvent;
     exports.GRID_STYLE = GRID_STYLE;
     exports.Grid = Grid;
-    exports.GroupTransformationContainer = GroupTransformationContainer;
-    exports.GroupTransformationContainerEvent = GroupTransformationContainerEvent;
+    exports.GroupEncapsulationEntity = GroupEncapsulationEntity;
     exports.LINE_INTERSECTION_TYPE = LINE_INTERSECTION_TYPE;
     exports.Line = Line;
     exports.LineIntersection = LineIntersection;

@@ -49,11 +49,6 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     const eventNameToHandlerFunc = new Map();
 
     /**
-     * @type {Entity[]}
-     */
-    const subEntities = [];
-
-    /**
      * @type {Number|null}
      */
     let x = null;
@@ -83,6 +78,16 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @type {Object}
      */
     let overwrittenRenderStyles = {};
+
+    /**
+     * @type {Boolean}
+     */
+    let allowedWithinMultiEntitySelection = true;
+
+    /**
+     * @type {Boolean}
+     */
+    let allowedWithinCluster = true;
 
     /**
      * @param {Element} _connectorAnchorDomElement
@@ -159,10 +164,14 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      */    
     this.getTranslateHandleOffset = function() {
         if(currentTranslateHandleElementActivated) {
-            return new Point(
-                -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
-                -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
-            );
+            if(currentTranslateHandleElementActivated === _domElement) {
+                return new Point(-currentTranslateHandleElementActivated.offsetWidth * 0.5, -currentTranslateHandleElementActivated.offsetHeight * 0.5);
+            } else {   
+                return new Point(
+                    -(currentTranslateHandleElementActivated.offsetLeft + currentTranslateHandleElementActivated.offsetWidth * 0.5),
+                    -(currentTranslateHandleElementActivated.offsetTop  + currentTranslateHandleElementActivated.offsetHeight * 0.5)
+                );
+            }
         }
 
         return null;
@@ -245,6 +254,38 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
+     * 
+     * @param {Boolean} _isSelectable 
+     */
+    this.setAllowedWithinMultiEntitySelection = function(_isSelectable) {
+        allowedWithinMultiEntitySelection = _isSelectable;
+    };
+
+    /**
+     * 
+     * @returns {Boolean}
+     */
+    this.isAllowedWithinMultiEntitySelection = function() {
+        return allowedWithinMultiEntitySelection;
+    };
+
+    /**
+     * 
+     * @param {Boolean} _isSelectable 
+     */
+    this.setAllowedWithinCluster = function(_isAllowedWithinCluster) {
+        allowedWithinCluster = _isAllowedWithinCluster;
+    };
+
+    /**
+     * 
+     * @returns {Boolean}
+     */
+    this.isAllowedWithinCluster = function() {
+        return allowedWithinCluster;
+    };
+
+    /**
      * @param {Number} _x
      * @param {Number} _y
      * @param {Boolean} [_withinGroupTransformation=false]
@@ -255,8 +296,6 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             return;
         }
 
-        const dx = _x - x;
-        const dy = _y - y;
         const originator = _originator ? _originator : Originator.PROGRAM;
 
         x = _x;
@@ -269,21 +308,11 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             handler(
                 {
                     "obj": self, 
-                    "x": _x, 
+                    "x": _x,
                     "y": _y,
                     "withinGroupTransformation": _withinGroupTransformation ? true : false,
                     "originator": originator,
                 }
-            );
-        });
-
-        const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
-        subEntities.forEach((_subEntity) => {
-            _subEntity.translate(
-                _subEntity.getX() + dx, 
-                _subEntity.getY() + dy, 
-                false, 
-                originatorForSubEntities,
             );
         });
     };
@@ -457,23 +486,6 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
                 "maxY": outerBoundMaxY
             }
         }
-    };
-
-    /**
-     * Attach sub-entities which will translate relative to this entity, when a translate transform occurs
-     * 
-     * @param {Entity[]} _subEntities 
-     */
-    this.attachSubEntities = function(_subEntities) {
-        subEntities.push(..._subEntities);
-    };
-
-    /**
-     * 
-     * @returns {Entity[]}
-     */
-    this.getAttachedSubEntities = function() {
-        return subEntities;
     };
 
     /**
