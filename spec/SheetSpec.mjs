@@ -1,9 +1,9 @@
 const jsdom = require("jsdom");
-import {Sheet} from '../src/Sheet.mjs';
-import {Entity} from '../src/Entity.mjs';
-import {ConnectorAnchor} from '../src/ConnectorAnchor.mjs';
-import {GRID_STYLE,Grid} from '../src/Grid.mjs';
-import {SheetEvent} from '../src/SheetEvent.mjs';
+import { Sheet } from '../src/Sheet.mjs';
+import { Entity } from '../src/Entity.mjs';
+import { ConnectorAnchor } from '../src/ConnectorAnchor.mjs';
+import { GRID_STYLE, Grid } from '../src/Grid.mjs';
+import { SheetEvent } from '../src/SheetEvent.mjs';
 
 const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);

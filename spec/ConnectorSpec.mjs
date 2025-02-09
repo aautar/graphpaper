@@ -1,6 +1,6 @@
 const jsdom = require("jsdom");
-import {ConnectorAnchor} from '../src/ConnectorAnchor.mjs'
-import {Connector} from '../src/Connector.mjs'
+import { ConnectorAnchor } from '../src/ConnectorAnchor.mjs'
+import { Connector } from '../src/Connector.mjs'
 import { Point } from '../src/Point.mjs';
 import { ConnectorRoutingAlgorithm } from '../src/ConnectorRoutingAlgorithm.mjs';
 

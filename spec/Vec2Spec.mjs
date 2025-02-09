@@ -1,4 +1,4 @@
-import {Vec2} from '../src/Vec2.mjs'
+import { Vec2 } from '../src/Vec2.mjs'
 
 describe("Vec2.normalize", function() {
     it("normalizes non-zero vector", function() {

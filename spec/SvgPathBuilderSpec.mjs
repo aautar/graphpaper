@@ -1,4 +1,4 @@
-import {SvgPathBuilder} from '../src/SvgPathBuilder.mjs'
+import { SvgPathBuilder } from '../src/SvgPathBuilder.mjs'
 import { Point } from '../src/Point.mjs';
 
 describe("SvgPathBuilder.pointsToPath", function() {
