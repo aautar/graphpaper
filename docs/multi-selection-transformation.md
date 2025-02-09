@@ -23,29 +23,25 @@ The event object (e) has 2 fields:
 ```
 
 ### Group (multi-entity) transformation
-Group transformations are supported by creating a `GroupTransformationContainer` with a set of entities and attaching it to a sheet via `Sheet.attachGroupTransformationContainer()`. 
+Group transformations are supported by creating a `GroupEncapsulationEntity`. This is an entity that contains a number of child entities, which are transformed when the entity itself is transformed.
 
-Currently only translations are supported on containers, which is enabled by calling `GroupTransformationContainer.initTranslateInteractionHandler()`.
+> Currently only translations are supported.
+
+> `GroupEncapsulationEntity` replaces the `GroupTransformationContainer` construct in earlier version of GraphPaper
 
 ```javascript
-const container = new GraphPaper.GroupTransformationContainer(sheet, entities);
-container.initTranslateInteractionHandler();
-sheet.attachGroupTransformationContainer(container);
+const encapsulationBox = new GraphPaper.GroupEncapsulationEntity(
+    'encapsulation-box', 
+    sheet,
+    document.getElementById('encapsulation-box'),
+    10
+);
 ```
 
-Typically you'll want to use a `GroupTransformationContainer` to respond to entity selection on a sheet. This requires listening for the `SheetEvent.MULTIPLE_ENTITIES_SELECTED` event, detaching any current container on the sheet, creating a new container, then attaching the new container.
+Typically you'll want to use a `GroupEncapsulationEntity` to respond to entity selection on a sheet. This requires listening for the `SheetEvent.MULTIPLE_ENTITIES_SELECTED` event and calling `GroupEncapsulationEntity.setEncapsulatedEntities()`:
 
 ```javascript
-let currentContainer = null;
-sheet.on(GraphPaper.SheetEvent.MULTIPLE_ENTITIES_SELECTED, (e) => {
-    // clear any current group transformation containers
-    if(currentContainer) {
-        sheet.detachGroupTransformationContainer(currentContainer);
-    }
-
-    // create new GroupTransformationContainer..
-    currentContainer = new GraphPaper.GroupTransformationContainer(sheet, e.selectedObjects);
-    currentContainer.initTranslateInteractionHandler();
-    sheet.attachGroupTransformationContainer(currentContainer);
+sheet.on(GraphPaper.SheetEvent.MULTIPLE_ENTITIES_SELECTED, function(e) {
+    encapsulationBox.setEncapsulatedEntities(e.selectedObjects);
 });
 ```
