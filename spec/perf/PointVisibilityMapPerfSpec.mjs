@@ -1,8 +1,8 @@
-import {Point} from '../../src/Point'
-import {PointSet} from '../../src/PointSet'
-import {Line} from '../../src/Line'
-import {LineSet} from '../../src/LineSet'
-import {PointVisibilityMap} from '../../src/PointVisibilityMap'
+import { Point } from '../../src/Point.mjs'
+import { PointSet } from '../../src/PointSet.mjs'
+import { Line } from '../../src/Line.mjs'
+import { LineSet } from '../../src/LineSet.mjs'
+import { PointVisibilityMap } from '../../src/PointVisibilityMap.mjs'
 
 describe("PointVisibilityMap constructor performance", function() {
 

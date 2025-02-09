@@ -1,6 +1,5 @@
-import {Point} from '../../src/Point'
-import {Line} from '../../src/Line'
-import {LINE_INTERSECTION_TYPE, LineIntersection} from '../../src/LineIntersection'
+import { Point } from '../../src/Point.mjs'
+import { Line } from '../../src/Line.mjs'
 
 describe("Line.computeIntersection performance", function() {
  
