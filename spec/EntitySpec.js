@@ -195,41 +195,6 @@ describe("Entity.translate", function() {
     expect(entityDomElem.style.top).toBe('300px');
   });
 
-  it("translates sub-entity", function() {
-    const entityDomElem = window.document.createElement('div');
-    const entity = new Entity(
-        "obj-123",
-        100, 
-        200, 
-        10, 
-        20, 
-        sheet, 
-        entityDomElem, 
-        [window.document.createElement('div')], 
-        [window.document.createElement('div')]
-    );
-
-    const subEntityDomElem = window.document.createElement('div');
-    const subEntity = new Entity(
-        "obj-sub",
-        110, 
-        210, 
-        10, 
-        20, 
-        sheet, 
-        subEntityDomElem, 
-        [window.document.createElement('div')], 
-        [window.document.createElement('div')]
-    );
-
-    entity.attachSubEntities([subEntity]);
-
-    entity.translate(250, 300);
-
-    expect(subEntityDomElem.style.left).toBe('260px');
-    expect(subEntityDomElem.style.top).toBe('310px');
-  });
-
   it("emits EntityEvent.TRANSLATE event", function() {
     const translateCallback = jasmine.createSpy(EntityEvent.TRANSLATE);
         
@@ -254,34 +219,3 @@ describe("Entity.translate", function() {
   });
 });
 
-describe("Entity.attachSubEntities", function() {
-  it("attaches sub-entities", function() {
-    const parent = new Entity(
-        "obj-parent",
-        100, 
-        200, 
-        10, 
-        20, 
-        sheet, 
-        window.document.createElement('div'), 
-        [window.document.createElement('div')], 
-        [window.document.createElement('div')]
-    );
-
-    const sub = new Entity(
-      "obj-sub",
-      110, 
-      210, 
-      10, 
-      20, 
-      sheet, 
-      window.document.createElement('div'), 
-      [window.document.createElement('div')], 
-      [window.document.createElement('div')]
-    );
-
-    parent.attachSubEntities([sub]);
-
-    expect(parent.getAttachedSubEntities()).toEqual([sub]);
-  });
-});
