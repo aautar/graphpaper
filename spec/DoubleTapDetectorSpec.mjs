@@ -1,5 +1,5 @@
-import { DoubleTapDetector } from '../src/DoubleTapDetector'
-import { Point } from '../src/Point';
+import { DoubleTapDetector } from '../src/DoubleTapDetector.mjs'
+import { Point } from '../src/Point.mjs';
 
 describe("DoubleTapDetector.processTap", function() {
     it("return no double-tap detected if no changed touches in event", function() {

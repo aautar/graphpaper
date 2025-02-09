@@ -1,4 +1,4 @@
-import { BestToConnectEntitiesFinder } from '../src/ConnectorAnchorFinder/BestToConnectEntitiesFinder'
+import { BestToConnectEntitiesFinder } from '../src/ConnectorAnchorFinder/BestToConnectEntitiesFinder.mjs'
 
 describe("BestToConnectEntitiesFinder.alreadyInSearchInputs", function() {
     beforeEach(function() {

@@ -1,7 +1,7 @@
 const jsdom = require("jsdom");
-import {BoxClusterDetector} from '../src/BoxClusterDetector.js';
-import {Entity} from '../src/Entity.js';
-import {Cluster} from '../src/Cluster.js';
+import {BoxClusterDetector} from '../src/BoxClusterDetector.mjs';
+import {Entity} from '../src/Entity.mjs';
+import {Cluster} from '../src/Cluster.mjs';
 
 const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);

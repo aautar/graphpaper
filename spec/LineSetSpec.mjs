@@ -1,6 +1,6 @@
-import {Point} from '../src/Point'
-import {Line} from '../src/Line'
-import {LineSet} from '../src/LineSet'
+import {Point} from '../src/Point.mjs'
+import {Line} from '../src/Line.mjs'
+import {LineSet} from '../src/LineSet.mjs'
 
 describe("LineSet.toFloat64Array", function() {  
     it("returns array with x,y points", function() {

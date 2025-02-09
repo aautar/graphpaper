@@ -1,7 +1,7 @@
 const jsdom = require("jsdom");
-import {Entity} from '../src/Entity.js';
-import {ConnectorAnchor} from '../src/ConnectorAnchor'
-import {Rectangle} from '../src/Rectangle.js';
+import {Entity} from '../src/Entity.mjs';
+import {ConnectorAnchor} from '../src/ConnectorAnchor.mjs'
+import {Rectangle} from '../src/Rectangle.mjs';
 
 const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);

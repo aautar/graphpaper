@@ -1,4 +1,4 @@
-import { AccessibleRoutingPointsFinder } from '../src/AccessibleRoutingPointsFinder'
+import { AccessibleRoutingPointsFinder } from '../src/AccessibleRoutingPointsFinder.mjs'
 
 describe("AccessibleRoutingPointsFinder.find", function() {
     it("return correct result for empty set of objects", function() {

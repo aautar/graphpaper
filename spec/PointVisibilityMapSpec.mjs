@@ -1,8 +1,5 @@
-import {Point} from '../src/Point'
-import {PointSet} from '../src/PointSet'
-import {Line} from '../src/Line'
-import {LineSet} from '../src/LineSet'
-import {PointVisibilityMap} from '../src/PointVisibilityMap'
+import {Point} from '../src/Point.mjs'
+import {PointVisibilityMap} from '../src/PointVisibilityMap.mjs'
 
 describe("PointVisibilityMap.findVisiblePointInfoClosestTo", function() {
     it("returns null when there are no points in PointVisibilityMap", function() {

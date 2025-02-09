@@ -1,9 +1,8 @@
 const jsdom = require("jsdom");
-import {Entity} from '../src/Entity.js';
-import {ConnectorAnchor} from '../src/ConnectorAnchor'
-import {Connector} from '../src/Connector'
-import { Point } from '../src/Point.js';
-import { ConnectorRoutingAlgorithm } from '../src/ConnectorRoutingAlgorithm.js';
+import {ConnectorAnchor} from '../src/ConnectorAnchor.mjs'
+import {Connector} from '../src/Connector.mjs'
+import { Point } from '../src/Point.mjs';
+import { ConnectorRoutingAlgorithm } from '../src/ConnectorRoutingAlgorithm.mjs';
 
 const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);

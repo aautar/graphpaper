@@ -1,5 +1,5 @@
-import {SvgPathBuilder} from '../src/SvgPathBuilder'
-import { Point } from '../src/Point';
+import {SvgPathBuilder} from '../src/SvgPathBuilder.mjs'
+import { Point } from '../src/Point.mjs';
 
 describe("SvgPathBuilder.pointsToPath", function() {
     it("returns SVG path string with given Points", function() {
