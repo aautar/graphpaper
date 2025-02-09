@@ -11,6 +11,7 @@ import { PointSet } from './PointSet.mjs';
 import { Connector } from './Connector.mjs';
 import { GRID_STYLE, Grid } from './Grid.mjs';
 import { ClusterDetectionWorkerJsString } from './Workers/ClusterDetectionWorker.string.mjs';
+import { ConnectorRoutingWorkerJsString } from './Workers/ConnectorRoutingWorker.string.mjs';
 import { Cluster } from './Cluster.mjs';
 import { Originator } from './Originator.mjs';
 
