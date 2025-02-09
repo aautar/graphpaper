@@ -1,5 +1,5 @@
-import { Entity } from "../Entity";
-import { ConnectorAnchor } from "../ConnectorAnchor";
+import { Entity } from "../Entity.mjs";
+import { ConnectorAnchor } from "../ConnectorAnchor.mjs";
 
 const ClosestPairFinder = {   
     /**

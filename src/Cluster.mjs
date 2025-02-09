@@ -1,4 +1,4 @@
-import {DescriptorCollection} from './DescriptorCollection';
+import { DescriptorCollection } from './DescriptorCollection.mjs';
 
 /**
  * 

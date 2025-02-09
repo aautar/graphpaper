@@ -1,5 +1,5 @@
-import { PointSet } from "./PointSet";
-import { Rectangle } from "./Rectangle";
+import { PointSet } from "./PointSet.mjs";
+import { Rectangle } from "./Rectangle.mjs";
 
 const AccessibleRoutingPointsFinder = {
 

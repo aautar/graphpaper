@@ -1,19 +1,18 @@
-import {MatrixMath} from './MatrixMath';
-import {BestToConnectEntitiesFinder} from './ConnectorAnchorFinder/BestToConnectEntitiesFinder';
-import {SheetEvent} from './SheetEvent';
-import {Entity} from './Entity';
-import {EntityEvent} from './EntityEvent';
-import {DebugMetricsPanel} from './DebugMetricsPanel/DebugMetricsPanel';
-import {DoubleTapDetector} from './DoubleTapDetector';
-import {Rectangle} from './Rectangle';
-import {Point} from './Point';
-import {PointSet} from './PointSet';
-import {Connector} from './Connector';
-import {GRID_STYLE, Grid} from './Grid';
-import {ClusterDetectionWorkerJsString} from './Workers/ClusterDetectionWorker.string';
-import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
-import {Cluster} from './Cluster';
-import {Originator} from './Originator';
+import { MatrixMath } from './MatrixMath.mjs';
+import { BestToConnectEntitiesFinder } from './ConnectorAnchorFinder/BestToConnectEntitiesFinder.mjs';
+import { SheetEvent } from './SheetEvent.mjs';
+import { Entity } from './Entity.mjs';
+import { EntityEvent } from './EntityEvent.mjs';
+import { DebugMetricsPanel } from './DebugMetricsPanel/DebugMetricsPanel.mjs';
+import { DoubleTapDetector } from './DoubleTapDetector.mjs';
+import { Rectangle } from './Rectangle.mjs';
+import { Point } from './Point.mjs';
+import { PointSet } from './PointSet.mjs';
+import { Connector } from './Connector.mjs';
+import { GRID_STYLE, Grid } from './Grid.mjs';
+import { ClusterDetectionWorkerJsString } from './Workers/ClusterDetectionWorker.string.mjs';
+import { Cluster } from './Cluster.mjs';
+import { Originator } from './Originator.mjs';
 
 /**
  * @callback HandleSheetInteractionCallback

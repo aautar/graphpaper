@@ -1,4 +1,4 @@
-import {Rectangle} from '../Rectangle';
+import {Rectangle} from '../Rectangle.mjs';
 
 function EntityOverlapFinder() {
     const self = this;

@@ -1,6 +1,6 @@
-import {Entity} from './Entity';
-import { Originator } from './Originator';
-import {Rectangle} from './Rectangle';
+import { Entity } from './Entity.mjs';
+import { Originator } from './Originator.mjs';
+import { Rectangle } from './Rectangle.mjs';
 
 /**
  * 

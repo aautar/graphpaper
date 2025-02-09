@@ -1,4 +1,4 @@
-import  {Point} from './Point';
+import { Point } from './Point.mjs';
 
 const LINE_INTERSECTION_TYPE = Object.freeze({
 	PARALLEL: "parallel",		// no intersection, lines are parallel

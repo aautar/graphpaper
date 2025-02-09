@@ -1,5 +1,5 @@
-import {Rectangle} from './Rectangle';
-import {Cluster} from './Cluster';
+import { Rectangle } from './Rectangle.mjs';
+import { Cluster } from './Cluster.mjs';
 
 function BoxClusterDetector(_boxExtentOffset) {
     const self = this;

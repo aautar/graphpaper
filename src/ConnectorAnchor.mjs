@@ -1,5 +1,5 @@
-import  {Point} from './Point';
-import  {Rectangle} from './Rectangle';
+import { Point } from './Point.mjs';
+import { Rectangle } from './Rectangle.mjs';
 
 /**
  * @param {String} _id

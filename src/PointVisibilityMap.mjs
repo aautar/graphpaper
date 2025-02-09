@@ -1,13 +1,13 @@
-import {AccessibleRoutingPointsFinder} from './AccessibleRoutingPointsFinder';
-import {Point} from './Point';
-import {Line} from './Line';
-import {PointSet} from './PointSet';
-import {PointVisibilityMapRouteOptimizer} from './PointVisibilityMapRouteOptimizer';
-import {LineSet} from './LineSet';
-import {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
-import {Rectangle} from './Rectangle';
-import {Vec2} from './Vec2';
-import { ConnectorRoutingAlgorithm } from './ConnectorRoutingAlgorithm';
+import { AccessibleRoutingPointsFinder } from './AccessibleRoutingPointsFinder.mjs';
+import { Point } from './Point.mjs';
+import { Line } from './Line.mjs';
+import { PointSet } from './PointSet.mjs';
+import { PointVisibilityMapRouteOptimizer } from './PointVisibilityMapRouteOptimizer.mjs';
+import { LineSet } from './LineSet.mjs';
+import { LINE_INTERSECTION_TYPE, LineIntersection } from './LineIntersection.mjs';
+import { Rectangle } from './Rectangle.mjs';
+import { Vec2 } from './Vec2.mjs';
+import { ConnectorRoutingAlgorithm } from './ConnectorRoutingAlgorithm.mjs';
 
 const VisiblePoints = {
     isValid: false,

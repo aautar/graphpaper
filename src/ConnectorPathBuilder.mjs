@@ -1,7 +1,7 @@
-import {Line} from './Line';
-import {Point} from './Point';
-import {PointSet} from './PointSet';
-import {SvgPathBuilder} from './SvgPathBuilder';
+import { Line } from './Line.mjs';
+import { Point } from './Point.mjs';
+import { PointSet } from './PointSet.mjs';
+import { SvgPathBuilder } from './SvgPathBuilder.mjs';
 
 /**
  * Note sure if this is necessary

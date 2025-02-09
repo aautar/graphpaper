@@ -1,5 +1,5 @@
-import  {Point} from './Point';
-import  {LINE_INTERSECTION_TYPE, LineIntersection} from './LineIntersection';
+import { Point } from './Point.mjs';
+import { LINE_INTERSECTION_TYPE, LineIntersection } from './LineIntersection.mjs';
 
 /**
  * 

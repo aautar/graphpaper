@@ -1,5 +1,5 @@
-import { AccessibleRoutingPointsFinder } from "../AccessibleRoutingPointsFinder";
-import { ClosestPairFinder as ConnectorAnchorClosestPairFinder } from "../ConnectorAnchorFinder/ClosestPairFinder";
+import { AccessibleRoutingPointsFinder } from "../AccessibleRoutingPointsFinder.mjs";
+import { ClosestPairFinder as ConnectorAnchorClosestPairFinder } from "../ConnectorAnchorFinder/ClosestPairFinder.mjs";
 
 const BestToConnectEntitiesFinder = function() {
     this.findBestTimeout = null;

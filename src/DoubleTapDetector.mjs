@@ -1,4 +1,4 @@
-import { MatrixMath } from './MatrixMath';
+import { MatrixMath } from './MatrixMath.mjs';
 
 /**
  * 

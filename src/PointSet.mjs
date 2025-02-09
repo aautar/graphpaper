@@ -1,5 +1,5 @@
-import  {Point} from './Point';
-import  {Line} from './Line';
+import { Point } from './Point.mjs';
+import { Line } from './Line.mjs';
 
 /**
  * Unique collection of Point objects

@@ -1,8 +1,8 @@
-import {ConnectorAnchor} from './ConnectorAnchor';
-import {ConnectorEvent} from './ConnectorEvent';
-import {ConnectorRoutingAlgorithm} from './ConnectorRoutingAlgorithm';
-import {Line} from './Line';
-import {Point} from './Point';
+import { ConnectorAnchor } from './ConnectorAnchor.mjs';
+import { ConnectorEvent } from './ConnectorEvent.mjs';
+import { ConnectorRoutingAlgorithm } from './ConnectorRoutingAlgorithm.mjs';
+import { Line } from './Line.mjs';
+import { Point } from './Point.mjs';
 
 /**
  * 

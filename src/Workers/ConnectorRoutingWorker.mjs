@@ -1,12 +1,12 @@
-import {AccessibleRoutingPointsFinder} from '../AccessibleRoutingPointsFinder';
-import {Point} from '../Point';
-import {PointSet} from '../PointSet';
-import {LineSet} from '../LineSet';
-import {PointVisibilityMap} from '../PointVisibilityMap';
-import {SvgPathBuilder} from '../SvgPathBuilder';
-import {Line} from '../Line';
-import {ConnectorRoutingAlgorithm} from '../ConnectorRoutingAlgorithm';
-import {Rectangle} from '../Rectangle';
+import { AccessibleRoutingPointsFinder } from '../AccessibleRoutingPointsFinder.mjs';
+import { Point } from '../Point.mjs';
+import { PointSet } from '../PointSet.mjs';
+import { LineSet } from '../LineSet.mjs';
+import { PointVisibilityMap } from '../PointVisibilityMap.mjs';
+import { SvgPathBuilder } from '../SvgPathBuilder.mjs';
+import { Line } from '../Line.mjs';
+import { ConnectorRoutingAlgorithm } from '../ConnectorRoutingAlgorithm.mjs';
+import { Rectangle } from '../Rectangle.mjs';
 
 const workerData = {
     pointVisibilityMap: new PointVisibilityMap(),

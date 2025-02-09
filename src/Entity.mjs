@@ -1,10 +1,10 @@
-import {EntityEvent} from './EntityEvent';
-import {Point} from './Point';
-import {Rectangle} from './Rectangle';
-import {Sheet} from './Sheet';
-import {ConnectorAnchor} from './ConnectorAnchor';
-import {PointSet} from './PointSet';
-import {Originator} from './Originator';
+import { EntityEvent } from './EntityEvent.mjs';
+import { Point } from './Point.mjs';
+import { Rectangle } from './Rectangle.mjs';
+import { Sheet } from './Sheet.mjs';
+import { ConnectorAnchor } from './ConnectorAnchor.mjs';
+import { PointSet } from './PointSet.mjs';
+import { Originator } from './Originator.mjs';
 
 /**
  * 

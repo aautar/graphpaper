@@ -1,7 +1,7 @@
-import {BoxClusterDetector} from '../BoxClusterDetector';
-import {Cluster} from '../Cluster';
-import {UUID} from '../UUID';
-import {EntityOverlapFinder} from '../Overlap/EntityOverlapFinder';
+import { BoxClusterDetector } from '../BoxClusterDetector.mjs';
+import { Cluster } from '../Cluster.mjs';
+import { UUID } from '../UUID.mjs';
+import { EntityOverlapFinder } from '../Overlap/EntityOverlapFinder.mjs';
 
 const workerData = {
     requestQueue: [],
