@@ -1,5 +1,4 @@
 const jsdom = require("jsdom");
-import {Rectangle} from '../src/Rectangle.js';
 import {Entity} from '../src/Entity.js';
 import {EntityEvent} from '../src/EntityEvent.js';
 import {Point} from "../src/Point.js";
@@ -13,7 +12,7 @@ global.cancelAnimationFrame = () => { };
 const sheet = {
   getGridSize: function() {
       return 12.0;
-  }
+  },
 };
 
 describe("Entity constructor", function() {
