@@ -8,10 +8,8 @@ import {DoubleTapDetector} from './DoubleTapDetector';
 import {Rectangle} from './Rectangle';
 import {Point} from './Point';
 import {PointSet} from './PointSet';
-import {GroupTransformationContainer} from './GroupTransformationContainer';
 import {Connector} from './Connector';
 import {GRID_STYLE, Grid} from './Grid';
-import {GroupTransformationContainerEvent } from './GroupTransformationContainerEvent';
 import {ClusterDetectionWorkerJsString} from './Workers/ClusterDetectionWorker.string';
 import {ConnectorRoutingWorkerJsString} from './Workers/ConnectorRoutingWorker.string';
 import {Cluster} from './Cluster';
@@ -49,17 +47,7 @@ function Sheet(_sheetDomElement, _window) {
      * @type {Element}
      */
     var selectionBoxElem = null;
-
-    /**
-     * @type {GroupTransformationContainer[]}
-     */
-    const groupTransformationContainers = [];
-
-    /**
-     * @type {GroupTransformationContainer}
-     */
-    var currentGroupTransformationContainerBeingDragged = null;
-  
+ 
     /**
      * @type {Grid}
      */
@@ -1258,51 +1246,6 @@ function Sheet(_sheetDomElement, _window) {
         });
     };
 
-    const setCurrentGroupTransformationContainerBeingDragged = function(e) {
-        currentGroupTransformationContainerBeingDragged = e.container;
-    };
-
-    /**
-     * @param {GroupTransformationContainer} _groupTransformationContainer
-     */
-    this.attachGroupTransformationContainer = function(_groupTransformationContainer) {
-        _sheetDomElement.appendChild(_groupTransformationContainer.getContainerDomElement());
-        groupTransformationContainers.push(_groupTransformationContainer);
-
-        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
-        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
-        _groupTransformationContainer.on(GroupTransformationContainerEvent.TRANSLATE, refreshAllClustersInternal);
-    };
-
-    /**
-     * @param {GroupTransformationContainer} _groupTransformationContainer
-     * @returns {Boolean}
-     */
-    this.detachGroupTransformationContainer = function(_groupTransformationContainer) {
-        for(let i=0; i<groupTransformationContainers.length; i++) {
-            if(groupTransformationContainers[i] === _groupTransformationContainer) {
-                _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE_START, setCurrentGroupTransformationContainerBeingDragged);
-                _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE, self.refreshAllConnectors);
-                _groupTransformationContainer.off(GroupTransformationContainerEvent.TRANSLATE, refreshAllClustersInternal);
-                _sheetDomElement.removeChild(_groupTransformationContainer.getContainerDomElement());
-                groupTransformationContainers.splice(i, 1);
-                return true;
-            }
-        }
-
-        return false;
-    };
-
-    /**
-     * 
-     * @param {Number} _dx 
-     * @param {Number} _dy 
-     */
-    const handleGroupTransformationContainerMove = function(_dx, _dy) {
-        const gtc = currentGroupTransformationContainerBeingDragged;        
-        gtc.translateByOffset(_dx, _dy);
-    };
-
     /**
      * 
      * @param {Object} _e
@@ -1585,19 +1528,6 @@ function Sheet(_sheetDomElement, _window) {
                 e.preventDefault();
             }
 
-            if(currentGroupTransformationContainerBeingDragged !== null) {
-                const dx = (e.touches[0].pageX - self.getOffsetLeft()) - touchMoveLastX;
-                const dy = (e.touches[0].pageY - self.getOffsetTop()) - touchMoveLastY;
-
-                const invTransformedPos = MatrixMath.vecMat4Multiply(
-                    [dx, dy, 0, 1],
-                    currentInvTransformationMatrix
-                );                    
-
-                handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);        
-                e.preventDefault();        
-            }
-
             if(multiObjectSelectionStarted) {
                 updateSelectionBoxEndPoint(e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop());
                 e.preventDefault();
@@ -1626,15 +1556,6 @@ function Sheet(_sheetDomElement, _window) {
                 handleResize(invTransformedPos[0], invTransformedPos[1]);
             }
 
-            if(currentGroupTransformationContainerBeingDragged !== null) {
-                const invTransformedPos = MatrixMath.vecMat4Multiply(
-                    [e.movementX, e.movementY, 0, 1],
-                    currentInvTransformationMatrix
-                );                    
-
-                handleGroupTransformationContainerMove(invTransformedPos[0], invTransformedPos[1]);                
-            }
-
             if(multiObjectSelectionStarted) {
                 updateSelectionBoxEndPoint(e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop());
             }
@@ -1651,12 +1572,7 @@ function Sheet(_sheetDomElement, _window) {
             
             if(objectIdBeingResized !== null) {
                 handleResizeEnd();
-            }
-
-            if(currentGroupTransformationContainerBeingDragged !== null) {
-                currentGroupTransformationContainerBeingDragged.endTranslate();
-                currentGroupTransformationContainerBeingDragged = null;
-            }            
+            } 
 
             if(multiObjectSelectionStarted) {
                 handleMultiEntitySelectionEnd();
@@ -1679,11 +1595,6 @@ function Sheet(_sheetDomElement, _window) {
                     handleResizeEnd();
                 }
 
-                if(currentGroupTransformationContainerBeingDragged !== null) {
-                    currentGroupTransformationContainerBeingDragged.endTranslate();
-                    currentGroupTransformationContainerBeingDragged = null;
-                }
-
                 if(multiObjectSelectionStarted) {
                     handleMultiEntitySelectionEnd();
                 }
@@ -1695,7 +1606,7 @@ function Sheet(_sheetDomElement, _window) {
 
         _sheetDomElement.addEventListener('mousedown', function (e) {
             // if we're dragging something, stop propagation
-            if(currentGroupTransformationContainerBeingDragged !== null || objectIdBeingDragged !== null || objectIdBeingResized !== null) {
+            if(objectIdBeingDragged !== null || objectIdBeingResized !== null) {
                 e.preventDefault();
                 e.stopPropagation();
             }
