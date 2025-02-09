@@ -28,7 +28,7 @@ const babelConfig = {
 // rollup.config.js
 export default [
   {
-    input: 'src/Workers/ConnectorRoutingWorker.js',
+    input: 'src/Workers/ConnectorRoutingWorker.mjs',
     output: {
       format: 'iife',
       file: 'dist/workers/connector-routing-worker.js',
@@ -36,7 +36,7 @@ export default [
     }
   },
   {
-    input: 'src/Workers/ConnectorRoutingWorker.js',
+    input: 'src/Workers/ConnectorRoutingWorker.mjs',
     output: {
       format: 'iife',
       file: 'dist/workers/connector-routing-worker.min.js',
@@ -55,7 +55,7 @@ export default [
     ],
   },
   {
-    input: 'src/Workers/ClusterDetectionWorker.js',
+    input: 'src/Workers/ClusterDetectionWorker.mjs',
     output: {
       format: 'iife',
       file: 'dist/workers/cluster-detection-worker.min.js',
@@ -74,7 +74,7 @@ export default [
     ],
   },
   {
-    input: 'src/GraphPaper.js',
+    input: 'src/GraphPaper.mjs',
     output: {
       format: 'iife',
       file: 'dist/graphpaper.js',
@@ -82,7 +82,7 @@ export default [
     }
   },
   {
-    input: 'src/GraphPaper.js',
+    input: 'src/GraphPaper.mjs',
     output: {
       format: 'iife',
       file: 'dist/graphpaper.min.js',
