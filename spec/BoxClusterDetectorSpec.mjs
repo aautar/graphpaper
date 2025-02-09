@@ -1,9 +1,8 @@
-const jsdom = require("jsdom");
+import { JSDOM } from 'jsdom';
 import { BoxClusterDetector } from '../src/BoxClusterDetector.mjs';
 import { Entity } from '../src/Entity.mjs';
 import { Cluster } from '../src/Cluster.mjs';
 
-const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 const requestAnimationFrame = () => { };

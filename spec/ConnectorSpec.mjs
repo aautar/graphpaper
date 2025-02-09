@@ -1,10 +1,9 @@
-const jsdom = require("jsdom");
+import { JSDOM } from 'jsdom';
 import { ConnectorAnchor } from '../src/ConnectorAnchor.mjs'
 import { Connector } from '../src/Connector.mjs'
 import { Point } from '../src/Point.mjs';
 import { ConnectorRoutingAlgorithm } from '../src/ConnectorRoutingAlgorithm.mjs';
 
-const { JSDOM } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 global.window = window;

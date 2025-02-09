@@ -1,10 +1,9 @@
-const jsdom = require("jsdom");
+import { JSDOM } from 'jsdom';
 import { Entity } from '../src/Entity.mjs';
 import { EntityEvent } from '../src/EntityEvent.mjs';
 import { GroupEncapsulationEntity } from '../src/GroupEncapsulationEntity.mjs';
 import { Rectangle } from '../src/Rectangle.mjs';
 
-const { JSDOM, Event } = jsdom;
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
 global.requestAnimationFrame = (_render) => { _render(); };
