@@ -8,6 +8,17 @@ GraphPaper was an offshoot of [ScratchGraph](https://scratchgraph.com), and is o
 
 GraphPaper is very much a work-in-progress, expect major, breaking, changes to the public API. That said, releases are semantically versioned, with major releases are tagged appropriately, so things should not unexpectedly break if consumed appropiately.
 
+## Dependencies
+### Source
+- Javascript (ES2018+) + ES Modules
+- [rollup.js](https://rollupjs.org/) to produce distribution code
+- [Jasmine](https://jasmine.github.io/index.html) and [JSDOM](https://github.com/jsdom/jsdom) for testing
+
+### Distribution
+Distribution code is a Javascript (ES2018+) IIFE module. A compatible browser with support for the DOM, SVG, and Web Workers is required.
+
+Distribution code is intended to work "out of the box" on any modern web browser.
+
 ## Documentation
 
 ### Concepts
@@ -26,7 +37,6 @@ GraphPaper is very much a work-in-progress, expect major, breaking, changes to t
 - [Entity methods](docs/entity-methods.md)
 - [Entity events](docs/entity-events.md)
 - [Multi-Entity Selection & Transformation](docs/multi-selection-transformation.md)
-- Sub-Entities (TBD)
 
 ### Connectors
 - Connectors (TBD)
