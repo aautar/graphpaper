@@ -193,3 +193,39 @@ describe("GroupEncapsulationEntity.translate", function () {
         encapsulationEntity.translate(50, 20);
     });
 });
+
+describe("GroupEncapsulationEntity.getEncapsulatedEntities", function () {
+    it("returns array of encapsulated entities", function () {
+        const objDomElem = window.document.createElement('div');
+        const encapsulationEntity = new GroupEncapsulationEntity(
+            "encapsulation-entity",
+            sheet,
+            objDomElem
+        );
+
+        const encapsulatedEntities = getEntitiesToEncapsulate();
+        encapsulationEntity.setEncapsulatedEntities(encapsulatedEntities);
+
+        expect(encapsulationEntity.getEncapsulatedEntities()).toContain(...encapsulatedEntities);
+    });
+});
+
+describe("GroupEncapsulationEntity.getBoundingRect", function () {
+    it("returns Rectangle with bound of encapsulated entities", function () {
+        const objDomElem = window.document.createElement('div');
+        const encapsulationEntity = new GroupEncapsulationEntity(
+            "encapsulation-entity",
+            sheet,
+            objDomElem
+        );
+
+        const encapsulatedEntities = getEntitiesToEncapsulate();
+        encapsulationEntity.setEncapsulatedEntities(encapsulatedEntities);
+
+        const boundingRect = encapsulationEntity.getBoundingRect();
+        expect(boundingRect.getLeft()).toBe(100);
+        expect(boundingRect.getTop()).toBe(200);
+        expect(boundingRect.getRight()).toBe(310);
+        expect(boundingRect.getBottom()).toBe(220);
+    });
+});

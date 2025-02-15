@@ -5426,6 +5426,11 @@ var GraphPaper = (function (exports) {
             return r;
         };
 
+        /**
+         * Avoid exposing this publically 
+         * .. this is only clearing the array, to a caller clearing also involves changing the bounding rect (to 0 dimensions) and resizing the DOM element
+         * .. calling setEncapsulatedEntities([]) provides a facade that better encapsulates these concerns
+         */
         const clearEncapsulatedEntities = function() {
             encapsulatedEntities.length = 0;
         };
@@ -5477,6 +5482,23 @@ var GraphPaper = (function (exports) {
             parentTranslate(bbox.getLeft(), bbox.getTop(), false, Originator.PROGRAM);
             self.resize(bbox.getWidth(), bbox.getHeight());
         };
+
+        /**
+         * 
+         * @returns {Entity[]}
+         */
+        this.getEncapsulatedEntities = function() {
+            return encapsulatedEntities;
+        };
+
+        /**
+         * 
+         * @returns {Rectangle}
+         */
+        this.getBoundingRect = function() {
+            return calculateBoundingRect();
+        };
+
     }
 
     GroupEncapsulationEntity.prototype = Object.create(Entity.prototype);
