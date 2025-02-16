@@ -14,7 +14,6 @@ function GroupEncapsulationEntity(_id, _sheet, _domElement, _sizeAdjustmentPx)  
 
     const self = this;
     const encapsulatedEntities = [];
-    let currentBoundingRect = new Rectangle(0, 0, 0, 0);
 
     Entity.call(
         this,

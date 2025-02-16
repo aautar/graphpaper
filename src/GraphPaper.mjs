@@ -7,6 +7,7 @@ export * from './LineIntersection.mjs';
 export * from './Line.mjs';
 export * from './Entity.mjs';
 export * from './EntityEvent.mjs';
+export * from './EntityTranslationMode.mjs';
 export * from './Sheet.mjs';
 export * from './SheetEvent.mjs';
 export * from './Cluster.mjs';
