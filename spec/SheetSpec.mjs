@@ -4,6 +4,7 @@ import { Entity } from '../src/Entity.mjs';
 import { ConnectorAnchor } from '../src/ConnectorAnchor.mjs';
 import { GRID_STYLE, Grid } from '../src/Grid.mjs';
 import { SheetEvent } from '../src/SheetEvent.mjs';
+import { Point } from '../src/Point.mjs';
 
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
@@ -816,5 +817,29 @@ describe("Sheet.transformDomRectToPageSpaceRect", function() {
         expect(r.getRight()).toBe(240);
         expect(r.getBottom()).toBe(40);
     });    
-    
+});
+
+describe("Sheet.transformPointFromPageSpaceToSheetSpace", function() {
+    var sheetDomElement = null;
+    var pvWorkerMock = null;
+
+    beforeEach(function() {
+        window.document.body.innerHTML = ""; // should have a way to destroy canvas owned DOM elements
+
+        sheetDomElement = window.document.createElement('div');
+        sheetDomElement.offsetLeft = 100;
+        sheetDomElement.offsetTop = 50;
+
+        pvWorkerMock = {
+            postMessage: function() { }
+        };    
+    });
+
+    it("returns point transformed to Sheet space", function() {
+        const sheet = new Sheet(sheetDomElement, window, pvWorkerMock);
+        const sheetSpacePt = sheet.transformPointFromPageSpaceToSheetSpace(new Point(200, 400));
+        
+        expect(sheetSpacePt.getX()).toBe(100);
+        expect(sheetSpacePt.getY()).toBe(350);
+    });
 });

@@ -2,6 +2,7 @@ import { JSDOM } from 'jsdom';
 import { Entity } from '../src/Entity.mjs';
 import { EntityEvent } from '../src/EntityEvent.mjs';
 import { Point } from "../src/Point.mjs";
+import { EntityTranslationMode } from '../src/EntityTranslationMode.mjs';
 
 const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
 const window = dom.window;
@@ -217,3 +218,40 @@ describe("Entity.translate", function () {
     });
 });
 
+describe("Entity.getTranslationMode", function () {
+    it("returns default translation mode (EntityTranslationMode.FROM_HANDLE_CENTER), if one was not explicitly set", function () {
+        const et = new Entity(
+            "obj-123",
+            100,
+            200,
+            10,
+            20,
+            sheet,
+            window.document.createElement('div'),
+            [window.document.createElement('div')],
+            [window.document.createElement('div')]
+        );
+
+        expect(et.getTranslationMode()).toBe(EntityTranslationMode.FROM_HANDLE_CENTER);
+    });
+});
+
+describe("Entity.setTranslationMode", function () {
+    it("changes translation mode of Entity", function () {
+        const et = new Entity(
+            "obj-123",
+            100,
+            200,
+            10,
+            20,
+            sheet,
+            window.document.createElement('div'),
+            [window.document.createElement('div')],
+            [window.document.createElement('div')]
+        );
+
+        et.setTranslationMode(EntityTranslationMode.FROM_HANDLE_SELECTION_START);
+
+        expect(et.getTranslationMode()).toBe(EntityTranslationMode.FROM_HANDLE_SELECTION_START);
+    });
+});

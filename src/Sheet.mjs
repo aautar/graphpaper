@@ -14,6 +14,8 @@ import { ClusterDetectionWorkerJsString } from './Workers/ClusterDetectionWorker
 import { ConnectorRoutingWorkerJsString } from './Workers/ConnectorRoutingWorker.string.mjs';
 import { Cluster } from './Cluster.mjs';
 import { Originator } from './Originator.mjs';
+import { EntityTranslationMode } from './EntityTranslationMode.mjs';
+import { DragContext } from './DragContext.mjs';
 
 /**
  * @callback HandleSheetInteractionCallback
@@ -81,14 +83,13 @@ function Sheet(_sheetDomElement, _window) {
      */
     const objectConnectors = [];
 
-    var objectIdBeingDragged = null;
     var objectIdBeingResized = null;
     var objectResizeCursor = "default";
-    
-    var objectDragX = 0.0;
-    var objectDragY = 0.0;
-    var objectDragStartX = 0.0;
-    var objectDragStartY = 0.0;
+
+    /**
+     * @type {DragContext|null}
+     */
+    let entityDragContext = null;
 
     var doubleTapDetector = null;
     const debugMetricsPanel = new DebugMetricsPanel(_window);
@@ -696,6 +697,22 @@ function Sheet(_sheetDomElement, _window) {
     };
 
     /**
+     * 
+     * @param {Point} _pt 
+     * @returns {Point}
+     */
+    this.transformPointFromPageSpaceToSheetSpace = function(_pt) {
+        const sheetOffset = self.getSheetOffset();
+
+        const invTransformedPos = MatrixMath.vecMat4Multiply(
+            [_pt.getX() - sheetOffset.getX(), _pt.getY() - sheetOffset.getY(), 0, 1],
+            currentInvTransformationMatrix
+        );
+
+        return new Point(invTransformedPos[0], invTransformedPos[1]);
+    };
+
+    /**
      * @param {Number} _p 
      * @returns {Number}
      */
@@ -1251,12 +1268,20 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Object} _e
      */
     const handleMoveStart = function(_e) {
-        objectIdBeingDragged = _e.obj.getId();
-        objectDragX = _e.x;
-        objectDragY = _e.y;
-        objectDragStartX = _e.x;
-        objectDragStartY = _e.y;        
-    };    
+        // should the transformed coordinates come from the Entity event?
+        // .. Also should be clearer that _e.x is the page position of the pointer, not the position of the entity
+        const pointerDragStartTransformedPt = self.transformPointFromPageSpaceToSheetSpace(new Point(_e.x, _e.y));
+
+        const entityDragStartPosition = new Point(_e.obj.getX(), _e.obj.getY());
+
+        entityDragContext = new DragContext(
+            _e.obj.getId(), 
+            pointerDragStartTransformedPt, 
+            entityDragStartPosition
+        );
+
+        entityDragContext.setCurrentDragPosition(pointerDragStartTransformedPt.getX(), pointerDragStartTransformedPt.getY());
+    };
 
     /**
      * 
@@ -1264,15 +1289,36 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */
     const handleMove = function(_x, _y) {
-        const entity = self.getEntityById(objectIdBeingDragged);
+        const entity = self.getEntityById(entityDragContext.getEntityId());
         const translateOffset = entity.getTranslateHandleOffset();
-        const mx = self.snapToGrid(_x + translateOffset.getX());
-        const my = self.snapToGrid(_y + translateOffset.getY());
-        
-        objectDragX = mx;
-        objectDragY = my;		
 
-        entity.translate(mx, my, false, Originator.USER);
+        if(entity.getTranslationMode() === EntityTranslationMode.FROM_HANDLE_CENTER) {
+            const mx = self.snapToGrid(_x + translateOffset.getX());
+            const my = self.snapToGrid(_y + translateOffset.getY());
+            
+            entity.translate(mx, my, false, Originator.USER);
+
+            entityDragContext.setCurrentDragPosition(mx, my);
+        } else if(entity.getTranslationMode() === EntityTranslationMode.FROM_HANDLE_SELECTION_START) {
+            // How much did we move from the drag start point?
+            const pointerDragStart = entityDragContext.getPointerDragStartPosition();
+            const distX = _x - pointerDragStart.getX();
+            const distY = _y - pointerDragStart.getY();
+
+            const pointerOffset = entityDragContext.getPointerOffsetFromEntityPosition();
+
+            // translate to: drag start + dist - pointerOffset
+            entity.translate(
+                self.snapToGrid(pointerDragStart.getX() + distX - pointerOffset.getX()),
+                self.snapToGrid(pointerDragStart.getY() + distY - pointerOffset.getY()),
+                false,
+                Originator.USER
+            );
+
+            entityDragContext.setCurrentDragPosition(_x, _y);
+        } else {
+            throw "Invalid Entity translation mode";
+        }
     };
 
     /**
@@ -1281,12 +1327,19 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */
     const handleMoveEnd = function(_x, _y) {
-        const entity = self.getEntityById(objectIdBeingDragged);
-        const translateOffset = entity.getTranslateHandleOffset();
-        const mx = self.snapToGrid(_x + translateOffset.getX());
-        const my = self.snapToGrid(_y + translateOffset.getY());
-        entity.translate(mx, my, false, Originator.USER);       
-    };         
+        const entity = self.getEntityById(entityDragContext.getEntityId());
+
+        if(entity.getTranslationMode() === EntityTranslationMode.FROM_HANDLE_CENTER) {
+            const translateOffset = entity.getTranslateHandleOffset();
+            const mx = self.snapToGrid(_x + translateOffset.getX());
+            const my = self.snapToGrid(_y + translateOffset.getY());
+            entity.translate(mx, my, false, Originator.USER);
+        } else if(entity.getTranslationMode() === EntityTranslationMode.FROM_HANDLE_SELECTION_START) {
+            entityDragContext = null;
+        } else {
+            throw "Invalid Entity translation mode";
+        }
+    };
 
     /**
      * 
@@ -1339,7 +1392,7 @@ function Sheet(_sheetDomElement, _window) {
             return false;
         }
 
-        if(objectIdBeingDragged !== null) {
+        if(entityDragContext !== null) {
             return false;
         }
 
@@ -1507,7 +1560,7 @@ function Sheet(_sheetDomElement, _window) {
         });
 
         _sheetDomElement.addEventListener('touchmove', function (e) {
-            if (objectIdBeingDragged !== null) {
+            if (entityDragContext !== null) {
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop(), 0, 1],
                     currentInvTransformationMatrix
@@ -1538,11 +1591,12 @@ function Sheet(_sheetDomElement, _window) {
         });
 
         _sheetDomElement.addEventListener('mousemove', function (e) {
-            if (objectIdBeingDragged !== null) {		
+            if (entityDragContext !== null) {
+                // subtract offset, as we want positions relative to this Sheet
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                     currentInvTransformationMatrix
-                );                    
+                );
 
                 handleMove(invTransformedPos[0], invTransformedPos[1]);
             }
@@ -1566,8 +1620,8 @@ function Sheet(_sheetDomElement, _window) {
             // e.touches is empty..
             // Need to use e.changedTouches for final x,y ???
 
-            if(objectIdBeingDragged !== null) {
-                objectIdBeingDragged = null;
+            if(entityDragContext !== null) {
+                entityDragContext = null;
             }           
             
             if(objectIdBeingResized !== null) {
@@ -1581,7 +1635,7 @@ function Sheet(_sheetDomElement, _window) {
 
         _sheetDomElement.addEventListener('mouseup', function (e) {
             if (e.which === 1) {
-                if(objectIdBeingDragged !== null) {
+                if(entityDragContext !== null) {
 
                     const invTransformedPos = MatrixMath.vecMat4Multiply(
                         [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
@@ -1599,14 +1653,14 @@ function Sheet(_sheetDomElement, _window) {
                     handleMultiEntitySelectionEnd();
                 }
 
-                objectIdBeingDragged = null;
+                entityDragContext = null;
                 objectIdBeingResized = null;
             }
         });
 
         _sheetDomElement.addEventListener('mousedown', function (e) {
             // if we're dragging something, stop propagation
-            if(objectIdBeingDragged !== null || objectIdBeingResized !== null) {
+            if(entityDragContext !== null || objectIdBeingResized !== null) {
                 e.preventDefault();
                 e.stopPropagation();
             }
