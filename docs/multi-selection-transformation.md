@@ -30,12 +30,16 @@ Group transformations are supported by creating a `GroupEncapsulationEntity`. Th
 > `GroupEncapsulationEntity` replaces the `GroupTransformationContainer` construct in earlier version of GraphPaper
 
 ```javascript
+// Create the Entity...
 const encapsulationBox = new GraphPaper.GroupEncapsulationEntity(
     'encapsulation-box', 
     sheet,
     document.getElementById('encapsulation-box'),
     10
 );
+
+// Add it to a Sheet...
+sheet.addEntity(encapsulationBox);
 ```
 
 Typically you'll want to use a `GroupEncapsulationEntity` to respond to entity selection on a sheet. This requires listening for the `SheetEvent.MULTIPLE_ENTITIES_SELECTED` event and calling `GroupEncapsulationEntity.setEncapsulatedEntities()`:
