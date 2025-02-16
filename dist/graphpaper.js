@@ -642,6 +642,15 @@ var GraphPaper = (function (exports) {
     });
 
     /**
+     * @readonly
+     * @enum {String}
+     */
+    const EntityTranslationMode = Object.freeze({
+        FROM_HANDLE_CENTER: 'from-handle-center',                       // center point of the handle
+        FROM_HANDLE_SELECTION_START: 'from-handle-selection-start',     // from the point where the handle was selected
+    });
+
+    /**
      * Unique collection of Point objects
      * 
      * @param {Point[]|Float64Array|undefined} _pointsInput
@@ -3861,6 +3870,11 @@ var GraphPaper = (function (exports) {
         let allowedWithinCluster = true;
 
         /**
+         * @type {EntityTranslationMode}
+         */
+        let translationMode = EntityTranslationMode.FROM_HANDLE_CENTER;
+
+        /**
          * @param {Element} _connectorAnchorDomElement
          * @param {Number} _routingPointOffsetX
          * @param {Number} _routingPointOffsetY
@@ -4054,6 +4068,22 @@ var GraphPaper = (function (exports) {
          */
         this.isAllowedWithinCluster = function() {
             return allowedWithinCluster;
+        };
+
+        /**
+         * 
+         * @param {EntityTranslationMode} _translationMode 
+         */
+        this.setTranslationMode = function(_translationMode) {
+            translationMode = _translationMode;
+        };
+
+        /**
+         * 
+         * @returns {EntityTranslationMode}
+         */
+        this.getTranslationMode = function() {
+            return _translationMode;
         };
 
         /**
@@ -5513,6 +5543,7 @@ var GraphPaper = (function (exports) {
     exports.Dimensions = Dimensions;
     exports.Entity = Entity;
     exports.EntityEvent = EntityEvent;
+    exports.EntityTranslationMode = EntityTranslationMode;
     exports.GRID_STYLE = GRID_STYLE;
     exports.Grid = Grid;
     exports.GroupEncapsulationEntity = GroupEncapsulationEntity;

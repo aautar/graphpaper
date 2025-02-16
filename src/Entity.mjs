@@ -1,4 +1,5 @@
 import { EntityEvent } from './EntityEvent.mjs';
+import { EntityTranslationMode } from './EntityTranslationMode.mjs';
 import { Point } from './Point.mjs';
 import { Rectangle } from './Rectangle.mjs';
 import { Sheet } from './Sheet.mjs';
@@ -88,6 +89,11 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @type {Boolean}
      */
     let allowedWithinCluster = true;
+
+    /**
+     * @type {EntityTranslationMode}
+     */
+    let translationMode = EntityTranslationMode.FROM_HANDLE_CENTER;
 
     /**
      * @param {Element} _connectorAnchorDomElement
@@ -283,6 +289,22 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      */
     this.isAllowedWithinCluster = function() {
         return allowedWithinCluster;
+    };
+
+    /**
+     * 
+     * @param {EntityTranslationMode} _translationMode 
+     */
+    this.setTranslationMode = function(_translationMode) {
+        translationMode = _translationMode;
+    };
+
+    /**
+     * 
+     * @returns {EntityTranslationMode}
+     */
+    this.getTranslationMode = function() {
+        return _translationMode;
     };
 
     /**
