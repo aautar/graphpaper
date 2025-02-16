@@ -304,7 +304,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
      * @returns {EntityTranslationMode}
      */
     this.getTranslationMode = function() {
-        return _translationMode;
+        return translationMode;
     };
 
     /**
