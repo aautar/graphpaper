@@ -137,7 +137,7 @@ function Sheet(_sheetDomElement, _window) {
     /**
      * Event name -> Callback map
      * 
-     * @type {Map<string, SheetEventCallback>}
+     * @type {Map<SheetEvent, SheetEventCallback>}
      */
     const eventHandlers = new Map();
 
@@ -1669,8 +1669,8 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
-     * @param {String} _eventName 
-     * @param {String} _eventData 
+     * @param {SheetEvent} _eventName 
+     * @param {Object} _eventData 
      */
     const emitEvent = function(_eventName, _eventData) {
         const allCallbacks = eventHandlers.get(_eventName) || [];
@@ -1683,7 +1683,7 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
-     * @param {String} _eventName 
+     * @param {SheetEvent} _eventName 
      * @param {SheetEventCallback} _callback 
      */
     this.off = function(_eventName, _callback) {
@@ -1701,7 +1701,7 @@ function Sheet(_sheetDomElement, _window) {
 
     /**
      * 
-     * @param {String} _eventName 
+     * @param {SheetEvent} _eventName 
      * @param {SheetEventCallback} _callback 
      */
     this.on = function(_eventName, _callback) {

@@ -45,7 +45,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     var currentResizeHandleElementActivated = null;
 
     /**
-     * @type {Map<String, Function>}
+     * @type {Map<EntityEvent, Function>}
      */
     const eventNameToHandlerFunc = new Map();
 
@@ -512,7 +512,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     /**
      * 
-     * @param {String} _eventName 
+     * @param {EntityEvent} _eventName 
      * @param {*} _handlerFunc 
      */
     this.on = function(_eventName, _handlerFunc) {
@@ -523,7 +523,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
 
     /**
      * 
-     * @param {String} _eventName 
+     * @param {EntityEvent} _eventName 
      * @param {*} _callback 
      */
     this.off = function(_eventName, _callback) {

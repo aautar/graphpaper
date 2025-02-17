@@ -1,3 +1,7 @@
+/**
+ * @readonly
+ * @enum {String}
+ */
 const SheetEvent = Object.freeze({
     DBLCLICK: "dblclick",
     CLICK: "click",

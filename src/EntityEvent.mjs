@@ -1,3 +1,7 @@
+/**
+ * @readonly
+ * @enum {String}
+ */
 const EntityEvent = Object.freeze({
     TRANSLATE_START: 'obj-translate-start',
     TRANSLATE: 'obj-translate',
