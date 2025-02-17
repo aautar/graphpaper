@@ -634,6 +634,10 @@ var GraphPaper = (function (exports) {
         return false;
     };
 
+    /**
+     * @readonly
+     * @enum {String}
+     */
     const EntityEvent = Object.freeze({
         TRANSLATE_START: 'obj-translate-start',
         TRANSLATE: 'obj-translate',
@@ -1197,6 +1201,10 @@ var GraphPaper = (function (exports) {
         this.findBestTimeout = setTimeout(searchFunc, this.findBufferTime);
     };
 
+    /**
+     * @readonly
+     * @enum {String}
+     */
     const SheetEvent = Object.freeze({
         DBLCLICK: "dblclick",
         CLICK: "click",
@@ -2330,7 +2338,7 @@ var GraphPaper = (function (exports) {
         /**
          * Event name -> Callback map
          * 
-         * @type {Map<string, SheetEventCallback>}
+         * @type {Map<SheetEvent, SheetEventCallback>}
          */
         const eventHandlers = new Map();
 
@@ -3862,8 +3870,8 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {String} _eventName 
-         * @param {String} _eventData 
+         * @param {SheetEvent} _eventName 
+         * @param {Object} _eventData 
          */
         const emitEvent = function(_eventName, _eventData) {
             const allCallbacks = eventHandlers.get(_eventName) || [];
@@ -3876,7 +3884,7 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {String} _eventName 
+         * @param {SheetEvent} _eventName 
          * @param {SheetEventCallback} _callback 
          */
         this.off = function(_eventName, _callback) {
@@ -3894,7 +3902,7 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {String} _eventName 
+         * @param {SheetEvent} _eventName 
          * @param {SheetEventCallback} _callback 
          */
         this.on = function(_eventName, _callback) {
@@ -3942,7 +3950,7 @@ var GraphPaper = (function (exports) {
         var currentTranslateHandleElementActivated = null;
 
         /**
-         * @type {Map<String, Function>}
+         * @type {Map<EntityEvent, Function>}
          */
         const eventNameToHandlerFunc = new Map();
 
@@ -4409,7 +4417,7 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {String} _eventName 
+         * @param {EntityEvent} _eventName 
          * @param {*} _handlerFunc 
          */
         this.on = function(_eventName, _handlerFunc) {
@@ -4420,7 +4428,7 @@ var GraphPaper = (function (exports) {
 
         /**
          * 
-         * @param {String} _eventName 
+         * @param {EntityEvent} _eventName 
          * @param {*} _callback 
          */
         this.off = function(_eventName, _callback) {
