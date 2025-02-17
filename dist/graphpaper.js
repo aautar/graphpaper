@@ -2220,6 +2220,30 @@ var GraphPaper = (function (exports) {
     }
 
     /**
+     * 
+     * @param {String} _entityId 
+     * @param {String} _resizeCursor 
+     */
+    function ResizeContext(_entityId, _resizeCursor) {
+
+        /**
+         * 
+         * @returns {String}
+         */
+        this.getEntityId = function() {
+            return _entityId;
+        };
+
+        /**
+         * 
+         * @returns {String}
+         */
+        this.getResizeCursor = function() {
+            return _resizeCursor;
+        };
+    }
+
+    /**
      * @callback HandleSheetInteractionCallback
      * @param {String} interactionType
      * @param {Object} interactionData
@@ -2284,8 +2308,10 @@ var GraphPaper = (function (exports) {
          */
         const objectConnectors = [];
 
-        var objectIdBeingResized = null;
-        var objectResizeCursor = "default";
+        /**
+         * @type {ResizeContext|null}
+         */
+        let entityResizeContext = null;
 
         /**
          * @type {DragContext|null}
@@ -3546,11 +3572,9 @@ var GraphPaper = (function (exports) {
          * 
          * @param {Object} _e 
          */
-        const handleResizeStart = function(_e) {       
-            objectIdBeingResized = _e.obj.getId();
-            objectResizeCursor = _e.resizeCursor;
-
-            _sheetDomElement.style.cursor = objectResizeCursor;
+        const handleResizeStart = function(_e) {
+            entityResizeContext = new ResizeContext(_e.obj.getId(), _e.resizeCursor);
+            _sheetDomElement.style.cursor = entityResizeContext.getResizeCursor();
         };
 
         /**
@@ -3559,7 +3583,7 @@ var GraphPaper = (function (exports) {
          * @param {Number} _y 
          */    
         const handleResize = function(_x, _y) {
-            const entity = self.getEntityById(objectIdBeingResized);
+            const entity = self.getEntityById(entityResizeContext.getEntityId());
 
             const mx = self.snapToGrid(_x);
             const my = self.snapToGrid(_y);
@@ -3573,7 +3597,7 @@ var GraphPaper = (function (exports) {
         };
 
         const handleResizeEnd = function() {
-            objectIdBeingResized = null;
+            entityResizeContext = null;
             _sheetDomElement.style.cursor = "";
         };    
 
@@ -3597,7 +3621,7 @@ var GraphPaper = (function (exports) {
                 return false;
             }
 
-            if(objectIdBeingResized !== null) {
+            if(entityResizeContext !== null) {
                 return false;
             }        
 
@@ -3772,7 +3796,7 @@ var GraphPaper = (function (exports) {
                     e.preventDefault();
                 }
 
-                if(objectIdBeingResized !== null) {
+                if(entityResizeContext !== null) {
                     const invTransformedPos = MatrixMath.vecMat4Multiply(
                         [e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop(), 0, 1],
                         currentInvTransformationMatrix
@@ -3802,7 +3826,7 @@ var GraphPaper = (function (exports) {
                     handleMove(invTransformedPos[0], invTransformedPos[1]);
                 }
 
-                if(objectIdBeingResized !== null) {
+                if(entityResizeContext !== null) {
                     const invTransformedPos = MatrixMath.vecMat4Multiply(
                         [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                         currentInvTransformationMatrix
@@ -3825,7 +3849,7 @@ var GraphPaper = (function (exports) {
                     entityDragContext = null;
                 }           
                 
-                if(objectIdBeingResized !== null) {
+                if(entityResizeContext !== null) {
                     handleResizeEnd();
                 } 
 
@@ -3846,7 +3870,7 @@ var GraphPaper = (function (exports) {
                         handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
                     }
 
-                    if(objectIdBeingResized !== null) {
+                    if(entityResizeContext !== null) {
                         handleResizeEnd();
                     }
 
@@ -3855,13 +3879,13 @@ var GraphPaper = (function (exports) {
                     }
 
                     entityDragContext = null;
-                    objectIdBeingResized = null;
+                    entityResizeContext = null;
                 }
             });
 
             _sheetDomElement.addEventListener('mousedown', function (e) {
                 // if we're dragging something, stop propagation
-                if(entityDragContext !== null || objectIdBeingResized !== null) {
+                if(entityDragContext !== null || entityResizeContext !== null) {
                     e.preventDefault();
                     e.stopPropagation();
                 }

@@ -16,6 +16,7 @@ import { Cluster } from './Cluster.mjs';
 import { Originator } from './Originator.mjs';
 import { EntityTranslationMode } from './EntityTranslationMode.mjs';
 import { DragContext } from './DragContext.mjs';
+import { ResizeContext } from './ResizeContext.mjs';
 
 /**
  * @callback HandleSheetInteractionCallback
@@ -83,8 +84,10 @@ function Sheet(_sheetDomElement, _window) {
      */
     const objectConnectors = [];
 
-    var objectIdBeingResized = null;
-    var objectResizeCursor = "default";
+    /**
+     * @type {ResizeContext|null}
+     */
+    let entityResizeContext = null;
 
     /**
      * @type {DragContext|null}
@@ -1345,11 +1348,9 @@ function Sheet(_sheetDomElement, _window) {
      * 
      * @param {Object} _e 
      */
-    const handleResizeStart = function(_e) {       
-        objectIdBeingResized = _e.obj.getId();
-        objectResizeCursor = _e.resizeCursor;
-
-        _sheetDomElement.style.cursor = objectResizeCursor;
+    const handleResizeStart = function(_e) {
+        entityResizeContext = new ResizeContext(_e.obj.getId(), _e.resizeCursor);
+        _sheetDomElement.style.cursor = entityResizeContext.getResizeCursor();
     };
 
     /**
@@ -1358,7 +1359,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */    
     const handleResize = function(_x, _y) {
-        const entity = self.getEntityById(objectIdBeingResized);
+        const entity = self.getEntityById(entityResizeContext.getEntityId());
 
         const mx = self.snapToGrid(_x);
         const my = self.snapToGrid(_y);
@@ -1372,7 +1373,7 @@ function Sheet(_sheetDomElement, _window) {
     };
 
     const handleResizeEnd = function() {
-        objectIdBeingResized = null;
+        entityResizeContext = null;
         _sheetDomElement.style.cursor = "";
     };    
 
@@ -1396,7 +1397,7 @@ function Sheet(_sheetDomElement, _window) {
             return false;
         }
 
-        if(objectIdBeingResized !== null) {
+        if(entityResizeContext !== null) {
             return false;
         }        
 
@@ -1571,7 +1572,7 @@ function Sheet(_sheetDomElement, _window) {
                 e.preventDefault();
             }
 
-            if(objectIdBeingResized !== null) {
+            if(entityResizeContext !== null) {
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.touches[0].pageX - self.getOffsetLeft(), e.touches[0].pageY - self.getOffsetTop(), 0, 1],
                     currentInvTransformationMatrix
@@ -1601,7 +1602,7 @@ function Sheet(_sheetDomElement, _window) {
                 handleMove(invTransformedPos[0], invTransformedPos[1]);
             }
 
-            if(objectIdBeingResized !== null) {
+            if(entityResizeContext !== null) {
                 const invTransformedPos = MatrixMath.vecMat4Multiply(
                     [e.pageX - self.getOffsetLeft(), e.pageY - self.getOffsetTop(), 0, 1],
                     currentInvTransformationMatrix
@@ -1624,7 +1625,7 @@ function Sheet(_sheetDomElement, _window) {
                 entityDragContext = null;
             }           
             
-            if(objectIdBeingResized !== null) {
+            if(entityResizeContext !== null) {
                 handleResizeEnd();
             } 
 
@@ -1645,7 +1646,7 @@ function Sheet(_sheetDomElement, _window) {
                     handleMoveEnd(invTransformedPos[0], invTransformedPos[1]);
                 }
 
-                if(objectIdBeingResized !== null) {
+                if(entityResizeContext !== null) {
                     handleResizeEnd();
                 }
 
@@ -1654,13 +1655,13 @@ function Sheet(_sheetDomElement, _window) {
                 }
 
                 entityDragContext = null;
-                objectIdBeingResized = null;
+                entityResizeContext = null;
             }
         });
 
         _sheetDomElement.addEventListener('mousedown', function (e) {
             // if we're dragging something, stop propagation
-            if(entityDragContext !== null || objectIdBeingResized !== null) {
+            if(entityDragContext !== null || entityResizeContext !== null) {
                 e.preventDefault();
                 e.stopPropagation();
             }
