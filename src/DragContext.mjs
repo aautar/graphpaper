@@ -1,12 +1,13 @@
+import { Entity } from "./Entity.mjs";
 import { Point } from "./Point.mjs";
 
 /**
  * 
- * @param {String} _entityId 
+ * @param {Entity} _entity 
  * @param {Point} _pointerDragStartPosition 
  * @param {Point} _entityDragStartPosition 
  */
-function DragContext(_entityId, _pointerDragStartPosition, _entityDragStartPosition)  {
+function DragContext(_entity, _pointerDragStartPosition, _entityDragStartPosition)  {
     let curDragX = 0.0;
     let curDragY = 0.0;
 
@@ -19,8 +20,8 @@ function DragContext(_entityId, _pointerDragStartPosition, _entityDragStartPosit
      * 
      * @returns {String}
      */
-    this.getEntityId = function() {
-        return _entityId;
+    this.getEntity = function() {
+        return _entity;
     };
 
     /**

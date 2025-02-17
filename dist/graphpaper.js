@@ -2155,11 +2155,11 @@ var GraphPaper = (function (exports) {
 
     /**
      * 
-     * @param {String} _entityId 
+     * @param {Entity} _entity 
      * @param {Point} _pointerDragStartPosition 
      * @param {Point} _entityDragStartPosition 
      */
-    function DragContext(_entityId, _pointerDragStartPosition, _entityDragStartPosition)  {
+    function DragContext(_entity, _pointerDragStartPosition, _entityDragStartPosition)  {
         let curDragX = 0.0;
         let curDragY = 0.0;
 
@@ -2172,8 +2172,8 @@ var GraphPaper = (function (exports) {
          * 
          * @returns {String}
          */
-        this.getEntityId = function() {
-            return _entityId;
+        this.getEntity = function() {
+            return _entity;
         };
 
         /**
@@ -3501,7 +3501,7 @@ var GraphPaper = (function (exports) {
             const entityDragStartPosition = new Point(_e.obj.getX(), _e.obj.getY());
 
             entityDragContext = new DragContext(
-                _e.obj.getId(), 
+                _e.obj, 
                 pointerDragStartTransformedPt, 
                 entityDragStartPosition
             );
@@ -3515,7 +3515,7 @@ var GraphPaper = (function (exports) {
          * @param {Number} _y 
          */
         const handleMove = function(_x, _y) {
-            const entity = self.getEntityById(entityDragContext.getEntityId());
+            const entity = entityDragContext.getEntity();
             const translateOffset = entity.getTranslateHandleOffset();
 
             if(entity.getTranslationMode() === EntityTranslationMode.FROM_HANDLE_CENTER) {
@@ -3553,7 +3553,7 @@ var GraphPaper = (function (exports) {
          * @param {Number} _y 
          */
         const handleMoveEnd = function(_x, _y) {
-            const entity = self.getEntityById(entityDragContext.getEntityId());
+            const entity = entityDragContext.getEntity();
 
             if(entity.getTranslationMode() === EntityTranslationMode.FROM_HANDLE_CENTER) {
                 const translateOffset = entity.getTranslateHandleOffset();

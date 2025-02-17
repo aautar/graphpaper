@@ -1278,7 +1278,7 @@ function Sheet(_sheetDomElement, _window) {
         const entityDragStartPosition = new Point(_e.obj.getX(), _e.obj.getY());
 
         entityDragContext = new DragContext(
-            _e.obj.getId(), 
+            _e.obj, 
             pointerDragStartTransformedPt, 
             entityDragStartPosition
         );
@@ -1292,7 +1292,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */
     const handleMove = function(_x, _y) {
-        const entity = self.getEntityById(entityDragContext.getEntityId());
+        const entity = entityDragContext.getEntity();
         const translateOffset = entity.getTranslateHandleOffset();
 
         if(entity.getTranslationMode() === EntityTranslationMode.FROM_HANDLE_CENTER) {
@@ -1330,7 +1330,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */
     const handleMoveEnd = function(_x, _y) {
-        const entity = self.getEntityById(entityDragContext.getEntityId());
+        const entity = entityDragContext.getEntity();
 
         if(entity.getTranslationMode() === EntityTranslationMode.FROM_HANDLE_CENTER) {
             const translateOffset = entity.getTranslateHandleOffset();

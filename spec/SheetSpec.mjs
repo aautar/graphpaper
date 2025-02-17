@@ -239,7 +239,6 @@ describe("Sheet", function() {
     });    
 
     it("emits object-translated event", function() {
-
         const translateCallback = jasmine.createSpy("translate-callback");
         
         const sheetElem = window.document.createElement('div');
