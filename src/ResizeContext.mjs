@@ -1,16 +1,17 @@
+import { Entity } from "./Entity.mjs";
+
 /**
  * 
- * @param {String} _entityId 
+ * @param {Entity} _entity 
  * @param {String} _resizeCursor 
  */
-function ResizeContext(_entityId, _resizeCursor) {
-
+function ResizeContext(_entity, _resizeCursor) {
     /**
      * 
      * @returns {String}
      */
-    this.getEntityId = function() {
-        return _entityId;
+    this.getEntity = function() {
+        return _entity;
     };
 
     /**

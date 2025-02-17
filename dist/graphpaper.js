@@ -2221,17 +2221,16 @@ var GraphPaper = (function (exports) {
 
     /**
      * 
-     * @param {String} _entityId 
+     * @param {Entity} _entity 
      * @param {String} _resizeCursor 
      */
-    function ResizeContext(_entityId, _resizeCursor) {
-
+    function ResizeContext(_entity, _resizeCursor) {
         /**
          * 
          * @returns {String}
          */
-        this.getEntityId = function() {
-            return _entityId;
+        this.getEntity = function() {
+            return _entity;
         };
 
         /**
@@ -3573,7 +3572,7 @@ var GraphPaper = (function (exports) {
          * @param {Object} _e 
          */
         const handleResizeStart = function(_e) {
-            entityResizeContext = new ResizeContext(_e.obj.getId(), _e.resizeCursor);
+            entityResizeContext = new ResizeContext(_e.obj, _e.resizeCursor);
             _sheetDomElement.style.cursor = entityResizeContext.getResizeCursor();
         };
 
@@ -3583,7 +3582,7 @@ var GraphPaper = (function (exports) {
          * @param {Number} _y 
          */    
         const handleResize = function(_x, _y) {
-            const entity = self.getEntityById(entityResizeContext.getEntityId());
+            const entity = entityResizeContext.getEntity();
 
             const mx = self.snapToGrid(_x);
             const my = self.snapToGrid(_y);

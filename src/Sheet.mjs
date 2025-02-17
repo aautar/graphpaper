@@ -1349,7 +1349,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Object} _e 
      */
     const handleResizeStart = function(_e) {
-        entityResizeContext = new ResizeContext(_e.obj.getId(), _e.resizeCursor);
+        entityResizeContext = new ResizeContext(_e.obj, _e.resizeCursor);
         _sheetDomElement.style.cursor = entityResizeContext.getResizeCursor();
     };
 
@@ -1359,7 +1359,7 @@ function Sheet(_sheetDomElement, _window) {
      * @param {Number} _y 
      */    
     const handleResize = function(_x, _y) {
-        const entity = self.getEntityById(entityResizeContext.getEntityId());
+        const entity = entityResizeContext.getEntity();
 
         const mx = self.snapToGrid(_x);
         const my = self.snapToGrid(_y);
