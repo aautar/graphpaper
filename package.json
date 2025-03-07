@@ -1,7 +1,12 @@
 {
   "name": "graphpaper-ui",
   "version": "0.0.0",
-  "main": "src/GraphPaper.js",
+  "exports": {
+    "node": {
+      "import": "./dist/graphpaper.esm.js",
+      "require": "./dist/graphpaper.cjs.js"
+    }
+  },
   "repository": "https://github.com/aautar/graphpaper.git",
   "author": "Avishkar Autar <av@semisignal.com>",
   "license": "MIT",

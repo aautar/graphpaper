@@ -73,6 +73,23 @@ export default [
       )
     ],
   },
+  // ESM dist files
+  {
+    input: 'src/GraphPaperWrappedExport.mjs',
+    output: {
+      format: 'es',
+      file: 'dist/graphpaper.esm.js',
+    }
+  },
+  // CJS dist files
+  {
+    input: 'src/GraphPaperWrappedExport.mjs',
+    output: {
+      format: 'cjs',
+      file: 'dist/graphpaper.cjs.js',
+    }
+  },
+  // IIFE dist files
   {
     input: 'src/GraphPaper.mjs',
     output: {
@@ -81,6 +98,7 @@ export default [
       name: 'GraphPaper'
     }
   },
+  // IIFE minifed dist files 
   {
     input: 'src/GraphPaper.mjs',
     output: {
