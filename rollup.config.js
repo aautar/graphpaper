@@ -83,7 +83,7 @@ export default [
   },
   // CJS dist files
   {
-    input: 'src/GraphPaperWrappedExport.mjs',
+    input: 'src/GraphPaper.mjs',
     output: {
       format: 'cjs',
       file: 'dist/graphpaper.cjs.js',

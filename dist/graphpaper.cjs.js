@@ -5684,34 +5684,27 @@ function GroupEncapsulationEntity(_id, _sheet, _domElement, _sizeAdjustmentPx)  
 GroupEncapsulationEntity.prototype = Object.create(Entity.prototype);
 GroupEncapsulationEntity.prototype.constructor = GroupEncapsulationEntity;
 
-
-
-var GraphPaper$1 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    MatrixMath: MatrixMath,
-    SvgPathBuilder: SvgPathBuilder,
-    Dimensions: Dimensions,
-    Rectangle: Rectangle,
-    Point: Point,
-    LINE_INTERSECTION_TYPE: LINE_INTERSECTION_TYPE,
-    LineIntersection: LineIntersection,
-    Line: Line,
-    Entity: Entity,
-    EntityEvent: EntityEvent,
-    EntityTranslationMode: EntityTranslationMode,
-    Sheet: Sheet,
-    SheetEvent: SheetEvent,
-    Cluster: Cluster,
-    BoxClusterDetector: BoxClusterDetector,
-    ConnectorEvent: ConnectorEvent,
-    Connector: Connector,
-    ConnectorAnchor: ConnectorAnchor,
-    ConnectorRoutingAlgorithm: ConnectorRoutingAlgorithm,
-    PointVisibilityMap: PointVisibilityMap,
-    GRID_STYLE: GRID_STYLE,
-    Grid: Grid,
-    Originator: Originator,
-    GroupEncapsulationEntity: GroupEncapsulationEntity
-});
-
-exports.GraphPaper = GraphPaper$1;
+exports.BoxClusterDetector = BoxClusterDetector;
+exports.Cluster = Cluster;
+exports.Connector = Connector;
+exports.ConnectorAnchor = ConnectorAnchor;
+exports.ConnectorEvent = ConnectorEvent;
+exports.ConnectorRoutingAlgorithm = ConnectorRoutingAlgorithm;
+exports.Dimensions = Dimensions;
+exports.Entity = Entity;
+exports.EntityEvent = EntityEvent;
+exports.EntityTranslationMode = EntityTranslationMode;
+exports.GRID_STYLE = GRID_STYLE;
+exports.Grid = Grid;
+exports.GroupEncapsulationEntity = GroupEncapsulationEntity;
+exports.LINE_INTERSECTION_TYPE = LINE_INTERSECTION_TYPE;
+exports.Line = Line;
+exports.LineIntersection = LineIntersection;
+exports.MatrixMath = MatrixMath;
+exports.Originator = Originator;
+exports.Point = Point;
+exports.PointVisibilityMap = PointVisibilityMap;
+exports.Rectangle = Rectangle;
+exports.Sheet = Sheet;
+exports.SheetEvent = SheetEvent;
+exports.SvgPathBuilder = SvgPathBuilder;
