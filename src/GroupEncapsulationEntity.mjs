@@ -74,8 +74,8 @@ function GroupEncapsulationEntity(_id, _sheet, _domElement, _sizeAdjustmentPx)  
         const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
         encapsulatedEntities.forEach((_subEntity) => {
             _subEntity.translate(
-                _subEntity.getX() + dx,
-                _subEntity.getY() + dy,
+                _sheet.snapToGrid(_subEntity.getX() + dx),
+                _sheet.snapToGrid(_subEntity.getY() + dy),
                 true,
                 originatorForSubEntities,
             );

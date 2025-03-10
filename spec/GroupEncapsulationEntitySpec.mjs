@@ -14,6 +14,11 @@ const sheet = {
         return 12.0;
     },
 
+    snapToGrid: function(_p) {
+        var ret = Math.round(_p/sheet.getGridSize()) * sheet.getGridSize();
+        return Math.max(0, ret - 1);
+    },
+
     /**
      * @todo figure out a better solution here, we're just copying the method from Sheet
      */
@@ -149,11 +154,39 @@ describe("GroupEncapsulationEntity.translate", function () {
 
         encapsulationEntity.translate(50, 20);
 
-        expect(encapsulatedEntities[0].getX()).toBe(50);
-        expect(encapsulatedEntities[0].getY()).toBe(20);
+        expect(encapsulatedEntities[0].getX()).toBe(47);
+        expect(encapsulatedEntities[0].getY()).toBe(23);
 
-        expect(encapsulatedEntities[1].getX()).toBe(250);
-        expect(encapsulatedEntities[1].getY()).toBe(20);
+        expect(encapsulatedEntities[1].getX()).toBe(251);
+        expect(encapsulatedEntities[1].getY()).toBe(23);
+    });
+
+    it("translates all encapsulated entities such that they are snapped to the Sheet grid", function () {
+        const objDomElem = window.document.createElement('div');
+        const encapsulationEntity = new GroupEncapsulationEntity(
+            "encapsulation-entity",
+            sheet,
+            objDomElem,
+            7
+        );
+
+        const encapsulatedEntity = new Entity(
+            "obj-123",
+            12,
+            12,
+            12,
+            12,
+            sheet,
+            window.document.createElement('div'),
+            [window.document.createElement('div')],
+            [window.document.createElement('div')]
+        );
+
+        encapsulationEntity.setEncapsulatedEntities([encapsulatedEntity]);
+        encapsulationEntity.translate(13, 32);
+
+        expect(encapsulatedEntity.getX()).toBe(23); // 20 = position of encapsulation entity (13) + entity's x-distance from encapsulation entity (7) = (20) -> snapped to 12px grid -> 23
+        expect(encapsulatedEntity.getY()).toBe(35); // 20 = position of encapsulation entity (32) + entity's x-distance from encapsulation entity (7) = (39) -> snapped to 12px grid -> 35
     });
 
     it("emits EntityEvent.TRANSLATE event, with withinGroupTransformation set to false", function (done) {
