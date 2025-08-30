@@ -255,3 +255,83 @@ describe("Entity.setTranslationMode", function () {
         expect(et.getTranslationMode()).toBe(EntityTranslationMode.FROM_HANDLE_SELECTION_START);
     });
 });
+
+describe("Entity.isRoutingAroundBoundingRectAllowed", function () {
+    it("returns true if Entity.setRoutingAroundBoundingRect() was never called", function () {
+        const et = new Entity(
+            "obj-123",
+            100,
+            200,
+            10,
+            20,
+            sheet,
+            window.document.createElement('div'),
+            [window.document.createElement('div')],
+            [window.document.createElement('div')]
+        );
+
+        expect(et.isRoutingAroundBoundingRectAllowed()).toBe(true);
+    });
+
+    it("returns value set by Entity.setRoutingAroundBoundingRect()", function () {
+        const et = new Entity(
+            "obj-123",
+            100,
+            200,
+            10,
+            20,
+            sheet,
+            window.document.createElement('div'),
+            [window.document.createElement('div')],
+            [window.document.createElement('div')]
+        );
+
+        et.setRoutingAroundBoundingRect(false);
+        expect(et.isRoutingAroundBoundingRectAllowed()).toBe(false);
+
+        et.setRoutingAroundBoundingRect(true);
+        expect(et.isRoutingAroundBoundingRectAllowed()).toBe(true);
+    });
+});
+
+
+describe("Entity.getDescriptor() ", function () {
+    it("returns Object with isRoutingAroundBoundingRectAllowed equal to true by default", function () {
+        const et = new Entity(
+            "obj-123",
+            100,
+            200,
+            10,
+            20,
+            sheet,
+            window.document.createElement('div'),
+            [window.document.createElement('div')],
+            [window.document.createElement('div')]
+        );
+
+        const etDescriptorDefault = et.getDescriptor();
+        expect(etDescriptorDefault.isRoutingAroundBoundingRectAllowed).toBe(true);
+    });
+
+    it("returns Object with isRoutingAroundBoundingRectAllowed equal to value set by setRoutingAroundBoundingRect()", function () {
+        const et = new Entity(
+            "obj-123",
+            100,
+            200,
+            10,
+            20,
+            sheet,
+            window.document.createElement('div'),
+            [window.document.createElement('div')],
+            [window.document.createElement('div')]
+        );
+
+        et.setRoutingAroundBoundingRect(false);
+        const etDescriptorA = et.getDescriptor();
+        expect(etDescriptorA.isRoutingAroundBoundingRectAllowed).toBe(false);
+
+        et.setRoutingAroundBoundingRect(true);
+        const etDescriptorB = et.getDescriptor();
+        expect(etDescriptorB.isRoutingAroundBoundingRectAllowed).toBe(true);
+    });    
+});

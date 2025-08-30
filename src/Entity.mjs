@@ -96,6 +96,11 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     let translationMode = EntityTranslationMode.FROM_HANDLE_CENTER;
 
     /**
+     * @type {Boolean}
+     */
+    let routingAroundBoundingRectAllowed = true;
+
+    /**
      * @param {Element} _connectorAnchorDomElement
      * @param {Number} _routingPointOffsetX
      * @param {Number} _routingPointOffsetY
@@ -454,6 +459,21 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
+     * 
+     * @param {Boolean} _isAllowed 
+     */
+    this.setRoutingAroundBoundingRect = function(_isAllowed) {
+        routingAroundBoundingRectAllowed = _isAllowed;
+    };
+
+    /**
+     * @returns {Boolean}
+     */
+    this.isRoutingAroundBoundingRectAllowed = function() {
+        return routingAroundBoundingRectAllowed;
+    };
+
+    /**
      * @returns {Object}
      */
     this.getDescriptor = function() {
@@ -501,6 +521,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             "width": self.getWidth(),
             "height": self.getHeight(),
             "connectorAnchors": anchors,
+            "isRoutingAroundBoundingRectAllowed": self.isRoutingAroundBoundingRectAllowed(),
             "outerBoundingRect": {
                 "minX": outerBoundMinX,
                 "minY": outerBoundMinY,
