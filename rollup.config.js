@@ -49,7 +49,7 @@ export default [
         {
           "exportVarName": "ConnectorRoutingWorkerJsString",
           "srcBundleName": "connector-routing-worker.min.js",
-          "dest": "src/Workers/ConnectorRoutingWorker.string.js"
+          "dest": "src/Workers/ConnectorRoutingWorker.string.mjs"
         }
       )
     ],
@@ -68,7 +68,7 @@ export default [
         {
           "exportVarName": "ClusterDetectionWorkerJsString",
           "srcBundleName": "cluster-detection-worker.min.js",
-          "dest": "src/Workers/ClusterDetectionWorker.string.js"
+          "dest": "src/Workers/ClusterDetectionWorker.string.mjs"
         }
       )
     ],
