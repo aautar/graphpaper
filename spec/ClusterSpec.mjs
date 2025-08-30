@@ -93,6 +93,7 @@ describe("Cluster.toJSON", function() {
                     width: 100,
                     height: 100,
                     connectorAnchors: [],
+                    isRoutingAroundBoundingRectAllowed: true,
                     outerBoundingRect: { minX: 10, minY: 10, maxX: 110, maxY: 110 }
                 },
                 {
@@ -102,6 +103,7 @@ describe("Cluster.toJSON", function() {
                     width: 100,
                     height: 100,
                     connectorAnchors: [],
+                    isRoutingAroundBoundingRectAllowed: true,
                     outerBoundingRect: {
                         minX: 20,
                         minY: 20,
