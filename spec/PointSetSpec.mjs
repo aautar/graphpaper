@@ -81,3 +81,19 @@ describe("PointSet constructor", function () {
 
     });
 });
+
+describe("PointSet.contains", function () {
+    it("returns true if Point is already in the set", function () {
+        const ps = new PointSet();
+        ps.push(new Point(-100, 200));
+
+        expect(ps.contains(new Point(-100, 200))).toBe(true);
+    });
+
+    it("returns false if Point is not in the set", function () {
+        const ps = new PointSet();
+        ps.push(new Point(-100, 200));
+
+        expect(ps.contains(new Point(0, 0))).toBe(false);
+    });
+});

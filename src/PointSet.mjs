@@ -19,10 +19,8 @@ function PointSet(_pointsInput) {
      * @param {Point} _newPoint
      */
     this.push = function(_newPoint) {
-        for(let i=0; i<points.length; i++) {
-            if(_newPoint.isEqual(points[i])) {
-                return false;
-            }
+        if(self.contains(_newPoint)) {
+            return false;
         }
 
         points.push(_newPoint);
@@ -35,7 +33,7 @@ function PointSet(_pointsInput) {
     this.pushPointSet = function(_ps) {
         const possibleNewPoints = _ps.toArray();
         for(let i=0; i<possibleNewPoints.length; i++) {
-            self.push(possibleNewPoints[i]);
+            self.push(possibleNewPoints[i]); // push method will only add Point if it doesn't already exist in the PointSet
         }
     };
 
@@ -137,6 +135,21 @@ function PointSet(_pointsInput) {
      */
     this.count = function() {
         return points.length;
+    };
+
+
+    /**
+     * @param {Point} _pt
+     * @returns {Boolean}
+     */
+    this.contains = function(_pt) {
+        for(let i=0; i<points.length; i++) {
+            if(_pt.isEqual(points[i])) {
+                return true;
+            }
+        }
+
+        return false;
     };
 
     if(_pointsInput && Array.isArray(_pointsInput)) {
