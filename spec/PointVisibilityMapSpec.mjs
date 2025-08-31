@@ -14,6 +14,7 @@ describe("PointVisibilityMap.findVisiblePointInfoClosestTo", function() {
             width: 100,
             height: 100,
             connectorAnchors: [],
+            isRoutingAroundBoundingRectAllowed: true,
             outerBoundingRect: {
                 minX: 25,
                 minY: 25,
@@ -40,6 +41,7 @@ describe("PointVisibilityMap.computeRoute", function() {
             width: 100,
             height: 100,
             connectorAnchors: [],
+            isRoutingAroundBoundingRectAllowed: true,
             outerBoundingRect: {
                 minX: 25,
                 minY: 25,
