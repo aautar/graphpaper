@@ -52,9 +52,16 @@ const AccessibleRoutingPointsFinder = {
         allRoutingPoints.forEach((_rp) => {
             let isPointWithinObj = false;
 
-            // check if routing point is occluded
+            // check if routing point is occluded (i.e. within another entity)
             for(let i=0; i<_occluderEntityDescriptors.length; i++) {
                 const occluder = _occluderEntityDescriptors[i];
+
+                // if routing around the entity is allowed == the entity is an occluder
+                // if routing around the entity is *not* allowed == the entity is *not* an occluder
+                if(!occluder.isRoutingAroundBoundingRectAllowed) {
+                    continue;
+                }
+
                 const boundingRect = new Rectangle(occluder.x, occluder.y, occluder.x + occluder.width, occluder.y + occluder.height);
                 if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                     isPointWithinObj = true;
