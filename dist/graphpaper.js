@@ -672,10 +672,8 @@ var GraphPaper = (function (exports) {
          * @param {Point} _newPoint
          */
         this.push = function(_newPoint) {
-            for(let i=0; i<points.length; i++) {
-                if(_newPoint.isEqual(points[i])) {
-                    return false;
-                }
+            if(self.contains(_newPoint)) {
+                return false;
             }
 
             points.push(_newPoint);
@@ -688,7 +686,7 @@ var GraphPaper = (function (exports) {
         this.pushPointSet = function(_ps) {
             const possibleNewPoints = _ps.toArray();
             for(let i=0; i<possibleNewPoints.length; i++) {
-                self.push(possibleNewPoints[i]);
+                self.push(possibleNewPoints[i]); // push method will only add Point if it doesn't already exist in the PointSet
             }
         };
 
@@ -792,6 +790,21 @@ var GraphPaper = (function (exports) {
             return points.length;
         };
 
+
+        /**
+         * @param {Point} _pt
+         * @returns {Boolean}
+         */
+        this.contains = function(_pt) {
+            for(let i=0; i<points.length; i++) {
+                if(_pt.isEqual(points[i])) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
         if(_pointsInput && Array.isArray(_pointsInput)) {
             _pointsInput.forEach(self.push);
         } else if(_pointsInput && Object.prototype.toString.call(_pointsInput) === '[object Float64Array]') {
@@ -850,9 +863,16 @@ var GraphPaper = (function (exports) {
             allRoutingPoints.forEach((_rp) => {
                 let isPointWithinObj = false;
 
-                // check if routing point is occluded
+                // check if routing point is occluded (i.e. within another entity)
                 for(let i=0; i<_occluderEntityDescriptors.length; i++) {
                     const occluder = _occluderEntityDescriptors[i];
+
+                    // if routing around the entity is allowed == the entity is an occluder
+                    // if routing around the entity is *not* allowed == the entity is *not* an occluder
+                    if(!occluder.isRoutingAroundBoundingRectAllowed) {
+                        continue;
+                    }
+
                     const boundingRect = new Rectangle(occluder.x, occluder.y, occluder.x + occluder.width, occluder.y + occluder.height);
                     if(boundingRect.checkIsPointWithin(_rp.routingPoint)) {
                         isPointWithinObj = true;
@@ -1926,11 +1946,11 @@ var GraphPaper = (function (exports) {
 
   function Line(a,b){if("undefined"==typeof a||null===a)throw "Line missing _startPoint";if("undefined"==typeof b||null===b)throw "Line missing _endPoint";this.__startPoint=a,this.__endPoint=b;}Line.prototype.getStartPoint=function(){return this.__startPoint},Line.prototype.getEndPoint=function(){return this.__endPoint},Line.prototype.isEqual=function(a){return !!(this.getStartPoint().isEqual(a.getStartPoint())&&this.getEndPoint().isEqual(a.getEndPoint()))},Line.prototype.getLength=function(){return Math.sqrt(Math.pow(this.__endPoint.getX()-this.__startPoint.getX(),2)+Math.pow(this.__endPoint.getY()-this.__startPoint.getY(),2))},Line.prototype.getMinX=function(){return Math.min(this.getStartPoint().getX(),this.getEndPoint().getX())},Line.prototype.getMaxX=function(){return Math.max(this.getStartPoint().getX(),this.getEndPoint().getX())},Line.prototype.getMinY=function(){return Math.min(this.getStartPoint().getY(),this.getEndPoint().getY())},Line.prototype.getMaxY=function(){return Math.max(this.getStartPoint().getY(),this.getEndPoint().getY())},Line.prototype.getDirection=function(){var a=this.__endPoint.getX()-this.__startPoint.getX(),b=this.__endPoint.getY()-this.__startPoint.getY(),c=Math.sqrt(a*a+b*b);return new Point(a/c,b/c)},Line.prototype.createShortenedLine=function(a,b){var c=this.__endPoint.getX()-this.__startPoint.getX(),d=this.__endPoint.getY()-this.__startPoint.getY(),e=this.getDirection();return new Line(new Point(this.__startPoint.getX()+a*e.getX(),this.__startPoint.getY()+a*e.getY()),new Point(this.__startPoint.getX()+c-b*e.getX(),this.__startPoint.getY()+d-b*e.getY()))},Line.prototype.computeIntersectionType=function(a){var b=this.__startPoint.getX(),c=this.__startPoint.getY(),d=this.__endPoint.getX(),e=this.__endPoint.getY(),f=a.getStartPoint().getX(),g=a.getStartPoint().getY(),h=a.getEndPoint().getX(),i=a.getEndPoint().getY(),j=(i-g)*(d-b)-(h-f)*(e-c),k=(h-f)*(c-g)-(i-g)*(b-f),l=(d-b)*(c-g)-(e-c)*(b-f);if(0==j)return 0==j&&0==k&&0==l?LINE_INTERSECTION_TYPE.COINCIDENT:LINE_INTERSECTION_TYPE.PARALLEL;var m=k/j,n=l/j;return 1<m||0>m||1<n||0>n?LINE_INTERSECTION_TYPE.LINE:LINE_INTERSECTION_TYPE.LINESEG},Line.prototype.computeIntersection=function(a){var b=this.__startPoint.getX(),c=this.__startPoint.getY(),d=this.__endPoint.getX(),e=this.__endPoint.getY(),f=a.getStartPoint().getX(),g=a.getStartPoint().getY(),h=a.getEndPoint().getX(),i=a.getEndPoint().getY(),j=(i-g)*(d-b)-(h-f)*(e-c),k=(h-f)*(c-g)-(i-g)*(b-f),l=(d-b)*(c-g)-(e-c)*(b-f);if(0==j)return 0==j&&0==k&&0==l?new LineIntersection(LINE_INTERSECTION_TYPE.COINCIDENT,null):new LineIntersection(LINE_INTERSECTION_TYPE.PARALLEL,null);var m=k/j,n=l/j,o=this.__startPoint.getX()+m*(this.__endPoint.getX()-this.__startPoint.getX()),p=this.__startPoint.getY()+m*(this.__endPoint.getY()-this.__startPoint.getY());return 1<m||0>m||1<n||0>n?new LineIntersection(LINE_INTERSECTION_TYPE.LINE,new Point(o,p)):new LineIntersection(LINE_INTERSECTION_TYPE.LINESEG,new Point(o,p))};
 
-  function PointSet(a){var b=this,c=[];this.push=function(a){for(var b=0;b<c.length;b++)if(a.isEqual(c[b]))return !1;return c.push(a),!0},this.pushPointSet=function(a){for(var c=a.toArray(),d=0;d<c.length;d++)b.push(c[d]);},this.findPointClosestTo=function(a){var b=null,d=Number.MAX_SAFE_INTEGER;return c.forEach(function(c){var e=new Line(a,c);e.getLength()<d&&(b=c,d=e.getLength());}),b},this.findDistanceToPointClosestTo=function(a){var b=Number.MAX_SAFE_INTEGER;return c.forEach(function(c){var d=new Line(a,c);d.getLength()<b&&(b=d.getLength());}),b},this.findPointsCloseTo=function(a,b){var d=new PointSet;return c.forEach(function(c){var e=new Line(a,c);e.getLength()<=b&&d.push(c);}),d},this.toArray=function(){return c},this.toFloat64Array=function(){for(var a=new Float64Array(2*c.length),b=0;b<c.length;b++)a[0+2*b]=c[b].getX(),a[1+2*b]=c[b].getY();return a};var d=function fromFloat64Array(a){c.length=0;for(var b=0;b<a.length;b+=2)c.push(new Point(a[b],a[b+1]));};this.count=function(){return c.length},a&&Array.isArray(a)?a.forEach(b.push):a&&"[object Float64Array]"===Object.prototype.toString.call(a)&&d(a);}
+  function PointSet(a){var b=this,c=[];this.push=function(a){return !b.contains(a)&&(c.push(a),!0)},this.pushPointSet=function(a){for(var c=a.toArray(),d=0;d<c.length;d++)b.push(c[d]);},this.findPointClosestTo=function(a){var b=null,d=Number.MAX_SAFE_INTEGER;return c.forEach(function(c){var e=new Line(a,c);e.getLength()<d&&(b=c,d=e.getLength());}),b},this.findDistanceToPointClosestTo=function(a){var b=Number.MAX_SAFE_INTEGER;return c.forEach(function(c){var d=new Line(a,c);d.getLength()<b&&(b=d.getLength());}),b},this.findPointsCloseTo=function(a,b){var d=new PointSet;return c.forEach(function(c){var e=new Line(a,c);e.getLength()<=b&&d.push(c);}),d},this.toArray=function(){return c},this.toFloat64Array=function(){for(var a=new Float64Array(2*c.length),b=0;b<c.length;b++)a[0+2*b]=c[b].getX(),a[1+2*b]=c[b].getY();return a};var d=function fromFloat64Array(a){c.length=0;for(var b=0;b<a.length;b+=2)c.push(new Point(a[b],a[b+1]));};this.count=function(){return c.length},this.contains=function(a){for(var b=0;b<c.length;b++)if(a.isEqual(c[b]))return !0;return !1},a&&Array.isArray(a)?a.forEach(b.push):a&&"[object Float64Array]"===Object.prototype.toString.call(a)&&d(a);}
 
   function Rectangle(a,b,c,d){this.__left=a,this.__top=b,this.__right=c,this.__bottom=d;}Rectangle.prototype.getLeft=function(){return this.__left},Rectangle.prototype.getTop=function(){return this.__top},Rectangle.prototype.getRight=function(){return this.__right},Rectangle.prototype.getBottom=function(){return this.__bottom},Rectangle.prototype.getWidth=function(){return this.__right-this.__left},Rectangle.prototype.getHeight=function(){return this.__bottom-this.__top},Rectangle.prototype.getPoints=function(){return [new Point(this.__left,this.__top),new Point(this.__right,this.__top),new Point(this.__right,this.__bottom),new Point(this.__left,this.__bottom)]},Rectangle.prototype.getLines=function(){return [new Line(new Point(this.__left,this.__top),new Point(this.__right,this.__top)),new Line(new Point(this.__right,this.__top),new Point(this.__right,this.__bottom)),new Line(new Point(this.__right,this.__bottom),new Point(this.__left,this.__bottom)),new Line(new Point(this.__left,this.__bottom),new Point(this.__left,this.__top))]},Rectangle.prototype.getUniformlyResizedCopy=function(a){return new Rectangle(this.__left-a,this.__top-a,this.__right+a,this.__bottom+a)},Rectangle.prototype.getPointsScaledToGrid=function(a){var b=new Point(this.__left+.5*(this.__right-this.__left),this.__top+.5*(this.__bottom-this.__top)),c=(this.__right-b.getX()+a)/(this.__right-b.getX()),d=(this.__bottom-b.getY()+a)/(this.__bottom-b.getY()),e=[new Point((this.__left-b.getX())*c+b.getX(),(this.__top-b.getY())*d+b.getY()),new Point((this.__right-b.getX())*c+b.getX(),(this.__top-b.getY())*d+b.getY()),new Point((this.__right-b.getX())*c+b.getX(),(this.__bottom-b.getY())*d+b.getY()),new Point((this.__left-b.getX())*c+b.getX(),(this.__bottom-b.getY())*d+b.getY())];return e},Rectangle.prototype.checkIntersect=function(a){return !(this.__bottom<a.getTop())&&!(this.__top>a.getBottom())&&!(this.__right<a.getLeft())&&!(this.__left>a.getRight())},Rectangle.prototype.checkIsPointWithin=function(a){return !!(a.getX()>=this.__left&&a.getX()<=this.__right&&a.getY()>=this.__top&&a.getY()<=this.__bottom)},Rectangle.prototype.checkIsWithin=function(a){return !!(this.__bottom<=a.getBottom()&&this.__top>=a.getTop()&&this.__right<=a.getRight()&&this.__left>=a.getLeft())};
 
-  var AccessibleRoutingPointsFinder={find:function find(a,b,c){var d=new Map,e=[],f=new PointSet;return a.forEach(function(a){var b=a.connectorAnchors;b.forEach(function(a){{var c=new PointSet(a.routingPointsFloat64Arr).toArray();c.forEach(function(b){e.push({routingPoint:b,parentAnchorId:a.id});}),d.set(a.id,c.length);}});}),e.forEach(function(a){for(var c=!1,e=0;e<b.length;e++){var g=b[e],h=new Rectangle(g.x,g.y,g.x+g.width,g.y+g.height);if(h.checkIsPointWithin(a.routingPoint)){c=!0;var j=d.get(a.parentAnchorId)||0;d.set(a.parentAnchorId,Math.max(0,j-1));}}c||f.push(a.routingPoint);}),{connectorAnchorToNumValidRoutingPoints:d,accessibleRoutingPoints:f}}};
+  var AccessibleRoutingPointsFinder={find:function find(a,b,c){var d=new Map,e=[],f=new PointSet;return a.forEach(function(a){var b=a.connectorAnchors;b.forEach(function(a){{var c=new PointSet(a.routingPointsFloat64Arr).toArray();c.forEach(function(b){e.push({routingPoint:b,parentAnchorId:a.id});}),d.set(a.id,c.length);}});}),e.forEach(function(a){for(var c,e=!1,g=0;g<b.length;g++)if(c=b[g],!!c.isRoutingAroundBoundingRectAllowed){var h=new Rectangle(c.x,c.y,c.x+c.width,c.y+c.height);if(h.checkIsPointWithin(a.routingPoint)){e=!0;var j=d.get(a.parentAnchorId)||0;d.set(a.parentAnchorId,Math.max(0,j-1));}}e||f.push(a.routingPoint);}),{connectorAnchorToNumValidRoutingPoints:d,accessibleRoutingPoints:f}}};
 
   function LineSet(a){var b=this,c=[];this.push=function(a){for(var b=0;b<c.length;b++)if(a.isEqual(c[b]))return !1;return c.push(a),!0},this.toArray=function(){return c},this.count=function(){return c.length},this.toFloat64Array=function(){for(var a=new Float64Array(4*c.length),b=0;b<c.length;b++)a[0+4*b]=c[b].getStartPoint().getX(),a[1+4*b]=c[b].getStartPoint().getY(),a[2+4*b]=c[b].getEndPoint().getX(),a[3+4*b]=c[b].getEndPoint().getY();return a};var d=function fromFloat64Array(a){c.length=0;for(var b=0;b<a.length;b+=4)c.push(new Line(new Point(a[b],a[b+1]),new Point(a[b+2],a[b+3])));};a&&Array.isArray(a)?a.forEach(b.push):a&&"[object Float64Array]"===Object.prototype.toString.call(a)&&d(a);}
 
