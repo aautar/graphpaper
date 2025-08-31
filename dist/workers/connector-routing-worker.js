@@ -852,6 +852,35 @@
         ASTAR_THETA_WITH_ROUTE_OPTIMIZATION: 5,
     });
 
+    const EntityDescriptorParser = {
+        /**
+         * @param {Object} _ed
+         * @returns {LineSet}
+         */    
+        extractBoundaryLines: function(_ed) {
+            const boundaryLines = new LineSet();
+
+            if(_ed.isRoutingAroundBoundingRectAllowed) {
+                const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
+                const lines = entityBoundingRect.getLines();
+                lines.forEach((_l) => {
+                    boundaryLines.push(_l);
+                });
+            }
+
+            const anchors = _ed.connectorAnchors;
+            anchors.forEach(function(_anchor) {
+                const anchorBoundingRect = new Rectangle(_anchor.x, _anchor.y, _anchor.x + _anchor.width, _anchor.y + _anchor.height);
+                const lines = anchorBoundingRect.getLines();
+                lines.forEach((_l) => {
+                    boundaryLines.push(_l);
+                });
+            });
+
+            return boundaryLines;
+        },
+    };
+
     const PointInfo = {
         point: null,
         visiblePoints: null
@@ -1066,31 +1095,6 @@
             };
         };
 
-        /**
-         * @param {Object} _ed
-         * @returns {LineSet}
-         */    
-        const getBoundaryLinesFromEntityDescriptor = function(_ed) {
-            const boundaryLines = new LineSet();
-
-            const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
-            const lines = entityBoundingRect.getLines();
-            lines.forEach((_l) => {
-                boundaryLines.push(_l);
-            });
-
-            const anchors = _ed.connectorAnchors;
-            anchors.forEach(function(_anchor) {
-                const anchorBoundingRect = new Rectangle(_anchor.x, _anchor.y, _anchor.x + _anchor.width, _anchor.y + _anchor.height);
-                const lines = anchorBoundingRect.getLines();
-                lines.forEach((_l) => {
-                    boundaryLines.push(_l);
-                });
-            });
-
-            return boundaryLines;
-        };    
-
         const hasEntityMutated = function(_old, _new) {
             if(_old.x !== _new.x || _old.y !== _new.y || _old.width !== _new.width || _old.height !== _new.height) {
                 return true;
@@ -1198,7 +1202,7 @@
                     continue;
                 }
 
-                const boundaryLinesForEntity = getBoundaryLinesFromEntityDescriptor(_entityDescriptors[i]);
+                const boundaryLinesForEntity = EntityDescriptorParser.extractBoundaryLines(_entityDescriptors[i]);
                 entityIdToBoundaryLineSet.set(entityId, boundaryLinesForEntity);
 
                 currentNumOfBoundaryLines += boundaryLinesForEntity.count();

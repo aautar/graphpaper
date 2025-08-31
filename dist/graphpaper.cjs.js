@@ -1941,7 +1941,9 @@ const ConnectorRoutingWorkerJsString = String.raw`(function () {
 
   var ConnectorRoutingAlgorithm=Object.freeze({STRAIGHT_LINE:0,STRAIGHT_LINE_BETWEEN_ANCHORS:1,STRAIGHT_LINE_BETWEEN_ANCHORS_AVOID_SELF_INTERSECTION:2,ASTAR:3,ASTAR_WITH_ROUTE_OPTIMIZATION:4,ASTAR_THETA_WITH_ROUTE_OPTIMIZATION:5});
 
-  var PointInfo={point:null,visiblePoints:null};function PointVisibilityMap(){var a=this,b=new Map,c=new Map,d=new Map,e=0,f=0,g=function doesLineIntersectAnyBoundaryLines(a){var b,e=_createForOfIteratorHelper(c);try{for(e.s();!(b=e.n()).done;){var f=_slicedToArray(b.value,2),g=f[0],h=f[1],j=d.get(g);if(!(a.getMinX()>j.outerBoundingRect.maxX)&&!(a.getMaxX()<j.outerBoundingRect.minX)&&!(a.getMinY()>j.outerBoundingRect.maxY)&&!(a.getMaxY()<j.outerBoundingRect.minY))for(var k,l=h.toArray(),m=0;m<l.length;m++)if(k=l[m].computeIntersectionType(a),k===LINE_INTERSECTION_TYPE.LINESEG)return !0}}catch(a){e.e(a);}finally{e.f();}return !1},h=function computePointsVisibilityForPoint(a){a.visiblePoints.points.length=0;var c,d=_createForOfIteratorHelper(b);try{for(d.s();!(c=d.n()).done;){var e,f=_slicedToArray(c.value,2),h=f[0],i=f[1],j=_createForOfIteratorHelper(i);try{for(j.s();!(e=j.n()).done;){var k=_slicedToArray(e.value,2),l=k[0],m=k[1],n=new Line(a.point,l);0<n.getLength()&&!g(n)&&a.visiblePoints.points.push(l);}}catch(a){j.e(a);}finally{j.f();}}}catch(a){d.e(a);}finally{d.f();}a.visiblePoints.isValid=!0;},i=function arePointsVisibleToEachOther(a,b){for(var c=o(a),d=j(c),e=0;e<d.length;e++)if(d[e].isEqual(b))return !0;return !1},j=function getVisiblePointsRelativeTo(a){return a.visiblePoints.isValid||h(a),a.visiblePoints.points},k=function isPointInArray(a,b){for(var c=0;c<b.length;c++)if(a.isEqual(b[c]))return !0;return !1},l=function routeToEndpoint(a,b,c,d,e,f,g){for(var h,l=c.point,m=j(c),n=Number.MAX_SAFE_INTEGER,o=null,p=new Vec2(e.getX()-l.getX(),e.getY()-l.getY()).normalize(),q=0;q<m.length;q++)if(h=m[q],!k(h,b)){var r=new Line(l,h).getLength(),s=r+a,t=new Line(h,e).getLength(),u=0;if(g===ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION){var v=new Vec2(h.getX()-l.getX(),h.getY()-l.getY()).normalize();u=p.dot(v)*r,e.getX()>l.getX()&&h.getX()>e.getX()&&(u=0),e.getX()<l.getX()&&h.getX()<e.getX()&&(u=0),e.getY()>l.getY()&&h.getY()>e.getY()&&(u=0),e.getY()<l.getY()&&h.getY()<e.getY()&&(u=0);}s+t-u<n&&(n=s+t-u,o=h);}return n===Number.MAX_SAFE_INTEGER?null:{cost:n,point:o}},m=function getBoundaryLinesFromEntityDescriptor(a){var b=new LineSet,c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});var e=a.connectorAnchors;return e.forEach(function(a){var c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});}),b},n=function hasEntityMutated(a,b){return !(a.x===b.x&&a.y===b.y&&a.width===b.width&&a.height===b.height)},o=function fetchPointInfoForPoint(a){var c,d=_createForOfIteratorHelper(b);try{for(d.s();!(c=d.n()).done;){var e,f=_slicedToArray(c.value,2),g=f[0],h=f[1],i=_createForOfIteratorHelper(h);try{for(i.s();!(e=i.n()).done;){var j=_slicedToArray(e.value,2),k=j[0],l=j[1];if(k===a)return p(k,l)}}catch(a){i.e(a);}finally{i.f();}}}catch(a){d.e(a);}finally{d.f();}return null},p=function buildPointInfo(a,b){var c=Object.create(PointInfo);return c.point=a,c.visiblePoints=b,c},q=function buildEmptyRoutingPointToVisibleSetMap(a,b,c,d){for(var e=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),f=AccessibleRoutingPointsFinder.find([a],b,c),g=f.accessibleRoutingPoints.toArray(),h=new Map,i=0;i<g.length;i++)h.set(g[i],{isValid:!1,points:[]});var k=e.getPointsScaledToGrid(c*d);return k.forEach(function(a){h.set(a,{isValid:!1,points:[]});}),h},s=function doesRoutingAlgorithmRequireOptimization(a){return !(a!==ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION&&a!==ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION)};this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors=function(a,g,h){"undefined"==typeof h&&(h=1),e=0,f=0;for(var j,k=[],l=[],o=[],p=0;p<a.length;p++){j=a[p].id,k.push(j);var r=c.get(j),s=d.get(j);if(r&&!n(s,a[p])){f+=r.count();continue}var A=m(a[p]);c.set(j,A),f+=A.count();}for(var B=0;B<a.length;B++){var t=a[B].id,u=d.get(t);!u||n(u,a[B]);var C=q(a[B],a,g,h);b.set(t,C),d.set(t,a[B]),l.push(t),e+=C.size;}var v,w=_createForOfIteratorHelper(d);try{for(w.s();!(v=w.n()).done;){var x=_slicedToArray(v.value,2),y=x[0],z=x[1];k.includes(y)||(l.push(y),o.push(y));}}catch(a){w.e(a);}finally{w.f();}return o.forEach(function(a){d.delete(a),c.delete(a),b.delete(a);}),l.length},this.getCurrentNumRoutingPoints=function(){return e},this.getCurrentNumBoundaryLines=function(){return f},this.findVisiblePointInfoClosestTo=function(a){var c,d=null,e=Number.MAX_SAFE_INTEGER,f=_createForOfIteratorHelper(b);try{for(f.s();!(c=f.n()).done;){var h,i=_slicedToArray(c.value,2),j=i[0],k=i[1],l=_createForOfIteratorHelper(k);try{for(l.s();!(h=l.n()).done;){var m=_slicedToArray(h.value,2),n=m[0],o=m[1],q=new Line(a,n),r=q.getLength();r<e&&!g(q)&&(d=p(n,o),e=r);;}}catch(a){l.e(a);}finally{l.f();}}}catch(a){f.e(a);}finally{f.f();}return d},this.computeRoute=function(b,c,d){if(null===b||null===c)return new PointSet;var e=a.findVisiblePointInfoClosestTo(b);if(null===e)return new PointSet;for(var f,h=new Vec2(c.getX()-b.getX(),c.getY()-b.getY()).normalize(),j=[e.point],k=0,m=e;!0;){if(f=l(k,j,m,b,c,h,d),null===f){var n=new Line(j[j.length-1],c);if(g(n))return new PointSet;break}if(k+=new Line(m.point,f.point).getLength(),j.push(f.point),m=o(f.point),1>new Line(m.point,c).getLength())break}return s(d)&&PointVisibilityMapRouteOptimizer.optimize(j,i),new PointSet(j)};}
+  var EntityDescriptorParser={extractBoundaryLines:function extractBoundaryLines(a){var b=new LineSet;if(a.isRoutingAroundBoundingRectAllowed){var c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});}var e=a.connectorAnchors;return e.forEach(function(a){var c=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),d=c.getLines();d.forEach(function(a){b.push(a);});}),b}};
+
+  var PointInfo={point:null,visiblePoints:null};function PointVisibilityMap(){var a=this,b=new Map,c=new Map,d=new Map,e=0,f=0,g=function doesLineIntersectAnyBoundaryLines(a){var b,e=_createForOfIteratorHelper(c);try{for(e.s();!(b=e.n()).done;){var f=_slicedToArray(b.value,2),g=f[0],h=f[1],j=d.get(g);if(!(a.getMinX()>j.outerBoundingRect.maxX)&&!(a.getMaxX()<j.outerBoundingRect.minX)&&!(a.getMinY()>j.outerBoundingRect.maxY)&&!(a.getMaxY()<j.outerBoundingRect.minY))for(var k,l=h.toArray(),m=0;m<l.length;m++)if(k=l[m].computeIntersectionType(a),k===LINE_INTERSECTION_TYPE.LINESEG)return !0}}catch(a){e.e(a);}finally{e.f();}return !1},h=function computePointsVisibilityForPoint(a){a.visiblePoints.points.length=0;var c,d=_createForOfIteratorHelper(b);try{for(d.s();!(c=d.n()).done;){var e,f=_slicedToArray(c.value,2),h=f[0],i=f[1],j=_createForOfIteratorHelper(i);try{for(j.s();!(e=j.n()).done;){var k=_slicedToArray(e.value,2),l=k[0],m=k[1],n=new Line(a.point,l);0<n.getLength()&&!g(n)&&a.visiblePoints.points.push(l);}}catch(a){j.e(a);}finally{j.f();}}}catch(a){d.e(a);}finally{d.f();}a.visiblePoints.isValid=!0;},i=function arePointsVisibleToEachOther(a,b){for(var c=n(a),d=j(c),e=0;e<d.length;e++)if(d[e].isEqual(b))return !0;return !1},j=function getVisiblePointsRelativeTo(a){return a.visiblePoints.isValid||h(a),a.visiblePoints.points},k=function isPointInArray(a,b){for(var c=0;c<b.length;c++)if(a.isEqual(b[c]))return !0;return !1},l=function routeToEndpoint(a,b,c,d,e,f,g){for(var h,l=c.point,m=j(c),n=Number.MAX_SAFE_INTEGER,o=null,p=new Vec2(e.getX()-l.getX(),e.getY()-l.getY()).normalize(),q=0;q<m.length;q++)if(h=m[q],!k(h,b)){var r=new Line(l,h).getLength(),s=r+a,t=new Line(h,e).getLength(),u=0;if(g===ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION){var v=new Vec2(h.getX()-l.getX(),h.getY()-l.getY()).normalize();u=p.dot(v)*r,e.getX()>l.getX()&&h.getX()>e.getX()&&(u=0),e.getX()<l.getX()&&h.getX()<e.getX()&&(u=0),e.getY()>l.getY()&&h.getY()>e.getY()&&(u=0),e.getY()<l.getY()&&h.getY()<e.getY()&&(u=0);}s+t-u<n&&(n=s+t-u,o=h);}return n===Number.MAX_SAFE_INTEGER?null:{cost:n,point:o}},m=function hasEntityMutated(a,b){return !(a.x===b.x&&a.y===b.y&&a.width===b.width&&a.height===b.height)},n=function fetchPointInfoForPoint(a){var c,d=_createForOfIteratorHelper(b);try{for(d.s();!(c=d.n()).done;){var e,f=_slicedToArray(c.value,2),g=f[0],h=f[1],i=_createForOfIteratorHelper(h);try{for(i.s();!(e=i.n()).done;){var j=_slicedToArray(e.value,2),k=j[0],l=j[1];if(k===a)return o(k,l)}}catch(a){i.e(a);}finally{i.f();}}}catch(a){d.e(a);}finally{d.f();}return null},o=function buildPointInfo(a,b){var c=Object.create(PointInfo);return c.point=a,c.visiblePoints=b,c},p=function buildEmptyRoutingPointToVisibleSetMap(a,b,c,d){for(var e=new Rectangle(a.x,a.y,a.x+a.width,a.y+a.height),f=AccessibleRoutingPointsFinder.find([a],b,c),g=f.accessibleRoutingPoints.toArray(),h=new Map,i=0;i<g.length;i++)h.set(g[i],{isValid:!1,points:[]});var k=e.getPointsScaledToGrid(c*d);return k.forEach(function(a){h.set(a,{isValid:!1,points:[]});}),h},r=function doesRoutingAlgorithmRequireOptimization(a){return !(a!==ConnectorRoutingAlgorithm.ASTAR_WITH_ROUTE_OPTIMIZATION&&a!==ConnectorRoutingAlgorithm.ASTAR_THETA_WITH_ROUTE_OPTIMIZATION)};this.updateRoutingPointsAndBoundaryLinesFromEntityDescriptors=function(a,g,h){"undefined"==typeof h&&(h=1),e=0,f=0;for(var j,k=[],l=[],n=[],o=0;o<a.length;o++){j=a[o].id,k.push(j);var q=c.get(j),r=d.get(j);if(q&&!m(r,a[o])){f+=q.count();continue}var z=EntityDescriptorParser.extractBoundaryLines(a[o]);c.set(j,z),f+=z.count();}for(var A=0;A<a.length;A++){var s=a[A].id,t=d.get(s);!t||m(t,a[A]);var B=p(a[A],a,g,h);b.set(s,B),d.set(s,a[A]),l.push(s),e+=B.size;}var u,v=_createForOfIteratorHelper(d);try{for(v.s();!(u=v.n()).done;){var w=_slicedToArray(u.value,2),x=w[0],y=w[1];k.includes(x)||(l.push(x),n.push(x));}}catch(a){v.e(a);}finally{v.f();}return n.forEach(function(a){d.delete(a),c.delete(a),b.delete(a);}),l.length},this.getCurrentNumRoutingPoints=function(){return e},this.getCurrentNumBoundaryLines=function(){return f},this.findVisiblePointInfoClosestTo=function(a){var c,d=null,e=Number.MAX_SAFE_INTEGER,f=_createForOfIteratorHelper(b);try{for(f.s();!(c=f.n()).done;){var h,i=_slicedToArray(c.value,2),j=i[0],k=i[1],l=_createForOfIteratorHelper(k);try{for(l.s();!(h=l.n()).done;){var m=_slicedToArray(h.value,2),n=m[0],p=m[1],q=new Line(a,n),r=q.getLength();r<e&&!g(q)&&(d=o(n,p),e=r);;}}catch(a){l.e(a);}finally{l.f();}}}catch(a){f.e(a);}finally{f.f();}return d},this.computeRoute=function(b,c,d){if(null===b||null===c)return new PointSet;var e=a.findVisiblePointInfoClosestTo(b);if(null===e)return new PointSet;for(var f,h=new Vec2(c.getX()-b.getX(),c.getY()-b.getY()).normalize(),j=[e.point],k=0,m=e;!0;){if(f=l(k,j,m,b,c,h,d),null===f){var o=new Line(j[j.length-1],c);if(g(o))return new PointSet;break}if(k+=new Line(m.point,f.point).getLength(),j.push(f.point),m=n(f.point),1>new Line(m.point,c).getLength())break}return r(d)&&PointVisibilityMapRouteOptimizer.optimize(j,i),new PointSet(j)};}
 
   var SvgPathBuilder={pointToLineTo:function pointToLineTo(a,b){return 0===b?"M"+a.getX()+" "+a.getY():"L"+a.getX()+" "+a.getY()},pointTripletToTesselatedCurvePoints:function pointTripletToTesselatedCurvePoints(a,b){if(3!==a.length)throw new Error("_points must be array of exactly 3 points");var c=a[1],d=new Line(a[0],a[1]),e=new Line(a[1],a[2]),f=d.createShortenedLine(0,.5*b),g=e.createShortenedLine(.5*b,0);return [f.getStartPoint(),f.getEndPoint(),g.getStartPoint(),g.getEndPoint()]},pointsToPath:function pointsToPath(a,b){b=b||0;var c=[],d=0;if(0<b){for(;3<=a.length;){var e=a.shift(),f=a.shift(),g=a.shift(),h=SvgPathBuilder.pointTripletToTesselatedCurvePoints([e,f,g],b);a.unshift(h[3]),a.unshift(h[2]);for(var k=0;k<h.length-2;k++)c.push(SvgPathBuilder.pointToLineTo(h[k],d++));}for(;0<a.length;){var j=a.shift();c.push(SvgPathBuilder.pointToLineTo(j,d++));}}else for(var l,m=0;m<a.length;m++)l=a[m],c.push(SvgPathBuilder.pointToLineTo(l,m));return c.join(" ")}};
 
@@ -4025,6 +4027,11 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     let translationMode = EntityTranslationMode.FROM_HANDLE_CENTER;
 
     /**
+     * @type {Boolean}
+     */
+    let routingAroundBoundingRectAllowed = true;
+
+    /**
      * @param {Element} _connectorAnchorDomElement
      * @param {Number} _routingPointOffsetX
      * @param {Number} _routingPointOffsetY
@@ -4383,6 +4390,21 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
     };
 
     /**
+     * 
+     * @param {Boolean} _isAllowed 
+     */
+    this.setRoutingAroundBoundingRect = function(_isAllowed) {
+        routingAroundBoundingRectAllowed = _isAllowed;
+    };
+
+    /**
+     * @returns {Boolean}
+     */
+    this.isRoutingAroundBoundingRectAllowed = function() {
+        return routingAroundBoundingRectAllowed;
+    };
+
+    /**
      * @returns {Object}
      */
     this.getDescriptor = function() {
@@ -4430,6 +4452,7 @@ function Entity(_id, _x, _y, _width, _height, _sheet, _domElement, _translateHan
             "width": self.getWidth(),
             "height": self.getHeight(),
             "connectorAnchors": anchors,
+            "isRoutingAroundBoundingRectAllowed": self.isRoutingAroundBoundingRectAllowed(),
             "outerBoundingRect": {
                 "minX": outerBoundMinX,
                 "minY": outerBoundMinY,
@@ -4960,6 +4983,32 @@ const PointVisibilityMapRouteOptimizer = {
 };
 
 /**
+ * 
+ * @param {Number} _x
+ * @param {Number} _y
+ */
+function Vec2(_x, _y) {
+    this.__x = _x;
+    this.__y = _y;
+}
+Vec2.prototype = Object.create(Point.prototype, {});
+
+Vec2.prototype.normalize = function() {
+    const len = Math.sqrt((this.__x * this.__x) + (this.__y * this.__y));
+    if(len === 0) {
+        return this;
+    }
+
+    this.__x = this.__x / len;
+    this.__y = this.__y / len;
+    return this;
+};
+
+Vec2.prototype.dot = function(_v) {
+    return ((this.__x * _v.getX()) + (this.__y * _v.getY()));
+};
+
+/**
  * Unique collection of Line objects
  * 
  * @param {Line[]|Float64Array|undefined} _linesInput
@@ -5040,30 +5089,33 @@ function LineSet(_linesInput) {
     }    
 }
 
-/**
- * 
- * @param {Number} _x
- * @param {Number} _y
- */
-function Vec2(_x, _y) {
-    this.__x = _x;
-    this.__y = _y;
-}
-Vec2.prototype = Object.create(Point.prototype, {});
+const EntityDescriptorParser = {
+    /**
+     * @param {Object} _ed
+     * @returns {LineSet}
+     */    
+    extractBoundaryLines: function(_ed) {
+        const boundaryLines = new LineSet();
 
-Vec2.prototype.normalize = function() {
-    const len = Math.sqrt((this.__x * this.__x) + (this.__y * this.__y));
-    if(len === 0) {
-        return this;
-    }
+        if(_ed.isRoutingAroundBoundingRectAllowed) {
+            const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
+            const lines = entityBoundingRect.getLines();
+            lines.forEach((_l) => {
+                boundaryLines.push(_l);
+            });
+        }
 
-    this.__x = this.__x / len;
-    this.__y = this.__y / len;
-    return this;
-};
+        const anchors = _ed.connectorAnchors;
+        anchors.forEach(function(_anchor) {
+            const anchorBoundingRect = new Rectangle(_anchor.x, _anchor.y, _anchor.x + _anchor.width, _anchor.y + _anchor.height);
+            const lines = anchorBoundingRect.getLines();
+            lines.forEach((_l) => {
+                boundaryLines.push(_l);
+            });
+        });
 
-Vec2.prototype.dot = function(_v) {
-    return ((this.__x * _v.getX()) + (this.__y * _v.getY()));
+        return boundaryLines;
+    },
 };
 
 const PointInfo = {
@@ -5280,31 +5332,6 @@ function PointVisibilityMap() {
         };
     };
 
-    /**
-     * @param {Object} _ed
-     * @returns {LineSet}
-     */    
-    const getBoundaryLinesFromEntityDescriptor = function(_ed) {
-        const boundaryLines = new LineSet();
-
-        const entityBoundingRect = new Rectangle(_ed.x, _ed.y, _ed.x + _ed.width, _ed.y + _ed.height);
-        const lines = entityBoundingRect.getLines();
-        lines.forEach((_l) => {
-            boundaryLines.push(_l);
-        });
-
-        const anchors = _ed.connectorAnchors;
-        anchors.forEach(function(_anchor) {
-            const anchorBoundingRect = new Rectangle(_anchor.x, _anchor.y, _anchor.x + _anchor.width, _anchor.y + _anchor.height);
-            const lines = anchorBoundingRect.getLines();
-            lines.forEach((_l) => {
-                boundaryLines.push(_l);
-            });
-        });
-
-        return boundaryLines;
-    };    
-
     const hasEntityMutated = function(_old, _new) {
         if(_old.x !== _new.x || _old.y !== _new.y || _old.width !== _new.width || _old.height !== _new.height) {
             return true;
@@ -5412,7 +5439,7 @@ function PointVisibilityMap() {
                 continue;
             }
 
-            const boundaryLinesForEntity = getBoundaryLinesFromEntityDescriptor(_entityDescriptors[i]);
+            const boundaryLinesForEntity = EntityDescriptorParser.extractBoundaryLines(_entityDescriptors[i]);
             entityIdToBoundaryLineSet.set(entityId, boundaryLinesForEntity);
 
             currentNumOfBoundaryLines += boundaryLinesForEntity.count();
@@ -5630,8 +5657,8 @@ function GroupEncapsulationEntity(_id, _sheet, _domElement, _sizeAdjustmentPx)  
         const originatorForSubEntities = (_originator === Originator.USER) ? Originator.USER_VIA_PARENT_ENTITY : Originator.PROGRAM_VIA_PARENT_ENTITY; 
         encapsulatedEntities.forEach((_subEntity) => {
             _subEntity.translate(
-                _subEntity.getX() + dx,
-                _subEntity.getY() + dy,
+                _sheet.snapToGrid(_subEntity.getX() + dx),
+                _sheet.snapToGrid(_subEntity.getY() + dy),
                 true,
                 originatorForSubEntities,
             );
